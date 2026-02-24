@@ -100,7 +100,7 @@ val ibmPlexMono = FontFamily(
 // ─────────────────────────────────────────────────────
 private val heroFont    = gloock          // ← swap to: playfairDisplay
 private val bodyFont    = lora            // ← swap to: libreCaslon, notoSerif
-private val uiFont      = plusJakartaSans // ← swap to: googleSans, roboto
+private val uiFont      = googleSans // ← swap to: googleSans, roboto
 private val dataFont    = ibmPlexMono     // no alternative needed
 
 // ─────────────────────────────────────────────────────

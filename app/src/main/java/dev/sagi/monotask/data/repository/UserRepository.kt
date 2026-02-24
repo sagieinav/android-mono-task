@@ -83,4 +83,20 @@ class UserRepository {
             it.toObject(User::class.java)?.copy(id = it.id)
         }
     }
+
+    // Logs XP and task count for today. Used by the Profile activity chart
+    suspend fun logDailyActivity(userId: String, xpEarned: Int, tasksCompleted: Int) {
+        val today = java.time.LocalDate.now().toEpochDay()
+        val docRef = userDoc(userId).collection("activity").document(today.toString())
+
+        // Use set with merge: safe to call multiple times per day
+        docRef.set(
+            mapOf(
+                "dateEpochDay"   to today,
+                "xpEarned"       to com.google.firebase.firestore.FieldValue.increment(xpEarned.toLong()),
+                "tasksCompleted" to com.google.firebase.firestore.FieldValue.increment(1L)
+            ),
+            com.google.firebase.firestore.SetOptions.merge()
+        ).await()
+    }
 }

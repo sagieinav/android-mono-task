@@ -5,6 +5,7 @@ import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.Task
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
 
 class TaskRepository {
 
@@ -39,6 +40,18 @@ class TaskRepository {
     // Returns completed tasks for the Archive view
     fun getCompletedTasks(userId: String, workspaceId: String): Flow<List<Task>> =
         getTasks(userId, workspaceId, isCompleted = true)
+
+    // One-shot fetch of completed tasks (used by BadgeEngine after completion)
+    suspend fun getCompletedTasksOnce(userId: String, workspaceId: String): List<Task> {
+        val result = tasksCollection(userId)
+            .whereEqualTo("workspaceId", workspaceId)
+            .whereEqualTo("isCompleted", true)
+            .get()
+            .await()
+        return result.documents.mapNotNull {
+            it.toObject(Task::class.java)?.copy(id = it.id)
+        }
+    }
 
 
     // Adds a new task. Firestore auto-generates the document ID
