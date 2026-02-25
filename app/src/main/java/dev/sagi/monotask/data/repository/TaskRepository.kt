@@ -62,7 +62,12 @@ class TaskRepository {
     // Marks a task as complete. Moves it to archive
     suspend fun completeTask(userId: String, taskId: String) {
         tasksCollection(userId).document(taskId)
-            .update("isCompleted", true)
+            .update(
+                mapOf(
+                    "isCompleted" to true,
+                    "completedAt" to com.google.firebase.Timestamp.now()
+                )
+            )
     }
 
     // Increments snooze count. Called when user snoozes the focus task

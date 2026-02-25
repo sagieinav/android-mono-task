@@ -258,9 +258,48 @@ val AceGoldDim         = Color(0xFFCCAC00) // Darker gold - pressed states
 
 val PenaltyRedGlow     = Color(0x33E63946) // 20% alpha - error container tint
 val SuccessGreen       = Color(0xFF06D6A0) // Raw success color
+val bonusGreen         = Color(0xCC39D540)
+val penaltyRed         = Color(0xDDDE0F38)
 
 val GlassSurface       = Color(0xCCFFFFFF) // 80% white - frosted card overlay (light)
 val GlassSurfaceDark   = Color(0xCC1A1A2E) // 80% dark - frosted card overlay (dark)
 
 val AeroShadow         = Color(0x1A000000) // 10% black - ambient shadow
 val AeroShadowDeep     = Color(0x33000000) // 20% black - elevated card shadow
+
+
+// ── Importance Tag Colors ────────────────────────────────────────
+val ImportanceHighBackground   = Color(0xFFFFDDDD) // was 0xFFFFEDED
+val ImportanceHighContent      = Color(0xFFB00020)
+
+val ImportanceMediumBackground = Color(0xFFFFF0CC) // was 0xFFFFF8E1
+val ImportanceMediumContent    = Color(0xFFF9A825)
+
+val ImportanceLowBackground    = Color(0xFFD9EED9) // was 0xFFE8F5E9
+val ImportanceLowContent       = Color(0xFF2E7D32)
+
+
+// ── Custom Tag Colors ─────────────────────────────────────────────
+val TagIndigoBackground   = Color(0xFFE8EAF6)
+val TagIndigoContent      = Color(0xFF3949AB)
+
+val TagTealBackground     = Color(0xFFE0F2F1)
+val TagTealContent        = Color(0xFF00796B)
+
+val TagPurpleBackground   = Color(0xFFF3E5F5)
+val TagPurpleContent      = Color(0xFF7B1FA2)
+
+val TagBlueBackground     = Color(0xFFE3F2FD)
+val TagBlueContent        = Color(0xFF1565C0)
+
+val TagCyanBackground     = Color(0xFFE0F7FA)
+val TagCyanContent        = Color(0xFF0097A7)
+
+val TagBrownBackground    = Color(0xFFEFEBE9)
+val TagBrownContent       = Color(0xFF5D4037)
+
+val TagBlueGreyBackground = Color(0xFFECEFF1)
+val TagBlueGreyContent    = Color(0xFF455A64)
+
+val TagLimeBackground     = Color(0xFFF9FBE7)
+val TagLimeContent        = Color(0xFF827717)

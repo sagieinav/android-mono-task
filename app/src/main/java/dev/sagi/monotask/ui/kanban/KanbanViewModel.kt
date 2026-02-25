@@ -7,8 +7,11 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
+import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.util.BadgeEngine
 import dev.sagi.monotask.domain.util.PriorityCalculator
+import dev.sagi.monotask.ui.focus.FocusUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class KanbanViewModel(
     private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
+    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
     private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
     private val userId: String = MonoTaskApp.instance.auth.currentUser?.uid ?: ""
 ) : ViewModel() {
@@ -107,6 +111,25 @@ class KanbanViewModel(
             taskRepository.deleteTask(userId, taskId)
         }
     }
+
+    // User tapped "Complete" on a Kanban task:
+    fun completeTask(task: Task) {
+        val workspace = _selectedWorkspace.value ?: return  // get workspace from its own state
+
+        viewModelScope.launch {
+            taskRepository.completeTask(userId, task.id)
+
+            val xpGained = XpEvents.calculateCompletionXp(task)
+            val userDoc  = userRepository.getUserOnce(userId) ?: return@launch
+
+            userRepository.addXp(userId, xpGained, userDoc.xp, userDoc.level)
+            userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
+
+            val completedTasks = taskRepository.getCompletedTasksOnce(userId, workspace.id)
+            val newBadges = BadgeEngine.evaluate(completedTasks)
+        }
+    }
+
 
 
 // ========== Edit Sheet ==========

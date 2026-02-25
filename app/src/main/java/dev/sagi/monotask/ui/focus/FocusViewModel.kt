@@ -11,6 +11,7 @@ import dev.sagi.monotask.data.repository.WorkspaceRepository
 import dev.sagi.monotask.domain.util.BadgeEngine
 import dev.sagi.monotask.domain.util.PriorityCalculator
 import dev.sagi.monotask.ui.auth.AuthUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ class FocusViewModel(
     private val userId: String = MonoTaskApp.instance.auth.currentUser?.uid ?: ""
 ) : ViewModel() {
 
+    // ========== STATE DECLARATIONS ==========
     // Private, writeable state-flow (only used by the ViewModel):
     private val _uiState = MutableStateFlow<FocusUiState>(FocusUiState.Loading)
     // Public, immutable state-flow (used/observed by the UI):
@@ -32,6 +34,12 @@ class FocusViewModel(
     // Snooze options sheet state (separate from the main UI state)
     private val _showSnoozeSheet = MutableStateFlow(false)
     val showSnoozeSheet: StateFlow<Boolean> = _showSnoozeSheet.asStateFlow()
+
+    private val _xpBadgeVisible = MutableStateFlow(false)
+    val xpBadgeVisible: StateFlow<Boolean> = _xpBadgeVisible.asStateFlow()
+    private val _lastXpGained = MutableStateFlow(0)
+    val lastXpGained: StateFlow<Int> = _lastXpGained.asStateFlow()
+
 
     init {
         observeTasks()
@@ -76,6 +84,11 @@ class FocusViewModel(
 
             // Add XP:
             userRepository.addXp(userId, xpGained, userDoc.xp, userDoc.level)
+            // XP Badge animation:
+            _lastXpGained.value = xpGained
+            _xpBadgeVisible.value = true
+            delay(2000)
+            _xpBadgeVisible.value = false
 
             // Log daily activity:
             userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)

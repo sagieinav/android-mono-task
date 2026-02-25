@@ -1,6 +1,7 @@
 package dev.sagi.monotask.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -93,6 +94,11 @@ val ibmPlexMono = FontFamily(
     Font(R.font.ibm_plex_mono_italic,  FontWeight.Normal, FontStyle.Italic),
 )
 
+val harabara = FontFamily(
+    Font(R.font.harabara, FontWeight.Normal),
+    Font(R.font.harabara_bold,  FontWeight.Bold),
+)
+
 // ─────────────────────────────────────────────────────
 // ACTIVE SELECTION
 // To swap a font, change the variable assigned here.
@@ -140,8 +146,14 @@ val AppTypography = Typography(
 
     // Buttons, chips, priority tags
     labelLarge  = baseline.labelLarge.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.SemiBold),
-    labelMedium = baseline.labelMedium.copy(fontFamily = uiFont),
+        fontFamily = harabara,
+        fontWeight = FontWeight.Bold,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    ),
+    labelMedium = baseline.labelMedium.copy(
+        fontFamily = harabara, fontWeight = FontWeight.Bold,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
+    ),
 
     // XP values (+100 XP), level (Level 12), due dates
     labelSmall  = baseline.labelSmall.copy(fontFamily = dataFont),
