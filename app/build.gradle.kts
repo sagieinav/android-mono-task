@@ -30,8 +30,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -41,7 +41,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -64,6 +64,15 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.ui.text.google.fonts)
+
+    // Compose Unstyled (Composables Library)
+    implementation("com.composables:composeunstyled:1.49.6")
+    // adds theming APIs
+    implementation("com.composables:composeunstyled-theming:1.49.6")
+    // adds component primitives for building components
+    implementation("com.composables:composeunstyled-primitives:1.49.6")
+    // adds themes for native look and feel
+    implementation("com.composables:composeunstyled-platformtheme:1.49.6")
 
     // Firebase
     implementation(platform(libs.firebase.bom))

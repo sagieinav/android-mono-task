@@ -5,15 +5,18 @@ import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -33,9 +36,11 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.SuccessGreen
 import dev.sagi.monotask.ui.theme.PenaltyRedGlow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import dev.sagi.monotask.ui.theme.bonusGreen
 import dev.sagi.monotask.ui.theme.penaltyRed
 import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 
 @Composable
 fun XpDeltaBadge(
@@ -47,36 +52,33 @@ fun XpDeltaBadge(
     val label = if (isPositive) "+${xpDelta} XP" else "${xpDelta} XP"
     val color = if (isPositive) bonusGreen else penaltyRed
 
-    AnimatedVisibility(
-        visible = visible,
-        modifier = modifier,
-        enter = fadeIn(tween(300, easing = EaseOut)) +
-                slideInVertically(
-                    animationSpec = tween(400, easing = EaseOutCubic),
-                    initialOffsetY = { it / 2 }
-                ),
-        exit  = fadeOut(tween(400, easing = EaseIn)) +
-                slideOutVertically(
-                    animationSpec = tween(400, easing = EaseInCubic),
-                    targetOffsetY = { -it / 2 }
-                )
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(300),
+        label = "xp_alpha"
+    )
+    val offsetY by animateFloatAsState(
+        targetValue = if (visible) 0f else 12f,
+        animationSpec = tween(400, easing = EaseOutCubic),
+        label = "xp_offset"
+    )
 
-    ) {
-        Text(
-            text = label,
-            color = color,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-        )
-    }
+    Text(
+        text = label,
+        color = color.copy(alpha = alpha),
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        modifier = modifier.offset { IntOffset(0, offsetY.roundToInt()) }
+    )
 }
+
 
 
 @Preview(showBackground = true)
 @Composable
 fun XpDeltaBadgePreview() {
     MonoTaskTheme {
-        // Static preview: visible = true to see both states
+        // Static preview
 //        Column(
 //            modifier = Modifier.padding(24.dp),
 //            horizontalAlignment = Alignment.CenterHorizontally
@@ -88,16 +90,21 @@ fun XpDeltaBadgePreview() {
         // Dynamic preview
         var visible by remember { mutableStateOf(false) }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier.padding(32.dp)
         ) {
-            XpDeltaBadge(xpDelta = -100, visible = visible)
-//            Spacer(modifier = Modifier.height(4.dp))
             Button(onClick = { visible = true }) {
                 Text("Complete Task")
             }
+
+            XpDeltaBadge(
+                xpDelta = 100,
+                visible = visible,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-16).dp)
+            )
         }
 
         LaunchedEffect(visible) {
