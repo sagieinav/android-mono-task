@@ -51,7 +51,7 @@ val libreCaslon = FontFamily(
 
 // Option C: Noto Serif — highly neutral, great multilingual support.
 val notoSerif = FontFamily(
-    Font(R.font.noto_serif,        FontWeight.Normal),
+    Font(R.font.noto_serif,        FontWeight.Normal, FontStyle.Normal),
     Font(R.font.noto_serif_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
@@ -67,7 +67,7 @@ val plusJakartaSans = FontFamily(
     Font(R.font.plus_jakarta_sans,        FontWeight.Medium),
     Font(R.font.plus_jakarta_sans,        FontWeight.SemiBold),
     Font(R.font.plus_jakarta_sans,        FontWeight.Bold),
-    Font(R.font.plus_jakarta_sans_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.plus_jakarta_sans_italic, FontWeight.Normal, FontStyle.Italic)
 )
 
 // Option B: Google Sans — clean, modern, Google's own product font.
@@ -105,8 +105,8 @@ val harabara = FontFamily(
 // e.g. replace `gloock` with `playfairDisplay` for titles.
 // ─────────────────────────────────────────────────────
 private val heroFont    = gloock          // ← swap to: playfairDisplay
-private val bodyFont    = lora            // ← swap to: libreCaslon, notoSerif
-private val uiFont      = googleSans // ← swap to: googleSans, roboto
+private val bodyFont    = notoSerif            // ← swap to: libreCaslon, notoSerif
+private val uiFont      = googleSans // ← swap to: googleSans, roboto, plusJakartaSans
 private val dataFont    = ibmPlexMono     // no alternative needed
 
 // ─────────────────────────────────────────────────────
@@ -129,15 +129,15 @@ val AppTypography = Typography(
     // THE Focus Card task title (most prominent text in the app)
     headlineLarge  = baseline.headlineLarge.copy(fontFamily = heroFont),
     headlineMedium = baseline.headlineMedium.copy(fontFamily = heroFont),
-    headlineSmall  = baseline.headlineSmall.copy(fontFamily = bodyFont),
+    headlineSmall  = baseline.headlineSmall.copy(fontFamily = uiFont),
 
     // Screen names ("Hello, Sagi"), workspace headers
     titleLarge  = baseline.titleLarge.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.SemiBold),
+        fontFamily = uiFont, fontWeight = FontWeight.Bold),
     titleMedium = baseline.titleMedium.copy(
         fontFamily = uiFont, fontWeight = FontWeight.SemiBold),
     titleSmall  = baseline.titleSmall.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.Medium),
+        fontFamily = uiFont, fontWeight = FontWeight.Normal),
 
     // Task descriptions, onboarding copy, settings text
     bodyLarge  = baseline.bodyLarge.copy(fontFamily = bodyFont),
@@ -151,10 +151,9 @@ val AppTypography = Typography(
         platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     labelMedium = baseline.labelMedium.copy(
-        fontFamily = harabara, fontWeight = FontWeight.Bold,
+        fontFamily = uiFont, fontWeight = FontWeight.Bold,
         platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
 
-    // XP values (+100 XP), level (Level 12), due dates
-    labelSmall  = baseline.labelSmall.copy(fontFamily = dataFont),
+    labelSmall  = baseline.labelSmall.copy(fontFamily = uiFont),
 )

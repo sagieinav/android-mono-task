@@ -30,7 +30,7 @@ import dev.sagi.monotask.ui.theme.AceGoldGlow
 
 fun Modifier.aceGlowBorder(
     cornerRadius: Dp = 20.dp,
-    borderWidth: Dp = 3.dp
+    borderWidth: Dp = 5.dp
 ): Modifier = composed {
     val rotation by rememberInfiniteTransition(label = "aceGlow").animateFloat(
         initialValue = 0f,

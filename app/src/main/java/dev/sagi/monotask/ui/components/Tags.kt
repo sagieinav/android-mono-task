@@ -19,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -36,7 +38,7 @@ fun TaskTag(
     trailingContent: @Composable (() -> Unit)? = null // Potentially "close" icon
 ) {
     val tagShape = RoundedCornerShape(100)
-    val borderColor = lerp(Color.Black, contentColor, 0.95f).copy(alpha = 0.6f)
+    val borderColor = lerp(Color.Black, contentColor, 0.85f).copy(alpha = 0.2f)
 
     Surface(
         modifier = modifier.border(1.5.dp, borderColor, tagShape),
@@ -46,14 +48,16 @@ fun TaskTag(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(
-                start = 7.dp,
-                end = if (trailingContent != null) 5.dp else 7.dp, // tighter end padding when "close" is present
+                start = 9.dp,
+                end = if (trailingContent != null) 6.dp else 9.dp, // tighter end padding when "close" is present
             )
         ) {
             Text(
                 text = label.lowercase(),
                 style = MaterialTheme.typography.labelLarge,
                 color = contentColor,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(vertical = 2.dp)
             )
             trailingContent?.invoke()
         }

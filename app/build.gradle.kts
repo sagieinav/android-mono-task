@@ -65,6 +65,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.ui.text.google.fonts)
 
+    // Haze (library for glass effect)
+    implementation("dev.chrisbanes.haze:haze:1.7.2")
+
     // Compose Unstyled (Composables Library)
     implementation("com.composables:composeunstyled:1.49.6")
     // adds theming APIs
@@ -84,4 +87,8 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+    // Coil (Native Image Loader)
+    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
 }
