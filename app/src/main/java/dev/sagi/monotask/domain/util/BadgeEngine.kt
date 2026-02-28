@@ -65,7 +65,7 @@ object BadgeEngine {
     // Converts a list of earned badge IDs into full Badge objects for the UI.
     fun buildBadgeList(earnedIds: List<String>): List<Badge> =
         allBadges.map { it.copy(
-            isEarned = it.id in earnedIds,
+            earned = it.id in earnedIds,
             earnedAt = if (it.id in earnedIds) System.currentTimeMillis() else null
         )}
 

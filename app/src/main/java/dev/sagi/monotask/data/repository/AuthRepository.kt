@@ -14,7 +14,7 @@ class AuthRepository {
     // The currently signed-in user, or null if signed out
     val currentUser: FirebaseUser? get() = auth.currentUser
 
-    val isSignedIn: Boolean get() = auth.currentUser != null
+    val signedIn: Boolean get() = auth.currentUser != null
 
     // Signs in with a Google account token
     // Returns the FirebaseUser on success, null on failure

@@ -12,6 +12,7 @@ googleServices = "4.4.4"
 firebaseBom = "34.9.0"
 navigationCompose = "2.9.7"
 kotlinCoroutines = "1.10.2"
+googleAuth = "21.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,7 +35,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinCoroutines" }
-
+google-play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "googleAuth"}
 
 
 [plugins]

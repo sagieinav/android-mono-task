@@ -51,9 +51,35 @@ class UserRepository {
         ).await()
     }
 
+    // Updates the user's preferences (app settings)
+    suspend fun updatePreferences(
+        userId: String,
+        hardcoreModeEnabled: Boolean? = null,
+        notificationsEnabled: Boolean? = null,
+        dueSoonDays: Int? = null
+    ) {
+        val updates = mutableMapOf<String, Any>()
+
+        // Only add to the map if the value is NOT null (only selected parameters)
+        hardcoreModeEnabled?.let { updates["hardcoreModeEnabled"] = it }
+        notificationsEnabled?.let { updates["notificationsEnabled"] = it }
+        dueSoonDays?.let { updates["dueSoonDays"] = it }
+
+        if (updates.isNotEmpty()) {
+            userDoc(userId).update(updates).await()
+        }
+    }
+
+    // Updates 'Hardcore Mode' State
+    suspend fun updateHardcoreMode(userId: String, enabled: Boolean) {
+        userDoc(userId).update(
+            "hardcoreModeEnabled", enabled
+        ).await()
+    }
+
     // Marks onboarding as complete. Called on the last onboarding page
     suspend fun completeOnboarding(userId: String) {
-        userDoc(userId).update("isOnboarded", true).await()
+        userDoc(userId).update("onboarded", true).await()
     }
 
     // Adds a friend by storing their userId in the friends list.

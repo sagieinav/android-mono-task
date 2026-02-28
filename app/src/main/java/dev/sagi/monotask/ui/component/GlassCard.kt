@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.components
+package dev.sagi.monotask.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,14 +9,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -25,7 +23,6 @@ import dev.sagi.monotask.ui.theme.AeroShadow
 import dev.sagi.monotask.ui.theme.AeroShadowDeep
 import dev.sagi.monotask.ui.theme.GlassSurface
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.components.CustomTagPreview
 
 @Composable
 fun GlassCard(

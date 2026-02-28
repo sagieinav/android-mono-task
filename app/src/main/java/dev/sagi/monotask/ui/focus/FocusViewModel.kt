@@ -42,7 +42,10 @@ class FocusViewModel(
 
 
     init {
-        observeTasks()
+        // Only observe tasks if user is logged in
+        if (userId.isNotEmpty()) {
+            observeTasks()
+        }
     }
 
     // Combines the task list and current workspace into one stream (for task ordering)

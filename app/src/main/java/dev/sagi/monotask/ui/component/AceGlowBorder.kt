@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.components
+package dev.sagi.monotask.ui.component
 
 
 import androidx.compose.animation.core.animateFloat
@@ -22,7 +22,6 @@ import dev.sagi.monotask.ui.theme.AceGoldDim
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import dev.sagi.monotask.ui.theme.AceGoldGlow

@@ -11,7 +11,7 @@ data class Task(
     val workspaceId: String = "",
     val tags: List<String> = emptyList(),
     val snoozeCount: Int = 0,
-    val isCompleted: Boolean = false,
+    val completed: Boolean = false,
     val createdAt: Timestamp = Timestamp.now(),
     val ownerId: String = ""
 ) {

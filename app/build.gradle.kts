@@ -82,7 +82,10 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
 
-    // Navigation
+    // Google Services Auth
+    implementation(libs.google.play.services.auth)
+
+    // Compose Navigation
     implementation(libs.androidx.navigation.compose)
 
     // Coroutines

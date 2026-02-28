@@ -17,6 +17,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+// ========== UI States ==========
+sealed class KanbanUiState {
+    object Loading : KanbanUiState()
+    data class Ready(
+        val highTasks   : List<Task>,
+        val mediumTasks : List<Task>,
+        val lowTasks    : List<Task>
+    ) : KanbanUiState()
+}
+
 class KanbanViewModel(
     private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
     private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
@@ -40,7 +50,10 @@ class KanbanViewModel(
     val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
 
     init {
-        observeWorkspaces()
+        // Only observe if user is logged in
+        if (userId.isNotEmpty()) {
+            observeWorkspaces()
+        }
     }
 
     private fun observeWorkspaces() {
@@ -131,7 +144,6 @@ class KanbanViewModel(
     }
 
 
-
 // ========== Edit Sheet ==========
 
     // Pass null to open a blank "Add Task" sheet
@@ -142,14 +154,4 @@ class KanbanViewModel(
     fun dismissEditSheet() {
         _editingTask.value = null
     }
-}
-
-// ========== UI States ==========
-sealed class KanbanUiState {
-    object Loading : KanbanUiState()
-    data class Ready(
-        val highTasks   : List<Task>,
-        val mediumTasks : List<Task>,
-        val lowTasks    : List<Task>
-    ) : KanbanUiState()
 }

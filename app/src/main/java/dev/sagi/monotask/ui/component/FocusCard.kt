@@ -21,19 +21,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.ui.components.CustomTag
-import dev.sagi.monotask.ui.components.ImportanceTag
-import dev.sagi.monotask.ui.components.XpDeltaBadge
-import dev.sagi.monotask.ui.components.aceGlowBorder
+import dev.sagi.monotask.ui.component.CustomTag
+import dev.sagi.monotask.ui.component.ImportanceTag
+import dev.sagi.monotask.ui.component.XpDeltaBadge
+import dev.sagi.monotask.ui.component.aceGlowBorder
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.toFormattedDate
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Composable
 fun TaskCard(

@@ -21,11 +21,11 @@ class TaskRepository {
     private fun getTasks(
         userId: String,
         workspaceId: String,
-        isCompleted: Boolean
+        completed: Boolean
     ): Flow<List<Task>> =
         tasksCollection(userId)
             .whereEqualTo("workspaceId", workspaceId)
-            .whereEqualTo("isCompleted", isCompleted)
+            .whereEqualTo("completed", completed)
             .snapshots()
             .map { snapshot ->
                 snapshot.documents.mapNotNull {
@@ -35,17 +35,17 @@ class TaskRepository {
 
     // Returns live stream of active tasks for the Focus Hub + Kanban
     fun getActiveTasks(userId: String, workspaceId: String): Flow<List<Task>> =
-        getTasks(userId, workspaceId, isCompleted = false)
+        getTasks(userId, workspaceId, completed = false)
 
     // Returns completed tasks for the Archive view
     fun getCompletedTasks(userId: String, workspaceId: String): Flow<List<Task>> =
-        getTasks(userId, workspaceId, isCompleted = true)
+        getTasks(userId, workspaceId, completed = true)
 
     // One-shot fetch of completed tasks (used by BadgeEngine after completion)
     suspend fun getCompletedTasksOnce(userId: String, workspaceId: String): List<Task> {
         val result = tasksCollection(userId)
             .whereEqualTo("workspaceId", workspaceId)
-            .whereEqualTo("isCompleted", true)
+            .whereEqualTo("completed", true)
             .get()
             .await()
         return result.documents.mapNotNull {
@@ -64,7 +64,7 @@ class TaskRepository {
         tasksCollection(userId).document(taskId)
             .update(
                 mapOf(
-                    "isCompleted" to true,
+                    "completed" to true,
                     "completedAt" to com.google.firebase.Timestamp.now()
                 )
             )

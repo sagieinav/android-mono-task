@@ -41,17 +41,18 @@ class WorkspaceRepository {
     suspend fun updateWeights(
         userId: String,
         workspaceId: String,
-        dueDateWeight: Float,
-        importanceWeight: Float,
-        randomnessFactor: Float
+        dueDateWeight: Float? = null,
+        importanceWeight: Float? = null
     ) {
-        workspacesCollection(userId).document(workspaceId).update(
-            mapOf(
-                "dueDateWeight"    to dueDateWeight,
-                "importanceWeight" to importanceWeight,
-                "randomnessFactor" to randomnessFactor
-            )
-        ).await()
+        val updates = mutableMapOf<String, Any>()
+
+        // Only add to the map if the value is NOT null (only selected parameters)
+        dueDateWeight?.let { updates["dueDateWeight"] = it }
+        importanceWeight?.let { updates["importanceWeight"] = it }
+
+        if (updates.isNotEmpty()) {
+            workspacesCollection(userId).document(workspaceId).update(updates).await()
+        }
     }
 
     // Adds a new custom workspace

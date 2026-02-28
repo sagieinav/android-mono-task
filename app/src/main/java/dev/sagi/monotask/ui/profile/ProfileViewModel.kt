@@ -28,7 +28,10 @@ class ProfileViewModel(
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
     init {
-        observeProfile()
+        // Only observe if user is logged in
+        if (userId.isNotEmpty()) {
+            observeProfile()
+        }
     }
 
     // Observes the user profile in real-time

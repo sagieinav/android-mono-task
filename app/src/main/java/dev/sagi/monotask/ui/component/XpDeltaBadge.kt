@@ -1,21 +1,9 @@
-package dev.sagi.monotask.ui.components
+package dev.sagi.monotask.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseInCubic
-import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -33,9 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.SuccessGreen
-import dev.sagi.monotask.ui.theme.PenaltyRedGlow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
 import dev.sagi.monotask.ui.theme.bonusGreen
 import dev.sagi.monotask.ui.theme.penaltyRed

@@ -5,7 +5,7 @@ data class Badge(
     val name: String = "",
     val description: String = "",
     val iconRes: String = "",           // Icon's drawable resource name as a string
-    val isEarned: Boolean = false,
+    val earned: Boolean = false,
     val earnedAt: Long? = null
 )
 

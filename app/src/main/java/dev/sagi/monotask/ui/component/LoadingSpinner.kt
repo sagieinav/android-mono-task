@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.components
+package dev.sagi.monotask.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
