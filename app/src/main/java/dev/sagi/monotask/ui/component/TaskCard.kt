@@ -28,8 +28,9 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.CustomTag
 import dev.sagi.monotask.ui.component.ImportanceTag
 import dev.sagi.monotask.ui.component.XpDeltaBadge
-import dev.sagi.monotask.ui.component.aceGlowBorder
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.aceTaskBorder
+import dev.sagi.monotask.ui.theme.defaultTaskBorder
 import dev.sagi.monotask.util.toFormattedDate
 
 @Composable
@@ -49,8 +50,8 @@ fun TaskCard(
             .fillMaxSize()
             // AceGlowBorder wraps the card only if task.isAce
             .then(
-                if (task.isAce) Modifier.aceGlowBorder(cornerRadius = cornerRadius.dp)
-                else Modifier
+                if (task.isAce) Modifier.aceTaskBorder(cornerRadius.dp)
+                else Modifier.defaultTaskBorder(cornerRadius.dp)
             )
     ) {
         Column(
@@ -207,7 +208,7 @@ fun TaskCardPreview() {
                     description = "Complete sections 3 and 4, submit before midnight.",
                     importance = Importance.HIGH,
                     tags = listOf("CS101", "ds"),
-                    snoozeCount = 0, // isAce = true → gold border
+                    snoozeCount = 0, // isAce = true --> gold border
                     dueDate = Timestamp.now()
                 )
             )

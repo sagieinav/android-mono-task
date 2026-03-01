@@ -1,75 +1,101 @@
+@file:OptIn(ExperimentalHazeMaterialsApi::class)
+
 package dev.sagi.monotask.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.ui.theme.AeroShadow
-import dev.sagi.monotask.ui.theme.AeroShadowDeep
-import dev.sagi.monotask.ui.theme.GlassSurface
+import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 @Composable
-fun GlassCard(
+fun GlassSurface(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 20.dp,
-    elevated: Boolean = false, // false = ambient shadow, true = deeper shadow
-    content: @Composable () -> Unit
+    shape: Shape = RoundedCornerShape(24.dp),
+    borderWidth: Dp = 1.dp,
+    borderColor: Color? = null,
+    content: @Composable BoxScope.() -> Unit
 ) {
-    val shape = RoundedCornerShape(cornerRadius)
-    val shadowColor = if (elevated) AeroShadowDeep else AeroShadow
-    val shadowElevation = if (elevated) 8.dp else 2.dp
+    val hazeState = LocalHazeState.current
 
-    Surface(
+    Box(
         modifier = modifier
-//            .shadow(
-//                elevation = shadowElevation,
-//                shape = shape,
-//                ambientColor = shadowColor,
-//                spotColor = shadowColor
-//            )
+            // Clip FIRST so the blur cannot bleed outside the shape
+            .clip(shape)
+            // Apply the blur effect inside the clipped bounds
+            .hazeEffect(hazeState, HazeMaterials.ultraThin())
+            // Inner "glass highlight" border
             .border(
                 width = 2.dp,
-                color = Color.White.copy(alpha = 0.5f), // glass edge highlight
+                color = Color.White.copy(alpha = 0.5f),
                 shape = shape
-            ),
-        shape = shape,
-        color = GlassSurface.copy(alpha = 0f),
-    ) {
-        Box(
-            modifier = Modifier.background(
+            )
+            // Outer border
+            .border(
+                width = 1.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                shape = shape
+            )
+            // Glass gradient
+            .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = 0.6f),  // bright top edge
-                        Color.White.copy(alpha = 0.1f)   // fades out downward
+                        Color.White.copy(alpha = 0.5f),
+                        Color.Transparent
                     )
                 )
             )
-        ) {
-            content()
-        }
+    ) {
+        content()
     }
 }
 
+@Composable
+fun GlassSurfaceElevated(
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(24.dp),
+    content: @Composable BoxScope.() -> Unit
+) {
+    GlassSurface(
+        modifier
+            // Shadow for elevation
+            .shadow(
+                elevation = 6.dp,
+                shape = shape,
+                ambientColor = Color.Black.copy(alpha = 0.05f),
+                spotColor = Color.Black.copy(alpha = 0.25f)
+            ),
+        shape
+    ) {
+        content()
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
-fun GlassCardPreview() {
+fun GlassSurfacePreview() {
     MonoTaskTheme {
         Box(
             modifier = Modifier
@@ -90,12 +116,12 @@ fun GlassCardPreview() {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // Elevated
-                GlassCard(elevated = true, content = { CustomTagPreview() })
+                GlassSurface(content = { CustomTagPreview() })
                 // Not Elevated
-                GlassCard(content = { CustomTagPreview() })
+                GlassSurface(content = { CustomTagPreview() })
 
                 // One more without a lambda (manual):
-                GlassCard(elevated = true) {
+                GlassSurface() {
                     FlowRow(
                         modifier = Modifier.padding(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),

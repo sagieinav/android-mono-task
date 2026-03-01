@@ -3,6 +3,7 @@ package dev.sagi.monotask.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,11 +20,11 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 @Composable
 fun LoadingSpinner(
     modifier: Modifier = Modifier,
-    size: Dp = 48.dp
+    size: Dp = 64.dp
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(size),
@@ -44,8 +45,8 @@ fun LoadingSpinnerPreview() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LoadingSpinner()                    // default size
-            LoadingSpinner(size = 32.dp)        // small
-            LoadingSpinner(size = 64.dp)        // large
+//            LoadingSpinner(size = 48.dp)        // small
+//            LoadingSpinner(size = 86.dp)        // large
         }
     }
 }

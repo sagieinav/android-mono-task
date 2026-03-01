@@ -121,16 +121,16 @@ fun EmptyStatePreview() {
     MonoTaskTheme {
         Column {
             EmptyState()
-            EmptyState(
-                emoji = "\uD83E\uDDBE",
-                title = "No open tasks",
-                subtitle = "Damn, you're a productivity machine."
-            )
-            EmptyState(
-                emoji = "📋",
-                title = "No tasks yet",
-                subtitle = "Add your first task to get started."
-            )
+//            EmptyState(
+//                emoji = "\uD83E\uDDBE",
+//                title = "No open tasks",
+//                subtitle = "Damn, you're a productivity machine."
+//            )
+//            EmptyState(
+//                emoji = "📋",
+//                title = "No tasks yet",
+//                subtitle = "Add your first task to get started."
+//            )
         }
     }
 }

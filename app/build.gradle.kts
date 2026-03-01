@@ -65,8 +65,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.ui.text.google.fonts)
 
-    // Haze (library for glass effect)
+    // Android Splash screen (for app launch)
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // Haze (library for blur effects)
     implementation("dev.chrisbanes.haze:haze:1.7.2")
+    implementation("dev.chrisbanes.haze:haze-materials:1.7.2")
 
     // Compose Unstyled (Composables Library)
     implementation("com.composables:composeunstyled:1.49.6")

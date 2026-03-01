@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,8 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.basicMonoTask
 
 @Composable
 fun TopBar(
@@ -39,6 +42,7 @@ fun TopBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .statusBarsPadding() // this is to avoid the notch
             .padding(horizontal = 18.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -51,9 +55,10 @@ fun TopBar(
             // Profile picture circle
             Box(
                 modifier = Modifier
+                    .basicMonoTask(CircleShape)
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .background(MaterialTheme.colorScheme.surfaceBright)
                     .clickable { onProfileClick() },
                 contentAlignment = Alignment.Center
             ) {
@@ -81,17 +86,24 @@ fun TopBar(
                 style = MaterialTheme.typography.headlineMedium,
 //                fontSize = 26.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.hazeSource(hazeState)
+
             )
         }
 
         // ========== Right: workspace dropdown ==========
-        WorkspaceDropdown(
+//        WorkspaceDropdown(
+//            workspaces = workspaces,
+//            selectedWorkspace = selectedWorkspace,
+//            onWorkspaceSelected = onWorkspaceSelected,
+//            onAddWorkspace = onAddWorkspace,
+//        )
+        WorkspaceDropdownGlass(
             workspaces = workspaces,
             selectedWorkspace = selectedWorkspace,
             onWorkspaceSelected = onWorkspaceSelected,
             onAddWorkspace = onAddWorkspace,
-            hazeState = hazeState
         )
     }
 }

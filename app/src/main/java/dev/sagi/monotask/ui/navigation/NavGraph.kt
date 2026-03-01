@@ -69,7 +69,8 @@ fun NavGraph(
         navigation(startDestination = Screen.Focus.route, route = Screen.Main.route) {
             composable(Screen.Focus.route) {
                 val focusVM: FocusViewModel = viewModel()
-                FocusScreen(navController = navController)
+                FocusScreen(
+                    navController, focusVM)
             }
 
 //            composable(Screen.Kanban.route) {
