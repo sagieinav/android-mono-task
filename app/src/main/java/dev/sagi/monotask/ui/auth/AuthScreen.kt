@@ -4,12 +4,9 @@ import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,24 +15,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.GlassCard
 import dev.sagi.monotask.ui.component.LoadingSpinner
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.AceGold
+import dev.sagi.monotask.ui.theme.basicMonoTask
 
 @Composable
-fun LoginScreen(
+fun AuthScreen(
     authViewModel: AuthViewModel,
     onNavigateToOnboarding: () -> Unit,
     onNavigateToMain: () -> Unit
@@ -132,16 +125,12 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-            // Use the official google sign-in button from guideline doc
+            // Official google sign-in button from guideline doc
             Image(
                 painter = painterResource(id = R.drawable.btn_sign_in_google),
                 contentDescription = "Sign in with Google",
                 modifier = Modifier
-                    .border(
-                        width = 1.5.dp,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        shape = MaterialTheme.shapes.extraLarge
-                    )
+                    .basicMonoTask(MaterialTheme.shapes.extraLarge)
                     .clip(shape = MaterialTheme.shapes.extraLarge)
                     .clickable { googleSignInLauncher.launch(intent) },
                 contentScale = ContentScale.Fit

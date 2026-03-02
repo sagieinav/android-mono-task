@@ -1,3 +1,5 @@
+package dev.sagi.monotask.ui.component
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -37,7 +39,6 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.ui.component.GlassSurface
 import dev.sagi.monotask.ui.theme.basicMonoTask
 
 // ==========================================
@@ -73,7 +74,7 @@ fun WorkspaceDropdownGlass(
                 GlassSurface(
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier
-                        .widthIn(min = 100.dp, max = 220.dp)
+                        .widthIn(min = 100.dp, max = 240.dp)
                         .padding(horizontal = 20.dp)
                 ) {
                     Column(modifier = Modifier.padding(vertical = 8.dp)) {

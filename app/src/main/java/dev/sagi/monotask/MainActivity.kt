@@ -1,6 +1,6 @@
 package dev.sagi.monotask
 
-import MainScaffold
+import dev.sagi.monotask.ui.navigation.MainScaffold
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

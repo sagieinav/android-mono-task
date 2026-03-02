@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import dev.sagi.monotask.ui.auth.AuthViewModel
-import dev.sagi.monotask.ui.auth.LoginScreen
+import dev.sagi.monotask.ui.auth.AuthScreen
 import dev.sagi.monotask.ui.auth.OnboardingScreen
 import dev.sagi.monotask.ui.component.LoadingSpinner
 import dev.sagi.monotask.ui.focus.FocusScreen
@@ -39,7 +39,7 @@ fun NavGraph(
         // ========== Authentication Flow ==========
         navigation(startDestination = Screen.Login.route, route = Screen.Auth.route) {
             composable(Screen.Login.route) {
-                LoginScreen(
+                AuthScreen(
                     authViewModel = authViewModel,
                     onNavigateToOnboarding = {
                         navController.navigate(Screen.Onboarding.route) {

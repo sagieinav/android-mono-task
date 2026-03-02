@@ -35,7 +35,7 @@ fun Modifier.basicMonoTask(shape: Shape): Modifier = composed {
             elevation = 4.dp,
             shape = shape,
             ambientColor = Color.Black.copy(alpha = 0.05f),
-            spotColor = Color.Black.copy(alpha = 0.35f)
+            spotColor = Color.Black.copy(alpha = 0.3f)
         )
         .border(
             width = 1.dp,

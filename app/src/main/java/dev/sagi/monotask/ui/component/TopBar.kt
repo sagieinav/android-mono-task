@@ -1,4 +1,5 @@
-import androidx.compose.foundation.Image
+package dev.sagi.monotask.ui.component
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,113 +10,73 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.rememberAsyncImagePainter
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
+import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.basicMonoTask
 
 @Composable
 fun TopBar(
-    userName: String,
-    profilePictureUrl: String?,
     workspaces: List<Workspace>,
     selectedWorkspace: Workspace?,
     onWorkspaceSelected: (Workspace) -> Unit,
     onAddWorkspace: () -> Unit,
-    onProfileClick: () -> Unit,
-    hazeState: HazeState,
+    onAddTaskClick: () -> Unit, // NEW: Trigger for task creation
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .statusBarsPadding() // this is to avoid the notch
+            .statusBarsPadding()
             .padding(horizontal = 18.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // ========== Left: avatar + greeting ==========
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Profile picture circle
-            Box(
-                modifier = Modifier
-                    .basicMonoTask(CircleShape)
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceBright)
-                    .clickable { onProfileClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                if (profilePictureUrl != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(profilePictureUrl),
-                        contentDescription = "Profile picture",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(40.dp)
-                    )
-                } else {
-                    // Fallback: first letter of name
-                    Text(
-                        text = userName.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Greeting
-            Text(
-                text = "Hi, $userName",
-                style = MaterialTheme.typography.headlineMedium,
-//                fontSize = 26.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.hazeSource(hazeState)
-
-            )
-        }
-
-        // ========== Right: workspace dropdown ==========
-//        WorkspaceDropdown(
-//            workspaces = workspaces,
-//            selectedWorkspace = selectedWorkspace,
-//            onWorkspaceSelected = onWorkspaceSelected,
-//            onAddWorkspace = onAddWorkspace,
-//        )
+        // ========== Left: Workspace Dropdown ==========
         WorkspaceDropdownGlass(
             workspaces = workspaces,
             selectedWorkspace = selectedWorkspace,
             onWorkspaceSelected = onWorkspaceSelected,
-            onAddWorkspace = onAddWorkspace,
+            onAddWorkspace = onAddWorkspace
         )
+
+        // ========== Right: Add Task Button ==========
+        Box(
+            modifier = Modifier
+                .basicMonoTask(CircleShape)
+                .size(42.dp) // Perfectly matches the height of your Workspace pill
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceBright)
+                .clickable { onAddTaskClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_add),
+                contentDescription = "Create new task",
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
 fun TopBarPreview() {
-    val hazeState = HazeState()
     MonoTaskTheme {
         TopBar(
-            userName = "Sagi",
-            profilePictureUrl = null,
             workspaces = listOf(
                 Workspace(id = "1", name = "University"),
                 Workspace(id = "2", name = "Personal"),
@@ -123,8 +84,7 @@ fun TopBarPreview() {
             selectedWorkspace = Workspace(id = "1", name = "University"),
             onWorkspaceSelected = {},
             onAddWorkspace = {},
-            onProfileClick = {},
-            hazeState = hazeState
+            onAddTaskClick = {}
         )
     }
 }

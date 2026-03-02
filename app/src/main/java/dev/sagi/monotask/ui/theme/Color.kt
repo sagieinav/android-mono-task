@@ -1,7 +1,7 @@
 package dev.sagi.monotask.ui.theme
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF745B00)
+val primaryLight = Color(0xFF866B00)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFF4C310)
 val onPrimaryContainerLight = Color(0xFF685100)

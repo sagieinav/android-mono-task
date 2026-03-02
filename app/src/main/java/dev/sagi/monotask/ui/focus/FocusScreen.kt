@@ -1,21 +1,16 @@
 package dev.sagi.monotask.ui.focus
 
-import EmptyState
-import TaskCard
-import TopBar
+import dev.sagi.monotask.ui.component.EmptyState
+import dev.sagi.monotask.ui.component.TaskCard
+import dev.sagi.monotask.ui.component.TopBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.google.firebase.Timestamp
 import dev.chrisbanes.haze.HazeState
@@ -23,7 +18,9 @@ import dev.chrisbanes.haze.haze
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
+import dev.sagi.monotask.ui.component.HeroGreeting
 import dev.sagi.monotask.ui.component.LoadingSpinner
+import dev.sagi.monotask.ui.navigation.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 // import dev.sagi.monotask.ui.component.LoadingSpinner // (Use yours if you have it)
 
@@ -31,7 +28,7 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 @Composable
 fun FocusScreen(
     navController: NavHostController,
-    viewModel: FocusViewModel
+    viewModel: FocusViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val hazeState = remember { HazeState() }
@@ -39,7 +36,7 @@ fun FocusScreen(
     FocusScreenContent(
         uiState = uiState,
         hazeState = hazeState,
-        onProfileClick = { /* TODO: navController.navigate(Screen.Profile.route) */ }
+        onProfileClick = { /* TODO */ }
     )
 }
 
@@ -50,7 +47,9 @@ fun FocusScreenContent(
     hazeState: HazeState,
     onProfileClick: () -> Unit
 ) {
-    // Extract workspace if Active, otherwise fallback to a generic one for now
+    // Grab the exact height of the app's bottom bar
+    val innerPadding = LocalScaffoldPadding.current
+
     val currentWorkspace = (uiState as? FocusUiState.Active)?.workspace
         ?: Workspace(id = "1", name = "Workspace")
 
@@ -60,26 +59,32 @@ fun FocusScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .haze(hazeState)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        // Apply the scaffold padding exactly here!
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = innerPadding.calculateBottomPadding())
+        ) {
 
-            // ========== Top Bar ==========
+            // ========== Top Bar + User Greeting ==========
             TopBar(
-                userName = "Sagi",
-                profilePictureUrl = null,
                 workspaces = listOf(currentWorkspace),
                 selectedWorkspace = currentWorkspace,
                 onWorkspaceSelected = { },
                 onAddWorkspace = { },
-                onProfileClick = onProfileClick,
+                onAddTaskClick = {}
+            )
+
+            HeroGreeting(
+                userName = "Sagi",
                 hazeState = hazeState
             )
 
-            // ========== Dynamic Content Box ==========
+            // ========== FocusCard / EmptyState ==========
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-//                contentAlignment = Alignment.BottomCenter
                 contentAlignment = Alignment.Center
             ) {
                 when (uiState) {
@@ -113,22 +118,20 @@ fun FocusScreenContent(
                     }
                 }
             }
-
-            // Add padding at the bottom so the FloatingNavBar doesn't cover the card
-            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 
-    Box (
-        contentAlignment = Alignment.BottomCenter,
-        modifier = Modifier.fillMaxSize().padding(vertical = 50.dp)
-    ) {
-        Text(
-            text = "Just some long ass text",
-            fontSize = 64.sp,
-            modifier = Modifier
-        )
-    }
+    // Dummy text to test bottom nav bar's bg blur
+//    Box (
+//        contentAlignment = Alignment.BottomCenter,
+//        modifier = Modifier.fillMaxSize().padding(vertical = 50.dp)
+//    ) {
+//        Text(
+//            text = "Just some long ass text",
+//            fontSize = 64.sp,
+//            modifier = Modifier
+//        )
+//    }
 
 }
 

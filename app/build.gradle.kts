@@ -58,28 +58,39 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // Compose & Other UI
+
+    // Android Splash screen (for app launch)
+    implementation(libs.androidx.core.splashscreen)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Coil (Native Image Loader)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    // Compose
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.ui.text.google.fonts)
 
-    // Android Splash screen (for app launch)
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    // Compose Navigation
+    implementation(libs.androidx.navigation.compose)
 
     // Haze (library for blur effects)
-    implementation("dev.chrisbanes.haze:haze:1.7.2")
-    implementation("dev.chrisbanes.haze:haze-materials:1.7.2")
+    implementation(libs.haze)
+    implementation(libs.haze.materials)
 
     // Compose Unstyled (Composables Library)
-    implementation("com.composables:composeunstyled:1.49.6")
+    implementation(libs.composeunstyled)
     // adds theming APIs
-    implementation("com.composables:composeunstyled-theming:1.49.6")
+    implementation(libs.composeunstyled.theming)
     // adds component primitives for building components
-    implementation("com.composables:composeunstyled-primitives:1.49.6")
+    implementation(libs.composeunstyled.primitives)
     // adds themes for native look and feel
-    implementation("com.composables:composeunstyled-platformtheme:1.49.6")
+    implementation(libs.composeunstyled.platformtheme)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
@@ -89,13 +100,4 @@ dependencies {
     // Google Services Auth
     implementation(libs.google.play.services.auth)
 
-    // Compose Navigation
-    implementation(libs.androidx.navigation.compose)
-
-    // Coroutines
-    implementation(libs.kotlinx.coroutines.android)
-
-    // Coil (Native Image Loader)
-    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
 }

@@ -1,3 +1,5 @@
+package dev.sagi.monotask.ui.component
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +27,6 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.ui.component.CustomTag
-import dev.sagi.monotask.ui.component.ImportanceTag
-import dev.sagi.monotask.ui.component.XpDeltaBadge
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.aceTaskBorder
 import dev.sagi.monotask.ui.theme.defaultTaskBorder
@@ -93,8 +92,12 @@ fun TaskCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
+                // Inject an invisible break-point after every hyphen (for word wrapping)
+                val titleWrapped = task.title
+                    .replace("-", "-\u200B")
+                    .replace("—", "—\u200B")
                 Text(
-                    text = task.title,
+                    text = titleWrapped,
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
 //                    fontSize = 36.sp,
@@ -191,7 +194,7 @@ private fun ImportanceBadge(importance: Importance) {
     }
 }
 
-// ── Preview ───────────────────────────────────────────────────────────────────
+// ========== Preview ==========
 @Preview(showBackground = true)
 @Composable
 fun TaskCardPreview() {
@@ -204,7 +207,7 @@ fun TaskCardPreview() {
             TaskCard(
                 task = Task(
                     id = "1",
-                    title = "Finish Algorithms Task",
+                    title = "Build Swipe-to-Complete",
                     description = "Complete sections 3 and 4, submit before midnight.",
                     importance = Importance.HIGH,
                     tags = listOf("CS101", "ds"),

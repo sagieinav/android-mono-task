@@ -1,7 +1,8 @@
+package dev.sagi.monotask.ui.component
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun TypewriterText(
@@ -34,8 +37,8 @@ fun TypewriterText(
     delayBefore: Long = 0L,
     charDelay: Long = 30L,
     modifier: Modifier = Modifier,
-    style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodySmall,
-    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onBackground,
+    style: TextStyle = MaterialTheme.typography.bodySmall,
+    color: Color = MaterialTheme.colorScheme.onBackground,
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
 ) {
@@ -69,6 +72,10 @@ fun EmptyState(
 ) {
     val emojiScale = remember { Animatable(0.2f) }
     val delayBefore = 600L
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val dynamicEmojiSize = with(LocalDensity.current) { (screenWidth * 0.7f).toSp() }
+    val dynamicFontSizeBig = with(LocalDensity.current) { (screenWidth * 0.18f).toSp() }
+    val dynamicFontSizeSmall = with(LocalDensity.current) { (screenWidth * 0.13f).toSp() }
 
     LaunchedEffect(Unit) {
         emojiScale.animateTo(
@@ -89,15 +96,24 @@ fun EmptyState(
     ) {
         Text(
             text = emoji,
-            fontSize = 64.sp,
-            modifier = Modifier.scale(emojiScale.value)
+//            fontSize = 64.sp,
+            fontSize = dynamicEmojiSize,
+            modifier = Modifier
+//                .scale(emojiScale.value)
+                .fillMaxWidth(0.85f)
+//                .align(Alignment.CenterHorizontally)
+//                .aspectRatio(1f)
+            ,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         TypewriterText(
             text = title,
             delayBefore = delayBefore,
             charDelay = 30L,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontSize = dynamicFontSizeBig,
+            ),
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
@@ -107,7 +123,9 @@ fun EmptyState(
             text = subtitle,
             delayBefore = delayBefore + (title.length * 50L),  // starts after title finishes
             charDelay = 25L,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = dynamicFontSizeSmall
+            ),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.outline,
         )
