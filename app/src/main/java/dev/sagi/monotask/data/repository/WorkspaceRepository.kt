@@ -29,7 +29,7 @@ class WorkspaceRepository {
     suspend fun createDefaultWorkspaces(userId: String) {
         val defaults = listOf(
             Workspace(name = "Personal",    ownerId = userId),
-            Workspace(name = "University",  ownerId = userId)
+            Workspace(name = "Education",  ownerId = userId)
         )
         defaults.forEach { workspace ->
             workspacesCollection(userId).add(workspace).await()
@@ -56,8 +56,13 @@ class WorkspaceRepository {
     }
 
     // Adds a new custom workspace
-    suspend fun addWorkspace(userId: String, name: String) {
+    suspend fun createWorkspace(userId: String, name: String) {
         val workspace = Workspace(name = name, ownerId = userId)
         workspacesCollection(userId).add(workspace).await()
     }
+
+    suspend fun deleteWorkspace(userId: String, workspaceId: String) {
+        workspacesCollection(userId).document(workspaceId).delete().await()
+    }
+
 }

@@ -30,13 +30,13 @@ fun LoadingSpinner(
     ) {
         if (useContained) {
             ContainedLoadingIndicator(
-                indicatorColor = MaterialTheme.colorScheme.secondary,
-                containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+                indicatorColor = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                 modifier = modifier
             )
         } else {
             LoadingIndicator(
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = modifier
             )
         }

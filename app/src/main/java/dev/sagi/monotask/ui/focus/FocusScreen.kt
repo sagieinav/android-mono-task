@@ -18,11 +18,15 @@ import dev.chrisbanes.haze.haze
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
+import dev.sagi.monotask.ui.component.CreateTaskSheet
+import dev.sagi.monotask.ui.component.CreateWorkspaceDialog
 import dev.sagi.monotask.ui.component.HeroGreeting
 import dev.sagi.monotask.ui.component.LoadingSpinner
 import dev.sagi.monotask.ui.navigation.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-// import dev.sagi.monotask.ui.component.LoadingSpinner // (Use yours if you have it)
+
+
+
 
 // STATEFUL WRAPPER (Used by NavGraph)
 @Composable
@@ -32,11 +36,23 @@ fun FocusScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val hazeState = remember { HazeState() }
+    val workspaces by viewModel.workspaces.collectAsState()
+    val currentWorkspace by viewModel.currentWorkspace.collectAsState()
 
     FocusScreenContent(
         uiState = uiState,
         hazeState = hazeState,
-        onProfileClick = { /* TODO */ }
+        workspaces = workspaces,
+        currentWorkspace = currentWorkspace,
+        onWorkspaceSelected = { viewModel.selectWorkspace(it) },
+        onCreateTask = { title, desc, importance, tags, dueDate ->
+            val workspaceId =
+                currentWorkspace?.id
+            if (workspaceId != null) {
+                viewModel.createTask(title, desc, importance, tags, dueDate, workspaceId)
+            }
+        },
+        onCreateWorkspace = {name -> viewModel.createWorkspace(name)}
     )
 }
 
@@ -45,13 +61,20 @@ fun FocusScreen(
 fun FocusScreenContent(
     uiState: FocusUiState,
     hazeState: HazeState,
-    onProfileClick: () -> Unit
-) {
+    workspaces: List<Workspace> = emptyList(),
+    currentWorkspace: Workspace? = null,
+    onWorkspaceSelected: (Workspace) -> Unit = {},
+    onCreateWorkspace: (String) -> Unit = {},
+    onCreateTask: (String, String, Importance, List<String>, Long?) -> Unit = { _, _, _, _, _ -> },
+)
+ {
     // Grab the exact height of the app's bottom bar
     val innerPadding = LocalScaffoldPadding.current
 
-    val currentWorkspace = (uiState as? FocusUiState.Active)?.workspace
-        ?: Workspace(id = "1", name = "Workspace")
+    var showCreateTaskSheet by remember { mutableStateOf(false) }
+    var showCreateWorkspaceDialog by remember { mutableStateOf(false) }
+
+
 
     Box(
         modifier = Modifier
@@ -59,7 +82,7 @@ fun FocusScreenContent(
             .background(MaterialTheme.colorScheme.background)
             .haze(hazeState)
     ) {
-        // Apply the scaffold padding exactly here!
+        // Apply the scaffold padding
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -68,12 +91,22 @@ fun FocusScreenContent(
 
             // ========== Top Bar + User Greeting ==========
             TopBar(
-                workspaces = listOf(currentWorkspace),
-                selectedWorkspace = currentWorkspace,
-                onWorkspaceSelected = { },
-                onAddWorkspace = { },
-                onAddTaskClick = {}
+                workspaces = workspaces,
+                selectedWorkspace = currentWorkspace ?: Workspace(),
+                onWorkspaceSelected = onWorkspaceSelected,
+                onAddWorkspace = { showCreateWorkspaceDialog = true },
+                onAddTaskClick = { showCreateTaskSheet = true }
             )
+
+            if (showCreateWorkspaceDialog) {
+                CreateWorkspaceDialog(
+                    onConfirm = { name ->
+                        onCreateWorkspace(name)
+                        showCreateWorkspaceDialog = false
+                    },
+                    onDismiss = { showCreateWorkspaceDialog = false }
+                )
+            }
 
             HeroGreeting(
                 userName = "Sagi",
@@ -89,7 +122,7 @@ fun FocusScreenContent(
             ) {
                 when (uiState) {
                     is FocusUiState.Loading -> {
-//                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+//                        CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                         LoadingSpinner()
                     }
 
@@ -117,6 +150,17 @@ fun FocusScreenContent(
                         }
                     }
                 }
+            }
+
+            // Bottom Sheet is drawn on top of everything when the state is true
+            if (showCreateTaskSheet) {
+                CreateTaskSheet(
+                    onDismissRequest = { showCreateTaskSheet = false },
+                    onAddTask = { title, desc, importance, tags, dueDate ->
+                        onCreateTask(title, desc, importance, tags, dueDate)
+                        showCreateTaskSheet = false
+                    }
+                )
             }
         }
     }
@@ -159,7 +203,7 @@ fun FocusScreenPreview() {
         FocusScreenContent(
             uiState = dummyState,
             hazeState = hazeState,
-            onProfileClick = {}
+            currentWorkspace = Workspace()
         )
     }
 }

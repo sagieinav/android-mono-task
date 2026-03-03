@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 //                        modifier = Modifier.align(Alignment.TopCenter)
 //                            .padding(top = 120.dp),
 //                        style = MaterialTheme.typography.displaySmall,
-//                        color = MaterialTheme.colorScheme.primary
+//                        color = MaterialTheme.colorScheme.secondary
 //                    )
 //                    Text(
 //                        text = "More stuff\nin the middle",

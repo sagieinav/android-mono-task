@@ -31,7 +31,7 @@ fun TopBar(
     selectedWorkspace: Workspace?,
     onWorkspaceSelected: (Workspace) -> Unit,
     onAddWorkspace: () -> Unit,
-    onAddTaskClick: () -> Unit, // NEW: Trigger for task creation
+    onAddTaskClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(

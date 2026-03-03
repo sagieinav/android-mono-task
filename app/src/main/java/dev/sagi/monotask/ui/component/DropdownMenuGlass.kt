@@ -75,7 +75,7 @@ fun WorkspaceDropdownGlass(
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier
                         .widthIn(min = 100.dp, max = 240.dp)
-                        .padding(horizontal = 20.dp)
+//                        .padding(horizontal = 20.dp)
                 ) {
                     Column(modifier = Modifier.padding(vertical = 8.dp)) {
 

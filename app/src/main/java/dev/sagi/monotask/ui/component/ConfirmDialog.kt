@@ -37,7 +37,7 @@ fun ConfirmDialog(
     val confirmColor = if (isDestructive)
         MaterialTheme.colorScheme.error
     else
-        MaterialTheme.colorScheme.secondary
+        MaterialTheme.colorScheme.primary
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -90,7 +90,7 @@ fun ConfirmDialogGlass(
     val confirmColor = if (isDestructive)
         MaterialTheme.colorScheme.error
     else
-        MaterialTheme.colorScheme.secondary // Or primary, depending on your theme!
+        MaterialTheme.colorScheme.primary // Or primary, depending on your theme!
 
     Dialog(onDismissRequest = onDismiss) {
         // Here is the magic: Replaced the solid container with your GlassSurface!

@@ -56,7 +56,7 @@ class TaskRepository {
 
     // Adds a new task. Firestore auto-generates the document ID
     suspend fun addTask(userId: String, task: Task) {
-        tasksCollection(userId).add(task)
+        tasksCollection(userId).add(task).await()
     }
 
     // Marks a task as complete. Moves it to archive

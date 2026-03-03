@@ -69,6 +69,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    // FireStore (modern SharedPreferences)
+    implementation(libs.androidx.datastore.preferences)
+
     // Compose
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

@@ -25,6 +25,7 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
+import dev.sagi.monotask.ui.theme.harabara
 
 
 @Composable
@@ -53,9 +54,11 @@ fun TaskTag(
             Text(
                 text = label.lowercase(),
                 style = MaterialTheme.typography.labelLarge,
+                fontFamily = harabara,
                 color = contentColor,
                 fontSize = 18.sp,
-                modifier = Modifier.padding(vertical = 2.dp)
+                modifier = Modifier.padding(vertical = 2.dp),
+                maxLines = 1
             )
             trailingContent?.invoke()
         }

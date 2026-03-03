@@ -35,23 +35,24 @@ class AuthViewModel(
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     init {
-        checkExistingSession()
+        observeAuthState()
     }
 
     // ========== Session Management ==========
 
-    private fun checkExistingSession() {
-        if (authRepository.signedIn) {
-            viewModelScope.launch {
-                val userId = MonoTaskApp.instance.auth.currentUser?.uid ?: return@launch
-                val user = userRepository.getUserOnce(userId)
-
-                // Route based on their actual database status
-                val requiresOnboarding = user?.onboarded == false
-                _uiState.value = AuthUiState.SignedIn(requiresOnboarding)
+    private fun observeAuthState() {
+        MonoTaskApp.instance.auth.addAuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            if (user == null) {
+                // Covers: cache clear, sign out, token expiry, account deletion
+                _uiState.value = AuthUiState.SignedOut
+            } else {
+                viewModelScope.launch {
+                    val storedUser = userRepository.getUserOnce(user.uid)
+                    val requiresOnboarding = storedUser?.onboarded == false
+                    _uiState.value = AuthUiState.SignedIn(requiresOnboarding)
+                }
             }
-        } else {
-            _uiState.value = AuthUiState.SignedOut
         }
     }
 
@@ -65,21 +66,26 @@ class AuthViewModel(
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             try {
-                val firebaseUser = authRepository.signInWithGoogle(account)
-                if (firebaseUser == null) {
+                val firebaseUser = authRepository.signInWithGoogle(account) ?: run {
                     _uiState.value = AuthUiState.Error("Authentication failed")
                     return@launch
                 }
 
-                val user = authRepository.buildUserModel(firebaseUser)
-                userRepository.createUserIfNotExists(user)
+                val userModel = authRepository.buildUserModel(firebaseUser)
+                userRepository.createUserIfNotExists(userModel)
 
-                if (!user.onboarded) {
-                    workspaceRepository.createDefaultWorkspaces(user.id)
+                // Fetch the actual stored user record
+                val storedUser = userRepository.getUserOnce(firebaseUser.uid) ?: run {
+                    _uiState.value = AuthUiState.Error("Failed to load user profile")
+                    return@launch
+                }
+
+                if (!storedUser.onboarded) {
+                    workspaceRepository.createDefaultWorkspaces(storedUser.id)
                 }
 
                 // Pass the flag to the UI state
-                _uiState.value = AuthUiState.SignedIn(requiresOnboarding = !user.onboarded)
+                _uiState.value = AuthUiState.SignedIn(requiresOnboarding = !storedUser.onboarded)
 
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Unknown AUTHENTICATION error")
@@ -111,7 +117,7 @@ class AuthViewModel(
 
     fun signOut() {
         authRepository.signOut()
-        _uiState.value = AuthUiState.SignedOut
+//        _uiState.value = AuthUiState.SignedOut
     }
 }
 

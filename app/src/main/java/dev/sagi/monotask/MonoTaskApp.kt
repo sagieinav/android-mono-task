@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import dev.sagi.monotask.data.repository.AuthRepository
 import dev.sagi.monotask.data.repository.TaskRepository
+import dev.sagi.monotask.data.repository.UserPrefsRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
 
@@ -20,6 +21,7 @@ class MonoTaskApp : Application() {
     val userRepository: UserRepository by lazy { UserRepository() }
     val taskRepository: TaskRepository by lazy { TaskRepository() }
     val workspaceRepository: WorkspaceRepository by lazy { WorkspaceRepository() }
+    val userPrefsRepository: UserPrefsRepository by lazy { UserPrefsRepository(this) }
 
     companion object {
         // Global reference to the Application instance

@@ -104,10 +104,10 @@ val harabara = FontFamily(
 // To swap a font, change the variable assigned here.
 // e.g. replace `gloock` with `playfairDisplay` for titles.
 // ─────────────────────────────────────────────────────
-private val heroFont    = gloock          // ← swap to: playfairDisplay
-private val bodyFont    = notoSerif            // ← swap to: libreCaslon, notoSerif
-private val uiFont      = googleSans // ← swap to: googleSans, roboto, plusJakartaSans
-private val dataFont    = ibmPlexMono     // no alternative needed
+private val heroFont    = gloock            // gloock, playfairDisplay
+private val bodyFont    = notoSerif         // libreCaslon, notoSerif, lora
+private val uiFont      = googleSans        // googleSans, roboto, plusJakartaSans
+private val dataFont    = ibmPlexMono       // no alternative needed
 
 // ─────────────────────────────────────────────────────
 // TYPOGRAPHY SCALE
@@ -131,7 +131,7 @@ val AppTypography = Typography(
     headlineMedium = baseline.headlineMedium.copy(fontFamily = heroFont),
     headlineSmall  = baseline.headlineSmall.copy(fontFamily = uiFont),
 
-    // Screen names ("Hello, Sagi"), workspace headers
+    // Screen names, workspace headers
     titleLarge  = baseline.titleLarge.copy(
         fontFamily = uiFont, fontWeight = FontWeight.Bold),
     titleMedium = baseline.titleMedium.copy(
@@ -146,7 +146,7 @@ val AppTypography = Typography(
 
     // Buttons, chips, priority tags
     labelLarge  = baseline.labelLarge.copy(
-        fontFamily = harabara,
+        fontFamily = uiFont,
         fontWeight = FontWeight.Bold,
         platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),

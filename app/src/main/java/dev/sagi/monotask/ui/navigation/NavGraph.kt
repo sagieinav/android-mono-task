@@ -1,6 +1,7 @@
 package dev.sagi.monotask.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -10,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.auth.AuthScreen
+import dev.sagi.monotask.ui.auth.AuthUiState
 import dev.sagi.monotask.ui.auth.OnboardingScreen
 import dev.sagi.monotask.ui.component.LoadingSpinner
 import dev.sagi.monotask.ui.focus.FocusScreen
@@ -29,6 +31,16 @@ fun NavGraph(
         LoadingSpinner()
         return // The rest of the function won't run (until recomposition)
     }
+
+    val authState by authViewModel.uiState.collectAsState()
+    LaunchedEffect(authState) {
+        if (authState is AuthUiState.SignedOut) {
+            navController.navigate(Screen.Auth.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
 
     val hardcoreMode = settingsState.hardcoreModeEnabled
 

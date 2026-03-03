@@ -7,6 +7,7 @@ composeunstyledTheming = "1.49.6"
 composeunstyledPrimitives = "1.49.6"
 composeunstyledPlatformtheme = "1.49.6"
 coreSplashscreen = "1.2.0"
+datastorePreferences = "1.2.0"
 haze = "1.7.2"
 hazeMaterials = "1.7.2"
 kotlin = "2.3.10"
@@ -27,6 +28,7 @@ composeMaterial3 = "1.5.0-alpha15"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilNetworkOkhttp" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 composeunstyled-platformtheme = { module = "com.composables:composeunstyled-platformtheme", version.ref = "composeunstyledPlatformtheme" }
