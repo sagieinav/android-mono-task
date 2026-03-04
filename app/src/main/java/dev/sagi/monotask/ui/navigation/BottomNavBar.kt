@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.GlassSurface
+import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 

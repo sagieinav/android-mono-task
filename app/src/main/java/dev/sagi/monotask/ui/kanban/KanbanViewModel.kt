@@ -25,7 +25,6 @@ sealed class KanbanUiState {
 
 class KanbanViewModel(
     private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
-    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
     private val userId: String = MonoTaskApp.instance.auth.currentUser?.uid ?: ""
 ) : ViewModel() {
 
@@ -75,34 +74,12 @@ class KanbanViewModel(
         )
     }
 
-    fun addTask(title: String, description: String, importance: Importance,
-                dueDate: com.google.firebase.Timestamp?, tags: List<String>, workspaceId: String) {
-        viewModelScope.launch {
-            taskRepository.addTask(userId, Task(
-                title = title, description = description, importance = importance,
-                dueDate = dueDate, workspaceId = workspaceId, tags = tags, ownerId = userId
-            ))
-        }
-    }
-
     fun updateTask(task: Task) {
         viewModelScope.launch { taskRepository.updateTask(userId, task) }
     }
 
     fun deleteTask(taskId: String) {
         viewModelScope.launch { taskRepository.deleteTask(userId, taskId) }
-    }
-
-    fun completeTask(task: Task, workspaceId: String) {
-        viewModelScope.launch {
-            taskRepository.completeTask(userId, task.id)
-            val xpGained = XpEvents.calculateCompletionXp(task)
-            val userDoc = userRepository.getUserOnce(userId) ?: return@launch
-            userRepository.addXp(userId, xpGained, userDoc.xp, userDoc.level)
-            userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
-            val completedTasks = taskRepository.getCompletedTasksOnce(userId, workspaceId)
-            BadgeEngine.evaluate(completedTasks)
-        }
     }
 
     fun openEditSheet(task: Task? = null) { _editingTask.value = task ?: Task() }

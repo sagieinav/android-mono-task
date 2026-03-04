@@ -8,8 +8,11 @@ import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
@@ -19,6 +22,11 @@ class ProfileViewModel(
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+
+    val currentUser: StateFlow<User?> = uiState
+        .map { (it as? ProfileUiState.Ready)?.user }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
 
     // Friend search results (separate from main profile state)
     private val _searchResults = MutableStateFlow<List<User>>(emptyList())

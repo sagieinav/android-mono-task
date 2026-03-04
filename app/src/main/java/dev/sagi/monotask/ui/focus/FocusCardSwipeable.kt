@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component
+package dev.sagi.monotask.ui.focus
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -38,7 +38,7 @@ import kotlin.math.roundToInt
 
 
 @Composable
-fun TaskCardSwipeable(
+fun FocusCardSwipeable(
     task: Task,
     onSwipeRight: () -> Unit,
     onSwipeLeft: () -> Unit,
@@ -115,7 +115,7 @@ fun TaskCardSwipeable(
         }
 
         // Task card
-        TaskCard(
+        FocusCard(
             task = task,
             modifier = Modifier
                 .offset { IntOffset(animatedOffset.roundToInt(), 0) }
@@ -123,91 +123,15 @@ fun TaskCardSwipeable(
                     detectHorizontalDragGestures(
                         onDragEnd = {
                             when {
-                                offsetX > completeThreshold -> { onSwipeRight(); offsetX = 0f }
-                                offsetX < -snoozeThreshold  -> { onSwipeLeft();  offsetX = 0f }
+                                offsetX > completeThreshold -> {
+                                    onSwipeRight(); offsetX = 0f
+                                }
+
+                                offsetX < -snoozeThreshold -> {
+                                    onSwipeLeft(); offsetX = 0f
+                                }
+
                                 else -> offsetX = 0f
-                            }
-                        },
-                        onDragCancel = { offsetX = 0f },
-                        onHorizontalDrag = { _, dragAmount ->
-                            offsetX = (offsetX + dragAmount).coerceIn(-400f, 400f)
-                        }
-                    )
-                }
-        )
-    }
-}
-
-
-
-
-
-
-
-@Composable
-fun TaskCardSwipeableOld(
-    task: Task,
-    onSwipeRight: () -> Unit,  // complete
-    onSwipeLeft: () -> Unit,   // snooze
-    modifier: Modifier = Modifier
-) {
-    var offsetX by remember { mutableFloatStateOf(0f) }
-    val animatedOffset by animateFloatAsState(
-        targetValue = offsetX,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "swipe"
-    )
-    val snoozeThreshold = 220f
-    val completeThreshold = 320f
-
-    // Background color based on drag direction
-    val bgColor by animateColorAsState(
-        targetValue = when {
-            offsetX > 60f  -> Color(0xFF4CAF50).copy(alpha = (offsetX).coerceIn(0f, 0.4f))
-            offsetX < -60f -> Color(0xFFF44336).copy(alpha = (-offsetX).coerceIn(0f, 0.4f))
-            else -> Color.Transparent
-        },
-        label = "swipe_bg"
-    )
-
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(RoundedCornerShape(28.dp))  // TODO change to M3 shape, not hardcoded
-                .background(bgColor)
-        )
-
-
-        // Hint icons behind the card
-        Icon(
-            painter = painterResource(R.drawable.ic_check_circle),
-            contentDescription = "Complete",
-            tint = Color.White,
-            modifier = Modifier.align(Alignment.CenterStart).padding(start = 24.dp).size(32.dp)
-        )
-        Icon(
-            painter = painterResource(R.drawable.ic_skip),
-            contentDescription = "Snooze",
-            tint = Color.White,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 24.dp).size(32.dp)
-        )
-
-        TaskCard(
-            task = task,
-            modifier = Modifier
-                .offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            when {
-                                offsetX > completeThreshold  -> { onSwipeRight(); offsetX = 0f }
-                                offsetX < -snoozeThreshold -> { onSwipeLeft();  offsetX = 0f }
-                                else -> offsetX = 0f // snap back
                             }
                         },
                         onDragCancel = { offsetX = 0f },

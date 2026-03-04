@@ -13,8 +13,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import dev.sagi.monotask.ui.auth.AuthViewModel
+import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
-import dev.sagi.monotask.ui.shared.SharedWorkspaceViewModel
+import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,22 +27,24 @@ class MainActivity : ComponentActivity() {
             MonoTaskTheme {
                 val navController = rememberNavController()
 
-                // Initialize the ViewModels
+                // Initialize general-scope ViewModels
                 val authVM: AuthViewModel = viewModel()
                 val settingsVM: SettingsViewModel = viewModel()
-                val sharedWorkSpaceVM: SharedWorkspaceViewModel = viewModel()
-                // focusVM, kanbanVM, profileVM get initialized in NavGraph (when user first navigates to them)
+                val workspaceVM: WorkspaceViewModel = viewModel()
+                val profileVM: ProfileViewModel = viewModel()
+                // Lazy VMs (focusVM & kanbanVM) get initialized in NavGraph (when user first navigates to them)
 
                 // Base Surface
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-//                    NavGraph(
-//                        navController, authVM, settingsVM
-//                    )
                     MainScaffold(
-                        navController, authVM, settingsVM, sharedWorkSpaceVM
+                        navController,
+                        authVM,
+                        workspaceVM,
+                        profileVM,
+                        settingsVM
                     )
                 }
 

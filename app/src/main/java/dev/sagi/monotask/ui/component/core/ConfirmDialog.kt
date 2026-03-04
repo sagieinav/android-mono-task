@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component
+package dev.sagi.monotask.ui.component.core
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog

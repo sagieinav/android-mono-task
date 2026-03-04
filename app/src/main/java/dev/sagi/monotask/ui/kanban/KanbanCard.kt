@@ -1,6 +1,5 @@
-package dev.sagi.monotask.ui.component
+package dev.sagi.monotask.ui.kanban
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,9 +22,10 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.ui.component.core.CustomTag
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.basicMonoTask
-import dev.sagi.monotask.util.toFormattedDate
+import dev.sagi.monotask.util.ext.toFormattedDate
 
 @Composable
 fun KanbanCard(

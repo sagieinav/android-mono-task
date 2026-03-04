@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component
+package dev.sagi.monotask.ui.focus
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -30,13 +29,15 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.ui.component.core.CustomTag
+import dev.sagi.monotask.ui.component.core.ImportanceTag
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.aceTaskBorder
 import dev.sagi.monotask.ui.theme.defaultTaskBorder
-import dev.sagi.monotask.util.toFormattedDate
+import dev.sagi.monotask.util.ext.toFormattedDate
 
 @Composable
-fun TaskCard(
+fun FocusCard(
     task: Task,
     modifier: Modifier = Modifier
 ) {
@@ -47,8 +48,6 @@ fun TaskCard(
     Surface(
         shape = shape,
         color = MaterialTheme.colorScheme.surface,
-        // tonalElevation for emphasizing the glass card look
-        tonalElevation = 1.dp,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 200.dp)
@@ -76,7 +75,7 @@ fun TaskCard(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_due_calendar),
+                            painter = painterResource(R.drawable.ic_due_soon),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
@@ -211,14 +210,14 @@ private fun ImportanceBadge(importance: Importance) {
 // ========== Preview ==========
 @Preview(showBackground = true)
 @Composable
-fun TaskCardPreview() {
+fun FocusCardPreview() {
     MonoTaskTheme {
         Box(
             modifier = Modifier
                 .size(360.dp)
                 .padding(18.dp)
         ) {
-            TaskCard(
+            FocusCard(
                 task = Task(
                     id = "1",
                     title = "Build Swipe-to-Complete",

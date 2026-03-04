@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component
+package dev.sagi.monotask.ui.component.core
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import kotlinx.coroutines.delay
 

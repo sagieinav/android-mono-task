@@ -9,15 +9,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.google.firebase.Timestamp
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.ui.component.*
-import dev.sagi.monotask.ui.shared.SharedWorkspaceViewModel
+import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.component.core.SegmentedToggle
+import dev.sagi.monotask.ui.component.task.EditTaskSheet
+import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
+import java.util.Date
 
 @Composable
 fun KanbanScreen(
     navController: NavHostController,
-    sharedWorkspaceVM: SharedWorkspaceViewModel,
+    sharedWorkspaceVM: WorkspaceViewModel,
     viewModel: KanbanViewModel = viewModel()
 ) {
     val selectedWorkspace by sharedWorkspaceVM.selectedWorkspace.collectAsState()
@@ -38,34 +42,21 @@ fun KanbanScreen(
     )
 
     editingTask?.let { task ->
-        if (task.id.isBlank()) {
-            CreateTaskSheet(
-                onDismiss = { viewModel.dismissEditSheet() },
-                onAddTask = { title, desc, importance, tags, dueDate ->
-                    viewModel.addTask(
-                        title, desc, importance,
-                        dueDate?.let { com.google.firebase.Timestamp(java.util.Date(it)) },
-                        tags, selectedWorkspace?.id ?: ""
-                    )
-                    viewModel.dismissEditSheet()
-                }
-            )
-        } else {
-            EditTaskSheet(
-                task = task,
-                onDismiss = { viewModel.dismissEditSheet() },
-                onSave = { title, desc, importance, tags, dueDate ->
-                    viewModel.updateTask(
-                        task.copy(
-                        title = title, description = desc, importance = importance, tags = tags,
-                        dueDate = dueDate?.let { com.google.firebase.Timestamp(java.util.Date(it)) }
-                    ))
-                    viewModel.dismissEditSheet()
-                },
-                onDelete = { viewModel.deleteTask(task.id) }
-            )
-        }
+        EditTaskSheet(
+            task = task,
+            onDismiss = { viewModel.dismissEditSheet() },
+            onSave = { title, desc, importance, tags, dueDate ->
+                viewModel.updateTask(
+                    task.copy(
+                    title = title, description = desc, importance = importance, tags = tags,
+                    dueDate = dueDate?.let { Timestamp(Date(it)) }
+                ))
+                viewModel.dismissEditSheet()
+            },
+            onDelete = { viewModel.deleteTask(task.id) }
+        )
     }
+
 }
 
 @Composable
@@ -111,3 +102,20 @@ fun KanbanScreenContent(
         }
     }
 }
+
+
+// Toggle
+@Composable
+fun ActiveArchiveToggle(
+    showCompleted: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SegmentedToggle(
+        options = listOf("Active", "Archive"),
+        selectedIndex = if (showCompleted) 1 else 0,
+        onOptionSelected = { onToggle() },
+        modifier = modifier
+    )
+}
+

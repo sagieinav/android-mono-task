@@ -18,11 +18,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.Date
 
-class SharedWorkspaceViewModel(
-    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.Companion.instance.workspaceRepository,
-    private val taskRepository: TaskRepository = MonoTaskApp.Companion.instance.taskRepository,
-    private val userPrefs: UserPrefsRepository = MonoTaskApp.Companion.instance.userPrefsRepository,
-    private val userId: String = MonoTaskApp.Companion.instance.auth.currentUser?.uid ?: ""
+class WorkspaceViewModel(
+    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
+    private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
+    private val userPrefs: UserPrefsRepository = MonoTaskApp.instance.userPrefsRepository,
+    private val userId: String = MonoTaskApp.instance.auth.currentUser?.uid ?: ""
 ) : ViewModel() {
 
     private val _workspaces = MutableStateFlow<List<Workspace>>(emptyList())
@@ -35,6 +35,8 @@ class SharedWorkspaceViewModel(
         if (userId.isNotEmpty()) observeWorkspaces()
     }
 
+
+    // ========== WORKSPACE OPERATIONS ==========
     private fun observeWorkspaces() {
         workspaceRepository.getWorkspaces(userId)
             .onEach { workspaces ->
@@ -58,6 +60,13 @@ class SharedWorkspaceViewModel(
         viewModelScope.launch { workspaceRepository.createWorkspace(userId, name) }
     }
 
+    fun deleteWorkspace(workspace: Workspace) {
+        if (_workspaces.value.size <= 1) return  // prevent deleting last workspace
+        viewModelScope.launch { workspaceRepository.deleteWorkspace(userId, workspace.id) }
+    }
+
+
+    // ========== TASK OPERATIONS ==========
     fun createTask(
         title: String,
         description: String,

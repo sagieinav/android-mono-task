@@ -1,4 +1,4 @@
-package dev.sagi.monotask.util
+package dev.sagi.monotask.util.ext
 
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat

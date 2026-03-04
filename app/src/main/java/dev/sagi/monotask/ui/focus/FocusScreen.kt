@@ -10,15 +10,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import dev.sagi.monotask.ui.component.*
-import dev.sagi.monotask.ui.shared.SharedWorkspaceViewModel
+import dev.sagi.monotask.ui.component.core.EmptyState
+import dev.sagi.monotask.ui.component.core.HeroGreeting
+import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 
 @Composable
 fun FocusScreen(
     navController: NavHostController,
     viewModel: FocusViewModel,
-    sharedWorkspaceVM: SharedWorkspaceViewModel
+    sharedWorkspaceVM: WorkspaceViewModel
 ) {
     LaunchedEffect(Unit) {
         viewModel.startObservingTasks(sharedWorkspaceVM.selectedWorkspace)
@@ -77,7 +79,7 @@ fun FocusScreenContent(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            TaskCardSwipeable(
+                            FocusCardSwipeable(
                                 task = uiState.focusTask,
                                 onSwipeRight = onCompleteTask,
                                 onSwipeLeft = onOpenSnooze,

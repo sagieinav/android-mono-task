@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component
+package dev.sagi.monotask.ui.component.task
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +44,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.ui.component.core.CustomTag
+import dev.sagi.monotask.ui.component.core.MonoTextField
+import dev.sagi.monotask.ui.component.core.BottomSheet
+import dev.sagi.monotask.ui.component.core.TaskDateTimePicker
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 
@@ -100,8 +104,9 @@ private fun TaskSheet(
 
         Button(
             onClick = {
-                val finalTags = if (tagInput.isNotBlank() && !tags.contains(tagInput.trim().lowercase()))
-                    tags + tagInput.trim().lowercase() else tags
+                val finalTags =
+                    if (tagInput.isNotBlank() && !tags.contains(tagInput.trim().lowercase()))
+                        tags + tagInput.trim().lowercase() else tags
                 onSubmit(title.trim(), description.trim(), importance, finalTags, dueDateMillis)
                 onDismiss()
             },
@@ -179,14 +184,14 @@ private fun TaskTitleAndDescriptionInput(
     onDescriptionChange: (String) -> Unit,
 ) {
     // Title
-    CustomTextField(
+    MonoTextField(
         value = title,
         onValueChange = onTitleChange,
         label = "Task Title"
     )
 
     // Description
-    CustomTextField(
+    MonoTextField(
         value = description,
         onValueChange = onDescriptionChange,
         label = "Description (Optional)",
@@ -215,7 +220,7 @@ private fun TaskSmartTagsInput(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        CustomTextField(
+        MonoTextField(
             value = tagInput,
             onValueChange = { input ->
                 when {
