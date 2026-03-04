@@ -1,4 +1,7 @@
+package dev.sagi.monotask.ui.component
+
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,13 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.basicMonoTask
 import dev.sagi.monotask.ui.theme.penaltyRed
 
 @Composable
@@ -33,7 +36,7 @@ fun SnoozePenaltyRow(
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().basicMonoTask(RoundedCornerShape(12.dp)),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -81,7 +84,7 @@ fun SnoozePenaltyRow(
 @Composable
 fun SnoozePenaltyRowPreview() {
     MonoTaskTheme {
-        androidx.compose.foundation.layout.Column(
+        Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {

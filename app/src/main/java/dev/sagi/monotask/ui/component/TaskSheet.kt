@@ -43,57 +43,50 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 
 @Composable
-fun CreateTaskSheet(
-    onDismissRequest: () -> Unit,
-    onAddTask: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit
+private fun TaskSheet(
+    sheetTitle: String,
+    submitLabel: String,
+    initialTitle: String = "",
+    initialDescription: String = "",
+    initialImportance: Importance = Importance.MEDIUM,
+    initialTags: List<String> = emptyList(),
+    initialDueDateMillis: Long? = null,
+    onDismiss: () -> Unit,
+    onSubmit: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit,
+    extraContent: @Composable (() -> Unit)? = null   // ← slot for delete button in edit mode
 ) {
-    // States
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var importance by remember { mutableStateOf(Importance.MEDIUM) }
+    var title by remember { mutableStateOf(initialTitle) }
+    var description by remember { mutableStateOf(initialDescription) }
+    var importance by remember { mutableStateOf(initialImportance) }
     var tagInput by remember { mutableStateOf("") }
-    var tags by remember { mutableStateOf(listOf<String>()) }
-    var dueDateMillis by remember { mutableStateOf<Long?>(null) }
+    var tags by remember { mutableStateOf(initialTags) }
+    var dueDateMillis by remember { mutableStateOf(initialDueDateMillis) }
     var showDateTimePicker by remember { mutableStateOf(false) }
 
     val shape = MaterialTheme.shapes.medium
 
-    BottomSheet(
-        title = "Create New Task",
-        onDismissRequest = onDismissRequest
-    ) {
+    BottomSheet(title = sheetTitle, onDismissRequest = onDismiss) {
         TaskTitleAndDescriptionInput(
-            title = title,
-            onTitleChange = { title = it },
-            description = description,
-            onDescriptionChange = { description = it },
+            title = title, onTitleChange = { title = it },
+            description = description, onDescriptionChange = { description = it }
         )
-
         TaskSmartTagsInput(
-            tagInput = tagInput,
-            onTagInputChange = { tagInput = it },
-            tags = tags,
-            onTagsUpdated = { tags = it },
+            tagInput = tagInput, onTagInputChange = { tagInput = it },
+            tags = tags, onTagsUpdated = { tags = it }
         )
-
-        Spacer(modifier = Modifier.height(0.dp))
-//        Divider()
-
         TaskImportanceSelector(
             selectedImportance = importance,
-            onImportanceSelected = { importance = it },
+            onImportanceSelected = { importance = it }
         )
-
         TaskDueDateSelector(
             dueDateMillis = dueDateMillis,
-            onClick = { showDateTimePicker = true },
+            onClick = { showDateTimePicker = true }
         )
-
-        // Render the time picker when triggered
         if (showDateTimePicker) {
             TaskDateTimePicker(
                 onDateTimeSelected = { millis -> dueDateMillis = millis },
@@ -101,22 +94,81 @@ fun CreateTaskSheet(
             )
         }
 
+        extraContent?.invoke()
+
         Spacer(modifier = Modifier.height(4.dp))
 
-        AddTaskButton(
-            isEnabled = title.isNotBlank(),
+        Button(
             onClick = {
-                val finalTags = if (tagInput.isNotBlank() && !tags.contains(tagInput.trim().lowercase())) {
-                    tags + tagInput.trim().lowercase()
-                } else tags
-
-                onAddTask(title.trim(), description.trim(), importance, finalTags, dueDateMillis)
-                onDismissRequest()
+                val finalTags = if (tagInput.isNotBlank() && !tags.contains(tagInput.trim().lowercase()))
+                    tags + tagInput.trim().lowercase() else tags
+                onSubmit(title.trim(), description.trim(), importance, finalTags, dueDateMillis)
+                onDismiss()
             },
             shape = shape,
-        )
+            enabled = title.isNotBlank(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+            modifier = Modifier.fillMaxWidth().height(56.dp)
+        ) {
+            Text(submitLabel, style = MaterialTheme.typography.titleMedium)
+        }
     }
 }
+
+
+@Composable
+fun CreateTaskSheet(
+    onDismiss: () -> Unit,
+    onAddTask: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit
+) {
+    TaskSheet(
+        sheetTitle = "Create New Task",
+        submitLabel = "Add Task",
+        onDismiss = onDismiss,
+        onSubmit = onAddTask
+    )
+}
+
+
+@Composable
+fun EditTaskSheet(
+    task: Task,
+    onDismiss: () -> Unit,
+    onSave: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit,
+    onDelete: () -> Unit
+) {
+    TaskSheet(
+        sheetTitle = "Edit Task",
+        submitLabel = "Save Changes",
+        initialTitle = task.title,
+        initialDescription = task.description,
+        initialImportance = task.importance,
+        initialTags = task.tags,
+        initialDueDateMillis = task.dueDate?.toDate()?.time,
+        onDismiss = onDismiss,
+        onSubmit = onSave,
+        extraContent = {
+            Spacer(modifier = Modifier.height(4.dp))
+            Button(
+                onClick = { onDelete(); onDismiss() },
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                modifier = Modifier.fillMaxWidth().height(56.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_delete),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp).padding(end = 4.dp)
+                )
+                Text("Delete Task", style = MaterialTheme.typography.titleMedium)
+            }
+        }
+    )
+}
+
 
 
 @Composable
@@ -283,7 +335,7 @@ private fun TaskDueDateSelector(
                         },
                         style = MaterialTheme.typography.titleSmall,
                         // A small fix to match the `importance` chip height
-                        modifier = Modifier.padding(vertical = 7.dp)
+//                        modifier = Modifier.padding(vertical = 7.dp)
                         )
                 },
                 leadingIcon = {
@@ -329,7 +381,7 @@ fun CreateTaskSheetPreview() {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             CreateTaskSheet(
-                onDismissRequest = {},
+                onDismiss = {},
                 onAddTask = { _, _, _, _, _ -> }
             )
         }

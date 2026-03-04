@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
+import dev.sagi.monotask.ui.shared.SharedWorkspaceViewModel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
                 // Initialize the ViewModels
                 val authVM: AuthViewModel = viewModel()
                 val settingsVM: SettingsViewModel = viewModel()
+                val sharedWorkSpaceVM: SharedWorkspaceViewModel = viewModel()
                 // focusVM, kanbanVM, profileVM get initialized in NavGraph (when user first navigates to them)
 
                 // Base Surface
@@ -39,7 +41,7 @@ class MainActivity : ComponentActivity() {
 //                        navController, authVM, settingsVM
 //                    )
                     MainScaffold(
-                        navController, authVM, settingsVM
+                        navController, authVM, settingsVM, sharedWorkSpaceVM
                     )
                 }
 

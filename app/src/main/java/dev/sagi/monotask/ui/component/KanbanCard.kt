@@ -1,6 +1,9 @@
+package dev.sagi.monotask.ui.component
+
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,8 +24,8 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.ui.component.CustomTag
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.basicMonoTask
 import dev.sagi.monotask.util.toFormattedDate
 
 @Composable
@@ -31,19 +34,14 @@ fun KanbanCard(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val cardShape = MaterialTheme.shapes.medium
     Surface(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .border(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(16.dp)
-            ),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+            .basicMonoTask(cardShape),
+        shape = cardShape,
         color = MaterialTheme.colorScheme.surfaceBright,
-//        tonalElevation = 1.dp,
-        shadowElevation = 4.dp
     ) {
         Column(
             modifier = Modifier
@@ -62,7 +60,7 @@ fun KanbanCard(
 
             // ========== Tags ==========
             if (task.tags.isNotEmpty()) {
-                androidx.compose.foundation.layout.FlowRow(
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {

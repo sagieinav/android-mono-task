@@ -3,7 +3,6 @@ package dev.sagi.monotask.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import kotlin.math.abs
 
@@ -57,10 +56,9 @@ val lightCustomColors = CustomColors(
     tagLime     = TagLimeBackground     to TagLimeContent,
 )
 
-val localCustomColors = staticCompositionLocalOf { lightCustomColors }
 
 // Add my custom colors to the theme
 val MaterialTheme.customColors: CustomColors
     @Composable
     @ReadOnlyComposable
-    get() = localCustomColors.current
+    get() = LocalCustomColors.current

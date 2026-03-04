@@ -9,27 +9,34 @@ import kotlin.random.Random
 
 object PriorityCalculator {
     // Returns the single highest-priority task from a list (the task displayed on the Focus Hub)
-    fun getTopTask(tasks: List<Task>, workspace: Workspace): Task? {
+    fun getTopTask(tasks: List<Task>, workspace: Workspace, excludeId: String? = null): Task? {
         if (tasks.isEmpty()) return null
-        return tasks.maxByOrNull { score(it, workspace) }
+
+        val candidates = if (excludeId != null) tasks.filter { it.id != excludeId } else tasks
+        val pool = candidates.ifEmpty { tasks } // fallback if only 1 task exists
+
+        val nonSnoozed = pool.filter { it.snoozeCount == 0 }
+        return (nonSnoozed.ifEmpty { pool })
+            .maxByOrNull { score(it, workspace) }
     }
+
 
     // Returns all tasks sorted by priority score descending
     fun getSortedTasks(tasks: List<Task>, workspace: Workspace): List<Task> =
         tasks.sortedByDescending { score(it, workspace) }
 
     /**
-     * Core scoring function. Pure — no side effects, no I/O.
+     * Core scoring function.
      * Deterministic except for the small randomness term.
      *
      * Due Date Score:
      *   Uses a sigmoid-style urgency curve so that tasks due very soon
      *   score much higher, but tasks with no due date aren't penalized
-     *   to zero — they just score at a neutral midpoint (0.5).
+     *   to zero - they just score at a neutral midpoint (0.5).
      *
      * Importance Score:
      *   LOW = 0.33, MEDIUM = 0.66, HIGH = 1.0
-     *   Simple linear scale — straightforward to explain and defend.
+     *   Simple linear scale - straightforward to explain and defend.
      */
     private fun score(task: Task, workspace: Workspace): Double {
         val dueDateScore = dueDateUrgency(task.dueDate)
@@ -39,10 +46,14 @@ object PriorityCalculator {
             workspace.randomnessFactor.toDouble()
         )
 
-        // This is the importance calculation function
-        return (workspace.dueDateWeight   * dueDateScore) +
+        // This is the importance calculation:
+        val rawScore = (workspace.dueDateWeight   * dueDateScore) +
                 (workspace.importanceWeight * importanceScore) +
                 noise
+
+        // Apply snooze penalty: each snooze reduces priority by ~33%
+        val snoozePenalty = 1.0 / (1.0 + task.snoozeCount * 0.5)
+        return rawScore * snoozePenalty
     }
 
     /**

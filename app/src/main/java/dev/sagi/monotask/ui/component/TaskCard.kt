@@ -3,11 +3,14 @@ package dev.sagi.monotask.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +41,8 @@ fun TaskCard(
     modifier: Modifier = Modifier
 ) {
     val cornerRadius = 28;
-    val shape = RoundedCornerShape(cornerRadius.dp)
+    val shape = RoundedCornerShape(cornerRadius.dp) // TODO change to M3 shape
+//    val shape = MaterialTheme.shapes.extraLarge
 
     Surface(
         shape = shape,
@@ -46,7 +50,8 @@ fun TaskCard(
         // tonalElevation for emphasizing the glass card look
         tonalElevation = 1.dp,
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .heightIn(min = 200.dp)
             // AceGlowBorder wraps the card only if task.isAce
             .then(
                 if (task.isAce) Modifier.aceTaskBorder(cornerRadius.dp)
@@ -55,9 +60,9 @@ fun TaskCard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(20.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(40.dp)
         ) {
             // ========== Top: Due date (if present) ==========
             Row(
@@ -89,7 +94,7 @@ fun TaskCard(
 
             // ========== Middle: title + description ==========
             Column(
-                modifier = Modifier.weight(1f),
+//                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
                 // Inject an invisible break-point after every hyphen (for word wrapping)
@@ -122,17 +127,26 @@ fun TaskCard(
             }
 
             // ========== Bottom: tags ==========
-            Row(
+            @OptIn(ExperimentalLayoutApi::class)
+            val allTags = task.tags
+            val maxVisible = 4 // tune this to taste
+            val visibleTags = allTags.take(maxVisible)
+            val overflowCount = allTags.size - maxVisible
+
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                maxLines = 2,
             ) {
                 ImportanceTag(importance = task.importance)
-                if (task.tags.isNotEmpty()) {
-                    task.tags.forEach { tag ->
-                        CustomTag(label = tag)
-                    }
+                visibleTags.forEach { tag ->
+                    CustomTag(label = tag)
                 }
+                if (overflowCount > 0) {
+                    CustomTag(label = "+$overflowCount")
+                }
+
 
 //                // Due date pushed to the end
 //                task.dueDate?.let { timestamp ->
@@ -159,7 +173,7 @@ fun TaskCard(
     }
 }
 
-// ── Importance badge ──────────────────────────────────────────────────────────
+// ========== Importance badge ==========
 @Composable
 private fun ImportanceBadge(importance: Importance) {
     val (label, containerColor, contentColor) = when (importance) {
