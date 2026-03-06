@@ -35,6 +35,7 @@ import dev.sagi.monotask.util.ext.toRelativeDate
 @Composable
 fun FocusCard(
     task: Task,
+    borderFraction: Float,
     modifier: Modifier = Modifier
 ) {
     val shape = MaterialTheme.shapes.large
@@ -45,8 +46,8 @@ fun FocusCard(
             .fillMaxWidth()
             .heightIn(min = 200.dp)
             .then(
-                if (task.isAce) Modifier.aceTaskBorder(shape)
-                else Modifier.defaultTaskBorder(shape)
+                if (task.isAce) Modifier.aceTaskBorder(shape = shape, drawFraction = borderFraction)
+                else Modifier.defaultTaskBorder(shape = shape, drawFraction = borderFraction)
             )
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface)
@@ -145,7 +146,8 @@ fun FocusCardPreview() {
                     tags = listOf("CS101", "ds"),
                     snoozeCount = 0,
                     dueDate = Timestamp.now()
-                )
+                ),
+                borderFraction = 0.5f
             )
         }
     }

@@ -75,7 +75,7 @@ fun XpLabelCompletion(
     modifier: Modifier = Modifier
 ) {
     val label = "+${xpDelta} XP"
-    val color = bonusGreen
+    val color = MaterialTheme.colorScheme.primary
 
     val alpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,

@@ -58,13 +58,19 @@ class FocusViewModel(
 
     fun completeTask() {
         val state = _uiState.value as? FocusUiState.Active ?: return
+
+        // Calculate XP synchronously and raise the gate BEFORE any coroutine/Firestore
+        val xpGained = XpEvents.calculateCompletionXp(state.focusTask)
+        _lastXpGained.value = xpGained
+        _xpBadgeVisible.value = true
+
         viewModelScope.launch {
             taskRepository.completeTask(userId, state.focusTask.id)
-            val xpGained = XpEvents.calculateCompletionXp(state.focusTask)
-            val userDoc = userRepository.getUserOnce(userId) ?: return@launch
+            val userDoc = userRepository.getUserOnce(userId) ?: run {
+                _xpBadgeVisible.value = false  // safety fallback
+                return@launch
+            }
             userRepository.addXp(userId, xpGained, userDoc.xp, userDoc.level)
-            _lastXpGained.value = xpGained
-            _xpBadgeVisible.value = true
             delay(2000)
             _xpBadgeVisible.value = false
             userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
@@ -72,6 +78,7 @@ class FocusViewModel(
             BadgeEngine.evaluate(completedTasks)
         }
     }
+
 
     fun snoozeTask(penalty: Int) {
         val state = _uiState.value as? FocusUiState.Active ?: return

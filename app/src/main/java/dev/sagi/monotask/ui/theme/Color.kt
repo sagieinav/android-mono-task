@@ -259,9 +259,9 @@ val onDarkBlueContainerDarkHighContrast = Color(0xFF000A22)
 // These are NOT part of the M3 system
 // brand-specific overlays used in custom composables only
 
-val AceGold            = Color(0xFFFFDA02) // Raw brand gold
+val AceGold            = Color(0xFFEAC600) // Raw brand gold
 val AceGoldGlow        = Color(0x40FFD700) // 25% alpha - glow ring on FocusCard
-val AceGoldDim         = Color(0xFFD5AE00) // Darker gold - pressed states
+val AceGoldDim         = Color(0xFFD0AA00) // Darker gold - pressed states
 
 val PenaltyRedGlow     = Color(0x33E63946) // 20% alpha - error container tint
 val SuccessGreen       = Color(0xFF06D6A0) // Raw success color

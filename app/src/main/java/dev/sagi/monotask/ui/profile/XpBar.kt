@@ -75,7 +75,7 @@ fun XpBar(
                     .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.inversePrimary)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
             )
         }
 

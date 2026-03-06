@@ -1,9 +1,11 @@
 package dev.sagi.monotask.ui.focus
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
@@ -150,8 +152,11 @@ fun SnoozePill(
 @Composable
 fun FocusCardSwipeable(
     task: Task,
+    exitTrigger: SwipeExitDirection?,
+    borderFraction: Float,
     onSwipeRight: () -> Unit,
     onSwipeLeft: () -> Unit,
+    onSnoozeCardExited: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
@@ -159,27 +164,57 @@ fun FocusCardSwipeable(
     val screenWidthPx = remember(configuration, density) {
         with(density) { configuration.screenWidthDp.dp.toPx() }
     }
+
     var offsetX by remember { mutableFloatStateOf(0f) }
+    var exitDirection by remember { mutableStateOf<SwipeExitDirection?>(null) }
+    val isExiting = exitDirection != null
+
+    // External snooze trigger → start exit
+    LaunchedEffect(exitTrigger) {
+        if (exitTrigger == SwipeExitDirection.LEFT) exitDirection = SwipeExitDirection.LEFT
+    }
+
+//    // Notify parent the moment exit starts
+//    LaunchedEffect(isExiting) {
+//        if (isExiting) onCardExitStart()
+//    }
+
+    // Pills fade out as soon as exit starts — formula breaks beyond threshold
+    val pillAlpha by animateFloatAsState(
+        targetValue   = if (isExiting) 0f else 1f,
+        animationSpec = tween(120),
+        label         = "pill_alpha"
+    )
+
+    val cardTargetOffset = when (exitDirection) {
+        SwipeExitDirection.RIGHT -> screenWidthPx * 1.5f
+        SwipeExitDirection.LEFT  -> -screenWidthPx * 1.5f
+        null                     -> offsetX
+    }
 
     val animatedOffset by animateFloatAsState(
-        targetValue = offsetX,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "swipe_offset"
-    )
-    val maxRotation = if (offsetX > COMPLETE_THRESHOLD || offsetX < -SNOOZE_THRESHOLD) 10f else 6f
-    val rotation by animateFloatAsState(
-        targetValue = (offsetX / 400f) * maxRotation,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "swipe_rotation"
+        targetValue   = cardTargetOffset,
+        // fast tween on exit, spring during drag
+        animationSpec = if (isExiting)
+            tween(280, easing = FastOutLinearInEasing)
+        else
+            spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "swipe_offset",
+        // callback fires AFTER card is off-screen
+        finishedListener = {
+            when (exitDirection) {
+                SwipeExitDirection.RIGHT -> onSwipeRight()
+                SwipeExitDirection.LEFT  -> onSnoozeCardExited()
+                null -> {}
+            }
+        }
     )
 
     val completeReady = offsetX > COMPLETE_THRESHOLD
-    val snoozeReady = offsetX < -SNOOZE_THRESHOLD
-
-    // Haptic feedback upon swipe completion
-    val haptic = LocalHapticFeedback.current
+    val snoozeReady   = offsetX < -SNOOZE_THRESHOLD
+    val haptic        = LocalHapticFeedback.current
     val wasCompleteReady = remember { mutableStateOf(false) }
-    val wasSnoozeReady = remember { mutableStateOf(false) }
+    val wasSnoozeReady   = remember { mutableStateOf(false) }
 
     LaunchedEffect(completeReady) {
         if (completeReady && !wasCompleteReady.value)
@@ -192,26 +227,29 @@ fun FocusCardSwipeable(
         wasSnoozeReady.value = snoozeReady
     }
 
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
         FocusCard(
             task = task,
+            borderFraction = borderFraction,
             modifier = Modifier
                 .fillMaxWidth()
                 .offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                .graphicsLayer { rotationZ = rotation }
-                .pointerInput(Unit) {
+                .graphicsLayer {
+                    // rotation tied directly to animatedOffset — no double-spring lag
+                    rotationZ = (animatedOffset / screenWidthPx) * 18f
+                }
+                // key on isExiting so drag is disabled once exit starts
+                .pointerInput(isExiting) {
+                    if (isExiting) return@pointerInput
                     detectHorizontalDragGestures(
                         onDragEnd = {
                             when {
-                                offsetX > COMPLETE_THRESHOLD -> { onSwipeRight(); offsetX = 0f }
-                                offsetX < -SNOOZE_THRESHOLD -> { onSwipeLeft(); offsetX = 0f }
-                                else -> offsetX = 0f
+                                offsetX > COMPLETE_THRESHOLD -> exitDirection = SwipeExitDirection.RIGHT
+                                offsetX < -SNOOZE_THRESHOLD  -> { offsetX = 0f; onSwipeLeft() }
+                                else                         -> offsetX = 0f
                             }
                         },
-                        onDragCancel = { offsetX = 0f },
+                        onDragCancel    = { offsetX = 0f },
                         onHorizontalDrag = { _, dragAmount ->
                             offsetX = (offsetX + dragAmount).coerceIn(-400f, 400f)
                         }
@@ -220,16 +258,22 @@ fun FocusCardSwipeable(
         )
 
         CompletePill(
-            syncedOffset = animatedOffset,
+            syncedOffset  = animatedOffset,
             screenWidthPx = screenWidthPx,
-            modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp)
+            modifier      = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 16.dp)
+                .graphicsLayer { alpha = pillAlpha }  // fade on exit
         )
-
         SnoozePill(
-            syncedOffset = animatedOffset,
+            syncedOffset  = animatedOffset,
             screenWidthPx = screenWidthPx,
-            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp)
+            modifier      = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 16.dp)
+                .graphicsLayer { alpha = pillAlpha }  // fade on exit
         )
     }
 }
 
+enum class SwipeExitDirection { RIGHT, LEFT }
