@@ -1,5 +1,16 @@
 package dev.sagi.monotask.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -17,6 +28,38 @@ import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 
+private val TAB_ORDER = listOf(
+    Screen.Kanban.route,
+    Screen.Focus.route,
+    Screen.Profile.route
+)
+
+private const val navAnimationDuration = 300
+
+// ========== Animation Helpers ==========
+private fun isForward(from: String?, to: String?): Boolean {
+    val fromIndex = TAB_ORDER.indexOf(from)
+    val toIndex = TAB_ORDER.indexOf(to)
+    // unknown route (Settings, Auth, etc.): always treat as forward
+    if (fromIndex == -1 || toIndex == -1) return true
+    return toIndex > fromIndex
+}
+
+fun tabSlideIn(from: String?, to: String?): EnterTransition =
+    slideInHorizontally(
+        initialOffsetX = { if (isForward(from, to)) it else -it },
+        animationSpec = tween(navAnimationDuration, easing = FastOutSlowInEasing)
+    )
+
+fun tabSlideOut(from: String?, to: String?): ExitTransition =
+    slideOutHorizontally(
+        targetOffsetX = { if (isForward(from, to)) -it else it },
+        animationSpec = tween(navAnimationDuration, easing = FastOutSlowInEasing)
+    )
+
+
+
+// ========== Navigation Graph ==========
 @Composable
 fun NavGraph(
     navController: NavHostController,
@@ -28,13 +71,11 @@ fun NavGraph(
     val settingsState by settingsVM.uiState.collectAsState()
     val authState by authVM.uiState.collectAsState()
 
-    // Wait for both settings AND auth to resolve before rendering NavHost
     if (settingsState.loading || authState is AuthUiState.Loading) {
         LoadingSpinner()
         return
     }
 
-    // Auth is resolved. Pick the correct start destination
     val startDestination = if (authState is AuthUiState.SignedIn)
         Screen.Main.route else Screen.Auth.route
 
@@ -46,14 +87,16 @@ fun NavGraph(
         }
     }
 
-
     val hardcoreMode = settingsState.hardcoreModeEnabled
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        enterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
+        exitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) },
+        popEnterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
+        popExitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) }
     ) {
-
         navigation(startDestination = Screen.Login.route, route = Screen.Auth.route) {
             composable(Screen.Login.route) {
                 AuthScreen(
@@ -88,10 +131,9 @@ fun NavGraph(
                 FocusScreen(
                     navController = navController,
                     viewModel = focusVM,
-                    sharedWorkspaceVM = workspaceVM   // ← added
+                    sharedWorkspaceVM = workspaceVM
                 )
             }
-
             composable(Screen.Kanban.route) {
                 val kanbanVM: KanbanViewModel = viewModel()
                 if (hardcoreMode) {
@@ -99,11 +141,23 @@ fun NavGraph(
                 } else {
                     KanbanScreen(
                         navController = navController,
-                        sharedWorkspaceVM = workspaceVM,  // ← added
+                        workspaceVM = workspaceVM,
                         viewModel = kanbanVM
                     )
                 }
             }
+//            composable(Screen.Profile.route) {
+//                ProfileScreen(
+//                    navController = navController,
+//                    viewModel = profileVM
+//                )
+//            }
+//            composable(Screen.Settings.route) {
+//                SettingsScreen(
+//                    navController = navController,
+//                    viewModel = settingsVM
+//                )
+//            }
         }
     }
 }

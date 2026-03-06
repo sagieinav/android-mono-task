@@ -1,8 +1,11 @@
 package dev.sagi.monotask.ui.kanban
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -10,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.Timestamp
+import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
@@ -21,13 +25,11 @@ import java.util.Date
 @Composable
 fun KanbanScreen(
     navController: NavHostController,
-    sharedWorkspaceVM: WorkspaceViewModel,
+    workspaceVM: WorkspaceViewModel,
     viewModel: KanbanViewModel = viewModel()
 ) {
-    val selectedWorkspace by sharedWorkspaceVM.selectedWorkspace.collectAsState()
-
     LaunchedEffect(Unit) {
-        viewModel.startObservingTasks(sharedWorkspaceVM.selectedWorkspace)
+        viewModel.startObservingTasks(workspaceVM.selectedWorkspace)
     }
 
     val uiState by viewModel.uiState.collectAsState()
@@ -71,15 +73,20 @@ fun KanbanScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(top = innerPadding.calculateTopPadding(),
-                bottom = innerPadding.calculateBottomPadding())
+                bottom = innerPadding.calculateBottomPadding()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ActiveArchiveToggle(
-            showCompleted = showCompleted,
-            onToggle = onToggleArchive,
+
+        // Active/Archive Toggle
+        SegmentedToggle(
+            options = listOf("Active", "Archive"),
+            selectedIndex = if (showCompleted) 1 else 0,
+            onOptionSelected = { onToggleArchive() },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(vertical = 8.dp)
+//                .padding(vertical = 8.dp)
         )
 
         when (uiState) {
@@ -92,30 +99,28 @@ fun KanbanScreenContent(
                         .fillMaxSize()
                         .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    KanbanColumn("High",   uiState.highTasks,   onTaskClick)
-                    KanbanColumn("Medium", uiState.mediumTasks, onTaskClick)
-                    KanbanColumn("Low",    uiState.lowTasks,    onTaskClick)
+                    KanbanColumn(
+                        title = "High",
+                        importance = Importance.HIGH,
+                        tasks = uiState.highTasks,
+                        onTaskClick = onTaskClick
+                    )
+                    KanbanColumn(
+                        title = "Medium",
+                        importance = Importance.MEDIUM,
+                        tasks = uiState.mediumTasks,
+                        onTaskClick = onTaskClick
+                    )
+                    KanbanColumn(
+                        title = "Low",
+                        importance = Importance.LOW,
+                        tasks = uiState.lowTasks,
+                        onTaskClick = onTaskClick
+                    )
                 }
             }
         }
     }
 }
-
-
-// Toggle
-@Composable
-fun ActiveArchiveToggle(
-    showCompleted: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    SegmentedToggle(
-        options = listOf("Active", "Archive"),
-        selectedIndex = if (showCompleted) 1 else 0,
-        onOptionSelected = { onToggle() },
-        modifier = modifier
-    )
-}
-

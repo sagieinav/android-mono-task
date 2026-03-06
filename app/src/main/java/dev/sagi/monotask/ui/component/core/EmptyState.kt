@@ -32,7 +32,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun TypewriterText(
-    text: String,
+    text: String = "Preview Text",
     delayBefore: Long = 0L,
     charDelay: Long = 30L,
     modifier: Modifier = Modifier,

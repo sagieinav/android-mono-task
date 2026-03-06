@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,12 +24,12 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.basicMonoTask
+import dev.sagi.monotask.ui.theme.monoShadow
 
 
-// ─────────────────────────────────────────
+// ========================================
 // Trigger Pill
-// ─────────────────────────────────────────
+// ========================================
 @Composable
 fun DropdownTriggerPill(
     text: String,
@@ -43,38 +42,44 @@ fun DropdownTriggerPill(
         animationSpec = tween(200),
         label = "chevron"
     )
-    Row(
+
+    GlassSurface(
+        blurred = false,
+        shape = CircleShape,
         modifier = modifier
-            .basicMonoTask(CircleShape)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceBright)
+            .monoShadow(CircleShape)
             .clickable(onClick = onClick)
-            .padding(start = 16.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = 120.dp)
-        )
-        Spacer(Modifier.width(2.dp))
-        Icon(
-            painter = painterResource(R.drawable.ic_keyboard_arrow_down),
-            contentDescription = null,
-            modifier = Modifier.rotate(chevronRotation),
-            tint = MaterialTheme.colorScheme.onSurface
-        )
+        Row(
+            modifier = Modifier
+                .padding(start = 16.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 120.dp)
+            )
+            Spacer(Modifier.width(2.dp))
+            Icon(
+                painter = painterResource(R.drawable.ic_keyboard_arrow_down),
+                contentDescription = null,
+                modifier = Modifier.rotate(chevronRotation),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 
 
-// ─────────────────────────────────────────
+
+// ========================================
 // Material Style Container
-// ─────────────────────────────────────────
+// ========================================
 @Composable
 fun MonoDropdownMenu(
     expanded: Boolean,
@@ -93,9 +98,9 @@ fun MonoDropdownMenu(
 }
 
 
-// ─────────────────────────────────────────
+// ========================================
 // Glass Style Container
-// ─────────────────────────────────────────
+// ========================================
 @Composable
 fun MonoDropdownMenuGlass(
     expanded: Boolean,
@@ -114,7 +119,7 @@ fun MonoDropdownMenuGlass(
     ) {
         GlassSurface(
             shape = MaterialTheme.shapes.medium,
-            modifier = modifier.widthIn(min = 100.dp, max = 240.dp)
+            modifier = modifier.widthIn(min = 100.dp, max = 220.dp)
         ) {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 content()
@@ -124,45 +129,62 @@ fun MonoDropdownMenuGlass(
 }
 
 
-// ─────────────────────────────────────────
+// ========================================
 // Generic Item
-// ─────────────────────────────────────────
+// ========================================
 @Composable
 fun MonoDropdownItem(
     label: String,
-    isSelected: Boolean = false,
+    selected: Boolean = false,
     onClick: () -> Unit,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
-    Row(
+    GlassSurface(
+        blurred = false,
+        shape = MaterialTheme.shapes.small,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 2.dp)
             .clip(MaterialTheme.shapes.small)
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.surfaceDim.copy(alpha = 0.7f)
-                else Color.Transparent
-            )
-            .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            // `selected` indication
+            .then(
+                if (!selected) Modifier
+                else Modifier.border(
+                    width = 0.4.dp,
+                    color = Color.Black.copy(alpha = 0.2f),
+                    shape = MaterialTheme.shapes.small
+                )
+            )
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        trailingContent?.invoke()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+//                .background(
+//                    if (selected) MaterialTheme.colorScheme.surfaceDim.copy(alpha = 0.6f)
+//                    else Color.Transparent
+//                )
+                .padding(horizontal = 12.dp, vertical = 10.dp)
+,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            trailingContent?.invoke()
+        }
     }
 }
 
 
-// ─────────────────────────────────────────
+
+// ========================================
 // Generic Action/Footer Item
-// ─────────────────────────────────────────
+// ========================================
 @Composable
 fun MonoDropdownActionItem(
     label: String,
@@ -194,9 +216,9 @@ fun MonoDropdownActionItem(
 }
 
 
-// ─────────────────────────────────────────
+// ========================================
 // Previews
-// ─────────────────────────────────────────
+// ========================================
 @Preview(showBackground = true, name = "Trigger Pill — Closed")
 @Composable
 private fun TriggerPillClosedPreview() {
@@ -222,7 +244,7 @@ private fun TriggerPillOpenPreview() {
 private fun DropdownItemPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
-            MonoDropdownItem(label = "Education", isSelected = false, onClick = {})
+            MonoDropdownItem(label = "Education", selected = false, onClick = {})
         }
     }
 }
@@ -234,7 +256,7 @@ private fun DropdownItemSelectedPreview() {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
             MonoDropdownItem(
                 label = "Education",
-                isSelected = true,
+                selected = true,
                 onClick = {},
                 trailingContent = {
                     Icon(

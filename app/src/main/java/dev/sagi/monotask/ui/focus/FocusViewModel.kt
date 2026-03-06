@@ -1,16 +1,15 @@
 package dev.sagi.monotask.ui.focus
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sagi.monotask.MonoTaskApp
-import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.domain.util.BadgeEngine
 import dev.sagi.monotask.domain.util.PriorityCalculator
+import dev.sagi.monotask.domain.util.XpEvents
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*

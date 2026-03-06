@@ -23,15 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.basicMonoTask
 import dev.sagi.monotask.ui.theme.penaltyRed
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.BottomSheet
+import dev.sagi.monotask.ui.theme.monoBorder
+import dev.sagi.monotask.ui.theme.monoShadow
 
 @Composable
 fun SnoozeBottomSheet(
@@ -82,11 +79,16 @@ fun SnoozePenaltyRow(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+
+    val shape = MaterialTheme.shapes.medium
     Surface(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().basicMonoTask(RoundedCornerShape(12.dp)),
+        modifier = modifier
+            .fillMaxWidth()
+            .monoShadow(shape)
+            .monoBorder(shape),
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp)
+        shape = shape
     ) {
         Row(
             modifier = Modifier

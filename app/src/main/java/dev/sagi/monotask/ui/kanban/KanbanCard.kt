@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.kanban
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -23,9 +24,12 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.CustomTag
+import dev.sagi.monotask.ui.component.core.DueDateLabel
+import dev.sagi.monotask.ui.component.core.TagSize
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.basicMonoTask
-import dev.sagi.monotask.util.ext.toFormattedDate
+import dev.sagi.monotask.ui.theme.invincibleBorder
+import dev.sagi.monotask.ui.theme.monoShadow
+
 
 @Composable
 fun KanbanCard(
@@ -33,14 +37,16 @@ fun KanbanCard(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val cardShape = MaterialTheme.shapes.medium
+    val cardShape = MaterialTheme.shapes.small
     Surface(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .basicMonoTask(cardShape),
+//            .monoBorder(cardShape)
+            .monoShadow(cardShape)
+            .invincibleBorder(cardShape),
         shape = cardShape,
-        color = MaterialTheme.colorScheme.surfaceBright,
+        color = MaterialTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier
@@ -64,29 +70,14 @@ fun KanbanCard(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     task.tags.forEach { tag ->
-                        CustomTag(label = tag)
+                        CustomTag(size = TagSize.SMALL, label = tag)
                     }
                 }
             }
 
             // ========== Due date ==========
-            task.dueDate?.let { timestamp ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_due_soon),
-                        contentDescription = null,
-                        modifier = Modifier.size(12.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                    )
-                    Text(
-                        text = timestamp.toFormattedDate(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                    )
-                }
+            task.dueDate?.let {
+                DueDateLabel(timestamp = it, small = true)
             }
         }
     }
@@ -98,7 +89,9 @@ fun KanbanCard(
 fun KanbanCardPreview() {
     MonoTaskTheme {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+//                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             KanbanCard(

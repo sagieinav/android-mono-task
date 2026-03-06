@@ -23,12 +23,12 @@ val errorLight = Color(0xFFBA0628)
 val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFDE2C3D)
 val onErrorContainerLight = Color(0xFFFFFBFF)
-val backgroundLight = Color(0xFFE6E6E6)
+val backgroundLight = Color(0xFFEAEAEA)
 //val backgroundLight = Color(0xFFFFFAF7)
 val onBackgroundLight = Color(0xFF1F1B11)
-val surfaceLight = Color(0xFFFCF8F8)
+val surfaceLight = Color(0xFFF8F8F8)
 val onSurfaceLight = Color(0xFF1C1B1B)
-val surfaceVariantLight = Color(0xFFE0E3E3)
+val surfaceVariantLight = Color(0xFFE0E0E0)
 val onSurfaceVariantLight = Color(0xFF434748)
 val outlineLight = Color(0xFF747878)
 val outlineVariantLight = Color(0xFFC4C7C7)
@@ -38,7 +38,7 @@ val inverseOnSurfaceLight = Color(0xFFF3F0EF)
 val inversePrimaryLight = Color(0xFFF1C00A)
 val surfaceDimLight = Color(0xFFDCD9D9)
 val surfaceBrightLight = Color(0xFFF6F2F2)
-val surfaceContainerLowestLight = Color(0xFFFFFFFF)
+val surfaceContainerLowestLight = Color(0xFFF8F8F8)
 val surfaceContainerLowLight = Color(0xFFF6F3F2)
 val surfaceContainerLight = Color(0xFFF1EDEC)
 val surfaceContainerHighLight = Color(0xFFEBE7E7)
@@ -259,9 +259,9 @@ val onDarkBlueContainerDarkHighContrast = Color(0xFF000A22)
 // These are NOT part of the M3 system
 // brand-specific overlays used in custom composables only
 
-val AceGold            = Color(0xFFFFD700) // Raw brand gold
+val AceGold            = Color(0xFFFFDA02) // Raw brand gold
 val AceGoldGlow        = Color(0x40FFD700) // 25% alpha - glow ring on FocusCard
-val AceGoldDim         = Color(0xFFCCAC00) // Darker gold - pressed states
+val AceGoldDim         = Color(0xFFD5AE00) // Darker gold - pressed states
 
 val PenaltyRedGlow     = Color(0x33E63946) // 20% alpha - error container tint
 val SuccessGreen       = Color(0xFF06D6A0) // Raw success color

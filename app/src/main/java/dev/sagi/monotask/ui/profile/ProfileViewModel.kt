@@ -7,6 +7,7 @@ import dev.sagi.monotask.data.model.Badge
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.UserRepository
+import dev.sagi.monotask.domain.util.XpEvents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -65,7 +66,7 @@ class ProfileViewModel(
                     levelProgress   = progress,
                     xpIntoLevel     = xpIntoLevel,
                     xpForNextLevel  = xpForNext - xpForCurrent,
-                    // Badges and activity hardcoded for now — wired in a later task
+                    // Badges and activity hardcoded for now - wired in a later task
                     badges          = emptyList(),
                     activityData    = emptyList()
                 )

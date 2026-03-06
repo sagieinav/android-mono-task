@@ -17,9 +17,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
+import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.basicMonoTask
+import dev.sagi.monotask.ui.theme.monoShadow
 
 
 // ─────────────────────────────────────────
@@ -112,22 +114,22 @@ fun TopBarIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    GlassSurface(
+        blurred = true,
+        shape = CircleShape,
         modifier = modifier
-            .basicMonoTask(CircleShape)
-            .size(42.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceBright)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+            .monoShadow(CircleShape)
+            .size(40.dp)
+            .clickable { onClick() }
     ) {
         Icon(
-            painter = painterResource(iconRes),
-            contentDescription = contentDescription,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            painter = painterResource(R.drawable.ic_add),
+            contentDescription = "Add task",
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(10.dp)  // ← padding sizes the card, no Box needed
         )
     }
+
 }
 
 

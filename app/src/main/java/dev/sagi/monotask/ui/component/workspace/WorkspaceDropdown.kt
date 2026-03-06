@@ -5,12 +5,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.*
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 
 // When clicking `Add Workspace`
@@ -55,7 +53,7 @@ fun WorkspaceDropdownGlass(
                 val isSelected = workspace.id == selectedWorkspace?.id
                 MonoDropdownItem(
                     label = workspace.name,
-                    isSelected = isSelected,
+                    selected = isSelected,
                     onClick = { onWorkspaceSelected(workspace); expanded = false },
                     trailingContent = if (isSelected) ({
                         Icon(

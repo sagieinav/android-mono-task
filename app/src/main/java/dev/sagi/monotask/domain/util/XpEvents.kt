@@ -1,24 +1,26 @@
+package dev.sagi.monotask.domain.util
+
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import kotlin.math.pow
 
 object XpEvents {
-    // ── Actions ──
+    // ========== Actions==========
     const val BASE_COMPLETION = 100
 
-    // ── Bonuses ──
+    // ========== Bonuses ==========
     const val BONUS_ACE = 50
     const val BONUS_HIGH_IMPORTANCE = 30
     const val BONUS_MEDIUM_IMPORTANCE = 10
 
-    // ── Penalties (Immediate Deduction) ──
+    // ========== Penalties (Immediate Deduction) ==========
     const val SNOOZE_MANUAL = -30
     const val SNOOZE_RANDOM = -20
     const val SNOOZE_NEXT = -15
     const val SNOOZE_DUE_SOON = -10
     const val SNOOZE_HIGH_IMPORTANCE = -10
 
-    // ── Calculation Helper ──
+    // ========== Calculation Helper ==========
     fun calculateCompletionXp(task: Task): Int {
         var xp = BASE_COMPLETION
 

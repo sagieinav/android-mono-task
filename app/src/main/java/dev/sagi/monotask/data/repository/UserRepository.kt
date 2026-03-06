@@ -3,6 +3,7 @@ package dev.sagi.monotask.data.repository
 import com.google.firebase.firestore.snapshots
 import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.domain.util.XpEvents
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await

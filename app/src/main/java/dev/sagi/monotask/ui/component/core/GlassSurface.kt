@@ -29,13 +29,13 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.glassBorder
 
 @Composable
 fun GlassSurface(
     modifier: Modifier = Modifier,
+    blurred: Boolean = true,
     shape: Shape = RoundedCornerShape(24.dp),
-    borderWidth: Dp = 1.dp,
-    borderColor: Color? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val hazeState = LocalHazeState.current
@@ -45,19 +45,12 @@ fun GlassSurface(
             // Clip FIRST so the blur cannot bleed outside the shape
             .clip(shape)
             // Apply the blur effect inside the clipped bounds
-            .hazeEffect(hazeState, HazeMaterials.ultraThin())
-            // Inner "glass highlight" border
-            .border(
-                width = 2.dp,
-                color = Color.White.copy(alpha = 0.5f),
-                shape = shape
+            .then(
+                if (!blurred) Modifier
+                else Modifier.hazeEffect(hazeState, HazeMaterials.ultraThin())
             )
-            // Outer border
-            .border(
-                width = 1.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                shape = shape
-            )
+            // Glass Border (my custom double border modifier)
+            .glassBorder(shape)
             // Glass gradient
             .background(
                 brush = Brush.verticalGradient(
@@ -72,26 +65,7 @@ fun GlassSurface(
     }
 }
 
-@Composable
-fun GlassSurfaceElevated(
-    modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(24.dp),
-    content: @Composable BoxScope.() -> Unit
-) {
-    GlassSurface(
-        modifier
-            // Shadow for elevation
-            .shadow(
-                elevation = 6.dp,
-                shape = shape,
-                ambientColor = Color.Black.copy(alpha = 0.05f),
-                spotColor = Color.Black.copy(alpha = 0.25f)
-            ),
-        shape
-    ) {
-        content()
-    }
-}
+
 
 @Preview(showBackground = true)
 @Composable

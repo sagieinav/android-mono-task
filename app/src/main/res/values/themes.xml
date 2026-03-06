@@ -3,7 +3,7 @@
 <style name="Theme.MonoTask" parent="android:Theme.Material.Light.NoActionBar" />
 
 <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-    <item name="windowSplashScreenBackground">#FFE6E6E6</item> <item name="windowSplashScreenAnimatedIcon">@drawable/ic_monotask_splash</item>
+    <item name="windowSplashScreenBackground">#FFEAEAEA</item> <item name="windowSplashScreenAnimatedIcon">@drawable/ic_monotask_splash</item>
 
     <item name="postSplashScreenTheme">@style/Theme.MonoTask</item>
 </style>

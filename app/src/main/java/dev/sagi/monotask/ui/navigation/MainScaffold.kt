@@ -1,7 +1,6 @@
 @file:OptIn(ExperimentalHazeMaterialsApi::class)
 package dev.sagi.monotask.ui.navigation
 
-import BottomNavBar
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -15,7 +14,6 @@ import dev.chrisbanes.haze.rememberHazeState
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.component.task.CreateTaskSheet
 import dev.sagi.monotask.ui.component.workspace.CreateWorkspaceDialog
-import dev.sagi.monotask.ui.navigation.TopBarIconButton
 import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
@@ -37,7 +35,7 @@ fun MainScaffold(
     val currentUser by profileVM.currentUser.collectAsState()
 
     val mainScreens = listOf(Screen.Focus.route, Screen.Kanban.route, Screen.Profile.route)
-    val showTopBar = currentRoute in listOf(Screen.Focus.route, Screen.Kanban.route)
+//    val showTopBar = currentRoute in listOf(Screen.Focus.route, Screen.Kanban.route)
     val showBottomBar = currentRoute in mainScreens
 
     val selectedTab = when (currentRoute) {
@@ -45,6 +43,8 @@ fun MainScaffold(
         Screen.Profile.route -> NavTab.PROFILE
         else -> NavTab.FOCUS
     }
+
+    var lastNavTime by remember { mutableLongStateOf(0L) }
 
     var showCreateSheet by remember { mutableStateOf(false) }
     var showCreateWorkspaceDialog by remember { mutableStateOf(false) }  // ← add this
@@ -82,7 +82,9 @@ fun MainScaffold(
                     BottomNavBar(
                         selectedTab = selectedTab,
                         onTabSelected = { tab ->
-                            if (tab == selectedTab) return@BottomNavBar
+                            val now = System.currentTimeMillis()
+                            if (tab == selectedTab || now - lastNavTime < 300) return@BottomNavBar
+                            lastNavTime = now
                             val route = when (tab) {
                                 NavTab.BOARD -> Screen.Kanban.route
                                 NavTab.FOCUS -> Screen.Focus.route
@@ -106,7 +108,7 @@ fun MainScaffold(
                         authVM,
                         workspaceVM,
                         profileVM,
-                        settingsVM
+                        settingsVM,
                     )
                 }
 

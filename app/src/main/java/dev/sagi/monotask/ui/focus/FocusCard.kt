@@ -1,61 +1,55 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package dev.sagi.monotask.ui.focus
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Timestamp
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.CustomTag
+import dev.sagi.monotask.ui.component.core.DueDateLabel
+import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.ImportanceTag
+import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.aceTaskBorder
 import dev.sagi.monotask.ui.theme.defaultTaskBorder
-import dev.sagi.monotask.util.ext.toFormattedDate
+import dev.sagi.monotask.util.ext.toRelativeDate
 
 @Composable
 fun FocusCard(
     task: Task,
     modifier: Modifier = Modifier
 ) {
-    val cornerRadius = 28;
-    val shape = RoundedCornerShape(cornerRadius.dp) // TODO change to M3 shape
-//    val shape = MaterialTheme.shapes.extraLarge
+    val shape = MaterialTheme.shapes.large
 
-    Surface(
+    GlassSurface(
         shape = shape,
-        color = MaterialTheme.colorScheme.surface,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 200.dp)
-            // AceGlowBorder wraps the card only if task.isAce
             .then(
-                if (task.isAce) Modifier.aceTaskBorder(cornerRadius.dp)
-                else Modifier.defaultTaskBorder(cornerRadius.dp)
+                if (task.isAce) Modifier.aceTaskBorder(shape)
+                else Modifier.defaultTaskBorder(shape)
             )
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -63,160 +57,85 @@ fun FocusCard(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(40.dp)
         ) {
-            // ========== Top: Due date (if present) ==========
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                task.dueDate?.let { timestamp ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_due_soon),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-                        )
-                        Text(
-                            text = timestamp.toFormattedDate(),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-                        )
-                    }
-                }
-
-                XpDeltaBadge(20, true)
-            }
-
-            // ========== Middle: title + description ==========
-            Column(
-//                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
-                // Inject an invisible break-point after every hyphen (for word wrapping)
-                val titleWrapped = task.title
-                    .replace("-", "-\u200B")
-                    .replace("—", "—\u200B")
-                Text(
-                    text = titleWrapped,
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-//                    fontSize = 36.sp,
-//                    lineHeight = 42.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                if (task.description.isNotBlank()) {
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        text = task.description,
-                        style = MaterialTheme.typography.bodyMedium,
-//                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                        maxLines = 4,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            // ========== Bottom: tags ==========
-            @OptIn(ExperimentalLayoutApi::class)
-            val allTags = task.tags
-            val maxVisible = 4 // tune this to taste
-            val visibleTags = allTags.take(maxVisible)
-            val overflowCount = allTags.size - maxVisible
-
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 2,
-            ) {
-                ImportanceTag(importance = task.importance)
-                visibleTags.forEach { tag ->
-                    CustomTag(label = tag)
-                }
-                if (overflowCount > 0) {
-                    CustomTag(label = "+$overflowCount")
-                }
-
-
-//                // Due date pushed to the end
-//                task.dueDate?.let { timestamp ->
-//                    Spacer(Modifier.weight(1f))
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(R.drawable.ic_due_calendar),
-//                            contentDescription = null,
-//                            modifier = Modifier.size(16.dp),
-//                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-//                        )
-//                        Text(
-//                            text = timestamp.toFormattedDate(),
-//                            style = MaterialTheme.typography.labelMedium,
-//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-//                        )
-//                    }
-//                }
-            }
+            FocusCardHeader(task)
+            FocusCardBody(task)
+            FocusCardFooter(task)
         }
     }
 }
 
-// ========== Importance badge ==========
-@Composable
-private fun ImportanceBadge(importance: Importance) {
-    val (label, containerColor, contentColor) = when (importance) {
-        Importance.HIGH   -> Triple(
-            "High Priority",
-            MaterialTheme.colorScheme.errorContainer,
-            MaterialTheme.colorScheme.onErrorContainer
-        )
-        Importance.MEDIUM -> Triple(
-            "Medium",
-            MaterialTheme.colorScheme.secondaryContainer,
-            MaterialTheme.colorScheme.onSecondaryContainer
-        )
-        Importance.LOW    -> Triple(
-            "Low",
-            MaterialTheme.colorScheme.surfaceVariant,
-            MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+// ========== Header: Due date (left) + XP (right) ==========
 
-    Surface(
-        shape = RoundedCornerShape(100),
-        color = containerColor
+@Composable
+private fun FocusCardHeader(task: Task) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        task.dueDate?.let { DueDateLabel(it) } ?: Spacer(Modifier) // keeps XP pinned right
+        XpLabelCurrent(xp = task.currentXp)
+    }
+}
+
+// ========== Body: Title + Description ==========
+
+@Composable
+private fun FocusCardBody(task: Task) {
+    Column(verticalArrangement = Arrangement.Center) {
+        val titleWrapped = task.title
+            .replace("-", "-\u200B")
+            .replace("—", "—\u200B")
+
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = contentColor,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            text = titleWrapped,
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
         )
+
+        if (task.description.isNotBlank()) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = task.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+// ========== Footer: Tags ==========
+
+@Composable
+private fun FocusCardFooter(task: Task) {
+    val maxVisible = 4
+    val visibleTags = task.tags.take(maxVisible)
+    val overflowCount = task.tags.size - maxVisible
+
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxWidth(),
+        maxLines = 2,
+    ) {
+        ImportanceTag(importance = task.importance)
+        visibleTags.forEach { CustomTag(label = it) }
+        if (overflowCount > 0) CustomTag(label = "+$overflowCount")
     }
 }
 
 // ========== Preview ==========
+
 @Preview(showBackground = true)
 @Composable
 fun FocusCardPreview() {
     MonoTaskTheme {
-        Box(
-            modifier = Modifier
-                .size(360.dp)
-                .padding(18.dp)
-        ) {
+        Box(modifier = Modifier.size(360.dp).padding(18.dp)) {
             FocusCard(
                 task = Task(
                     id = "1",
@@ -224,7 +143,7 @@ fun FocusCardPreview() {
                     description = "Complete sections 3 and 4, submit before midnight.",
                     importance = Importance.HIGH,
                     tags = listOf("CS101", "ds"),
-                    snoozeCount = 0, // isAce = true --> gold border
+                    snoozeCount = 0,
                     dueDate = Timestamp.now()
                 )
             )

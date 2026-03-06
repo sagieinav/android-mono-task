@@ -1,12 +1,17 @@
 @file:OptIn(ExperimentalHazeMaterialsApi::class)
 
+package dev.sagi.monotask.ui.navigation
+
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,6 +55,19 @@ fun BottomNavBar(
     onTabSelected: (NavTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val tabs = NavTab.entries
+    val selectedIndex = tabs.indexOf(selectedTab) // index of the enum NavTab
+
+    val animatedIndex by animateFloatAsState(
+        targetValue = selectedIndex.toFloat(),
+        animationSpec = spring(
+            stiffness = Spring.StiffnessLow,
+            dampingRatio = Spring.DampingRatioLowBouncy
+        ),
+        label = "nav_dot_slide"
+    )
+    val dotColor = MaterialTheme.colorScheme.scrim
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -59,24 +77,40 @@ fun BottomNavBar(
             shape = MaterialTheme.shapes.large,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Row(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 8.dp, vertical = 8.dp)
             ) {
-                NavTab.entries.forEach { tab ->
-                    NavDockItem(
-                        tab = tab,
-                        isSelected = tab == selectedTab,
-                        onClick = { onTabSelected(tab) }
-                    )
+                val tabWidth = maxWidth / tabs.size
+                val dotX = tabWidth * (animatedIndex + 0.5f) - 2.dp // -2.dp centers the 4.dp dot
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    tabs.forEach { tab ->
+                        NavDockItem(
+                            tab = tab,
+                            isSelected = tab == selectedTab,
+                            onClick = { onTabSelected(tab) }
+                        )
+                    }
                 }
+
+                // Sliding dot indicator
+                Box(
+                    modifier = Modifier
+                        .offset(x = dotX, y = 50.dp) // Boring math
+                        .size(4.dp)
+                        .background(dotColor, CircleShape)
+                )
             }
         }
     }
 }
+
 
 @Composable
 private fun RowScope.NavDockItem(
@@ -84,21 +118,13 @@ private fun RowScope.NavDockItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val dotAlpha by animateFloatAsState(
-        targetValue = if (isSelected) 1f else 0f,
-        animationSpec = tween(300),
-        label = "dot_alpha"
-    )
-
     val iconSize = 36
-    val dotOffset = iconSize / 1.6
 
-    // A Box perfectly centers its contents independently
     Box(
         modifier = Modifier
             .weight(1f)
             .height(56.dp)
-            .clip(MaterialTheme.shapes.medium) // Using your MaterialTheme shapes rule!
+            .clip(MaterialTheme.shapes.medium)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -106,7 +132,7 @@ private fun RowScope.NavDockItem(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Because of the Box, the Icon is now mathematically dead-center.
+        // Because of the Box, the icon is mathematically centered
         Icon(
             painter = painterResource(tab.iconRes),
             contentDescription = tab.label,
@@ -115,17 +141,6 @@ private fun RowScope.NavDockItem(
                 MaterialTheme.colorScheme.scrim
             else
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-        )
-
-        // Dot indicator
-        Box(
-            modifier = Modifier
-                .offset(y = dotOffset.dp)
-                .size(4.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.scrim.copy(alpha = dotAlpha),
-                    shape = CircleShape
-                )
         )
     }
 }

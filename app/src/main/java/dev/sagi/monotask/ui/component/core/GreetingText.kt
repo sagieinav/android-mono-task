@@ -1,11 +1,14 @@
 package dev.sagi.monotask.ui.component.core
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -13,24 +16,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 
 @Composable
 fun HeroGreeting(
     userName: String,
-    hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
-    GreetingText(
-        title = "Hi, ${userName.substringBefore(" ")}",
-        titleStyle = MaterialTheme.typography.displaySmall,
-        titleWeight = FontWeight.Bold,
-        hazeState = hazeState,
-        modifier = modifier
+    Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 8.dp)
-    )
+            .padding(horizontal = 22.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        GreetingText(
+            title = "Hi, ${userName.substringBefore(" ")}",
+            modifier = Modifier.weight(1f)  // ← takes remaining space, doesn't push date out
+        )
+//        Text(
+//            text = timestamp.toFormattedDate(),
+//            style = MaterialTheme.typography.bodyMedium,
+//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+//        )
+
+//        Text(
+////            text = "$remaining tasks left",
+//            text = "3 tasks left",
+//            style = MaterialTheme.typography.labelMedium,
+//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+//        )
+    }
+
+//    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+//        StatChip(icon = R.drawable.ic_xp,     value = "+140 XP today")
+//        StatChip(icon = R.drawable.ic_streak, value = "5 day streak")
+//    }
 }
 
 
@@ -39,7 +62,7 @@ fun GreetingText(
     title: String,
     subtitle: String? = null,
     titleStyle: TextStyle = MaterialTheme.typography.displaySmall,
-    titleWeight: FontWeight = FontWeight.Bold,
+    titleWeight: FontWeight = FontWeight.Normal,
     hazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {

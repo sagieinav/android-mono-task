@@ -1,6 +1,7 @@
 package dev.sagi.monotask.data.model
 
 import com.google.firebase.Timestamp
+import dev.sagi.monotask.domain.util.XpEvents
 
 data class Task(
     val id: String = "",
@@ -16,6 +17,7 @@ data class Task(
     val ownerId: String = ""
 ) {
     val isAce: Boolean get() = snoozeCount == 0
+    val currentXp: Int get() = XpEvents.calculateCompletionXp(this)
 }
 
 enum class Importance(val weight: Float) {

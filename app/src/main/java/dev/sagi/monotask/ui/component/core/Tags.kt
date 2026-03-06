@@ -2,11 +2,12 @@ package dev.sagi.monotask.ui.component.core
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,37 +29,50 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.harabara
 
+enum class TagSize { DEFAULT, SMALL }
 
 @Composable
 fun TaskTag(
     label: String,
     containerColor: Color,
     contentColor: Color,
+    size: TagSize = TagSize.DEFAULT,
     modifier: Modifier = Modifier,
     trailingContent: @Composable (() -> Unit)? = null // Potentially "close" icon
 ) {
-    val tagShape = RoundedCornerShape(100)
+    // General properties
+    val tagShape = CircleShape
     val borderColor = lerp(Color.Black, contentColor, 0.85f).copy(alpha = 0.2f)
 
+    // Size-specific
+    val textStyle = if (size == TagSize.SMALL) MaterialTheme.typography.labelSmall
+                    else MaterialTheme.typography.labelLarge
+    val fontSize = if (size == TagSize.DEFAULT) 16.sp else 10.sp
+    val horizontalPadding = if (size == TagSize.SMALL) 5.dp else 8.dp
+    val verticalPadding = if (size == TagSize.SMALL) 0.dp else 1.dp
+    val borderWidth = if (size == TagSize.SMALL) 1.dp else 1.5.dp
+
     Surface(
-        modifier = modifier.border(1.5.dp, borderColor, tagShape),
+        modifier = modifier.border(borderWidth, borderColor, tagShape),
         shape = tagShape,
         color = containerColor,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(
-                start = 9.dp,
-                end = if (trailingContent != null) 6.dp else 9.dp, // tighter end padding when "close" is present
+                start = horizontalPadding,
+                end = if (trailingContent != null) horizontalPadding - 3.dp
+                else horizontalPadding,
             )
         ) {
             Text(
                 text = label.lowercase(),
-                style = MaterialTheme.typography.labelLarge,
+                style = textStyle,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = fontSize,
                 fontFamily = harabara,
                 color = contentColor,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(vertical = 2.dp),
+                modifier = Modifier.padding(vertical = verticalPadding),
                 maxLines = 1
             )
             trailingContent?.invoke()
@@ -66,9 +81,11 @@ fun TaskTag(
 }
 
 
+
 @Composable
 fun ImportanceTag(
     importance: Importance,
+    size: TagSize = TagSize.DEFAULT,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.customColors
@@ -77,14 +94,21 @@ fun ImportanceTag(
         Importance.MEDIUM -> Triple("Medium", colors.importanceMediumBackground, colors.importanceMediumContent)
         Importance.LOW    -> Triple("Low",    colors.importanceLowBackground,    colors.importanceLowContent)
     }
-    TaskTag(label, containerColor, contentColor, modifier)
+    TaskTag(
+        label = label,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        size = size,
+        modifier = modifier
+    )
 }
 
 
 @Composable
 fun CustomTag(
     label: String,
-    onRemove: (() -> Unit)? = null,  // null = read-only, non-null = dismissible
+    onRemove: (() -> Unit)? = null,  // null = read-only, non-null = dismissible,
+    size: TagSize = TagSize.DEFAULT,
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.customColors
@@ -94,6 +118,7 @@ fun CustomTag(
         label = label,
         containerColor = containerColor,
         contentColor = contentColor,
+        size = size,
         modifier = modifier,
         trailingContent = onRemove?.let { removeAction ->
             {
@@ -118,24 +143,37 @@ fun CustomTag(
 @Composable
 fun CustomTagPreview() {
     MonoTaskTheme {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(16.dp)
-        ) {
-        // Importance Tags
-            ImportanceTag(Importance.LOW)
-            ImportanceTag(Importance.MEDIUM)
-            ImportanceTag(Importance.HIGH)
+        Column () {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(16.dp)
+            ) {
+                // Importance Tags (Default size)
+                ImportanceTag(importance = Importance.LOW)
+                ImportanceTag(importance = Importance.MEDIUM)
+                ImportanceTag(importance = Importance.HIGH)
+            }
 
-        // Read-only custom tag (for views like focus, kanban...)
-        CustomTag("leetcode")
-        CustomTag("ds")
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(16.dp)
+            ) {
+                // Importance Tags (Small size)
+                ImportanceTag(size = TagSize.SMALL, importance = Importance.LOW)
+                ImportanceTag(size = TagSize.SMALL, importance = Importance.MEDIUM)
+                ImportanceTag(size = TagSize.SMALL, importance = Importance.HIGH)
 
-        // Dismissible custom tag with onRemove = { } (for create/edit task)
-        CustomTag("leetcode", onRemove = {})
-        CustomTag("ds", onRemove = {})
-    }
+//        // Read-only custom tag (for views like focus, kanban...)
+//        CustomTag("leetcode")
+//        CustomTag("ds")
+//
+//        // Dismissible custom tag with onRemove = { } (for create/edit task)
+//        CustomTag("leetcode", onRemove = {})
+//        CustomTag("ds", onRemove = {})
+            }
+        }
     }
 }
 
