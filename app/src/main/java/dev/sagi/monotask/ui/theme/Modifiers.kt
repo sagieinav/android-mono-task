@@ -222,7 +222,7 @@ private fun DrawScope.drawOutlineBorder(
 @Composable
 fun Modifier.aceTaskBorder(
     shape: Shape = MaterialTheme.shapes.medium,
-    borderWidth: Dp = 6.dp,
+    borderWidth: Dp = 5.dp,
     glassInnerWidth: Dp = 1.5.dp,
     glassOuterWidth: Dp = 1.dp,
     drawFraction: Float = 1f
@@ -239,7 +239,7 @@ fun Modifier.aceTaskBorder(
     val glassInnerWidthPx = remember(glassInnerWidth, density) { with(density) { glassInnerWidth.toPx() } }
     val glassOuterWidthPx = remember(glassOuterWidth, density) { with(density) { glassOuterWidth.toPx() } }
 
-    // One cache shared across all 3 drawOutlineBorder calls — safe because they're sequential
+    // One cache shared across all 3 drawOutlineBorder calls
     val cache        = remember { BorderDrawCache() }
     val shaderMatrix = remember { Matrix() }
 
@@ -247,7 +247,7 @@ fun Modifier.aceTaskBorder(
     val shaderHolder     = remember { arrayOfNulls<SweepGradient>(1) }
     val cachedSize       = remember { floatArrayOf(0f, 0f) }
 
-    // Paints allocated once — only .alpha and .shader are mutated per frame
+    // Paints allocated once
     val outerGlassPaint = remember(glassOuterWidthPx) {
         android.graphics.Paint().apply {
             style       = android.graphics.Paint.Style.STROKE
@@ -296,7 +296,7 @@ fun Modifier.aceTaskBorder(
             cachedSize[1]       = size.height
             outerGlassPaint.shader = s
             goldPaint.shader       = s
-            // innerGlassPaint is solid color — no shader
+            // innerGlassPaint is solid color, no shader
         }
 
         shaderMatrix.reset()
@@ -314,7 +314,7 @@ fun Modifier.aceTaskBorder(
 @Composable
 fun Modifier.defaultTaskBorder(
     shape: Shape = MaterialTheme.shapes.medium,
-    borderWidth: Dp = 6.dp,
+    borderWidth: Dp = 5.dp,
     drawFraction: Float = 1f
 ): Modifier = composed {
     val borderColor   = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)

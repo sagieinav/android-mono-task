@@ -71,7 +71,9 @@ class FocusViewModel(
                 return@launch
             }
             userRepository.addXp(userId, xpGained, userDoc.xp, userDoc.level)
-            delay(2000)
+
+            // Delay before fetching the next task / EmptyState. For allowing animations
+            delay(1000)
             _xpBadgeVisible.value = false
             userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
             val completedTasks = taskRepository.getCompletedTasksOnce(userId, state.workspace.id)

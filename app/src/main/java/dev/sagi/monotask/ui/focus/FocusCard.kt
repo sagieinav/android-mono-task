@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -32,16 +33,17 @@ import dev.sagi.monotask.ui.theme.aceTaskBorder
 import dev.sagi.monotask.ui.theme.defaultTaskBorder
 import dev.sagi.monotask.util.ext.toRelativeDate
 
+// ========== FocusCard ==========
 @Composable
 fun FocusCard(
     task: Task,
     borderFraction: Float,
+    hideXpLabel: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val shape = MaterialTheme.shapes.large
 
-    GlassSurface(
-        shape = shape,
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 200.dp)
@@ -49,35 +51,43 @@ fun FocusCard(
                 if (task.isAce) Modifier.aceTaskBorder(shape = shape, drawFraction = borderFraction)
                 else Modifier.defaultTaskBorder(shape = shape, drawFraction = borderFraction)
             )
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
     ) {
-        Column(
+        GlassSurface(
+            shape    = shape,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+                .matchParentSize()
+                .clip(shape)
+                .background(MaterialTheme.colorScheme.surface)
+        ) {}
+
+        Column(
+            modifier            = Modifier.fillMaxWidth().padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(40.dp)
         ) {
-            FocusCardHeader(task)
+            FocusCardHeader(task = task, hideXpLabel = hideXpLabel)
             FocusCardBody(task)
             FocusCardFooter(task)
         }
     }
 }
 
-// ========== Header: Due date (left) + XP (right) ==========
-
+// ========== Header: Due date (right) + XP (left) ==========
 @Composable
-private fun FocusCardHeader(task: Task) {
+private fun FocusCardHeader(task: Task, hideXpLabel: Boolean = false) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier              = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment     = Alignment.CenterVertically
     ) {
-        task.dueDate?.let { DueDateLabel(it) } ?: Spacer(Modifier) // keeps XP pinned right
-        XpLabelCurrent(xp = task.currentXp)
+        if (!hideXpLabel) XpLabelCurrent(xp = task.currentXp) else Spacer(Modifier)
+        task.dueDate?.let { DueDateLabel(it) } ?: Spacer(Modifier)
     }
 }
+
+
+
+
+
 
 // ========== Body: Title + Description ==========
 

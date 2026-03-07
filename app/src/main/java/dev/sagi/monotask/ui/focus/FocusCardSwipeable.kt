@@ -40,12 +40,11 @@ import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBorder
 import kotlin.math.roundToInt
 
-private val PILL_SIZE = 44.dp
+private val PILL_SIZE    = 44.dp
 private val COMPLETE_COLOR = Color(0xFF4BB24F)
-private val SNOOZE_COLOR = Color(0xFFFF511C)
-const val SNOOZE_THRESHOLD = 380f
+private val SNOOZE_COLOR   = Color(0xFFFF511C)
+const val SNOOZE_THRESHOLD   = 380f
 const val COMPLETE_THRESHOLD = 380f
-
 
 // ========== Generic pill ==========
 @Composable
@@ -59,7 +58,7 @@ fun SwipePill(
     modifier: Modifier = Modifier
 ) {
     val isTriggered = progress >= 1f
-    val burstScale = remember { Animatable(1f) }
+    val burstScale  = remember { Animatable(1f) }
 
     LaunchedEffect(isTriggered) {
         if (isTriggered) {
@@ -89,13 +88,9 @@ fun SwipePill(
                 val currentScale = lerp(baseScale / maxScale, 1f, progress) * burstScale.value
                 scaleX       = currentScale
                 scaleY       = currentScale
-                translationX = offsetX  //
+                translationX = offsetX
             }
-            .circleGlow(
-                color   = currentColor.copy(alpha = 0.25f),
-                radius  = 20.dp,
-                offsetY = 0.dp
-            )
+            .circleGlow(color = currentColor.copy(alpha = 0.25f), radius = 20.dp, offsetY = 0.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f + progress / 2f))
             .glassBorder(CircleShape),
@@ -110,11 +105,7 @@ fun SwipePill(
     }
 }
 
-
-
-
-// ========== Complete pill (slides in from right) ==========
-
+// ========== Complete pill ==========
 @Composable
 fun CompletePill(
     syncedOffset: Float,
@@ -123,15 +114,15 @@ fun CompletePill(
 ) {
     val progress = (syncedOffset / COMPLETE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
-        iconRes = R.drawable.ic_check_circle,
+        iconRes  = R.drawable.ic_check_circle,
         iconTint = COMPLETE_COLOR,
         progress = progress,
-        offsetX = screenWidthPx * (1f - progress),
+        offsetX  = screenWidthPx * (1f - progress),
         modifier = modifier
     )
 }
 
-// ========== Snooze pill (slides in from left) ==========
+// ========== Snooze pill ==========
 @Composable
 fun SnoozePill(
     syncedOffset: Float,
@@ -140,10 +131,10 @@ fun SnoozePill(
 ) {
     val progress = (-syncedOffset / SNOOZE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
-        iconRes = R.drawable.ic_next_plan,
+        iconRes  = R.drawable.ic_next_plan,
         iconTint = SNOOZE_COLOR,
         progress = progress,
-        offsetX = -screenWidthPx * (1f - progress),
+        offsetX  = -screenWidthPx * (1f - progress),
         modifier = modifier
     )
 }
@@ -160,26 +151,20 @@ fun FocusCardSwipeable(
     modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
+    val density       = LocalDensity.current
     val screenWidthPx = remember(configuration, density) {
         with(density) { configuration.screenWidthDp.dp.toPx() }
     }
 
-    var offsetX by remember { mutableFloatStateOf(0f) }
+    var badgeOffsetX  by remember { mutableFloatStateOf(0f) }
+    var offsetX       by remember { mutableFloatStateOf(0f) }
     var exitDirection by remember { mutableStateOf<SwipeExitDirection?>(null) }
     val isExiting = exitDirection != null
 
-    // External snooze trigger → start exit
     LaunchedEffect(exitTrigger) {
         if (exitTrigger == SwipeExitDirection.LEFT) exitDirection = SwipeExitDirection.LEFT
     }
 
-//    // Notify parent the moment exit starts
-//    LaunchedEffect(isExiting) {
-//        if (isExiting) onCardExitStart()
-//    }
-
-    // Pills fade out as soon as exit starts — formula breaks beyond threshold
     val pillAlpha by animateFloatAsState(
         targetValue   = if (isExiting) 0f else 1f,
         animationSpec = tween(120),
@@ -194,62 +179,63 @@ fun FocusCardSwipeable(
 
     val animatedOffset by animateFloatAsState(
         targetValue   = cardTargetOffset,
-        // fast tween on exit, spring during drag
         animationSpec = if (isExiting)
             tween(280, easing = FastOutLinearInEasing)
         else
             spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "swipe_offset",
-        // callback fires AFTER card is off-screen
         finishedListener = {
             when (exitDirection) {
                 SwipeExitDirection.RIGHT -> onSwipeRight()
                 SwipeExitDirection.LEFT  -> onSnoozeCardExited()
-                null -> {}
+                null                     -> {}
             }
         }
     )
 
+    val haptic = LocalHapticFeedback.current
+
+    var wasCompleteReady by remember { mutableStateOf(false) }
+    var wasSnoozeReady   by remember { mutableStateOf(false) }
     val completeReady = offsetX > COMPLETE_THRESHOLD
     val snoozeReady   = offsetX < -SNOOZE_THRESHOLD
-    val haptic        = LocalHapticFeedback.current
-    val wasCompleteReady = remember { mutableStateOf(false) }
-    val wasSnoozeReady   = remember { mutableStateOf(false) }
 
     LaunchedEffect(completeReady) {
-        if (completeReady && !wasCompleteReady.value)
+        if (completeReady && !wasCompleteReady)
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        wasCompleteReady.value = completeReady
+        wasCompleteReady = completeReady
     }
     LaunchedEffect(snoozeReady) {
-        if (snoozeReady && !wasSnoozeReady.value)
+        if (snoozeReady && !wasSnoozeReady)
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        wasSnoozeReady.value = snoozeReady
+        wasSnoozeReady = snoozeReady
     }
+
+    val showXpBadge = exitDirection == SwipeExitDirection.RIGHT
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         FocusCard(
-            task = task,
+            task           = task,
             borderFraction = borderFraction,
-            modifier = Modifier
+            hideXpLabel    = showXpBadge,
+            modifier       = Modifier
                 .fillMaxWidth()
                 .offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                .graphicsLayer {
-                    // rotation tied directly to animatedOffset — no double-spring lag
-                    rotationZ = (animatedOffset / screenWidthPx) * 18f
-                }
-                // key on isExiting so drag is disabled once exit starts
+                .graphicsLayer { rotationZ = (animatedOffset / screenWidthPx) * 18f }
                 .pointerInput(isExiting) {
                     if (isExiting) return@pointerInput
                     detectHorizontalDragGestures(
                         onDragEnd = {
                             when {
-                                offsetX > COMPLETE_THRESHOLD -> exitDirection = SwipeExitDirection.RIGHT
-                                offsetX < -SNOOZE_THRESHOLD  -> { offsetX = 0f; onSwipeLeft() }
-                                else                         -> offsetX = 0f
+                                offsetX > COMPLETE_THRESHOLD -> {
+                                    badgeOffsetX  = offsetX
+                                    exitDirection = SwipeExitDirection.RIGHT
+                                }
+                                offsetX < -SNOOZE_THRESHOLD -> { offsetX = 0f; onSwipeLeft() }
+                                else                        -> offsetX = 0f
                             }
                         },
-                        onDragCancel    = { offsetX = 0f },
+                        onDragCancel     = { offsetX = 0f },
                         onHorizontalDrag = { _, dragAmount ->
                             offsetX = (offsetX + dragAmount).coerceIn(-400f, 400f)
                         }
@@ -257,13 +243,24 @@ fun FocusCardSwipeable(
                 }
         )
 
+        if (showXpBadge) {
+            XpLabelCompletion(
+                xpDelta  = task.currentXp,
+                visible  = true,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 20.dp, top = 20.dp)
+                    .offset { IntOffset(badgeOffsetX.roundToInt(), 0) }
+            )
+        }
+
         CompletePill(
             syncedOffset  = animatedOffset,
             screenWidthPx = screenWidthPx,
             modifier      = Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 16.dp)
-                .graphicsLayer { alpha = pillAlpha }  // fade on exit
+                .graphicsLayer { alpha = pillAlpha }
         )
         SnoozePill(
             syncedOffset  = animatedOffset,
@@ -271,9 +268,10 @@ fun FocusCardSwipeable(
             modifier      = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 16.dp)
-                .graphicsLayer { alpha = pillAlpha }  // fade on exit
+                .graphicsLayer { alpha = pillAlpha }
         )
     }
 }
+
 
 enum class SwipeExitDirection { RIGHT, LEFT }
