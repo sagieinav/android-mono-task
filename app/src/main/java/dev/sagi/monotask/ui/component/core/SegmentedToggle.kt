@@ -79,7 +79,7 @@ private fun ToggleChip(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.labelLarge,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             color = if (selected) MaterialTheme.colorScheme.onSurfaceVariant
                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)

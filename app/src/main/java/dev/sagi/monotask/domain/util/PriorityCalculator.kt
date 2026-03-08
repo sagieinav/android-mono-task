@@ -4,8 +4,13 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import com.google.firebase.Timestamp
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toLocalDateTime
 import kotlin.math.exp
 import kotlin.random.Random
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 object PriorityCalculator {
     // Returns the single highest-priority task from a list (the task displayed on the Focus Hub)
@@ -70,14 +75,26 @@ object PriorityCalculator {
      * Formula: 1 / (1 + e^(0.5 * (daysUntilDue - 3)))
      * This is a logistic (sigmoid) function centered at 3 days.
      */
+//    private fun dueDateUrgency(dueDate: Timestamp?): Double {
+//        if (dueDate == null) return 0.5  // no due date = neutral
+//
+//        val now = System.currentTimeMillis()
+//        val dueMillis = dueDate.toDate().time
+//        val daysUntilDue = (dueMillis - now) / (1000.0 * 60 * 60 * 24)
+//
+//        // Sigmoid func centered at 3 days. smooth curve, no hard cutoffs
+//        return 1.0 / (1.0 + exp(0.5 * (daysUntilDue - 3)))
+//    }
+
     private fun dueDateUrgency(dueDate: Timestamp?): Double {
-        if (dueDate == null) return 0.5  // no due date = neutral
+        if (dueDate == null) return 0.5
 
-        val now = System.currentTimeMillis()
-        val dueMillis = dueDate.toDate().time
-        val daysUntilDue = (dueMillis - now) / (1000.0 * 60 * 60 * 24)
+        val timeZone = TimeZone.currentSystemDefault()
+        val today = Clock.System.now().toLocalDateTime(timeZone).date
+        val due = Instant.fromEpochMilliseconds(dueDate.toDate().time).toLocalDateTime(timeZone).date
+        val daysUntilDue = today.daysUntil(due).toDouble()
 
-        // Sigmoid func centered at 3 days. smooth curve, no hard cutoffs
+        // Sigmoid func centered at 3 days
         return 1.0 / (1.0 + exp(0.5 * (daysUntilDue - 3)))
     }
 

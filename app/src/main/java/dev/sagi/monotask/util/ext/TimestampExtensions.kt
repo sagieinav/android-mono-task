@@ -1,39 +1,44 @@
 package dev.sagi.monotask.util.ext
 
-import androidx.compose.runtime.remember
 import com.google.firebase.Timestamp
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toLocalDateTime
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.time.Clock
+import kotlin.time.Instant
+
 
 data class FormattedDate(val text: String, val isOverdue: Boolean)
 
 fun Timestamp.toRelativeDate(): FormattedDate {
-    val now = System.currentTimeMillis()
-    val diff = this.toDate().time - now
+    val timeZone = TimeZone.currentSystemDefault()
+    val today = Clock.System.now().toLocalDateTime(timeZone).date
+    val due = Instant.fromEpochMilliseconds(this.toDate().time).toLocalDateTime(timeZone).date
+    val diffDays = today.daysUntil(due)
+
     return when {
-        diff < 0 -> {
-            val hrsAgo = (-diff / (1000 * 60 * 60)).toInt()
-            val text = if (hrsAgo < 24) "${hrsAgo}h ago"
-            else "${hrsAgo / 24}d ago"
-            FormattedDate(text, isOverdue = true)
-        }
-        diff < 1000 * 60 * 60 * 24 -> {
-            val hrs = (diff / (1000 * 60 * 60)).toInt()
-            val mins = (diff / (1000 * 60) % 60).toInt()
-            val text = if (hrs > 0) "in ${hrs}h ${mins}m" else "in ${mins}m"
-            FormattedDate(text, isOverdue = false)
-        }
-        diff < 1000 * 60 * 60 * 24 * 7 -> {
-            val days = (diff / (1000 * 60 * 60 * 24)).toInt()
-            FormattedDate(if (days == 1) "Tomorrow" else "in $days days", isOverdue = false)
-        }
-        else -> FormattedDate(this.toFormattedDate(), isOverdue = false)
+        diffDays < 0  -> FormattedDate("${-diffDays}d ago", isOverdue = true)
+        diffDays == 0 -> FormattedDate("Today", isOverdue = false)
+        diffDays == 1 -> FormattedDate("Tomorrow", isOverdue = false)
+        diffDays < 7  -> FormattedDate("in $diffDays days", isOverdue = false)
+        else          -> FormattedDate(this.toFormattedDate(), isOverdue = false)
     }
 }
 
 
 fun Timestamp.toFormattedDate(): String {
-    val sdf = SimpleDateFormat("MMM d", Locale.getDefault())
-    return sdf.format(toDate())
+    val due = this.toDate()
+    val dueYear = Instant.fromEpochMilliseconds(due.time)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .year
+
+    val thisYear = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .year
+
+    val pattern = if (dueYear != thisYear) "MMM d, yyyy" else "MMM d"
+    return SimpleDateFormat(pattern, Locale.getDefault()).format(due)
 }
 

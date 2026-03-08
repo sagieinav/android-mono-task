@@ -10,16 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,15 +35,19 @@ import java.util.Locale
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
+import com.google.firebase.Timestamp
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.core.CustomTag
 import dev.sagi.monotask.ui.component.core.MonoTextField
 import dev.sagi.monotask.ui.component.core.BottomSheet
-import dev.sagi.monotask.ui.component.core.TaskDateTimePicker
+import dev.sagi.monotask.ui.component.core.GlassChip
+import dev.sagi.monotask.ui.component.core.TaskDatePicker
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
+import dev.sagi.monotask.util.ext.toRelativeDate
 
 @Composable
 private fun TaskSheet(
@@ -62,7 +60,7 @@ private fun TaskSheet(
     initialDueDateMillis: Long? = null,
     onDismiss: () -> Unit,
     onSubmit: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit,
-    extraContent: @Composable (() -> Unit)? = null   // ← slot for delete button in edit mode
+    extraContent: @Composable (() -> Unit)? = null   // Slot for delete button in edit mode
 ) {
     var title by remember { mutableStateOf(initialTitle) }
     var description by remember { mutableStateOf(initialDescription) }
@@ -72,17 +70,29 @@ private fun TaskSheet(
     var dueDateMillis by remember { mutableStateOf(initialDueDateMillis) }
     var showDateTimePicker by remember { mutableStateOf(false) }
 
-    val shape = MaterialTheme.shapes.medium
+//    val shape = MaterialTheme.shapes.medium
 
     BottomSheet(title = sheetTitle, onDismissRequest = onDismiss) {
-        TaskTitleAndDescriptionInput(
-            title = title, onTitleChange = { title = it },
-            description = description, onDescriptionChange = { description = it }
-        )
-        TaskSmartTagsInput(
-            tagInput = tagInput, onTagInputChange = { tagInput = it },
-            tags = tags, onTagsUpdated = { tags = it }
-        )
+        // Column to override vertical gap for the 3 text fields
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            TaskTitleAndDescriptionInput(
+                title = title, onTitleChange = { title = it },
+                description = description, onDescriptionChange = { description = it }
+            )
+            TaskSmartTagsInput(
+                tagInput = tagInput, onTagInputChange = { tagInput = it },
+                tags = tags, onTagsUpdated = { tags = it }
+            )
+        }
+
+//        HorizontalDivider(
+//            Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 6.dp),
+//            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)
+//        )
+
+        // Spacer before chips
+        Spacer(Modifier.padding(1.dp))
+
         TaskImportanceSelector(
             selectedImportance = importance,
             onImportanceSelected = { importance = it }
@@ -92,17 +102,20 @@ private fun TaskSheet(
             onClick = { showDateTimePicker = true }
         )
         if (showDateTimePicker) {
-            TaskDateTimePicker(
-                onDateTimeSelected = { millis -> dueDateMillis = millis },
+            TaskDatePicker(
+                onDateSelected = { millis -> dueDateMillis = millis },
                 onDismiss = { showDateTimePicker = false }
             )
         }
 
+        // (Potentially) "Delete Task" button, or any other extra button
         extraContent?.invoke()
 
-        Spacer(modifier = Modifier.height(4.dp))
+        // Spacer before buttons
+        Spacer(Modifier.padding(4.dp))
 
-        Button(
+        // Save Changes / Add Task
+        ActionButton(
             onClick = {
                 val finalTags =
                     if (tagInput.isNotBlank() && !tags.contains(tagInput.trim().lowercase()))
@@ -110,12 +123,9 @@ private fun TaskSheet(
                 onSubmit(title.trim(), description.trim(), importance, finalTags, dueDateMillis)
                 onDismiss()
             },
-            shape = shape,
-            enabled = title.isNotBlank(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-            modifier = Modifier.fillMaxWidth().height(56.dp)
+            enabled = title.isNotBlank()
         ) {
-            Text(submitLabel, style = MaterialTheme.typography.titleMedium)
+            Text(submitLabel, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -153,23 +163,18 @@ fun EditTaskSheet(
         onDismiss = onDismiss,
         onSubmit = onSave,
         extraContent = {
-            Spacer(modifier = Modifier.height(4.dp))
-            Button(
+            // "Delete Task" button
+            ActionButton(
                 onClick = { onDelete(); onDismiss() },
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                ),
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                enabled = true,
+                color = MaterialTheme.colorScheme.error,
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_delete),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp).padding(end = 4.dp)
                 )
-                Text("Delete Task", style = MaterialTheme.typography.titleMedium)
-            }
+                Text("Delete Task", style = MaterialTheme.typography.titleMedium)            }
         }
     )
 }
@@ -187,16 +192,37 @@ private fun TaskTitleAndDescriptionInput(
     MonoTextField(
         value = title,
         onValueChange = onTitleChange,
-        label = "Task Title"
+        label = "Title",
+        required = true,
+        leadingIcon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_title),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+            )
+        },
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences
+        )
     )
 
     // Description
     MonoTextField(
         value = description,
         onValueChange = onDescriptionChange,
-        label = "Description (Optional)",
+        label = "Description",
+        leadingIcon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_description2),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+            )
+        },
         singleLine = false,
-        maxLines = 3
+        maxLines = 3,
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences
+        ),
     )
 }
 
@@ -210,7 +236,6 @@ private fun TaskSmartTagsInput(
     onTagsUpdated: (List<String>) -> Unit,
     shape: Shape = MaterialTheme.shapes.medium
 ) {
-    // Extracted so both onValueChange and KeyboardActions share the same logic
     fun commitTag(input: String) {
         val newTag = input.trim().lowercase()
         if (newTag.isNotEmpty() && !tags.contains(newTag)) {
@@ -229,7 +254,15 @@ private fun TaskSmartTagsInput(
                     else -> onTagInputChange(input)
                 }
             },
-            label = "Tags (Space or comma to add)",
+            label = "Tags",
+            supportingText = "Space or Enter to add",
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_tag),
+                    contentDescription = "Tags",
+                    tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = shape,
             singleLine = true,
@@ -258,8 +291,7 @@ private fun TaskSmartTagsInput(
 @Composable
 private fun TaskImportanceSelector(
     selectedImportance: Importance,
-    onImportanceSelected: (Importance) -> Unit,
-    borderWidth: Dp = 2.5.dp
+    onImportanceSelected: (Importance) -> Unit
 ) {
     val customColors = MaterialTheme.customColors
     val importanceColor: (Importance) -> Color = { imp ->
@@ -270,47 +302,17 @@ private fun TaskImportanceSelector(
         }
     }
 
-    Column {
-        Text(text = "Importance", style = MaterialTheme.typography.titleMedium)
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Importance.entries.forEach { imp ->
-                val color = importanceColor(imp)
-                val isSelected = selectedImportance == imp
-
-                FilterChip(
-                    selected = isSelected,
-                    onClick = { onImportanceSelected(imp) },
-                    label = {
-                        Text(
-                            imp.name.lowercase().capitalize(Locale.ROOT),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                        )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        // unselected state
-                        containerColor = Color.Transparent,
-                        labelColor = MaterialTheme.colorScheme.onSurface,
-                        // selected state — transparent bg, colored label
-                        selectedContainerColor = Color.Transparent,
-                        selectedLabelColor = color,
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        enabled = true,
-                        selected = isSelected,
-                        // unselected border
-                        borderColor = MaterialTheme.colorScheme.outlineVariant,
-                        borderWidth = 1.dp,
-                        // selected border
-                        selectedBorderColor = color,
-                        selectedBorderWidth = borderWidth,
-                    )
-                )
-            }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Importance.entries.forEach { imp ->
+            GlassChip(
+                label = imp.name.lowercase().capitalize(Locale.ROOT),
+                selected = selectedImportance == imp,
+                selectedColor = importanceColor(imp),
+                onClick = { onImportanceSelected(imp) }
+            )
         }
     }
 }
@@ -321,59 +323,26 @@ private fun TaskDueDateSelector(
     dueDateMillis: Long?,
     onClick: () -> Unit
 ) {
-    Column() {
-        Text(text = "Due Date", style = MaterialTheme.typography.titleMedium)
-
-        Row(modifier = Modifier
-            .fillMaxWidth(),
-        ) {
-            AssistChip(
-                onClick = onClick,
-                label = {
-                    Text(
-                        if (dueDateMillis != null) {
-                            // Format the timestamp if a date is selected
-                            val sdf = SimpleDateFormat("MMM d, yyyy h:mm a", LocalLocale.current.platformLocale)
-                            sdf.format(Date(dueDateMillis))
-                        } else {
-                            "Select Date"
-                        },
-                        style = MaterialTheme.typography.titleSmall,
-                        // A small fix to match the `importance` chip height
-//                        modifier = Modifier.padding(vertical = 7.dp)
-                        )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search_activity),
-                        contentDescription = "Calendar Icon",
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.scrim
-                    )
-                }
-            )
-        }
-    }
+        GlassChip(
+            label = if (dueDateMillis != null) {
+                Timestamp(Date(dueDateMillis)).toRelativeDate().text
+            } else {
+                "Select Date"
+            },
+            selected = dueDateMillis != null,
+            selectedColor = MaterialTheme.colorScheme.onSurface,
+            onClick = onClick,
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_search_activity),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        )
 }
 
-@Composable
-private fun AddTaskButton(
-    isEnabled: Boolean,
-    onClick: () -> Unit,
-    shape: Shape = MaterialTheme.shapes.medium
-) {
-    Button(
-        onClick = onClick,
-        shape = shape,
-        enabled = isEnabled,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-        modifier = Modifier.fillMaxWidth().height(56.dp),
-    ) {
-        Text("Add Task", style = MaterialTheme.typography.titleMedium)
-    }
-}
 
 
 @Preview(showBackground = true, showSystemUi = true)

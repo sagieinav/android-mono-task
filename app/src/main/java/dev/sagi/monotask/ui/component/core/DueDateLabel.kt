@@ -30,7 +30,7 @@ fun DueDateLabel(
     else
         MaterialTheme.colorScheme.onSurface.copy(alpha = if (small) 0.4f else 0.45f)
 
-    val iconSize = if (small) 12.dp else 16.dp
+    val iconSize = if (small) 13.dp else 18.dp
     val textStyle = if (small)
         MaterialTheme.typography.labelSmall
     else

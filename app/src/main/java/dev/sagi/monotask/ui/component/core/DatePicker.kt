@@ -1,125 +1,110 @@
 package dev.sagi.monotask.ui.component.core
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import dev.darkokoa.datetimewheelpicker.WheelDatePicker
+import dev.darkokoa.datetimewheelpicker.core.WheelPickerDefaults
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import java.util.Calendar
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskDateTimePicker(
-    onDateTimeSelected: (Long) -> Unit,
+fun TaskDatePicker(
+    initialDateMillis: Long? = null,
+    onDateSelected: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // ========== Step 1: Date ==========
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis()
+    val timeZone = TimeZone.currentSystemDefault()
+    val today: LocalDate = Clock.System.now().toLocalDateTime(timeZone).date
+
+    val initialDate: LocalDate = initialDateMillis
+        ?.let { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
+        ?: today
+
+    var selectedDate by remember { mutableStateOf(initialDate) }
+
+    val glassBorder = Brush.linearGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.7f),
+            Color.White.copy(alpha = 0.15f),
+            Color.White.copy(alpha = 0.4f)
+        )
     )
-    var showTimePicker by remember { mutableStateOf(false) }
 
-    if (!showTimePicker) {
-        DatePickerDialog(
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(
-                    onClick = { showTimePicker = true },
-                    enabled = datePickerState.selectedDateMillis != null
-                ) { Text("Next") }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+
+    GlassDialog(
+        onDismissRequest = onDismiss,
+        title = "Due Date",
+        content = {
+            WheelDatePicker(
+                modifier = Modifier.fillMaxWidth(),
+                startDate = initialDate,
+                minDate = today,
+                textStyle = MaterialTheme.typography.titleSmall,
+                textColor = MaterialTheme.colorScheme.onSurface,
+                selectorProperties = WheelPickerDefaults.selectorProperties(
+                    color = Color.White.copy(alpha = 0.4f),
+                    border = BorderStroke(
+                        0.5.dp,
+                        brush = glassBorder
+//                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    ),
+                    shape = CircleShape,
+                ),
+            ) { snappedDate -> selectedDate = snappedDate }
+        },
+        buttons = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
-        ) {
-            DatePicker(state = datePickerState)
+            TextButton(onClick = {
+                val millis = selectedDate.atStartOfDayIn(timeZone).toEpochMilliseconds()
+                onDateSelected(millis)
+                onDismiss()
+            }) {
+                Text("Done")
+            }
         }
-    }
+    )
 
-    // ========== Step 2: Time ==========
-    if (showTimePicker) {
-        val timePickerState = rememberTimePickerState(
-            initialHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-            initialMinute = Calendar.getInstance().get(Calendar.MINUTE),
-            is24Hour = false
-        )
-
-        AlertDialog(
-            onDismissRequest = { showTimePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    // Combine date + time into a single millis value
-                    val calendar = Calendar.getInstance().apply {
-                        timeInMillis = datePickerState.selectedDateMillis!!
-                        set(Calendar.HOUR_OF_DAY, timePickerState.hour)
-                        set(Calendar.MINUTE, timePickerState.minute)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                    }
-                    onDateTimeSelected(calendar.timeInMillis)
-                    onDismiss()
-                }) { Text("Done") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("Back") }
-            },
-            title = { Text("Select Time") },
-            text = { TimePicker(state = timePickerState) }
-        )
-    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun TaskDateTimePickerPreview() {
+private fun TaskDatePickerPreview() {
     MonoTaskTheme {
-        // Toggle these to preview each step independently
-        val previewStep = "date" // "date" or "time"
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
         ) {
-            if (previewStep == "date") {
-                val datePickerState = rememberDatePickerState(
-                    initialSelectedDateMillis = System.currentTimeMillis()
-                )
-                DatePickerDialog(
-                    onDismissRequest = {},
-                    confirmButton = {
-                        TextButton(onClick = {}) { Text("Next") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = {}) { Text("Cancel") }
-                    }
-                ) {
-                    DatePicker(state = datePickerState)
-                }
-            }
-
-            if (previewStep == "time") {
-                val timePickerState = rememberTimePickerState(
-                    initialHour = 14,
-                    initialMinute = 30,
-                    is24Hour = false
-                )
-                AlertDialog(
-                    onDismissRequest = {},
-                    confirmButton = {
-                        TextButton(onClick = {}) { Text("Done") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = {}) { Text("Back") }
-                    },
-                    title = { Text("Select Time") },
-                    text = { TimePicker(state = timePickerState) }
-                )
-            }
+            TaskDatePicker(
+                initialDateMillis = System.currentTimeMillis(),
+                onDateSelected = {},
+                onDismiss = {}
+            )
         }
     }
 }

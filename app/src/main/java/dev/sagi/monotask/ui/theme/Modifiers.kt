@@ -5,7 +5,6 @@ import android.graphics.Path
 import android.graphics.PathMeasure
 import android.graphics.RectF
 import android.graphics.SweepGradient
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.border
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
@@ -28,18 +27,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.background
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toAndroidRectF
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import dev.sagi.monotask.ui.component.core.GlassSurface
@@ -71,20 +68,86 @@ fun Modifier.monoBorder(shape: Shape): Modifier = composed {
         )
 }
 
-fun Modifier.glassBorder(shape: Shape): Modifier = composed {
+fun Modifier.glassBorder(shape: Shape, color: Color? = null): Modifier = composed {
+    val innerModifier =
+        if (color == null) {
+            // Normal, non-colored:
+            Modifier.border(1.5.dp, Color.White.copy(alpha = 0.5f), shape)
+        } else {
+            // Colored:
+            val brush = Brush.linearGradient(
+                colors = listOf(
+                    color.copy(alpha = 0.4f),
+                    color.copy(alpha = 0.1f),
+                    Color.Transparent,
+                    Color.White.copy(alpha = 0.5f),
+                )
+            )
+            Modifier.border(1.5.dp, brush, shape)
+        }
+
+    val outerModifier =
+        if (color == null) {
+            // Normal, non-colored:
+            Modifier.border(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), shape)
+        } else {
+            // Colored:
+            val brush = Brush.linearGradient(
+                colors = listOf(
+                    color.copy(alpha = 0.4f),
+                    color.copy(alpha = 0.1f),
+                    Color.Transparent,
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                )
+            )
+            Modifier.border(0.5.dp, brush, shape)
+        }
+
+    // Apply the 2 borders
     this
-        // Inner "glass highlight" border
-        .border(
-            width = 1.5.dp,
-            color = Color.White.copy(alpha = 0.5f),
-            shape = shape
+        .then(innerModifier)
+        .then(outerModifier)
+}
+
+//fun Modifier.glassBackground(color: Color? = null): Modifier {
+//    val brush = if (color == null) {
+//        Brush.verticalGradient(
+//            colors = listOf(Color.White.copy(alpha = 0.5f), Color.Transparent)
+//        )
+//    } else {
+//        Brush.linearGradient(
+//            colors = listOf(
+//                color.copy(alpha = 0.3f),
+//                color.copy(alpha = 0.05f),
+//                Color.Transparent,
+//                Color.White.copy(alpha = 0.4f)
+//            )
+//        )
+//    }
+//    return this.background(brush)
+//}
+
+fun Modifier.glassBackground(
+    accentColor: Color? = null,
+    baseColor: Color = Color.Transparent // solid base bg layer
+): Modifier {
+    val shineBrush = if (accentColor == null) {
+        Brush.verticalGradient(
+            colors = listOf(Color.White.copy(alpha = 0.5f), Color.Transparent)
         )
-        // Outer border
-        .border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            shape = shape
+    } else {
+        Brush.linearGradient(
+            colors = listOf(
+                accentColor.copy(alpha = 0.3f),
+                accentColor.copy(alpha = 0.05f),
+                Color.Transparent,
+                Color.White.copy(alpha = 0.4f)
+            )
         )
+    }
+    return this
+        .background(baseColor)      // solid base
+        .background(shineBrush)     // glass shine on top
 }
 
 

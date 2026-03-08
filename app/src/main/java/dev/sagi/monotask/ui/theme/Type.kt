@@ -6,6 +6,8 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 
 // ─────────────────────────────────────────────────────
@@ -66,8 +68,8 @@ val plusJakartaSans = FontFamily(
     Font(R.font.plus_jakarta_sans,        FontWeight.Normal),
     Font(R.font.plus_jakarta_sans,        FontWeight.Medium),
     Font(R.font.plus_jakarta_sans,        FontWeight.SemiBold),
-    Font(R.font.plus_jakarta_sans,        FontWeight.Bold),
-    Font(R.font.plus_jakarta_sans_italic, FontWeight.Normal, FontStyle.Italic)
+    Font(R.font.plus_jakarta_sans_bold,        FontWeight.Bold),
+    Font(R.font.plus_jakarta_sans_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
 // Option B: Google Sans — clean, modern, Google's own product font.
@@ -137,7 +139,12 @@ val AppTypography = Typography(
     titleMedium = baseline.titleMedium.copy(
         fontFamily = uiFont, fontWeight = FontWeight.SemiBold),
     titleSmall  = baseline.titleSmall.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.Normal),
+        fontFamily = plusJakartaSans, fontWeight = FontWeight.Normal,
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Center,
+            trim = LineHeightStyle.Trim.FirstLineTop
+        ),
+    ),
 
     // Task descriptions, onboarding copy, settings text
     bodyLarge  = baseline.bodyLarge.copy(fontFamily = bodyFont),
