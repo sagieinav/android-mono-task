@@ -34,7 +34,7 @@ fun HeroGreeting(
     ) {
         GreetingText(
             title = "Hi, ${userName.substringBefore(" ")}",
-            modifier = Modifier.weight(1f)  // ← takes remaining space, doesn't push date out
+//            modifier = Modifier.weight(1f)  // takes remaining space, doesn't push date out
         )
 //        Text(
 //            text = timestamp.toFormattedDate(),

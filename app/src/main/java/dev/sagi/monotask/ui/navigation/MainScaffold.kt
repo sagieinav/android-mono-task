@@ -20,14 +20,16 @@ import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.shared.UserSessionViewModel
 
 @Composable
 fun MainScaffold(
     navController: NavHostController,
     authVM: AuthViewModel,
-    workspaceVM: WorkspaceViewModel,
     profileVM: ProfileViewModel,
-    settingsVM: SettingsViewModel
+    settingsVM: SettingsViewModel,
+    workspaceVM: WorkspaceViewModel,
+    userSessionVM: UserSessionViewModel
 ) {
     val hazeState = rememberHazeState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -104,11 +106,12 @@ fun MainScaffold(
             CompositionLocalProvider(LocalScaffoldPadding provides innerPadding) {
                 Box(modifier = Modifier.fillMaxSize().hazeSource(hazeState)) {
                     NavGraph(
-                        navController,
-                        authVM,
-                        workspaceVM,
-                        profileVM,
-                        settingsVM,
+                        navController   = navController,
+                        authVM          = authVM,
+                        profileVM       = profileVM,
+                        settingsVM      = settingsVM,
+                        workspaceVM     = workspaceVM,
+                        userSessionVM   = userSessionVM
                     )
                 }
 

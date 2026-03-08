@@ -2,13 +2,8 @@ package dev.sagi.monotask.ui.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.*
@@ -26,6 +21,7 @@ import dev.sagi.monotask.ui.kanban.KanbanScreen
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
 import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
+import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 
 private val TAB_ORDER = listOf(
@@ -64,9 +60,10 @@ fun tabSlideOut(from: String?, to: String?): ExitTransition =
 fun NavGraph(
     navController: NavHostController,
     authVM: AuthViewModel,
-    workspaceVM: WorkspaceViewModel,
     profileVM: ProfileViewModel,
-    settingsVM: SettingsViewModel
+    settingsVM: SettingsViewModel,
+    workspaceVM: WorkspaceViewModel,
+    userSessionVM: UserSessionViewModel
 ) {
     val settingsState by settingsVM.uiState.collectAsState()
     val authState by authVM.uiState.collectAsState()
@@ -130,8 +127,9 @@ fun NavGraph(
                 val focusVM: FocusViewModel = viewModel()
                 FocusScreen(
                     navController = navController,
-                    viewModel = focusVM,
-                    sharedWorkspaceVM = workspaceVM
+                    focusVM = focusVM,
+                    workspaceVM = workspaceVM,
+                    userSessionVM = userSessionVM
                 )
             }
             composable(Screen.Kanban.route) {

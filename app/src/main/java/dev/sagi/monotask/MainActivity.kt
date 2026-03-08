@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -15,10 +16,14 @@ import androidx.navigation.compose.rememberNavController
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
+import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
+
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
@@ -30,8 +35,9 @@ class MainActivity : ComponentActivity() {
                 // Initialize general-scope ViewModels
                 val authVM: AuthViewModel = viewModel()
                 val settingsVM: SettingsViewModel = viewModel()
-                val workspaceVM: WorkspaceViewModel = viewModel()
                 val profileVM: ProfileViewModel = viewModel()
+                val workspaceVM: WorkspaceViewModel = viewModel()
+                val userSessionVM: UserSessionViewModel = viewModel()
                 // Lazy VMs (focusVM & kanbanVM) get initialized in NavGraph (when user first navigates to them)
 
                 // Base Surface
@@ -42,9 +48,10 @@ class MainActivity : ComponentActivity() {
                     MainScaffold(
                         navController,
                         authVM,
-                        workspaceVM,
                         profileVM,
-                        settingsVM
+                        settingsVM,
+                        workspaceVM,
+                        userSessionVM
                     )
                 }
 

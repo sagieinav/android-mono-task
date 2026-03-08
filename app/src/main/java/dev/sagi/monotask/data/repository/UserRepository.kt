@@ -21,6 +21,13 @@ class UserRepository {
             .snapshots()
             .map { it.toObject(User::class.java)?.copy(id = it.id) }
 
+    // Fetches a user profile once (not real-time)
+    // Used for friend search results and read-only friend profile view
+    suspend fun getUserOnce(userId: String): User? {
+        val doc = userDoc(userId).get().await()
+        return doc.toObject(User::class.java)?.copy(id = doc.id)
+    }
+
     // Creates the user document on first login
     // Called once after Google Sign-In if the doc doesn't exist yet
     suspend fun createUserIfNotExists(user: User) {
@@ -91,12 +98,6 @@ class UserRepository {
         ).await()
     }
 
-    // Fetches a user profile once (not real-time)
-    // Used for friend search results and read-only friend profile view
-    suspend fun getUserOnce(userId: String): User? {
-        val doc = userDoc(userId).get().await()
-        return doc.toObject(User::class.java)?.copy(id = doc.id)
-    }
 
     // Searches users by display name (for the Add Friend screen)
     // Firestore prefix search: finds names starting with `[query]`

@@ -13,10 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import dev.sagi.monotask.ui.component.core.EmptyState
 import dev.sagi.monotask.ui.component.core.HeroGreeting
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import kotlinx.coroutines.flow.first
@@ -25,14 +27,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun FocusScreen(
     navController: NavHostController,
-    viewModel: FocusViewModel,
-    sharedWorkspaceVM: WorkspaceViewModel
+    focusVM: FocusViewModel,
+    workspaceVM: WorkspaceViewModel,
+    userSessionVM: UserSessionViewModel
 ) {
-    LaunchedEffect(Unit) { viewModel.startObservingTasks(sharedWorkspaceVM.selectedWorkspace) }
+    LaunchedEffect(Unit) { focusVM.startObservingTasks(workspaceVM.selectedWorkspace) }
 
-    val uiState         by viewModel.uiState.collectAsState()
-    val showSnoozeSheet by viewModel.showSnoozeSheet.collectAsState()
-    val xpBadgeVisible  by viewModel.xpBadgeVisible.collectAsState()
+    val uiState         by focusVM.uiState.collectAsState()
+    val showSnoozeSheet by focusVM.showSnoozeSheet.collectAsState()
+    val xpBadgeVisible  by focusVM.xpBadgeVisible.collectAsState()
 
     var isSnoozeExiting     by remember { mutableStateOf(false) }
     var snoozeExitTrigger   by remember { mutableStateOf<SwipeExitDirection?>(null) }
@@ -45,18 +48,21 @@ fun FocusScreen(
         displayedUiState = uiState
     }
 
+    val userDisplayName by userSessionVM.displayName.collectAsStateWithLifecycle()
+
     FocusScreenContent(
         uiState           = displayedUiState,
+        userDisplayName   = userDisplayName,
         showSnoozeSheet   = showSnoozeSheet,
         snoozeExitTrigger = snoozeExitTrigger,
-        onCompleteTask    = { viewModel.completeTask() },
-        onOpenSnooze      = { viewModel.openSnoozeSheet() },
-        onDismissSnooze   = { viewModel.dismissSnoozeSheet() },
+        onCompleteTask    = { focusVM.completeTask() },
+        onOpenSnooze      = { focusVM.openSnoozeSheet() },
+        onDismissSnooze   = { focusVM.dismissSnoozeSheet() },
         onSnoozeConfirmed = { penalty ->
-            pendingSnoozeAction = { viewModel.snoozeTask(penalty) }
+            pendingSnoozeAction = { focusVM.snoozeTask(penalty) }
             isSnoozeExiting     = true
             snoozeExitTrigger   = SwipeExitDirection.LEFT
-            viewModel.dismissSnoozeSheet()
+            focusVM.dismissSnoozeSheet()
         },
         onSnoozeCardExited = {
             pendingSnoozeAction?.invoke()
@@ -70,6 +76,7 @@ fun FocusScreen(
 @Composable
 fun FocusScreenContent(
     uiState: FocusUiState,
+    userDisplayName: String,
     showSnoozeSheet: Boolean = false,
     snoozeExitTrigger: SwipeExitDirection? = null,
     onCompleteTask: () -> Unit = {},
@@ -87,7 +94,7 @@ fun FocusScreenContent(
                 bottom = innerPadding.calculateBottomPadding()
             )
         ) {
-            HeroGreeting(userName = "Sagi")
+            HeroGreeting(userName = userDisplayName)
             Box(
                 modifier           = Modifier.fillMaxWidth().weight(1f),
                 contentAlignment   = Alignment.Center
