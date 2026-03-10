@@ -94,7 +94,10 @@ fun NavGraph(
         popEnterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
         popExitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) }
     ) {
-        navigation(startDestination = Screen.Login.route, route = Screen.Auth.route) {
+        navigation(
+            startDestination = Screen.Login.route,
+            route = Screen.Auth.route
+        ) {
             composable(Screen.Login.route) {
                 AuthScreen(
                     authViewModel = authVM,
@@ -140,7 +143,7 @@ fun NavGraph(
                     KanbanScreen(
                         navController = navController,
                         workspaceVM = workspaceVM,
-                        viewModel = kanbanVM
+                        kanbanVM = kanbanVM
                     )
                 }
             }

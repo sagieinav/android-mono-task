@@ -65,4 +65,9 @@ class WorkspaceRepository {
         workspacesCollection(userId).document(workspaceId).delete().await()
     }
 
+    suspend fun setFocusTask(userId: String, workspaceId: String, taskId: String?) {
+        workspacesCollection(userId)
+            .document(workspaceId)
+            .update("currentFocusTaskId", taskId).await()
+    }
 }

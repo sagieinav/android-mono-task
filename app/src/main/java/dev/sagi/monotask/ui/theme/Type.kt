@@ -162,5 +162,7 @@ val AppTypography = Typography(
         platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
 
-    labelSmall  = baseline.labelSmall.copy(fontFamily = uiFont),
+    labelSmall  = baseline.labelSmall.copy(
+        fontFamily = plusJakartaSans, fontSize = 10.sp,
+    )
 )

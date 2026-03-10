@@ -1,7 +1,6 @@
 package dev.sagi.monotask.ui.focus
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,27 +14,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.penaltyRed
 import androidx.compose.ui.text.style.TextAlign
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.core.BottomSheet
-import dev.sagi.monotask.ui.theme.monoBorder
-import dev.sagi.monotask.ui.theme.monoShadow
 
 @Composable
 fun SnoozeBottomSheet(
     onDismissRequest: () -> Unit,
-    onSnooze: (penalty: Int) -> Unit
+    onSnooze: (XpEvents.SnoozeOption) -> Unit
 ) {
     BottomSheet(
         title = "Snooze Task",
@@ -51,24 +47,37 @@ fun SnoozeBottomSheet(
             modifier = Modifier.fillMaxWidth()
         )
 
-        ChooseSnoozeButton(
-            icon = painterResource(R.drawable.ic_due_soon),
-            label = "Due Soon",
-            xpCost = XpEvents.SNOOZE_DUE_SOON,
-            onClick = { onSnooze(XpEvents.SNOOZE_DUE_SOON) }
+        // Define the metadata of each snooze option button
+        val snoozeOptions = remember {
+            listOf(
+                Triple(XpEvents.SnoozeOption.BY_DUE_DATE,       R.drawable.ic_due_soon,         "Due Soon"),
+                Triple(XpEvents.SnoozeOption.NEXT_IN_QUEUE,     R.drawable.ic_skip,             "Next in Queue"),
+//                Triple(XpEvents.SnoozeOption.MANUAL,            R.drawable.ic_view_kanban,      "Choose Manually")
+            )
+        }
+
+        // Show the snooze button for each snooze option
+        snoozeOptions.forEach { (option, iconRes, label) ->
+            ChooseSnoozeButton(
+                icon       = painterResource(iconRes),
+                label      = label,
+                xpPenalty  = option.penalty,
+                onClick    = { onSnooze(option) }
+            )
+        }
+
+
+        Text(
+            text = "You can also snooze tasks directly from the Kanban board.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth()
+            ,
+            textAlign = TextAlign.Center
         )
-        ChooseSnoozeButton(
-            icon = painterResource(R.drawable.ic_skip),
-            label = "Next in Queue",
-            xpCost = XpEvents.SNOOZE_NEXT,
-            onClick = { onSnooze(XpEvents.SNOOZE_NEXT) }
-        )
-        ChooseSnoozeButton(
-            icon = painterResource(R.drawable.ic_view_kanban),
-            label = "Choose Manually",
-            xpCost = XpEvents.SNOOZE_MANUAL,
-            onClick = { onSnooze(XpEvents.SNOOZE_MANUAL) }
-        )
+
     }
 }
 
@@ -77,7 +86,7 @@ fun SnoozeBottomSheet(
 fun ChooseSnoozeButton(
     icon: Painter,
     label: String,
-    xpCost: Int? = null,
+    xpPenalty: Int? = null,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -105,13 +114,13 @@ fun ChooseSnoozeButton(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
-            if (xpCost != null) {
+            if (xpPenalty != null) {
                 Surface(
                     shape = RoundedCornerShape(100),
                     color = penaltyRed.copy(alpha = 0.12f)
                 ) {
                     Text(
-                        text = "$xpCost XP",
+                        text = "$xpPenalty XP",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = penaltyRed,

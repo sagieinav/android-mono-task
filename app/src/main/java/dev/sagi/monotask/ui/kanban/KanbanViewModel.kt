@@ -7,9 +7,7 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
-import dev.sagi.monotask.data.repository.UserRepository
-import dev.sagi.monotask.domain.util.BadgeEngine
-import dev.sagi.monotask.domain.util.PriorityCalculator
+import dev.sagi.monotask.domain.util.TaskSelector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,7 +17,8 @@ sealed class KanbanUiState {
     data class Ready(
         val highTasks: List<Task>,
         val mediumTasks: List<Task>,
-        val lowTasks: List<Task>
+        val lowTasks: List<Task>,
+        val isArchive: Boolean
     ) : KanbanUiState()
 }
 
@@ -35,7 +34,6 @@ class KanbanViewModel(
     val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
 
     private val _showCompleted = MutableStateFlow(false)
-    val showCompleted: StateFlow<Boolean> = _showCompleted.asStateFlow()
 
     private var tasksObserved = false
 
@@ -50,10 +48,8 @@ class KanbanViewModel(
             .flatMapLatest { (workspace, showCompleted) ->
                 when {
                     workspace == null -> flowOf(Pair(null, emptyList()))
-                    showCompleted -> taskRepository.getCompletedTasks(userId, workspace.id)
-                        .map { Pair(workspace, it) }
-                    else -> taskRepository.getActiveTasks(userId, workspace.id)
-                        .map { Pair(workspace, it) }
+                    showCompleted     -> taskRepository.getCompletedTasks(userId, workspace.id).map { Pair(workspace, it) }
+                    else              -> taskRepository.getActiveTasks(userId, workspace.id).map { Pair(workspace, it) }
                 }
             }
             .onEach { (workspace, tasks) -> updateUiState(tasks, workspace) }
@@ -61,21 +57,23 @@ class KanbanViewModel(
     }
 
     fun toggleArchive() {
+        _uiState.value = KanbanUiState.Loading
         _showCompleted.value = !_showCompleted.value
     }
 
     private fun updateUiState(tasks: List<Task>, workspace: Workspace?) {
-        val sorted = if (workspace != null) PriorityCalculator.getSortedTasks(tasks, workspace) else tasks
+        val sorted  = if (workspace != null) TaskSelector.getSortedTasks(tasks, workspace) else tasks
         val grouped = sorted.groupBy { it.importance }
         _uiState.value = KanbanUiState.Ready(
             highTasks   = grouped[Importance.HIGH]   ?: emptyList(),
             mediumTasks = grouped[Importance.MEDIUM] ?: emptyList(),
-            lowTasks    = grouped[Importance.LOW]    ?: emptyList()
+            lowTasks    = grouped[Importance.LOW]    ?: emptyList(),
+            isArchive   = _showCompleted.value
         )
     }
 
     fun updateTask(task: Task) {
-        viewModelScope.launch { taskRepository.updateTask(userId, task) }
+        viewModelScope.launch { taskRepository.overwriteExistingTask(userId, task) }
     }
 
     fun deleteTask(taskId: String) {
@@ -83,5 +81,5 @@ class KanbanViewModel(
     }
 
     fun openEditSheet(task: Task? = null) { _editingTask.value = task ?: Task() }
-    fun dismissEditSheet() { _editingTask.value = null }
+    fun dismissEditSheet()                { _editingTask.value = null }
 }

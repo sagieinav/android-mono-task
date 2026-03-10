@@ -12,7 +12,7 @@ import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-object PriorityCalculator {
+object TaskSelector {
     // Returns the single highest-priority task from a list (the task displayed on the Focus Hub)
     fun getTopTask(tasks: List<Task>, workspace: Workspace, excludeId: String? = null): Task? {
         if (tasks.isEmpty()) return null
@@ -22,13 +22,35 @@ object PriorityCalculator {
 
         val nonSnoozed = pool.filter { it.snoozeCount == 0 }
         return (nonSnoozed.ifEmpty { pool })
-            .maxByOrNull { score(it, workspace) }
+            .maxByOrNull { priorityScore(it, workspace) }
+    }
+
+    // Add alongside getTopTask()
+    fun getTopTaskByDueDate(
+        tasks: List<Task>,
+        workspace: Workspace,
+        excludeId: String? = null
+    ): Task? {
+        val candidates = tasks.filter { it.id != excludeId }
+        if (candidates.isEmpty()) return null
+
+        val withDueDate = candidates.filter { it.dueDate != null }
+
+        return if (withDueDate.isNotEmpty()) {
+            withDueDate.sortedWith(
+                compareBy<Task> { it.dueDate!!.toDate() }      // 1. soonest due date
+                    .thenBy { priorityScore(it, workspace) }   // 2. tiebreaker: normal priority
+            ).first()
+        } else {
+            // Fallback: no tasks have a due date → normal priority
+            getTopTask(candidates, workspace, excludeId = null)
+        }
     }
 
 
     // Returns all tasks sorted by priority score descending
     fun getSortedTasks(tasks: List<Task>, workspace: Workspace): List<Task> =
-        tasks.sortedByDescending { score(it, workspace) }
+        tasks.sortedByDescending { priorityScore(it, workspace) }
 
     /**
      * Core scoring function.
@@ -43,7 +65,7 @@ object PriorityCalculator {
      *   LOW = 0.33, MEDIUM = 0.66, HIGH = 1.0
      *   Simple linear scale - straightforward to explain and defend.
      */
-    private fun score(task: Task, workspace: Workspace): Double {
+    private fun priorityScore(task: Task, workspace: Workspace): Double {
         val dueDateScore = dueDateUrgency(task.dueDate)
         val importanceScore = importanceScore(task.importance)
         val noise = Random.nextDouble(

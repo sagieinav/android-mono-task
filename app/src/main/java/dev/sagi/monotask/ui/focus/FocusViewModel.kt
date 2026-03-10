@@ -7,8 +7,9 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
+import dev.sagi.monotask.data.repository.WorkspaceRepository
 import dev.sagi.monotask.domain.util.BadgeEngine
-import dev.sagi.monotask.domain.util.PriorityCalculator
+import dev.sagi.monotask.domain.util.TaskSelector
 import dev.sagi.monotask.domain.util.XpEvents
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 class FocusViewModel(
     private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
     private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
+    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
     private val userId: String = MonoTaskApp.instance.auth.currentUser?.uid ?: ""
 ) : ViewModel() {
 
@@ -33,8 +35,10 @@ class FocusViewModel(
     private val _lastXpGained = MutableStateFlow(0)
     val lastXpGained: StateFlow<Int> = _lastXpGained.asStateFlow()
 
-    private var lastSnoozedId: String? = null
+//    private var lastSnoozedId: String? = null
+//    private var pendingSnoozeOption: XpEvents.SnoozeOption = XpEvents.SnoozeOption.NEXT_IN_QUEUE
     private var tasksObserved = false
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun startObservingTasks(selectedWorkspace: StateFlow<Workspace?>) {
@@ -48,31 +52,35 @@ class FocusViewModel(
             }
             .onEach { (workspace, tasks) ->
                 if (workspace == null) { _uiState.value = FocusUiState.Empty; return@onEach }
-                val topTask = PriorityCalculator.getTopTask(tasks, workspace, excludeId = lastSnoozedId)
-                val queue = PriorityCalculator.getSortedTasks(tasks, workspace)
+
+                // Source of truth is Firestore, not local computation
+                val topTask = workspace.currentFocusTaskId
+                    ?.let { id -> tasks.find { it.id == id } }
+                    ?: TaskSelector.getTopTask(tasks, workspace) // first launch fallback
+
+                val queue = TaskSelector.getSortedTasks(tasks, workspace)
                 _uiState.value = if (topTask == null) FocusUiState.Empty
                 else FocusUiState.Active(topTask, queue.drop(1), workspace)
             }
+
             .launchIn(viewModelScope)
     }
 
     fun completeTask() {
         val state = _uiState.value as? FocusUiState.Active ?: return
 
-        // Calculate XP synchronously and raise the gate BEFORE any coroutine/Firestore
-        val xpGained = XpEvents.calculateCompletionXp(state.focusTask)
+        // Use the stored value. No recalculation needed
+        val xpGained = state.focusTask.currentXp
         _lastXpGained.value = xpGained
         _xpBadgeVisible.value = true
 
         viewModelScope.launch {
-            taskRepository.completeTask(userId, state.focusTask.id)
+            taskRepository.markTaskCompleted(userId, state.focusTask.id)
             val userDoc = userRepository.getUserOnce(userId) ?: run {
-                _xpBadgeVisible.value = false  // safety fallback
+                _xpBadgeVisible.value = false
                 return@launch
             }
             userRepository.addXp(userId, xpGained, userDoc.xp, userDoc.level)
-
-            // Delay before fetching the next task / EmptyState. For allowing animations
             delay(1000)
             _xpBadgeVisible.value = false
             userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
@@ -81,17 +89,33 @@ class FocusViewModel(
         }
     }
 
-
-    fun snoozeTask(penalty: Int) {
+    fun snoozeTask(option: XpEvents.SnoozeOption) {
         val state = _uiState.value as? FocusUiState.Active ?: return
+
         viewModelScope.launch {
-            val userDoc = userRepository.getUserOnce(userId) ?: return@launch
-            userRepository.addXp(userId, penalty, userDoc.xp, userDoc.level)
-            taskRepository.snoozeTask(userId, state.focusTask.id)
-            lastSnoozedId = state.focusTask.id
+            // 1. Snooze the current task
+            taskRepository.updateSnoozeFields(userId, state.focusTask, option)
+
+            // 2. Compute next task locally
+            val allTasks = taskRepository.getActiveTasksOnce(userId, state.workspace.id)
+            val nextTask = when (option) {
+                XpEvents.SnoozeOption.BY_DUE_DATE -> TaskSelector.getTopTaskByDueDate(
+                    allTasks, state.workspace, excludeId = state.focusTask.id
+                )
+                else -> TaskSelector.getTopTask(
+                    allTasks, state.workspace, excludeId = state.focusTask.id
+                )
+            }
+
+            // 3. Write the decision to Firestore — both devices now agree
+            workspaceRepository.setFocusTask(userId, state.workspace.id, nextTask?.id)
             _showSnoozeSheet.value = false
         }
     }
+
+
+
+
 
     fun openSnoozeSheet() { _showSnoozeSheet.value = true }
     fun dismissSnoozeSheet() { _showSnoozeSheet.value = false }

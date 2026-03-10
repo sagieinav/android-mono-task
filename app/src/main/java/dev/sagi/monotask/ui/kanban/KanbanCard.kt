@@ -34,6 +34,7 @@ import dev.sagi.monotask.ui.theme.monoShadow
 @Composable
 fun KanbanCard(
     task: Task,
+    isArchive: Boolean = false,
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -76,8 +77,10 @@ fun KanbanCard(
             }
 
             // ========== Due date ==========
-            task.dueDate?.let {
-                DueDateLabel(timestamp = it, small = true)
+            if (!isArchive) {
+                task.dueDate?.let {
+                    DueDateLabel(timestamp = it, small = true)
+                }
             }
         }
     }

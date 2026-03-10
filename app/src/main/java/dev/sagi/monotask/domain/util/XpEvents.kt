@@ -13,12 +13,39 @@ object XpEvents {
     const val BONUS_HIGH_IMPORTANCE = 30
     const val BONUS_MEDIUM_IMPORTANCE = 10
 
-    // ========== Penalties (Immediate Deduction) ==========
-    const val SNOOZE_MANUAL = -30
-    const val SNOOZE_RANDOM = -20
-    const val SNOOZE_NEXT = -15
-    const val SNOOZE_DUE_SOON = -10
-    const val SNOOZE_HIGH_IMPORTANCE = -10
+    // ========== Snooze Options (penalty baked in) ==========
+    enum class SnoozeOption(val penalty: Int) {
+        MANUAL(-30),        // triggered from Kanban card long-press
+        NEXT_IN_QUEUE(-15), // snooze sheet option 1
+        BY_DUE_DATE(-10)    // snooze sheet option 2
+    }
+
+    // Stacked penalty for snoozing a high-importance task (any option)
+    const val SNOOZE_HIGH_IMPORTANCE_EXTRA = -10
+
+
+
+// ==============================
+// TASK XP EVENTS
+// ==============================
+
+    // Called on task creation and after edits (pure recalculation from task state)
+    fun xpForTask(task: Task): Int = calculateCompletionXp(task)
+
+    // Called on snooze. Recalculates with new snoozeCount, then applies option penalty on top
+    fun xpAfterSnooze(task: Task, option: SnoozeOption): Int {
+        val taskAfterSnooze = task.copy(snoozeCount = task.snoozeCount + 1)
+        val base = calculateCompletionXp(taskAfterSnooze) // ace bonus lost on first snooze
+        val penalty = calculateSnoozePenalty(option, task)
+        return (base + penalty).coerceAtLeast(10)
+    }
+
+    // ========== Penalty Helper ==========
+    fun calculateSnoozePenalty(option: SnoozeOption, task: Task): Int {
+        val base = option.penalty
+        val extra = if (task.importance == Importance.HIGH) SNOOZE_HIGH_IMPORTANCE_EXTRA else 0
+        return base + extra
+    }
 
     // ========== Calculation Helper ==========
     fun calculateCompletionXp(task: Task): Int {
@@ -38,6 +65,12 @@ object XpEvents {
 
         return xp.coerceAtLeast(10) // Set a minimum XP value of 10
     }
+
+
+
+// ==============================
+// USER XP EVENTS
+// ==============================
 
     /**
      * Total XP required to REACH a given level.

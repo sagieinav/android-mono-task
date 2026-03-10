@@ -12,12 +12,13 @@ data class Task(
     val workspaceId: String = "",
     val tags: List<String> = emptyList(),
     val snoozeCount: Int = 0,
+    val currentXp: Int = 0,
     val completed: Boolean = false,
     val createdAt: Timestamp = Timestamp.now(),
     val ownerId: String = ""
 ) {
     val isAce: Boolean get() = snoozeCount == 0
-    val currentXp: Int get() = XpEvents.calculateCompletionXp(this)
+//    val currentXp: Int get() = XpEvents.calculateCompletionXp(this)
 }
 
 enum class Importance(val weight: Float) {

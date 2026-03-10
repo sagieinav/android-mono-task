@@ -15,33 +15,79 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingSpinner(
-    modifier: Modifier = Modifier.size(86.dp),
+    modifier: Modifier = Modifier,
+    indicatorSize: Dp = 86.dp,
     useContained: Boolean = false // container UI or not
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize().background(Color.Transparent),
     ) {
         if (useContained) {
             ContainedLoadingIndicator(
                 indicatorColor = MaterialTheme.colorScheme.primary,
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                modifier = modifier
+//                modifier = modifier
+//                    .align(Alignment.Center)
+                modifier = Modifier.size(indicatorSize).background(Color.Transparent)
             )
         } else {
             LoadingIndicator(
                 color = MaterialTheme.colorScheme.primary,
-                modifier = modifier
+//                modifier = modifier
+//                    .align(Alignment.Center)
+                modifier = Modifier.size(indicatorSize)
             )
         }
     }
 }
+
+
+
+@Composable
+fun LoadingOverlay(
+    isLoading: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Box(modifier = modifier) {
+        content()
+
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(animationSpec = tween(200)),
+            exit = fadeOut(animationSpec = tween(200)),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6f)),
+                contentAlignment = Alignment.Center
+            ) {
+                LoadingSpinner(indicatorSize = 64.dp, useContained = true)
+            }
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -54,7 +100,7 @@ fun LoadingSpinnerPreview() {
         ) {
 //            LoadingSpinner()                    // default size
 //            LoadingSpinner(size = 48.dp)        // small
-            LoadingSpinner(Modifier.size(86.dp), true)        // large
+            LoadingSpinner(indicatorSize = 96.dp, useContained = true)        // large
         }
     }
 }

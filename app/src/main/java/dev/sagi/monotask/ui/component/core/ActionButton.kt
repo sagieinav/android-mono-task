@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.dropShadow
 import dev.sagi.monotask.ui.theme.monoBorder
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.penaltyRed
@@ -69,21 +70,16 @@ fun ActionButton(
 
     GlassSurface(
         modifier = modifier
-//            .then(
-//                if (!enabled) modifier
-//                else modifier
-//                    .shadow(
-//                        elevation = 6.dp,
-//                        shape = shape,
-//                        ambientColor = Color.Black.copy(alpha = 0.07f),
-//                        spotColor = Color.Black.copy(alpha = 0.15f)
-//                    )
+//            .shadow(
+//                elevation = shadowElevation,
+//                shape = shape,
+//                clip = false,
+//                ambientColor = Color.Black.copy(alpha = 0.08f),
+//                spotColor = Color.Black.copy(alpha = 0.12f)
 //            )
-            .shadow(
-                elevation = shadowElevation,
-                shape = shape,
-                ambientColor = Color.Black.copy(alpha = 0.08f),
-                spotColor = Color.Black.copy(alpha = 0.12f)
+            .then(
+                if (enabled) Modifier.dropShadow(shape = shape)
+                else Modifier
             )
             .fillMaxWidth()
             .height(56.dp)
@@ -96,7 +92,7 @@ fun ActionButton(
                 onClick = onClick
             ),
         shape = shape,
-//        blurred = false
+        blurred = false
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {
             Row(

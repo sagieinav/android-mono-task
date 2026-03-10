@@ -76,7 +76,7 @@ class WorkspaceViewModel(
     ) {
         val workspaceId = _selectedWorkspace.value?.id ?: return
         viewModelScope.launch {
-            taskRepository.addTask(userId, Task(
+            taskRepository.insertNewTask(userId, Task(
                 title = title,
                 description = description,
                 importance = importance,

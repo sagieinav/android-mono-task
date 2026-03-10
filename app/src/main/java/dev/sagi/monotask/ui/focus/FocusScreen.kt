@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.EmptyState
 import dev.sagi.monotask.ui.component.core.HeroGreeting
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
@@ -58,8 +59,8 @@ fun FocusScreen(
         onCompleteTask    = { focusVM.completeTask() },
         onOpenSnooze      = { focusVM.openSnoozeSheet() },
         onDismissSnooze   = { focusVM.dismissSnoozeSheet() },
-        onSnoozeConfirmed = { penalty ->
-            pendingSnoozeAction = { focusVM.snoozeTask(penalty) }
+        onSnoozeConfirmed = { option ->
+            pendingSnoozeAction = { focusVM.snoozeTask(option) }
             isSnoozeExiting     = true
             snoozeExitTrigger   = SwipeExitDirection.LEFT
             focusVM.dismissSnoozeSheet()
@@ -82,12 +83,13 @@ fun FocusScreenContent(
     onCompleteTask: () -> Unit = {},
     onOpenSnooze: () -> Unit = {},
     onDismissSnooze: () -> Unit = {},
-    onSnoozeConfirmed: (Int) -> Unit = {},
+    onSnoozeConfirmed: (XpEvents.SnoozeOption) -> Unit = {},
     onSnoozeCardExited: () -> Unit = {}
 ) {
     val innerPadding = LocalScaffoldPadding.current
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // Only show content when not loading
+    if (uiState !is FocusUiState.Loading) {
         Column(
             modifier = Modifier.fillMaxSize().padding(
                 top    = innerPadding.calculateTopPadding(),
@@ -96,11 +98,11 @@ fun FocusScreenContent(
         ) {
             HeroGreeting(userName = userDisplayName)
             Box(
-                modifier           = Modifier.fillMaxWidth().weight(1f),
-                contentAlignment   = Alignment.Center
+                modifier         = Modifier.fillMaxWidth().weight(1f),
+                contentAlignment = Alignment.Center
             ) {
                 when (uiState) {
-                    is FocusUiState.Loading -> LoadingSpinner()
+//                    is FocusUiState.Loading -> LoadingSpinner()
                     is FocusUiState.Empty   -> EmptyState()
                     is FocusUiState.Active  -> ActiveFocusCard(
                         uiState            = uiState,
@@ -116,7 +118,7 @@ fun FocusScreenContent(
         if (showSnoozeSheet) {
             SnoozeBottomSheet(
                 onDismissRequest = onDismissSnooze,
-                onSnooze         = { penalty -> onSnoozeConfirmed(penalty) }
+                onSnooze         = { snoozeOption -> onSnoozeConfirmed(snoozeOption) }
             )
         }
     }
