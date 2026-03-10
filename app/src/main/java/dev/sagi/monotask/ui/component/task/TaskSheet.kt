@@ -108,7 +108,7 @@ private fun TaskSheet(
             )
         }
 
-        // (Potentially) "Delete Task" button, or any other extra button
+        // (Potentially) any extra button
         extraContent?.invoke()
 
         // Spacer before buttons
@@ -161,21 +161,7 @@ fun EditTaskSheet(
         initialTags = task.tags,
         initialDueDateMillis = task.dueDate?.toDate()?.time,
         onDismiss = onDismiss,
-        onSubmit = onSave,
-        extraContent = {
-            // "Delete Task" button
-            ActionButton(
-                onClick = { onDelete(); onDismiss() },
-                enabled = true,
-                color = MaterialTheme.colorScheme.error,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_delete),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp).padding(end = 4.dp)
-                )
-                Text("Delete Task", style = MaterialTheme.typography.titleMedium)            }
-        }
+        onSubmit = onSave
     )
 }
 

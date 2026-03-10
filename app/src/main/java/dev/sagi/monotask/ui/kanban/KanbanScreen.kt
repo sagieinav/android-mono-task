@@ -20,7 +20,7 @@ import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import java.util.Date
 
-private const val COLUMN_STAGGER_MS = 300
+private const val COLUMN_STAGGER_MS = 80
 
 @Composable
 fun KanbanScreen(
@@ -36,9 +36,12 @@ fun KanbanScreen(
     val editingTask by kanbanVM.editingTask.collectAsState()
 
     KanbanScreenContent(
-        uiState        = uiState,
+        uiState         = uiState,
         onToggleArchive = { kanbanVM.toggleArchive() },
-        onTaskClick     = { kanbanVM.openEditSheet(it) }
+        onTaskClick     = { kanbanVM.openEditSheet(it) },
+        onFocusNow      = { kanbanVM.focusNow(it) },
+        onRestore       = { kanbanVM.restoreTask(it) },
+        onDelete        = { kanbanVM.deleteTask(it.id) }
     )
 
     editingTask?.let { task ->
@@ -64,7 +67,10 @@ fun KanbanScreen(
 fun KanbanScreenContent(
     uiState: KanbanUiState,
     onToggleArchive: () -> Unit,
-    onTaskClick: (Task) -> Unit
+    onTaskClick: (Task) -> Unit,
+    onFocusNow: (Task) -> Unit,
+    onRestore: (Task) -> Unit,
+    onDelete: (Task) -> Unit
 ) {
     val innerPadding = LocalScaffoldPadding.current
 
@@ -82,7 +88,7 @@ fun KanbanScreenContent(
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // ========== Active / Archive toggle ==========
+        // ── Active / Archive toggle ─────────────────────────────────────────
         SegmentedToggle(
             options          = listOf("Active", "Archive"),
             selectedIndex    = if (uiState is KanbanUiState.Ready && uiState.isArchive) 1 else 0,
@@ -90,7 +96,7 @@ fun KanbanScreenContent(
             modifier         = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        // ========== Kanban columns ==========
+        // ── Kanban columns ──────────────────────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -103,7 +109,10 @@ fun KanbanScreenContent(
                 importance        = Importance.HIGH,
                 tasks             = displayState?.highTasks   ?: emptyList(),
                 isArchive         = displayState?.isArchive   ?: false,
-                onTaskClick       = onTaskClick,
+                onEditClick       = onTaskClick,
+                onFocusNowClick   = onFocusNow,
+                onRestoreClick    = onRestore,
+                onDeleteClick     = onDelete,
                 animationDelayMs  = 0 * COLUMN_STAGGER_MS
             )
             KanbanColumn(
@@ -111,7 +120,10 @@ fun KanbanScreenContent(
                 importance        = Importance.MEDIUM,
                 tasks             = displayState?.mediumTasks ?: emptyList(),
                 isArchive         = displayState?.isArchive   ?: false,
-                onTaskClick       = onTaskClick,
+                onEditClick       = onTaskClick,
+                onFocusNowClick   = onFocusNow,
+                onRestoreClick    = onRestore,
+                onDeleteClick     = onDelete,
                 animationDelayMs  = 1 * COLUMN_STAGGER_MS
             )
             KanbanColumn(
@@ -119,7 +131,10 @@ fun KanbanScreenContent(
                 importance        = Importance.LOW,
                 tasks             = displayState?.lowTasks    ?: emptyList(),
                 isArchive         = displayState?.isArchive   ?: false,
-                onTaskClick       = onTaskClick,
+                onEditClick       = onTaskClick,
+                onFocusNowClick   = onFocusNow,
+                onRestoreClick    = onRestore,
+                onDeleteClick     = onDelete,
                 animationDelayMs  = 2 * COLUMN_STAGGER_MS
             )
         }

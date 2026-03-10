@@ -41,8 +41,12 @@ class WorkspaceViewModel(
         workspaceRepository.getWorkspaces(userId)
             .onEach { workspaces ->
                 _workspaces.value = workspaces
-                val isCurrentValid = workspaces.any { it.id == _selectedWorkspace.value?.id }
-                if (!isCurrentValid) {
+                val currentId = _selectedWorkspace.value?.id
+                val freshCurrent = workspaces.firstOrNull { it.id == currentId }
+                if (freshCurrent != null) {
+                    // Always sync selected workspace with latest Firestore data
+                    _selectedWorkspace.value = freshCurrent
+                } else {
                     val lastId = userPrefs.getLastWorkspaceId()
                     _selectedWorkspace.value = workspaces.firstOrNull { it.id == lastId }
                         ?: workspaces.firstOrNull()

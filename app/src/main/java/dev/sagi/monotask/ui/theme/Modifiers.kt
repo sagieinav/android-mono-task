@@ -60,7 +60,7 @@ fun Modifier.basicMonoTask(shape: Shape): Modifier = composed {
 // Custom (workaround) drop shadow for use in semi-transparent components
 fun Modifier.dropShadow(
     shape: Shape,
-    color: Color = Color.Black.copy(alpha = 0.0f),
+    color: Color = Color.Black.copy(alpha = 0.08f),
     blur: Dp = 8.dp,
     offsetY: Dp = 0.dp,
     offsetX: Dp = 0.dp,

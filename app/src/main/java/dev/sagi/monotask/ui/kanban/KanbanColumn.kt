@@ -1,6 +1,5 @@
 package dev.sagi.monotask.ui.kanban
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -44,21 +43,23 @@ import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.harabara
 import kotlinx.coroutines.delay
 
-private const val ANIM_DURATION   = 600
+private const val ANIM_DURATION   = 250
 private const val COLUMN_SLIDE_PX = -48  // column entrance: slides down from above
 
-@SuppressLint("UnusedTargetStateInContentKeyLambda")
 @Composable
 fun KanbanColumn(
     title: String,
     importance: Importance,
     tasks: List<Task>,
     isArchive: Boolean = false,
-    onTaskClick: (Task) -> Unit,
+    onEditClick: (Task) -> Unit,
+    onFocusNowClick: (Task) -> Unit,
+    onRestoreClick: (Task) -> Unit,
+    onDeleteClick: (Task) -> Unit,
     modifier: Modifier = Modifier,
     animationDelayMs: Int = 0
 ) {
-    // Column entrance animation (first load only)
+    // ── Column entrance animation (first load only) ─────────────────────────
     var columnVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         delay(animationDelayMs.toLong())
@@ -85,7 +86,7 @@ fun KanbanColumn(
         ) {
             val cardShape = MaterialTheme.shapes.medium
 
-            // ========== Header ==========
+            // ── Header ─────────────────────────────────────────────────────
             GlassSurface(blurred = false, shape = cardShape, modifier = Modifier) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -106,7 +107,7 @@ fun KanbanColumn(
                         color       = contentColor,
                     )
                     Spacer(Modifier.weight(1f))
-                    // Task count badge (fades in/out on change)
+                    // ── Task count badge (fades in/out on change) ───────────
                     Surface(
                         shape = RoundedCornerShape(100),
                         color = containerColor.copy(alpha = 0.35f),
@@ -127,11 +128,12 @@ fun KanbanColumn(
                 }
             }
 
-            // ========== Body ==========
+            // ── Body ───────────────────────────────────────────────────────
             GlassSurface(blurred = false, shape = cardShape, modifier = Modifier.fillMaxSize()) {
+                val archiveKey = isArchive
                 AnimatedContent(
                     targetState    = tasks,
-                    contentKey     = { isArchive },
+                    contentKey     = { archiveKey },
                     transitionSpec = {
                         (slideInVertically(tween(ANIM_DURATION)) { COLUMN_SLIDE_PX } + fadeIn(tween(ANIM_DURATION))) togetherWith
                                 fadeOut(tween(0))
@@ -145,9 +147,12 @@ fun KanbanColumn(
                     ) {
                         items(displayedTasks, key = { it.id }) { task ->
                             KanbanCard(
-                                task      = task,
-                                isArchive = isArchive,
-                                onClick   = { onTaskClick(task) }
+                                task            = task,
+                                isArchive       = isArchive,
+                                onEditClick     = { onEditClick(task) },
+                                onFocusNowClick = { onFocusNowClick(task) },
+                                onRestoreClick  = { onRestoreClick(task) },
+                                onDeleteClick   = { onDeleteClick(task) }
                             )
                         }
                     }
@@ -171,9 +176,9 @@ fun KanbanColumnPreview() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier              = Modifier.padding(16.dp)
         ) {
-            KanbanColumn(title = "High",   tasks = fakeTasks.filter { it.importance == Importance.HIGH },   onTaskClick = {}, importance = Importance.HIGH,   animationDelayMs = 0)
-            KanbanColumn(title = "Medium", tasks = fakeTasks.filter { it.importance == Importance.MEDIUM }, onTaskClick = {}, importance = Importance.MEDIUM, animationDelayMs = 80)
-            KanbanColumn(title = "Low",    tasks = fakeTasks.filter { it.importance == Importance.LOW },    onTaskClick = {}, importance = Importance.LOW,    animationDelayMs = 160)
+            KanbanColumn(title = "High",   tasks = fakeTasks.filter { it.importance == Importance.HIGH },   onEditClick = {}, onFocusNowClick = {}, onRestoreClick = {}, onDeleteClick = {}, importance = Importance.HIGH,   animationDelayMs = 0)
+            KanbanColumn(title = "Medium", tasks = fakeTasks.filter { it.importance == Importance.MEDIUM }, onEditClick = {}, onFocusNowClick = {}, onRestoreClick = {}, onDeleteClick = {}, importance = Importance.MEDIUM, animationDelayMs = 80)
+            KanbanColumn(title = "Low",    tasks = fakeTasks.filter { it.importance == Importance.LOW },    onEditClick = {}, onFocusNowClick = {}, onRestoreClick = {}, onDeleteClick = {}, importance = Importance.LOW,    animationDelayMs = 160)
         }
     }
 }

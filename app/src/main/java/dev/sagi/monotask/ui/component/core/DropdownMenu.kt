@@ -19,13 +19,34 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.monoShadow
-
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.text.style.TextAlign
+import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.harabara
+import dev.sagi.monotask.ui.theme.lora
+import dev.sagi.monotask.ui.theme.notoSerif
+import dev.sagi.monotask.ui.theme.playfairDisplay
+import kotlinx.coroutines.delay
 
 // ========================================
 // Trigger Pill
@@ -106,32 +127,152 @@ fun MonoDropdownMenuGlass(
     expanded: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    offset: IntOffset = IntOffset(0, 130),
+    popupPositionProvider: PopupPositionProvider = remember {
+        object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset = IntOffset(
+                x = anchorBounds.left.coerceIn(0, windowSize.width - popupContentSize.width),
+                y = (anchorBounds.bottom + 4).coerceIn(0, windowSize.height - popupContentSize.height)
+            )
+        }
+    },
     content: @Composable ColumnScope.() -> Unit
 ) {
-    if (!expanded) return
+    var visible by remember { mutableStateOf(false) }
+    var mounted by remember { mutableStateOf(false) }
+
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            mounted = true
+            delay(16)
+            visible = true
+        } else {
+            visible = false
+            delay(160)
+            mounted = false
+        }
+    }
+    if (!mounted) return
 
     Popup(
-        alignment = Alignment.TopStart,
-        offset = offset,
-        onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = true)
+        popupPositionProvider = popupPositionProvider,
+        onDismissRequest      = onDismiss,
+        properties            = PopupProperties(focusable = true)
     ) {
-        GlassSurface(
-            shape = MaterialTheme.shapes.medium,
-            modifier = modifier.widthIn(min = 100.dp, max = 220.dp)
+        AnimatedVisibility(
+            visible = visible,
+            enter = expandVertically(
+                animationSpec = tween(350),
+                expandFrom    = Alignment.Top
+            ) + fadeIn(tween(450)),
+            exit = shrinkVertically(
+                animationSpec = tween(350),
+                shrinkTowards = Alignment.Top
+            ) + fadeOut(tween(350))
         ) {
-            Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                content()
+            GlassSurface(
+                shape    = MaterialTheme.shapes.medium,
+                modifier = modifier.widthIn(min = 100.dp, max = 220.dp),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(vertical = 6.dp)
+                        .width(IntrinsicSize.Max),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    content()
+                }
             }
         }
     }
+}
+
+@Composable
+fun MonoDropdownMenuGlass(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    tapOffset: IntOffset,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val positionProvider = remember(tapOffset) {
+        object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset = IntOffset(
+//                x = tapOffset.x.coerceIn(0, windowSize.width  - popupContentSize.width), // anchored to left
+                x = (tapOffset.x - popupContentSize.width / 2).coerceIn(0, windowSize.width - popupContentSize.width), // centered
+                y = tapOffset.y.coerceIn(0, windowSize.height - popupContentSize.height)
+            )
+        }
+    }
+    MonoDropdownMenuGlass(
+        expanded             = expanded,
+        onDismiss            = onDismiss,
+        popupPositionProvider = positionProvider,
+        modifier             = modifier,
+        content              = content
+    )
 }
 
 
 // ========================================
 // Generic Item
 // ========================================
+//@Composable
+//fun MonoDropdownItem(
+//    label: String,
+//    selected: Boolean = false,
+//    onClick: () -> Unit,
+//    trailingContent: @Composable (() -> Unit)? = null
+//) {
+//    GlassSurface(
+//        blurred = false,
+//        shape = MaterialTheme.shapes.small,
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(horizontal = 8.dp, vertical = 2.dp)
+//            .clip(MaterialTheme.shapes.small)
+//            .clickable(onClick = onClick)
+//            // `selected` indication
+//            .then(
+//                if (!selected) Modifier
+//                else Modifier.border(
+//                    width = 0.4.dp,
+//                    color = Color.Black.copy(alpha = 0.2f),
+//                    shape = MaterialTheme.shapes.small
+//                )
+//            )
+//    ) {
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+////                .background(
+////                    if (selected) MaterialTheme.colorScheme.surfaceDim.copy(alpha = 0.6f)
+////                    else Color.Transparent
+////                )
+//                .padding(horizontal = 12.dp, vertical = 8.dp)
+//,
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            Text(
+//                text = label,
+//                style = MaterialTheme.typography.titleMedium,
+//                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+//                color = MaterialTheme.colorScheme.onSurface
+//            )
+//            trailingContent?.invoke()
+//        }
+//    }
+//}
 @Composable
 fun MonoDropdownItem(
     label: String,
@@ -139,44 +280,28 @@ fun MonoDropdownItem(
     onClick: () -> Unit,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
-    GlassSurface(
-        blurred = false,
-        shape = MaterialTheme.shapes.small,
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .padding(horizontal = 6.dp, vertical = 0.dp)
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
-            // `selected` indication
             .then(
                 if (!selected) Modifier
-                else Modifier.border(
-                    width = 0.4.dp,
-                    color = Color.Black.copy(alpha = 0.2f),
-                    shape = MaterialTheme.shapes.small
-                )
+                else Modifier.glassBorder(MaterialTheme.shapes.small)
             )
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+        ,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-//                .background(
-//                    if (selected) MaterialTheme.colorScheme.surfaceDim.copy(alpha = 0.6f)
-//                    else Color.Transparent
-//                )
-                .padding(horizontal = 12.dp, vertical = 10.dp)
-,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            trailingContent?.invoke()
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+        trailingContent?.invoke() // 'selected' icon
     }
 }
 
@@ -189,28 +314,31 @@ fun MonoDropdownItem(
 fun MonoDropdownActionItem(
     label: String,
     iconRes: Int,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .padding(horizontal = 6.dp, vertical = 0.dp) // outer padding
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(start = 8.dp, end = 12.dp)
+            .padding(vertical = 10.dp), // inner padding
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Icon(
             painter = painterResource(iconRes),
             contentDescription = null,
             modifier = Modifier.size(18.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = color
         )
-        Spacer(Modifier.width(12.dp))
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = color
         )
     }
 }

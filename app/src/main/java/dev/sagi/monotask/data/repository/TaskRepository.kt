@@ -48,7 +48,6 @@ class TaskRepository {
         }
     }
 
-
     // Returns completed tasks for the Archive view
     fun getCompletedTasks(userId: String, workspaceId: String): Flow<List<Task>> =
         getTasks(userId, workspaceId, completed = true)
@@ -65,39 +64,32 @@ class TaskRepository {
         }
     }
 
-
-//    // Adds a new task. Firestore auto-generates the document ID
-//    suspend fun addTask(userId: String, task: Task) {
-//        tasksCollection(userId).add(task).await()
-//    }
-//
-//    // Increments snooze count. Called when user snoozes the focus task
-//    suspend fun snoozeTask(userId: String, taskId: String) {
-//        tasksCollection(userId).document(taskId)
-//            .update("snoozeCount", com.google.firebase.firestore.FieldValue.increment(1))
-//    }
-//
-//    // Full task update (used by the Edit Task sheet)
-//    suspend fun updateTask(userId: String, task: Task) {
-//        tasksCollection(userId).document(task.id).set(task)
-//    }
-
     // Marks a task as complete. Moves it to archive
     suspend fun markTaskCompleted(userId: String, taskId: String) {
         tasksCollection(userId).document(taskId)
             .update(
                 mapOf(
-                    "completed" to true,
+                    "completed"   to true,
                     "completedAt" to com.google.firebase.Timestamp.now()
                 )
             )
+    }
+
+    // Restores a completed task back to active. Inverse of markTaskCompleted
+    suspend fun restoreTask(userId: String, taskId: String) {
+        tasksCollection(userId).document(taskId)
+            .update(
+                mapOf(
+                    "completed"   to false,
+                    "completedAt" to null
+                )
+            ).await()
     }
 
     // Permanently deletes a task
     suspend fun deleteTask(userId: String, taskId: String) {
         tasksCollection(userId).document(taskId).delete()
     }
-
 
     // insertNewTask now stores initial XP
     suspend fun insertNewTask(userId: String, task: Task) {
@@ -114,7 +106,6 @@ class TaskRepository {
                 "currentXp"   to newXp
             )).await()
     }
-
 
     // overwriteExistingTask recalculates XP from edited properties
     suspend fun overwriteExistingTask(userId: String, task: Task) {

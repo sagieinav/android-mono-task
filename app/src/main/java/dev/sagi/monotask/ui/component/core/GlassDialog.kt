@@ -55,7 +55,9 @@ fun GlassDialog(
             baseColor = MaterialTheme.colorScheme.surfaceDim
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 18.dp),
+                modifier = Modifier
+                    .padding(horizontal = 28.dp)
+                    .padding(top = 24.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Title
@@ -95,7 +97,8 @@ fun GlassConfirmDialog(
         content = {
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Thin,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
         },

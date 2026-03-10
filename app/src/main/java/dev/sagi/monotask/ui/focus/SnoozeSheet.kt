@@ -1,6 +1,9 @@
 package dev.sagi.monotask.ui.focus
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,6 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.core.BottomSheet
+import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.core.InfoCallout
+import dev.sagi.monotask.ui.theme.GlassSurface
 
 @Composable
 fun SnoozeBottomSheet(
@@ -67,17 +77,22 @@ fun SnoozeBottomSheet(
         }
 
 
-        Text(
-            text = "You can also snooze tasks directly from the Kanban board.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .fillMaxWidth()
-            ,
-            textAlign = TextAlign.Center
-        )
+//        Text(
+//            text = "You can also snooze tasks directly from the Kanban board.",
+//            style = MaterialTheme.typography.bodySmall,
+//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+//            modifier = Modifier
+//                .padding(top = 8.dp)
+//                .fillMaxWidth()
+//            ,
+//            textAlign = TextAlign.Center
+//        )
 
+        InfoCallout(
+            title    = "MANUAL SNOOZE",
+            body     = "Want to pick a specific next task? Tap it on the Kanban board and hit 'Focus Now'!",
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
 

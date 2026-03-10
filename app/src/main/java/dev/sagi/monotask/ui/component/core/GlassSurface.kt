@@ -46,7 +46,7 @@ fun GlassSurface(
             // Apply the blur effect inside the clipped bounds
             .then(
                 if (!blurred) Modifier
-                else Modifier.hazeEffect(hazeState, HazeMaterials.ultraThin())
+                else Modifier.hazeEffect(hazeState, HazeMaterials.thin())
             )
             // Glass Border (my custom double border modifier)
             .glassBorder(shape, accentColor)

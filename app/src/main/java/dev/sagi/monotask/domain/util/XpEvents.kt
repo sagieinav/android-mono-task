@@ -21,7 +21,7 @@ object XpEvents {
     }
 
     // Stacked penalty for snoozing a high-importance task (any option)
-    const val SNOOZE_HIGH_IMPORTANCE_EXTRA = -10
+//    const val SNOOZE_HIGH_IMPORTANCE_EXTRA = -10
 
 
 
@@ -30,25 +30,16 @@ object XpEvents {
 // ==============================
 
     // Called on task creation and after edits (pure recalculation from task state)
-    fun xpForTask(task: Task): Int = calculateCompletionXp(task)
+    fun xpForTask(task: Task): Int = calculateTaskXp(task)
 
-    // Called on snooze. Recalculates with new snoozeCount, then applies option penalty on top
+    // Called on snooze. Applies penalty on top of current stored XP
     fun xpAfterSnooze(task: Task, option: SnoozeOption): Int {
-        val taskAfterSnooze = task.copy(snoozeCount = task.snoozeCount + 1)
-        val base = calculateCompletionXp(taskAfterSnooze) // ace bonus lost on first snooze
-        val penalty = calculateSnoozePenalty(option, task)
-        return (base + penalty).coerceAtLeast(10)
-    }
-
-    // ========== Penalty Helper ==========
-    fun calculateSnoozePenalty(option: SnoozeOption, task: Task): Int {
-        val base = option.penalty
-        val extra = if (task.importance == Importance.HIGH) SNOOZE_HIGH_IMPORTANCE_EXTRA else 0
-        return base + extra
+        val penalty = option.penalty
+        return (task.currentXp + penalty).coerceAtLeast(10)
     }
 
     // ========== Calculation Helper ==========
-    fun calculateCompletionXp(task: Task): Int {
+    fun calculateTaskXp(task: Task): Int {
         var xp = BASE_COMPLETION
 
         // Importance Bonus
