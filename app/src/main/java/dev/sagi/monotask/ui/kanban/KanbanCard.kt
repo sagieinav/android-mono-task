@@ -42,6 +42,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ripple
+import androidx.compose.ui.graphics.Shape
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.AceGold
@@ -55,6 +56,7 @@ private enum class PendingAction { FOCUS_NOW, RESTORE, DELETE }
 fun KanbanCard(
     task: Task,
     isArchive: Boolean = false,
+    shape: Shape = MaterialTheme.shapes.small,
     onEditClick: () -> Unit = {},
     onFocusNowClick: () -> Unit = {},
     onRestoreClick: () -> Unit = {},

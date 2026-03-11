@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,10 +85,11 @@ fun KanbanColumn(
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            val cardShape = MaterialTheme.shapes.medium
+            val colShape = MaterialTheme.shapes.medium
+            val cardShape = MaterialTheme.shapes.small
 
             // ── Header ─────────────────────────────────────────────────────
-            GlassSurface(blurred = false, shape = cardShape, modifier = Modifier) {
+            GlassSurface(blurred = false, shape = colShape, modifier = Modifier) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -129,7 +131,7 @@ fun KanbanColumn(
             }
 
             // ── Body ───────────────────────────────────────────────────────
-            GlassSurface(blurred = false, shape = cardShape, modifier = Modifier.fillMaxSize()) {
+            GlassSurface(blurred = false, shape = colShape, modifier = Modifier.fillMaxSize()) {
                 val archiveKey = isArchive
                 AnimatedContent(
                     targetState    = tasks,
@@ -141,14 +143,17 @@ fun KanbanColumn(
                     label = "cards"
                 ) { displayedTasks ->
                     LazyColumn(
-                        modifier        = Modifier.padding(8.dp),
+                        modifier            = Modifier
+                            .padding(8.dp)
+                            .clip(cardShape),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding  = PaddingValues(bottom = 8.dp)
+                        contentPadding      = PaddingValues(bottom = 8.dp),
                     ) {
                         items(displayedTasks, key = { it.id }) { task ->
                             KanbanCard(
                                 task            = task,
                                 isArchive       = isArchive,
+                                shape = cardShape,
                                 onEditClick     = { onEditClick(task) },
                                 onFocusNowClick = { onFocusNowClick(task) },
                                 onRestoreClick  = { onRestoreClick(task) },

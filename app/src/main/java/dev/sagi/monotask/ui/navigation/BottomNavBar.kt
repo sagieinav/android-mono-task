@@ -75,7 +75,9 @@ fun BottomNavBar(
     ) {
         GlassSurface(
             shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            baseColor = MaterialTheme.colorScheme.surfaceContainerLow,
+//            blurred = false
         ) {
             BoxWithConstraints(
                 modifier = Modifier
