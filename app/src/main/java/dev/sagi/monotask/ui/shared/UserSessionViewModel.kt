@@ -18,13 +18,18 @@ class UserSessionViewModel(
 ) : ViewModel() {
 
     // Stream the whole user doc
-    val currentUser: StateFlow<User?> = userRepository
-        .getUserStream(userId)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null
-        )
+
+    val currentUser: StateFlow<User?> = if (userId.isNotEmpty()) {
+        userRepository
+            .getUserStream(userId)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = null
+            )
+    } else {
+        MutableStateFlow(null)
+    }
 
     // Display name only
     val displayName: StateFlow<String> = currentUser
