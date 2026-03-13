@@ -32,3 +32,10 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# MacOS
+*.DS_Store
+
+# Unit Tests
+app/src/androidTest/
+app/src/test/
