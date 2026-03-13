@@ -28,19 +28,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.dropShadow
-import dev.sagi.monotask.ui.theme.monoBorder
-import dev.sagi.monotask.ui.theme.monoShadow
+import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import dev.sagi.monotask.ui.theme.penaltyRed
 
 @Composable
@@ -78,7 +74,7 @@ fun ActionButton(
 //                spotColor = Color.Black.copy(alpha = 0.12f)
 //            )
             .then(
-                if (enabled) Modifier.dropShadow(shape = shape)
+                if (enabled) Modifier.monoShadowWorkaround(shape = shape)
                 else Modifier
             )
             .fillMaxWidth()

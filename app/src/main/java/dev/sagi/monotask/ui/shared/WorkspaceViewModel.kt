@@ -10,8 +10,12 @@ import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserPrefsRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.util.AuthUtils
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -22,7 +26,6 @@ class WorkspaceViewModel(
     private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
     private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
     private val userPrefs: UserPrefsRepository = MonoTaskApp.instance.userPrefsRepository,
-    private val userId: String = MonoTaskApp.instance.auth.currentUser?.uid ?: ""
 ) : ViewModel() {
 
     private val _workspaces = MutableStateFlow<List<Workspace>>(emptyList())
@@ -31,12 +34,20 @@ class WorkspaceViewModel(
     private val _selectedWorkspace = MutableStateFlow<Workspace?>(null)
     val selectedWorkspace: StateFlow<Workspace?> = _selectedWorkspace.asStateFlow()
 
+    private val _errorEvent = MutableSharedFlow<String>()
+    val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
+
+    private lateinit var userId: String
+
     init {
-        if (userId.isNotEmpty()) observeWorkspaces()
+        viewModelScope.launch {
+            userId = AuthUtils.awaitUid()
+            observeWorkspaces()
+        }
     }
 
 
-    // ========== WORKSPACE OPERATIONS ==========
+// ========== WORKSPACE OPERATIONS ==========
     private fun observeWorkspaces() {
         workspaceRepository.getWorkspaces(userId)
             .onEach { workspaces ->
@@ -44,7 +55,6 @@ class WorkspaceViewModel(
                 val currentId = _selectedWorkspace.value?.id
                 val freshCurrent = workspaces.firstOrNull { it.id == currentId }
                 if (freshCurrent != null) {
-                    // Always sync selected workspace with latest Firestore data
                     _selectedWorkspace.value = freshCurrent
                 } else {
                     val lastId = userPrefs.getLastWorkspaceId()
@@ -61,16 +71,29 @@ class WorkspaceViewModel(
     }
 
     fun createWorkspace(name: String) {
-        viewModelScope.launch { workspaceRepository.createWorkspace(userId, name) }
+        viewModelScope.launch {
+            try {
+                workspaceRepository.createWorkspace(userId, name)
+            } catch (e: Exception) {
+                _errorEvent.emit("Failed to create workspace: ${e.message}")
+            }
+        }
     }
 
     fun deleteWorkspace(workspace: Workspace) {
-        if (_workspaces.value.size <= 1) return  // prevent deleting last workspace
-        viewModelScope.launch { workspaceRepository.deleteWorkspace(userId, workspace.id) }
+        if (_workspaces.value.size <= 1) return
+        viewModelScope.launch {
+            try {
+                workspaceRepository.deleteWorkspace(userId, workspace.id)
+            } catch (e: Exception) {
+                _errorEvent.emit("Failed to delete workspace: ${e.message}")
+            }
+        }
     }
 
+// ========== TASK OPERATIONS ==========
+// TODO: Consider moving to a dedicated TaskViewModel
 
-    // ========== TASK OPERATIONS ==========
     fun createTask(
         title: String,
         description: String,
@@ -80,17 +103,20 @@ class WorkspaceViewModel(
     ) {
         val workspaceId = _selectedWorkspace.value?.id ?: return
         viewModelScope.launch {
-            taskRepository.insertNewTask(userId, Task(
-                title = title,
-                description = description,
-                importance = importance,
-                tags = tags,
-                dueDate = dueDateMillis?.let { Timestamp(Date(it)) },
-                workspaceId = workspaceId,
-                ownerId = userId,
-                createdAt = Timestamp.now()
-            )
-            )
+            try {
+                taskRepository.insertNewTask(userId, Task(
+                    title = title,
+                    description = description,
+                    importance = importance,
+                    tags = tags,
+                    dueDate = dueDateMillis?.let { Timestamp(Date(it)) },
+                    workspaceId = workspaceId,
+                    ownerId = userId,
+                    createdAt = Timestamp.now()
+                ))
+            } catch (e: Exception) {
+                _errorEvent.emit("Failed to create task: ${e.message}")
+            }
         }
     }
 }

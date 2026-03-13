@@ -106,6 +106,13 @@ dependencies {
     implementation(libs.firebase.firestore)
 
     // Google Services Auth
-    implementation(libs.google.play.services.auth)
+//    implementation(libs.google.play.services.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
+    // Vico (charts library)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
 
 }

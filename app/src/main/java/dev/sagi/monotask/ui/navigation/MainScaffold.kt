@@ -2,10 +2,18 @@
 package dev.sagi.monotask.ui.navigation
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.chrisbanes.haze.hazeSource
@@ -14,30 +22,30 @@ import dev.chrisbanes.haze.rememberHazeState
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.component.task.CreateTaskSheet
 import dev.sagi.monotask.ui.component.workspace.CreateWorkspaceDialog
-import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.component.core.GlassSnackbar
+import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
+import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 
 @Composable
 fun MainScaffold(
     navController: NavHostController,
     authVM: AuthViewModel,
-    profileVM: ProfileViewModel,
     settingsVM: SettingsViewModel,
     workspaceVM: WorkspaceViewModel,
     userSessionVM: UserSessionViewModel
 ) {
     val hazeState = rememberHazeState()
+    val snackbarHostState = remember { SnackbarHostState() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val currentUser by profileVM.currentUser.collectAsState()
 
     val mainScreens = listOf(Screen.Focus.route, Screen.Kanban.route, Screen.Profile.route)
-//    val showTopBar = currentRoute in listOf(Screen.Focus.route, Screen.Kanban.route)
     val showBottomBar = currentRoute in mainScreens
 
     val selectedTab = when (currentRoute) {
@@ -49,34 +57,43 @@ fun MainScaffold(
     var lastNavTime by remember { mutableLongStateOf(0L) }
 
     var showCreateSheet by remember { mutableStateOf(false) }
-    var showCreateWorkspaceDialog by remember { mutableStateOf(false) }  // ← add this
-    val workspaces by workspaceVM.workspaces.collectAsState()
-    val selectedWorkspace by workspaceVM.selectedWorkspace.collectAsState()
+    var showCreateWorkspaceDialog by remember { mutableStateOf(false) }
+    val workspaces by workspaceVM.workspaces.collectAsStateWithLifecycle()
+    val selectedWorkspace by workspaceVM.selectedWorkspace.collectAsStateWithLifecycle()
 
-    CompositionLocalProvider(LocalHazeState provides hazeState) {
+    CompositionLocalProvider(
+        LocalHazeState provides hazeState,
+        LocalSnackbarHostState provides snackbarHostState
+    ) {
         Scaffold(
             containerColor = Color.Transparent,
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState) { snackbarData ->
+                    GlassSnackbarDismissable(snackbarData)
+                }
+            },
             topBar = {
                 when (currentRoute) {
                     Screen.Focus.route, Screen.Kanban.route ->
                         WorkspaceTopBar(
-                        workspaces = workspaces,
-                        selectedWorkspace = selectedWorkspace,
-                        onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
-                        onAddWorkspace = { showCreateWorkspaceDialog = true },
-                        onAddTaskClick = { showCreateSheet = true }
-                    )
-                    Screen.Profile.route -> TitleTopBar(
-                        title = currentUser?.displayName ?: "",
-                        trailingIcon = {
-                            TopBarIconButton(
-                                iconRes = R.drawable.ic_settings,
-                                contentDescription = "Settings",
-                                onClick = { navController.navigate(Screen.Settings.route) }
-                            )
-                        }
-                    )
-                    // Screen.Settings.route -> TitleTopBar(title = "Settings")
+                            workspaces = workspaces,
+                            selectedWorkspace = selectedWorkspace,
+                            onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
+                            onAddWorkspace = { showCreateWorkspaceDialog = true },
+                            onAddTaskClick = { showCreateSheet = true }
+                        )
+                    Screen.Profile.route ->
+                        TitleTopBar(
+                            title = stringResource(R.string.app_name),
+                            titleStyle = MaterialTheme.typography.headlineLarge,
+                            trailingIcon = {
+                                TopBarIconButton(
+                                    iconRes = R.drawable.ic_settings,
+                                    contentDescription = "Settings",
+                                    onClick = { navController.navigate(Screen.Settings.route) }
+                                )
+                            }
+                        )
                 }
             },
             bottomBar = {
@@ -106,12 +123,11 @@ fun MainScaffold(
             CompositionLocalProvider(LocalScaffoldPadding provides innerPadding) {
                 Box(modifier = Modifier.fillMaxSize().hazeSource(hazeState)) {
                     NavGraph(
-                        navController   = navController,
-                        authVM          = authVM,
-                        profileVM       = profileVM,
-                        settingsVM      = settingsVM,
-                        workspaceVM     = workspaceVM,
-                        userSessionVM   = userSessionVM
+                        navController = navController,
+                        authVM        = authVM,
+                        settingsVM    = settingsVM,
+                        workspaceVM   = workspaceVM,
+                        userSessionVM = userSessionVM
                     )
                 }
 

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
@@ -19,7 +20,9 @@ import dev.sagi.monotask.ui.focus.FocusScreen
 import dev.sagi.monotask.ui.focus.FocusViewModel
 import dev.sagi.monotask.ui.kanban.KanbanScreen
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
+import dev.sagi.monotask.ui.profile.ProfileScreen
 import dev.sagi.monotask.ui.profile.ProfileViewModel
+import dev.sagi.monotask.ui.settings.SettingsUiState
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
@@ -36,7 +39,6 @@ private const val navAnimationDuration = 300
 private fun isForward(from: String?, to: String?): Boolean {
     val fromIndex = TAB_ORDER.indexOf(from)
     val toIndex = TAB_ORDER.indexOf(to)
-    // unknown route (Settings, Auth, etc.): always treat as forward
     if (fromIndex == -1 || toIndex == -1) return true
     return toIndex > fromIndex
 }
@@ -54,21 +56,20 @@ fun tabSlideOut(from: String?, to: String?): ExitTransition =
     )
 
 
-
 // ========== Navigation Graph ==========
 @Composable
 fun NavGraph(
     navController: NavHostController,
     authVM: AuthViewModel,
-    profileVM: ProfileViewModel,
     settingsVM: SettingsViewModel,
     workspaceVM: WorkspaceViewModel,
     userSessionVM: UserSessionViewModel
 ) {
-    val settingsState by settingsVM.uiState.collectAsState()
-    val authState by authVM.uiState.collectAsState()
+    val settingsState by settingsVM.uiState.collectAsStateWithLifecycle()
+    val authState by authVM.uiState.collectAsStateWithLifecycle()
 
-    if (settingsState.loading || authState is AuthUiState.Loading) {
+    val isLoading = authState is AuthUiState.Loading || settingsState is SettingsUiState.Loading
+    if (isLoading) {
         LoadingSpinner()
         return
     }
@@ -84,7 +85,7 @@ fun NavGraph(
         }
     }
 
-    val hardcoreMode = settingsState.hardcoreModeEnabled
+    val hardcoreMode = (settingsState as? SettingsUiState.Ready)?.hardcoreModeEnabled ?: false
 
     NavHost(
         navController = navController,
@@ -128,37 +129,36 @@ fun NavGraph(
         navigation(startDestination = Screen.Focus.route, route = Screen.Main.route) {
             composable(Screen.Focus.route) {
                 val focusVM: FocusViewModel = viewModel()
+                // Wire workspace source once. Observation starts automatically in init
+                focusVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
                 FocusScreen(
                     navController = navController,
-                    focusVM = focusVM,
-                    workspaceVM = workspaceVM,
+                    focusVM       = focusVM,
                     userSessionVM = userSessionVM
                 )
             }
             composable(Screen.Kanban.route) {
                 val kanbanVM: KanbanViewModel = viewModel()
+                kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
                 if (hardcoreMode) {
                     LaunchedEffect(Unit) { navController.popBackStack() }
                 } else {
                     KanbanScreen(
                         navController = navController,
-                        workspaceVM = workspaceVM,
-                        kanbanVM = kanbanVM
+                        kanbanVM      = kanbanVM
                     )
                 }
             }
-//            composable(Screen.Profile.route) {
-//                ProfileScreen(
-//                    navController = navController,
-//                    viewModel = profileVM
-//                )
-//            }
-//            composable(Screen.Settings.route) {
-//                SettingsScreen(
-//                    navController = navController,
-//                    viewModel = settingsVM
-//                )
-//            }
+            composable(Screen.Profile.route) {
+                val profileVM: ProfileViewModel = viewModel()
+                LaunchedEffect(Unit) {
+                    profileVM.startObserving(userSessionVM.currentUser)
+                }
+                ProfileScreen(
+                    navController = navController,
+                    profileVM     = profileVM
+                )
+            }
         }
     }
 }

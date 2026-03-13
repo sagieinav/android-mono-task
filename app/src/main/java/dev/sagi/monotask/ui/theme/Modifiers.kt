@@ -1,14 +1,10 @@
 package dev.sagi.monotask.ui.theme
 
-import android.graphics.BlurMaskFilter
 import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.PathMeasure
 import android.graphics.RectF
-import android.graphics.Region
 import android.graphics.SweepGradient
-import android.os.Build
-import android.os.Build.VERSION
 import androidx.compose.foundation.border
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
@@ -34,12 +30,10 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.background
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asAndroidPath
-import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -58,11 +52,11 @@ fun Modifier.basicMonoTask(shape: Shape): Modifier = composed {
 
 
 // Custom (workaround) drop shadow for use in semi-transparent components
-fun Modifier.dropShadow(
+fun Modifier.monoShadowWorkaround(
     shape: Shape,
-    color: Color = Color.Black.copy(alpha = 0.08f),
-    blur: Dp = 8.dp,
-    offsetY: Dp = 0.dp,
+    color: Color = Color.Black.copy(alpha = 0.04f),
+    blur: Dp = 6.dp,
+    offsetY: Dp = 2.dp,
     offsetX: Dp = 0.dp,
 ) = this.drawBehind {
     drawIntoCanvas { canvas ->

@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -160,9 +161,12 @@ fun FocusCardSwipeable(
     var offsetX       by remember { mutableFloatStateOf(0f) }
     var exitDirection by remember { mutableStateOf<SwipeExitDirection?>(null) }
     val isExiting = exitDirection != null
+    val isSwiping = offsetX != 0f || isExiting
 
-    LaunchedEffect(exitTrigger) {
-        if (exitTrigger == SwipeExitDirection.LEFT) exitDirection = SwipeExitDirection.LEFT
+    LaunchedEffect(exitTrigger, task.id) {
+        if (exitTrigger == SwipeExitDirection.LEFT) {
+            exitDirection = SwipeExitDirection.LEFT
+        }
     }
 
     val pillAlpha by animateFloatAsState(
@@ -213,12 +217,14 @@ fun FocusCardSwipeable(
 
     val showXpBadge = exitDirection == SwipeExitDirection.RIGHT
 
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center) {
         FocusCard(
-            task           = task,
+            task = task,
             borderFraction = borderFraction,
-            hideXpLabel    = showXpBadge,
-            modifier       = Modifier
+            hideXpLabel = showXpBadge,
+            modifier = Modifier
                 .fillMaxWidth()
                 .offset { IntOffset(animatedOffset.roundToInt(), 0) }
                 .graphicsLayer { rotationZ = (animatedOffset / screenWidthPx) * 18f }
@@ -228,14 +234,18 @@ fun FocusCardSwipeable(
                         onDragEnd = {
                             when {
                                 offsetX > COMPLETE_THRESHOLD -> {
-                                    badgeOffsetX  = offsetX
+                                    badgeOffsetX = offsetX
                                     exitDirection = SwipeExitDirection.RIGHT
                                 }
-                                offsetX < -SNOOZE_THRESHOLD -> { offsetX = 0f; onSwipeLeft() }
-                                else                        -> offsetX = 0f
+
+                                offsetX < -SNOOZE_THRESHOLD -> {
+                                    offsetX = 0f; onSwipeLeft()
+                                }
+
+                                else -> offsetX = 0f
                             }
                         },
-                        onDragCancel     = { offsetX = 0f },
+                        onDragCancel = { offsetX = 0f },
                         onHorizontalDrag = { _, dragAmount ->
                             offsetX = (offsetX + dragAmount).coerceIn(-400f, 400f)
                         }
@@ -245,8 +255,8 @@ fun FocusCardSwipeable(
 
         if (showXpBadge) {
             XpLabelCompletion(
-                xpDelta  = task.currentXp,
-                visible  = true,
+                xpDelta = task.currentXp,
+                visible = true,
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 20.dp, top = 20.dp)
@@ -254,22 +264,24 @@ fun FocusCardSwipeable(
             )
         }
 
-        CompletePill(
-            syncedOffset  = animatedOffset,
-            screenWidthPx = screenWidthPx,
-            modifier      = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 16.dp)
-                .graphicsLayer { alpha = pillAlpha }
-        )
-        SnoozePill(
-            syncedOffset  = animatedOffset,
-            screenWidthPx = screenWidthPx,
-            modifier      = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 16.dp)
-                .graphicsLayer { alpha = pillAlpha }
-        )
+        if (isSwiping) {
+            CompletePill(
+                syncedOffset = animatedOffset,
+                screenWidthPx = screenWidthPx,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 16.dp)
+                    .graphicsLayer { alpha = pillAlpha }
+            )
+            SnoozePill(
+                syncedOffset = animatedOffset,
+                screenWidthPx = screenWidthPx,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
+                    .graphicsLayer { alpha = pillAlpha }
+            )
+        }
     }
 }
 

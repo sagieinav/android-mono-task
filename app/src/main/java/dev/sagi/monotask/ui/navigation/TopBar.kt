@@ -1,6 +1,5 @@
 package dev.sagi.monotask.ui.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,8 +20,7 @@ import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.basicMonoTask
-import dev.sagi.monotask.ui.theme.monoShadow
+import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 
 
 // ─────────────────────────────────────────
@@ -37,7 +36,8 @@ private fun TopBarScaffold(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 18.dp, vertical = 12.dp),
+            .heightIn(min = 64.dp, max = 96.dp)
+            .padding(horizontal = 18.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -86,6 +86,7 @@ fun WorkspaceTopBar(
 @Composable
 fun TitleTopBar(
     title: String,
+    titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
     modifier: Modifier = Modifier,
     trailingIcon: (@Composable () -> Unit)? = null
 ) {
@@ -94,7 +95,7 @@ fun TitleTopBar(
         leading = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = titleStyle,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -115,18 +116,22 @@ fun TopBarIconButton(
     modifier: Modifier = Modifier
 ) {
     GlassSurface(
-        blurred = true,
+        blurred = false,
         shape = CircleShape,
         modifier = modifier
-            .monoShadow(CircleShape)
+//            .monoShadow(CircleShape)
+            .monoShadowWorkaround(CircleShape)
+            .clip(CircleShape)
             .size(40.dp)
             .clickable { onClick() }
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_add),
-            contentDescription = "Add task",
+            painter = painterResource(iconRes),
+            contentDescription = contentDescription,
             tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(10.dp)  // ← padding sizes the card, no Box needed
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(8.dp)  // padding sizes the button
         )
     }
 

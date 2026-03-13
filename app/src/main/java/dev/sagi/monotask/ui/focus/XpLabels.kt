@@ -87,7 +87,7 @@ fun XpLabelCurrent(xp: Int, modifier: Modifier = Modifier) {
 
 // ========== XpLabelCompletion ==========
 
-private const val XP_POP_SCALE        = 1.45f   // slightly less extreme → faster settle
+private const val XP_POP_SCALE        = 1.8f
 private const val XP_INITIAL_OFFSET_Y = -30f
 private const val XP_EXIT_OFFSET_Y    = -200f
 private const val SHIMMER_HALF_WIDTH  = 0.2f
@@ -125,7 +125,7 @@ fun XpLabelCompletion(
             shimmer.animateTo(
                 1f,
                 tween(
-                    durationMillis = 650,          // was 800
+                    durationMillis = 400,
                     easing         = EaseInOutQuart
                 )
             )

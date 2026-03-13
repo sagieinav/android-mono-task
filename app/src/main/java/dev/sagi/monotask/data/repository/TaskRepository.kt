@@ -73,6 +73,7 @@ class TaskRepository {
                     "completedAt" to com.google.firebase.Timestamp.now()
                 )
             )
+            .await()
     }
 
     // Restores a completed task back to active. Inverse of markTaskCompleted
@@ -88,18 +89,21 @@ class TaskRepository {
 
     // Permanently deletes a task
     suspend fun deleteTask(userId: String, taskId: String) {
-        tasksCollection(userId).document(taskId).delete()
+        tasksCollection(userId).document(taskId)
+            .delete()
+            .await()
     }
 
     // insertNewTask now stores initial XP
     suspend fun insertNewTask(userId: String, task: Task) {
-        val taskWithXp = task.copy(currentXp = XpEvents.xpForTask(task))
+        val taskWithXp = task.copy(currentXp = XpEvents.calculateTaskXp(task))
         tasksCollection(userId).add(taskWithXp).await()
     }
 
     // Snoozes task and recalculates its XP. No user XP touched here!
     suspend fun updateSnoozeFields(userId: String, task: Task, option: XpEvents.SnoozeOption) {
-        val newXp = XpEvents.xpAfterSnooze(task, option)
+        val newXp = XpEvents.calculateXpAfterSnooze(task, option)
+//        val newXp = XpEvents.calculateTaskXp(task, option)
         tasksCollection(userId).document(task.id)
             .update(mapOf(
                 "snoozeCount" to com.google.firebase.firestore.FieldValue.increment(1),
@@ -109,8 +113,19 @@ class TaskRepository {
 
     // overwriteExistingTask recalculates XP from edited properties
     suspend fun overwriteExistingTask(userId: String, task: Task) {
-        val taskWithXp = task.copy(currentXp = XpEvents.xpForTask(task))
+        val taskWithXp = task.copy(currentXp = XpEvents.calculateTaskXp(task))
         tasksCollection(userId).document(task.id).set(taskWithXp).await()
+    }
+
+    // Reverts a snooze action by restoring the previous snooze count and XP from the cached task
+    suspend fun undoSnoozeFields(userId: String, originalTask: Task) {
+        tasksCollection(userId).document(originalTask.id)
+            .update(
+                mapOf(
+                    "snoozeCount" to originalTask.snoozeCount,
+                    "currentXp"   to originalTask.currentXp
+                )
+            ).await()
     }
 
 }

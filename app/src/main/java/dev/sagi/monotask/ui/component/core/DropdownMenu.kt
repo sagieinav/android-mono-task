@@ -40,6 +40,8 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.text.style.TextAlign
+import dev.sagi.monotask.ui.theme.AceGold
+import dev.sagi.monotask.ui.theme.AceGoldDim
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.gloock
 import dev.sagi.monotask.ui.theme.harabara
@@ -288,7 +290,9 @@ fun MonoDropdownItem(
             .clickable(onClick = onClick)
             .then(
                 if (!selected) Modifier
-                else Modifier.glassBorder(MaterialTheme.shapes.small)
+                else Modifier
+                    .glassBorder(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
             )
             .padding(horizontal = 12.dp, vertical = 8.dp)
         ,

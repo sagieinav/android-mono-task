@@ -6,57 +6,75 @@ import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
-import dev.sagi.monotask.data.repository.AuthRepository
+import dev.sagi.monotask.util.AuthUtils
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update // Required for atomic updates
 import kotlinx.coroutines.launch
 
-// ========== UI State Data Class ==========
-data class SettingsUiState(
-    val hardcoreModeEnabled: Boolean = false,
-    val notificationsEnabled: Boolean = true,
-    val dueSoonDays: Int = 3,
-    val loading: Boolean = false,
-    val editingWorkspace: Workspace? = null
-)
+// ========== UI States ==========
+sealed class SettingsUiState {
+    object Loading : SettingsUiState()
+    data class Ready(
+        val hardcoreModeEnabled: Boolean = false,
+        val notificationsEnabled: Boolean = true,
+        val dueSoonDays: Int = 3,
+        val editingWorkspace: Workspace? = null
+    ) : SettingsUiState()
+    data class Error(val message: String) : SettingsUiState()
+}
 
 class SettingsViewModel(
     private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
     private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
-    private val authRepository: AuthRepository = MonoTaskApp.instance.authRepository,
-    private val userId: String = MonoTaskApp.instance.auth.currentUser?.uid ?: ""
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
+    private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    init {
-        // Only load user settings if user is logged in
-        if (userId.isNotEmpty()) {
-            loadUserSettings()
-        }
+    private val _errorEvent = MutableSharedFlow<String>()
+    val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
+
+    private lateinit var userId: String
+
+//    init {
+//        viewModelScope.launch {
+//            userId = AuthUtils.awaitUid()
+//            loadUserSettings()
+//        }
+//    }
+init {
+    val uid = AuthUtils.currentUidOrNull()
+    if (uid != null) {
+        userId = uid
+        viewModelScope.launch { loadUserSettings() }
+    } else {
+        _uiState.value = SettingsUiState.Ready() // signed out, show defaults
     }
+}
 
-// ========== Initialization ==========
+    // ========== Initialization ==========
 
-    private fun loadUserSettings() {
-        _uiState.update { it.copy(loading = true) }
-        viewModelScope.launch {
+    private suspend fun loadUserSettings() {
+        try {
             val user = userRepository.getUserOnce(userId)
-            user?.let {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        hardcoreModeEnabled = it.hardcoreModeEnabled,
-                        notificationsEnabled = it.notificationsEnabled,
-                        dueSoonDays = it.dueSoonDays,
-                        loading = false
-                    )
-                }
+            if (user == null) {
+                _uiState.value = SettingsUiState.Error("Failed to load settings")
+                return
             }
+            _uiState.value = SettingsUiState.Ready(
+                hardcoreModeEnabled = user.hardcoreModeEnabled,
+                notificationsEnabled = user.notificationsEnabled,
+                dueSoonDays = user.dueSoonDays
+            )
+        } catch (e: Exception) {
+            _uiState.value = SettingsUiState.Error("Failed to load settings: ${e.message}")
         }
     }
+
 
 // ========== Settings Operations ==========
 
@@ -65,37 +83,35 @@ class SettingsViewModel(
         notificationsEnabled: Boolean? = null,
         dueSoonDays: Int? = null
     ) {
-        // Update local UI state
-        _uiState.update { currentState ->
-            currentState.copy(
-                hardcoreModeEnabled = hardcoreModeEnabled ?: currentState.hardcoreModeEnabled,
-                notificationsEnabled = notificationsEnabled ?: currentState.notificationsEnabled,
-                dueSoonDays = dueSoonDays ?: currentState.dueSoonDays
-            )
-        }
+        val current = _uiState.value as? SettingsUiState.Ready ?: return
+
+        // Optimistic UI update
+        _uiState.value = current.copy(
+            hardcoreModeEnabled = hardcoreModeEnabled ?: current.hardcoreModeEnabled,
+            notificationsEnabled = notificationsEnabled ?: current.notificationsEnabled,
+            dueSoonDays = dueSoonDays ?: current.dueSoonDays
+        )
 
         // Sync with Firestore
         viewModelScope.launch {
-            userRepository.updatePreferences(
-                userId,
-                hardcoreModeEnabled,
-                notificationsEnabled,
-                dueSoonDays
-            )
+            try {
+                userRepository.updatePreferences(
+                    userId,
+                    hardcoreModeEnabled,
+                    notificationsEnabled,
+                    dueSoonDays
+                )
+            } catch (e: Exception) {
+                // Revert to previous state on failure
+                _uiState.value = current
+                _errorEvent.emit("Failed to save settings: ${e.message}")
+            }
         }
     }
 
     fun selectWorkspaceForEditing(workspace: Workspace) {
-        _uiState.update { currentState ->
-            currentState.copy(editingWorkspace = workspace)
-        }
+        val current = _uiState.value as? SettingsUiState.Ready ?: return
+        _uiState.value = current.copy(editingWorkspace = workspace)
     }
 
-// ========== Authentication ==========
-
-    fun logout() {
-        viewModelScope.launch {
-            authRepository.signOut()
-        }
-    }
 }

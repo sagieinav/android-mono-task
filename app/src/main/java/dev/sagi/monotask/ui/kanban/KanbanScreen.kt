@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.firebase.Timestamp
@@ -16,7 +17,6 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.task.EditTaskSheet
-import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import java.util.Date
 
@@ -25,15 +25,10 @@ private const val COLUMN_STAGGER_MS = 80
 @Composable
 fun KanbanScreen(
     navController: NavHostController,
-    workspaceVM: WorkspaceViewModel,
-    kanbanVM: KanbanViewModel = viewModel()
+    kanbanVM: KanbanViewModel
 ) {
-    LaunchedEffect(Unit) {
-        kanbanVM.startObservingTasks(workspaceVM.selectedWorkspace)
-    }
-
-    val uiState    by kanbanVM.uiState.collectAsState()
-    val editingTask by kanbanVM.editingTask.collectAsState()
+    val uiState     by kanbanVM.uiState.collectAsStateWithLifecycle()
+    val editingTask by kanbanVM.editingTask.collectAsStateWithLifecycle()
 
     KanbanScreenContent(
         uiState         = uiState,
@@ -74,21 +69,18 @@ fun KanbanScreenContent(
 ) {
     val innerPadding = LocalScaffoldPadding.current
 
-    // Hold last Ready so columns keep their content visible during Loading
     var lastReady by remember { mutableStateOf<KanbanUiState.Ready?>(null) }
     val displayState = (uiState as? KanbanUiState.Ready)?.also { lastReady = it } ?: lastReady
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .padding(
                 top    = innerPadding.calculateTopPadding(),
                 bottom = innerPadding.calculateBottomPadding()
             ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // ── Active / Archive toggle ─────────────────────────────────────────
         SegmentedToggle(
             options          = listOf("Active", "Archive"),
             selectedIndex    = if (uiState is KanbanUiState.Ready && uiState.isArchive) 1 else 0,
@@ -96,7 +88,6 @@ fun KanbanScreenContent(
             modifier         = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        // ── Kanban columns ──────────────────────────────────────────────────
         Row(
             modifier = Modifier
                 .fillMaxSize()

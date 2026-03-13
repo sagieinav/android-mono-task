@@ -29,32 +29,30 @@ object XpEvents {
 // TASK XP EVENTS
 // ==============================
 
-    // Called on task creation and after edits (pure recalculation from task state)
-    fun xpForTask(task: Task): Int = calculateTaskXp(task)
+
+    // Called on task creation and edit. Computes XP from scratch
+    fun calculateTaskXp(task: Task): Int {
+        var xp = BASE_COMPLETION
+        xp += when (task.importance) {
+            Importance.HIGH   -> BONUS_HIGH_IMPORTANCE
+            Importance.MEDIUM -> BONUS_MEDIUM_IMPORTANCE
+            else              -> 0
+        }
+        if (task.isAce) xp += BONUS_ACE
+        return xp.coerceAtLeast(10)
+    }
 
     // Called on snooze. Applies penalty on top of current stored XP
-    fun xpAfterSnooze(task: Task, option: SnoozeOption): Int {
-        val penalty = option.penalty
+    fun calculateXpAfterSnooze(task: Task, option: SnoozeOption): Int {
+        val penalty = snoozePenalty(task, option)
         return (task.currentXp + penalty).coerceAtLeast(10)
     }
 
-    // ========== Calculation Helper ==========
-    fun calculateTaskXp(task: Task): Int {
-        var xp = BASE_COMPLETION
-
-        // Importance Bonus
-        xp += when (task.importance) {
-            Importance.HIGH -> BONUS_HIGH_IMPORTANCE
-            Importance.MEDIUM -> BONUS_MEDIUM_IMPORTANCE
-            else -> 0
-        }
-
-        // ACE Bonus (only if never snoozed)
-        if (task.isAce) {
-            xp += BONUS_ACE
-        }
-
-        return xp.coerceAtLeast(10) // Set a minimum XP value of 10
+    // Penalty calculation logic
+    private fun snoozePenalty(task: Task, option: SnoozeOption): Int {
+        var penalty = option.penalty
+        if (task.isAce) penalty -= 50  // Ace tasks lose less XP on snooze
+        return penalty
     }
 
 

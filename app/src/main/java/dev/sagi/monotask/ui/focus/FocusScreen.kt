@@ -5,9 +5,9 @@ import androidx.compose.animation.core.EaseInQuart
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,148 +18,151 @@ import androidx.navigation.NavHostController
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.EmptyState
 import dev.sagi.monotask.ui.component.core.HeroGreeting
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
-import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import kotlinx.coroutines.flow.first
+import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
+// ========== Entry Point ==========
 
 @Composable
 fun FocusScreen(
     navController: NavHostController,
     focusVM: FocusViewModel,
-    workspaceVM: WorkspaceViewModel,
     userSessionVM: UserSessionViewModel
 ) {
-    LaunchedEffect(Unit) { focusVM.startObservingTasks(workspaceVM.selectedWorkspace) }
+    val uiState             by focusVM.uiState.collectAsStateWithLifecycle()
+    val frozenForAnimation  by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
+    val userDisplayName     by userSessionVM.displayName.collectAsStateWithLifecycle()
+    val snackbarHostState   = LocalSnackbarHostState.current
 
-    val uiState         by focusVM.uiState.collectAsState()
-    val showSnoozeSheet by focusVM.showSnoozeSheet.collectAsState()
-    val xpBadgeVisible  by focusVM.xpBadgeVisible.collectAsState()
+    val stableOnFocusEvent  = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
+    val animState           = rememberFocusAnimationState(onFocusEvent = stableOnFocusEvent)
 
-    var isSnoozeExiting     by remember { mutableStateOf(false) }
-    var snoozeExitTrigger   by remember { mutableStateOf<SwipeExitDirection?>(null) }
-    var pendingSnoozeAction by remember { mutableStateOf<(() -> Unit)?>(null) }
-
-    var displayedUiState by remember { mutableStateOf<FocusUiState>(uiState) }
-    LaunchedEffect(uiState) {
-        snapshotFlow { xpBadgeVisible || isSnoozeExiting }
-            .first { !it }
-        displayedUiState = uiState
+    // Hold off UI updates while a completion animation is playing,
+    // so Firestore snapshots don't interrupt the card animation mid-way
+    var displayedUiState by remember { mutableStateOf(uiState) }
+    LaunchedEffect(uiState, frozenForAnimation) {
+        if (!frozenForAnimation) displayedUiState = uiState
     }
 
-    val userDisplayName by userSessionVM.displayName.collectAsStateWithLifecycle()
+    // Collect one-shot UI effects (snackbars)
+    LaunchedEffect(Unit) {
+        focusVM.uiEffect.collectLatest { effect ->
+            when (effect) {
+                is FocusUiEffect.ShowError -> {
+                    snackbarHostState.showSnackbar(
+                        message         = effect.message,
+                        withDismissAction = true,
+                        duration        = SnackbarDuration.Short
+                    )
+                }
+                is FocusUiEffect.ShowUndoComplete -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message     = effect.message,
+                        actionLabel = "Undo",
+                        duration    = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        focusVM.onEvent(FocusEvent.UndoCompleteTask)
+                    }
+                }
+                is FocusUiEffect.ShowUndoSnooze -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message     = effect.message,
+                        actionLabel = "Undo",
+                        duration    = SnackbarDuration.Short
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        focusVM.onEvent(FocusEvent.UndoSnoozeTask)
+                    }
+                }
+            }
+        }
+    }
 
     FocusScreenContent(
-        uiState           = displayedUiState,
-        userDisplayName   = userDisplayName,
-        showSnoozeSheet   = showSnoozeSheet,
-        snoozeExitTrigger = snoozeExitTrigger,
-        onCompleteTask    = { focusVM.completeTask() },
-        onOpenSnooze      = { focusVM.openSnoozeSheet() },
-        onDismissSnooze   = { focusVM.dismissSnoozeSheet() },
-        onSnoozeConfirmed = { option ->
-            pendingSnoozeAction = { focusVM.snoozeTask(option) }
-            isSnoozeExiting     = true
-            snoozeExitTrigger   = SwipeExitDirection.LEFT
-            focusVM.dismissSnoozeSheet()
-        },
-        onSnoozeCardExited = {
-            pendingSnoozeAction?.invoke()
-            pendingSnoozeAction = null
-            snoozeExitTrigger   = null
-            isSnoozeExiting     = false
-        }
+        uiState         = displayedUiState,
+        userDisplayName = userDisplayName,
+        animState       = animState,
+        onFocusEvent    = stableOnFocusEvent
     )
 }
+
+// ========== Content ==========
 
 @Composable
 fun FocusScreenContent(
     uiState: FocusUiState,
     userDisplayName: String,
-    showSnoozeSheet: Boolean = false,
-    snoozeExitTrigger: SwipeExitDirection? = null,
-    onCompleteTask: () -> Unit = {},
-    onOpenSnooze: () -> Unit = {},
-    onDismissSnooze: () -> Unit = {},
-    onSnoozeConfirmed: (XpEvents.SnoozeOption) -> Unit = {},
-    onSnoozeCardExited: () -> Unit = {}
+    animState: FocusAnimationState,
+    onFocusEvent: (FocusEvent) -> Unit
 ) {
     val innerPadding = LocalScaffoldPadding.current
+    val scope = rememberCoroutineScope()
 
-    // Only show content when not loading
-    if (uiState !is FocusUiState.Loading) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(
+    if (uiState is FocusUiState.Loading) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
                 top    = innerPadding.calculateTopPadding(),
                 bottom = innerPadding.calculateBottomPadding()
             )
+    ) {
+        HeroGreeting(userName = userDisplayName)
+        Box(
+            modifier         = Modifier.fillMaxWidth().weight(1f),
+            contentAlignment = Alignment.Center
         ) {
-            HeroGreeting(userName = userDisplayName)
-            Box(
-                modifier         = Modifier.fillMaxWidth().weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                when (uiState) {
-//                    is FocusUiState.Loading -> LoadingSpinner()
-                    is FocusUiState.Empty   -> EmptyState()
-                    is FocusUiState.Active  -> ActiveFocusCard(
-                        uiState            = uiState,
-                        snoozeExitTrigger  = snoozeExitTrigger,
-                        onCompleteTask     = onCompleteTask,
-                        onOpenSnooze       = onOpenSnooze,
-                        onSnoozeCardExited = onSnoozeCardExited
-                    )
-                }
+            when (uiState) {
+                is FocusUiState.Empty  -> EmptyState()
+                is FocusUiState.Active -> ActiveFocusCard(
+                    uiState      = uiState,
+                    animState    = animState,
+                    onFocusEvent = onFocusEvent
+                )
+                else -> {}
             }
         }
+    }
 
-        if (showSnoozeSheet) {
-            SnoozeBottomSheet(
-                onDismissRequest = onDismissSnooze,
-                onSnooze         = { snoozeOption -> onSnoozeConfirmed(snoozeOption) }
-            )
-        }
+    if (uiState is FocusUiState.Active && uiState.showSnoozeSheet) {
+        SnoozeBottomSheet(
+            onDismissRequest = { onFocusEvent(FocusEvent.DismissSnooze) },
+            onSnooze         = { option -> animState.onSnoozeConfirmed(option, scope) }
+        )
     }
 }
 
-// ========== Active state ==========
-
-private class FocusCardAnim {
-    val alpha  = Animatable(0f)
-    val scale  = Animatable(0.22f)
-    val border = Animatable(0f)
-
-    suspend fun reset() {
-        alpha.snapTo(0f)
-        scale.snapTo(0.22f)
-        border.snapTo(0f)
-    }
-}
+// ========== Active Card ==========
 
 @Composable
 private fun ActiveFocusCard(
     uiState: FocusUiState.Active,
-    snoozeExitTrigger: SwipeExitDirection?,
-    onSnoozeCardExited: () -> Unit,
-    onCompleteTask: () -> Unit,
-    onOpenSnooze: () -> Unit,
+    animState: FocusAnimationState,
+    onFocusEvent: (FocusEvent) -> Unit
 ) {
-    val anim = remember { FocusCardAnim() }
+    // Synchronously mark dirty before the first frame draws
+    SideEffect {
+        animState.checkIfNeedsReset(uiState.focusTask.id, uiState.restoreVersion)
+    }
 
-    LaunchedEffect(uiState.focusTask.id) {
-        anim.reset()
-
+    LaunchedEffect(uiState.focusTask.id, uiState.restoreVersion) {
+        animState.resetCard()
         val entrySpec = spring<Float>(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness    = Spring.StiffnessLow
         )
-        launch { anim.alpha.animateTo(1f, tween(300)) }
-        launch { anim.scale.animateTo(1f, entrySpec) }
+        launch { animState.alpha.animateTo(1f, tween(300)) }
+        launch { animState.scale.animateTo(1f, entrySpec) }
         launch {
-            anim.border.animateTo(1f,   tween(1600, easing = EaseInQuart))
-            anim.border.animateTo(1.1f, tween(200))
+            animState.border.animateTo(1f,   tween(1600, easing = EaseInQuart))
+            animState.border.animateTo(1.1f, tween(200))
         }
     }
 
@@ -168,22 +171,93 @@ private fun ActiveFocusCard(
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
             .graphicsLayer {
-                alpha  = anim.alpha.value
-                scaleX = anim.scale.value
-                scaleY = anim.scale.value
+                alpha  = animState.displayAlpha
+                scaleX = animState.displayScale
+                scaleY = animState.displayScale
             },
         contentAlignment = Alignment.Center
     ) {
-        key(uiState.focusTask.id) {
+        key(uiState.focusTask.id, uiState.restoreVersion) {
             FocusCardSwipeable(
                 task               = uiState.focusTask,
-                exitTrigger        = snoozeExitTrigger,
-                borderFraction     = anim.border.value,
-                onSwipeRight       = onCompleteTask,
-                onSwipeLeft        = onOpenSnooze,
-                onSnoozeCardExited = onSnoozeCardExited,
+                exitTrigger        = animState.snoozeExitTrigger,
+                borderFraction     = animState.displayBorder,
+                onSwipeRight       = { onFocusEvent(FocusEvent.CompleteTask) },
+                onSwipeLeft        = { onFocusEvent(FocusEvent.OpenSnooze) },
+                onSnoozeCardExited = { animState.onSnoozeCardExited() },
                 modifier           = Modifier.fillMaxWidth()
             )
         }
     }
+}
+
+// ========== Animation State ==========
+
+@Stable
+class FocusAnimationState(
+    private val onFocusEvent: (FocusEvent) -> Unit
+) {
+    // ========== Snooze Exit State ==========
+
+    var isSnoozeExiting by mutableStateOf(false)
+        private set
+
+    var snoozeExitTrigger by mutableStateOf<SwipeExitDirection?>(null)
+        private set
+
+    private var pendingSnoozeAction: (() -> Unit)? = null
+
+    // ========== Entry Animation ==========
+
+    val alpha  = Animatable(0f)
+    val scale  = Animatable(0.22f)
+    val border = Animatable(0f)
+
+    private var needsReset by mutableStateOf(true)
+    private var lastCardKey: Pair<String, Int>? = null
+
+    val displayAlpha:  Float get() = if (needsReset) 0f    else alpha.value
+    val displayScale:  Float get() = if (needsReset) 0.22f else scale.value
+    val displayBorder: Float get() = if (needsReset) 0f    else border.value
+
+    // Called during composition. Sets needsReset only when the card identity changes
+    fun checkIfNeedsReset(taskId: String, restoreVersion: Int) {
+        val key = taskId to restoreVersion
+        if (key != lastCardKey) {
+            lastCardKey = key
+            needsReset = true
+        }
+    }
+
+    // Called from LaunchedEffect. Snaps values then clears the reset flag
+    suspend fun resetCard() {
+        alpha.snapTo(0f)
+        scale.snapTo(0.22f)
+        border.snapTo(0f)
+        needsReset = false
+    }
+
+    // ========== Snooze Actions ==========
+
+    fun onSnoozeConfirmed(option: XpEvents.SnoozeOption, scope: CoroutineScope) {
+        scope.launch {
+            onFocusEvent(FocusEvent.DismissSnooze)
+            delay(100)
+            pendingSnoozeAction = { onFocusEvent(FocusEvent.ExecuteSnooze(option)) }
+            isSnoozeExiting  = true
+            snoozeExitTrigger = SwipeExitDirection.LEFT
+        }
+    }
+
+    fun onSnoozeCardExited() {
+        pendingSnoozeAction?.invoke()
+        pendingSnoozeAction  = null
+        snoozeExitTrigger    = null
+        isSnoozeExiting      = false
+    }
+}
+
+@Composable
+fun rememberFocusAnimationState(onFocusEvent: (FocusEvent) -> Unit): FocusAnimationState {
+    return remember(onFocusEvent) { FocusAnimationState(onFocusEvent) }
 }
