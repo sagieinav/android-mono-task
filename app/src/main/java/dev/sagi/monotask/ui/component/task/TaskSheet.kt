@@ -29,10 +29,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
-import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -40,7 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.Timestamp
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.ActionButton
-import dev.sagi.monotask.ui.component.core.CustomTag
 import dev.sagi.monotask.ui.component.core.MonoTextField
 import dev.sagi.monotask.ui.component.core.BottomSheet
 import dev.sagi.monotask.ui.component.core.GlassChip

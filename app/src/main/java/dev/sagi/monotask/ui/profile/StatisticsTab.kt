@@ -28,10 +28,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.domain.util.ActivityStats
+import dev.sagi.monotask.domain.util.ActivityStats.computeCurrentStreak
+import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
+import dev.sagi.monotask.domain.util.ActivityStats.last7DayLabels
+import dev.sagi.monotask.domain.util.ActivityStats.last7Days
+import dev.sagi.monotask.ui.component.statistics.AceCompletionCard
+import dev.sagi.monotask.ui.component.statistics.BarChart
+import dev.sagi.monotask.ui.component.statistics.CompletionDonutCard
+import dev.sagi.monotask.ui.component.statistics.StreakCard
+import dev.sagi.monotask.ui.component.statistics.LineChart
+import dev.sagi.monotask.ui.component.statistics.TopPerformanceCard
+import dev.sagi.monotask.ui.component.statistics.TotalTasksCard
+import dev.sagi.monotask.ui.component.statistics.TotalXpCard
+import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tab 2 — Statistics: XP stat card, heatmap, bar charts
@@ -42,58 +54,83 @@ fun StatisticsTab(
     state: ProfileUiState.Ready,
     bottomPadding: Dp
 ) {
-    val streak = remember(state.activityData) { computeCurrentStreak(state.activityData) }
-    val record = remember(state.activityData) { computeRecordStreak(state.activityData) }
+    val activity = state.activityData
+    val tasks = state.completedTasks
+    val workspaces = state.workspaces
+
+    val streak = remember(activity) { computeCurrentStreak(activity) }
+    val record = remember(activity) { computeRecordStreak(activity) }
+    val aceCount    = tasks.count { it.isAce }
+    val totalTasks  = tasks.size
+    val totalXp = activity.sumOf { it.xpEarned }
 
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
-            start = 20.dp,
-            end = 20.dp,
-            top        = 20.dp,
-            bottom     = bottomPadding + 16.dp
+            start           = 20.dp,
+            end             = 20.dp,
+            top             = 20.dp,
+            bottom          = bottomPadding + 16.dp
         ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+
+        // Xp this week (line chart)
         item {
-            StatCard(
-                label = "Total XP",
-                value = state.user.xp.toString(),
-                emoji = "✨"
+            LineChart(
+                title        = "XP This Week",
+                headline     = "$totalXp XP",
+                points       = ActivityStats.buildXpPoints(activity),
+                trendPercent = ActivityStats.computeXpTrend(activity),
+                lineColor    = AceGold,
             )
         }
 
+        // Tasks this week (bar graph)
         item {
-            SectionTitle("Activity")
-            ActivityHeatmap(
-                activityData  = state.activityData,
-                currentStreak = streak,
-                recordStreak  = record,
-                modifier      = Modifier
+            BarChart(
+                title       = "Tasks This Week",
+                headline     = "${activity.sumOf { it.tasksCompleted }} completed",
+                points      = ActivityStats.buildTaskPoints(activity),
+                trendPercent = ActivityStats.computeTaskTrend(activity),
+                barColor    = MaterialTheme.colorScheme.primary,
+                animate     = true,
+            )
+        }
+
+        // 4 half-width widget cards with simple data
+        item {
+            Row(
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
-            )
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                TotalTasksCard(totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
+                AceCompletionCard(aceCount = state.completedTasks.count { it.isAce },
+                    totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                TotalXpCard(totalXp = state.user.xp, modifier = Modifier.weight(1f))
+                StreakCard(streakDays = ActivityStats.computeCurrentStreak(state.activityData),
+                    modifier = Modifier.weight(1f))
+            }
         }
 
+        // Best day card
         item {
-            SectionTitle("XP: last 7 days")
-            SimpleBarChart(
-                bars   = last7Days(state.activityData).map { it?.xpEarned?.toFloat() ?: 0f },
-                labels = last7DayLabels(),
-                color  = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            TopPerformanceCard(activityData = state.activityData)
         }
 
-        item {
-            SectionTitle("Tasks completed: last 7 days")
-            SimpleBarChart(
-                bars   = last7Days(state.activityData).map { it?.tasksCompleted?.toFloat() ?: 0f },
-                labels = last7DayLabels(),
-                color  = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        // DonutChart Duo
+//        item {
+//            CompletionDonutCard(tasks, workspaces)
+//        }
     }
 }
 
@@ -187,94 +224,40 @@ fun SimpleBarChart(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Streak + date helpers (private to this tab)
-// ─────────────────────────────────────────────────────────────────────────────
-
-fun computeCurrentStreak(data: List<DailyActivity>): Int {
-    if (data.isEmpty()) return 0
-    val days = data
-        .filter { it.tasksCompleted > 0 }
-        .map { it.dateEpochDay }
-        .toSortedSet()
-        .toList()
-        .sortedDescending()
-
-    var streak   = 0
-    var expected = LocalDate.now().toEpochDay()
-    for (day in days) {
-        if (day == expected || day == expected - 1) {
-            streak++
-            expected = day - 1
-        } else break
-    }
-    return streak
-}
-
-fun computeRecordStreak(data: List<DailyActivity>): Int {
-    if (data.isEmpty()) return 0
-    val days = data
-        .filter { it.tasksCompleted > 0 }
-        .map { it.dateEpochDay }
-        .toSortedSet()
-        .toList()
-        .sorted()
-
-    var best    = 0
-    var current = 0
-    var prev    = Long.MIN_VALUE
-    for (day in days) {
-        current = if (day == prev + 1) current + 1 else 1
-        if (current > best) best = current
-        prev = day
-    }
-    return best
-}
-
-fun last7Days(data: List<DailyActivity>): List<DailyActivity?> {
-    val today = LocalDate.now()
-    val map   = data.associateBy { it.dateEpochDay }
-    return (6 downTo 0).map { daysBack ->
-        map[today.minusDays(daysBack.toLong()).toEpochDay()]
-    }
-}
-
-fun last7DayLabels(): List<String> {
-    val today = LocalDate.now()
-    return (6 downTo 0).map { daysBack ->
-        today.minusDays(daysBack.toLong())
-            .dayOfWeek
-            .getDisplayName(TextStyle.SHORT, Locale.getDefault())
-            .take(2)
-    }
-}
 
 
-
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun StatisticsTabPreview() {
     val today = LocalDate.now()
     MonoTaskTheme {
-        StatisticsTab(
-            state = ProfileUiState.Ready(
-                user           = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),
-                level          = 25,
-                levelProgress  = 0.73f,
-                xpIntoLevel    = 2115,
-                xpForNextLevel = 2326,
-                badges         = emptyList(),
-                activityData   = listOf(
-                    DailyActivity(dateEpochDay = today.minusDays(6).toEpochDay(), xpEarned = 120, tasksCompleted = 4),
-                    DailyActivity(dateEpochDay = today.minusDays(5).toEpochDay(), xpEarned = 0,   tasksCompleted = 0),
-                    DailyActivity(dateEpochDay = today.minusDays(4).toEpochDay(), xpEarned = 310, tasksCompleted = 8),
-                    DailyActivity(dateEpochDay = today.minusDays(3).toEpochDay(), xpEarned = 85,  tasksCompleted = 3),
-                    DailyActivity(dateEpochDay = today.minusDays(2).toEpochDay(), xpEarned = 200, tasksCompleted = 6),
-                    DailyActivity(dateEpochDay = today.minusDays(1).toEpochDay(), xpEarned = 450, tasksCompleted = 11),
-                    DailyActivity(dateEpochDay = today.toEpochDay(),              xpEarned = 90,  tasksCompleted = 2),
-                )
-            ),
-            bottomPadding = 0.dp
-        )
-    }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center
+        ) {
+            StatisticsTab(
+                state = ProfileUiState.Ready(
+                    user           = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),
+                    level          = 25,
+                    levelProgress  = 0.73f,
+                    xpIntoLevel    = 2115,
+                    xpForNextLevel = 2326,
+                    badges         = emptyList(),
+                    activityData   = listOf(
+                        DailyActivity(dateEpochDay = today.minusDays(6).toEpochDay(), xpEarned = 120, tasksCompleted = 4),
+                        DailyActivity(dateEpochDay = today.minusDays(5).toEpochDay(), xpEarned = 0,   tasksCompleted = 0),
+                        DailyActivity(dateEpochDay = today.minusDays(4).toEpochDay(), xpEarned = 310, tasksCompleted = 8),
+                        DailyActivity(dateEpochDay = today.minusDays(3).toEpochDay(), xpEarned = 85,  tasksCompleted = 3),
+                        DailyActivity(dateEpochDay = today.minusDays(2).toEpochDay(), xpEarned = 200, tasksCompleted = 6),
+                        DailyActivity(dateEpochDay = today.minusDays(1).toEpochDay(), xpEarned = 450, tasksCompleted = 11),
+                        DailyActivity(dateEpochDay = today.toEpochDay(),              xpEarned = 90,  tasksCompleted = 2),
+                    )
+                ),
+                bottomPadding = 0.dp,
+//            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            )
+        }
+        }
 }

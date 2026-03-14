@@ -23,18 +23,24 @@ data class CustomColors(
     val tagBrown: Pair<Color, Color>,
     val tagBlueGrey: Pair<Color, Color>,
     val tagLime: Pair<Color, Color>,
+    val chartColors: List<Color>,
 ) {
     val customTagColors get() = listOf(
         tagIndigo, tagTeal, tagPurple, tagBlue,
         tagCyan, tagBrown, tagBlueGrey, tagLime
     )
 
-    // Hash function to generate a tag color. How to call it:
-    // 1. val (containerColor, contentColor) = tagColorFor(tag)
-    // 2. TaskTag(label = tag, containerColor = containerColor, contentColor = contentColor)
+
+    // Returns a (containerColor, contentColor) pair for a tag label.
     fun tagColorFor(tag: String): Pair<Color, Color> {
         val index = abs(tag.lowercase().hashCode()) % customTagColors.size
         return customTagColors[index]
+    }
+
+    // Returns a single Color for any use
+    fun colorFor(key: String): Color {
+        val index = abs(key.lowercase().hashCode()) % customTagColors.size
+        return customTagColors[index].second   // content (vivid) color
     }
 }
 
@@ -54,10 +60,21 @@ val lightCustomColors = CustomColors(
     tagBrown    = TagBrownBackground    to TagBrownContent,
     tagBlueGrey = TagBlueGreyBackground to TagBlueGreyContent,
     tagLime     = TagLimeBackground     to TagLimeContent,
+
+    chartColors = listOf(
+        Color(0xFF4F6EF7),  // indigo blue
+        Color(0xFF9B4DCA),  // violet
+        Color(0xFF0EA875),  // emerald
+        Color(0xFFE8622A),  // burnt orange
+        Color(0xFF2BB5D8),  // cyan
+        Color(0xFFD4455E),  // crimson
+        Color(0xFF3DBD8A),  // teal green
+        Color(0xFFE0A020),  // golden amber
+    )
 )
 
 
-// Add my custom colors to the theme
+// Add custom colors to the theme
 val MaterialTheme.customColors: CustomColors
     @Composable
     @ReadOnlyComposable

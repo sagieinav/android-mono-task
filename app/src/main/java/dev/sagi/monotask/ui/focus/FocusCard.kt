@@ -4,34 +4,24 @@ package dev.sagi.monotask.ui.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Timestamp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
-import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.ui.component.core.CustomTag
+import dev.sagi.monotask.ui.component.task.CustomTag
 import dev.sagi.monotask.ui.component.core.DueDateLabel
 import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.core.ImportanceTag
-import dev.sagi.monotask.ui.theme.LocalHazeState
+import dev.sagi.monotask.ui.component.task.ImportanceTag
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.aceTaskBorder
 import dev.sagi.monotask.ui.theme.defaultTaskBorder
-import dev.sagi.monotask.util.ext.toRelativeDate
 
 // ========== FocusCard ==========
 @Composable

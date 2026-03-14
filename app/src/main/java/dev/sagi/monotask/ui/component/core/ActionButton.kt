@@ -48,31 +48,13 @@ fun ActionButton(
     shape: Shape = MaterialTheme.shapes.medium,
     content: @Composable RowScope.() -> Unit
 ) {
-    val alpha by animateFloatAsState(
-        targetValue = if (enabled) 1f else 0.4f,
-        label = "ActionButtonAlpha"
-    )
-
     val contentColor by animateColorAsState(
         targetValue = if (enabled) color else MaterialTheme.colorScheme.outlineVariant,
         label = "ActionButtonColor"
     )
 
-    val shadowElevation by animateDpAsState(
-        targetValue = if (enabled) 5.dp else 0.dp,
-        label = "ActionButtonShadow"
-    )
-
-
     GlassSurface(
         modifier = modifier
-//            .shadow(
-//                elevation = shadowElevation,
-//                shape = shape,
-//                clip = false,
-//                ambientColor = Color.Black.copy(alpha = 0.08f),
-//                spotColor = Color.Black.copy(alpha = 0.12f)
-//            )
             .then(
                 if (enabled) Modifier.monoShadowWorkaround(shape = shape)
                 else Modifier

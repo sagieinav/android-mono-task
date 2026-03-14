@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.core
+package dev.sagi.monotask.ui.component.task
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement

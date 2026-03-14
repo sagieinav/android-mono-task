@@ -283,7 +283,7 @@ val ImportanceMediumBackground = Color(0xFFFFF0CC) // was 0xFFFFF8E1
 val ImportanceMediumContent    = Color(0xFFF9A825)
 
 val ImportanceLowBackground    = Color(0xFFD9EED9) // was 0xFFE8F5E9
-val ImportanceLowContent       = Color(0xFF2E7D32)
+val ImportanceLowContent       = Color(0xFF30A435)
 
 
 // ── Custom Tag Colors ─────────────────────────────────────────────

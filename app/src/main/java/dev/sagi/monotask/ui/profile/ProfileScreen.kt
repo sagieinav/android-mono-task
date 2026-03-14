@@ -43,6 +43,7 @@ import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.monoShadow
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -132,11 +133,6 @@ private fun ProfileReadyContent(
             .fillMaxSize()
             .padding(top = scaffoldPadding.calculateTopPadding())
     ) {
-        ProfileHeader(
-            user     = state.user,
-            modifier = Modifier.padding(vertical = 20.dp)
-        )
-
         PrimaryTabRow(
             selectedTabIndex = selectedTab,
             containerColor = Color.Transparent
@@ -168,86 +164,6 @@ private fun ProfileReadyContent(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Header
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-fun ProfileHeader(
-    user: User,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier            = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Box(
-            modifier         = Modifier
-                .size(96.dp)
-                .clip(CircleShape)
-                .glassBorder(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            if (user.profilePicUrl.isNotEmpty()) {
-                AsyncImage(
-                    model              = user.profilePicUrl,
-                    contentDescription = "Profile picture",
-                    contentScale       = ContentScale.Crop,
-                    modifier           = Modifier.fillMaxSize()
-                )
-            } else {
-                Box(
-                    modifier         = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text       = user.displayName.firstOrNull()?.uppercase() ?: "?",
-                        style      = MaterialTheme.typography.headlineMedium,
-                        color      = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-
-        Text(
-            text       = user.displayName.ifEmpty { "MonoTask User" },
-            style      = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Level chip
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-fun LevelChip(level: Int, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.tertiary
-                    )
-                )
-            )
-            .padding(horizontal = 14.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text       = "Level $level",
-            style      = MaterialTheme.typography.labelLarge,
-            color      = MaterialTheme.colorScheme.onPrimary,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
 
 
 @Preview(showSystemUi = true)

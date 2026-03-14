@@ -5,8 +5,12 @@ import androidx.lifecycle.viewModelScope
 import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.Badge
 import dev.sagi.monotask.data.model.DailyActivity
+import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.data.model.Workspace
+import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
+import dev.sagi.monotask.data.repository.WorkspaceRepository
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +23,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-// ========== UI States ==========
+// ─────────────────────────────────────────────────────────────────────────────
+// UI state
+// ─────────────────────────────────────────────────────────────────────────────
+
 sealed class ProfileUiState {
     object Loading : ProfileUiState()
     data class Error(val message: String) : ProfileUiState()
@@ -30,12 +37,20 @@ sealed class ProfileUiState {
         val xpIntoLevel    : Int,
         val xpForNextLevel : Int,
         val badges         : List<Badge>,
-        val activityData   : List<DailyActivity>
+        val activityData   : List<DailyActivity>   = emptyList(),
+        val completedTasks : List<Task>            = emptyList(),
+        val workspaces     : List<Workspace>       = emptyList(),
     ) : ProfileUiState()
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ViewModel
+// ─────────────────────────────────────────────────────────────────────────────
+
 class ProfileViewModel(
-    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
+    private val userRepository      : UserRepository      = MonoTaskApp.instance.userRepository,
+    private val workspaceRepository : WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
+    private val taskRepository      : TaskRepository      = MonoTaskApp.instance.taskRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -57,10 +72,10 @@ class ProfileViewModel(
         viewModelScope.launch { userId = AuthUtils.awaitUid() }
     }
 
-    // ========== User Observation ==========
+    // ─────────────────────────────────────────────────────────────────────────
+    // User observation
+    // ─────────────────────────────────────────────────────────────────────────
 
-    // Receives the shared user flow from UserSessionViewModel.
-    // Call once from a LaunchedEffect when the Profile destination composes.
     fun startObserving(userFlow: StateFlow<User?>) {
         if (observing) return
         observing = true
@@ -85,13 +100,51 @@ class ProfileViewModel(
                     xpIntoLevel    = xpIntoLevel,
                     xpForNextLevel = xpForNext - xpForCurrent,
                     badges         = emptyList(),
-                    activityData   = emptyList()
                 )
+
+                // Load statistics data after user is known — runs in parallel
+                loadStatisticsData(user.id)
             }
             .launchIn(viewModelScope)
     }
 
-    // ========== Profile Editing ==========
+    // ─────────────────────────────────────────────────────────────────────────
+    // Statistics data
+    //
+    // Workspaces are a live flow (subscribe once).
+    // Activity + completed tasks are one-shot fetches (fresh on each profile open).
+    // Both update the Ready state via copy() — safe since we're on the same
+    // coroutine scope with no concurrent writes.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private fun loadStatisticsData(uid: String) {
+        // Live workspace list: updates state whenever workspaces change
+        workspaceRepository.getWorkspaces(uid)
+            .onEach { workspaces ->
+                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
+                _uiState.value = current.copy(workspaces = workspaces)
+            }
+            .launchIn(viewModelScope)
+
+        // One-shot fetches for activity + completed tasks
+        viewModelScope.launch {
+            try {
+                val activity = userRepository.getActivityLast7Days(uid)
+                val tasks    = taskRepository.getAllCompletedTasksOnce(uid)
+                val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                _uiState.value = current.copy(
+                    activityData   = activity,
+                    completedTasks = tasks
+                )
+            } catch (e: Exception) {
+                _errorEvent.emit("Failed to load statistics: ${e.message}")
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Profile editing
+    // ─────────────────────────────────────────────────────────────────────────
 
     fun updateProfile(displayName: String, profilePicUrl: String) {
         viewModelScope.launch {
@@ -103,7 +156,9 @@ class ProfileViewModel(
         }
     }
 
-    // ========== Friends ==========
+    // ─────────────────────────────────────────────────────────────────────────
+    // Friends
+    // ─────────────────────────────────────────────────────────────────────────
 
     fun searchUsers(query: String) {
         if (query.isBlank()) {

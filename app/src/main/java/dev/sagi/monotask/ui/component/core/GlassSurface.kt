@@ -23,6 +23,9 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.sagi.monotask.data.model.Importance
+import dev.sagi.monotask.ui.component.task.CustomTag
+import dev.sagi.monotask.ui.component.task.CustomTagPreview
+import dev.sagi.monotask.ui.component.task.ImportanceTag
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground

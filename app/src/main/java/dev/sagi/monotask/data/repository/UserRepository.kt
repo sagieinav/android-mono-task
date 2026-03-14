@@ -61,8 +61,8 @@ class UserRepository {
         userDoc(userId).update(mapOf("xp" to newXp, "level" to newLevel)).await()
     }
 
-    // Deducts XP atomically (for undoing a task completion).
-    // Uses a transaction to read the current XP from Firestore, preventing stale-value issues.
+    // Deducts XP atomically (for undoing a task completion)
+    // Uses a transaction to read the current XP from Firestore, preventing stale-value issues
     suspend fun removeXp(userId: String, amount: Int) {
         db.runTransaction { tx ->
             val currentXp = tx.get(userDoc(userId)).getLong("xp")?.toInt() ?: 0
@@ -99,6 +99,18 @@ class UserRepository {
                 ),
                 SetOptions.merge()
             ).await()
+    }
+
+    // Fetches activity documents for the last 7 days (including today). Used by the XP chart
+    suspend fun getActivityLast7Days(userId: String): List<dev.sagi.monotask.data.model.DailyActivity> {
+        val today = java.time.LocalDate.now()
+        val epochDays = (0..6).map { today.minusDays(it.toLong()).toEpochDay() }
+        val docs = db.collection("users").document(userId)
+            .collection("activity")
+            .whereIn("dateEpochDay", epochDays)
+            .get()
+            .await()
+        return docs.mapNotNull { it.toObject(dev.sagi.monotask.data.model.DailyActivity::class.java) }
     }
 
     // ========== Settings ==========
