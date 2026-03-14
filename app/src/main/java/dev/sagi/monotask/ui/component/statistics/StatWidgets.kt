@@ -119,7 +119,7 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
             .clip(CircleShape)
             .glassBackground(
                 accentColor = accentColor,
-                baseColor   = MaterialTheme.colorScheme.surface.copy(alpha = 0.35f)
+                baseColor   = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
             )
             .glassBorder(shape = CircleShape, color = accentColor),
         contentAlignment = Alignment.Center
@@ -212,9 +212,9 @@ fun StatWidgetSmall(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (subtitle != null) {
+                subtitle?. let {
                     Text(
-                        text  = subtitle,
+                        text  = it,
                         style = MaterialTheme.typography.labelSmall,
                         color = accentColor.copy(alpha = 0.8f)
                     )
@@ -290,9 +290,9 @@ fun StatWidgetMedium(
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         // Date label
-                        if (dateLabel != null) {
+                        dateLabel?. let {
                             Text(
-                                text = dateLabel,
+                                text = it,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Black,
                                 color = accentColor
@@ -317,22 +317,23 @@ fun StatWidgetMedium(
                 verticalAlignment     = Alignment.Bottom
             ) {
                 WidgetValueRow(value = value, unit = unit, accentColor = accentColor)
-                if (trailingValue != null) {
+                // Trailing value and unit (if not null)
+                trailingValue?. let { value ->
                     Column(horizontalAlignment = Alignment.End) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalAlignment = Alignment.Bottom
                         ) {
                             Text(
-                                text = trailingValue,
+                                text = value,
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 modifier = Modifier.alignByBaseline()
                             )
-                            if (trailingUnit != null) {
+                            trailingUnit?. let { unit ->
                                 Text(
-                                    text = trailingUnit,
+                                    text = unit,
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.W400,
                                     color = MaterialTheme.colorScheme.outlineVariant,

@@ -129,13 +129,14 @@ fun ChooseSnoozeButton(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
-            if (xpPenalty != null) {
+
+            xpPenalty?. let {
                 Surface(
                     shape = RoundedCornerShape(100),
                     color = penaltyRed.copy(alpha = 0.12f)
                 ) {
                     Text(
-                        text = "$xpPenalty XP",
+                        text = "$it XP",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = penaltyRed,

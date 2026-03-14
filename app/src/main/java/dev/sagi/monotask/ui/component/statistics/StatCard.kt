@@ -43,14 +43,14 @@ fun StatCard(
                     verticalAlignment     = Alignment.Top
                 ) {
                     Column {
-                        if (title != null) {
+                        title?. let {
                             Text(
                                 text  = title,
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
                             )
                         }
-                        if (headline != null) {
+                        headline?. let {
                             Text(
                                 text       = headline,
                                 style      = MaterialTheme.typography.headlineMedium,

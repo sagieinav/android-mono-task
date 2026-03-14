@@ -94,7 +94,7 @@ fun AuthScreen(
                     .clickable {
                         scope.launch {
                             val idToken = authViewModel.launchGoogleSignIn(context)
-                            if (idToken != null) {
+                            idToken?. let {
                                 authViewModel.onGoogleSignInResult(idToken)
                             }
                         }

@@ -95,6 +95,7 @@ fun EmptyState(
     ) {
         Text(
             text = emoji,
+            style = MaterialTheme.typography.titleMedium, // cause default body font is italics
 //            fontSize = 64.sp,
             fontSize = dynamicEmojiSize,
             modifier = Modifier

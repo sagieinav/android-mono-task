@@ -120,7 +120,7 @@ fun FocusScreenContent(
             contentAlignment = Alignment.Center
         ) {
             when (uiState) {
-                is FocusUiState.Empty  -> EmptyState()
+                is FocusUiState.Empty  -> EmptyState(emoji = "🦾")
                 is FocusUiState.Active -> ActiveFocusCard(
                     uiState      = uiState,
                     animState    = animState,

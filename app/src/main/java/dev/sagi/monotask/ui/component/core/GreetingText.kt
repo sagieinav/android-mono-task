@@ -74,7 +74,7 @@ fun GreetingText(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = if (hazeState != null) Modifier.hazeSource(hazeState) else Modifier
         )
-        if (subtitle != null) {
+        subtitle?. let {
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
