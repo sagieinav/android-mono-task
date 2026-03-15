@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
 import dev.sagi.monotask.domain.util.ActivityStats.last7DayLabels
 import dev.sagi.monotask.domain.util.ActivityStats.last7Days
 import dev.sagi.monotask.ui.component.statistics.AceCompletionCard
+import dev.sagi.monotask.ui.component.statistics.ActivityHeatmap
 import dev.sagi.monotask.ui.component.statistics.BarChart
 import dev.sagi.monotask.ui.component.statistics.CompletionDonutCard
 import dev.sagi.monotask.ui.component.statistics.StreakCard
@@ -43,6 +45,10 @@ import dev.sagi.monotask.ui.component.statistics.TotalTasksCard
 import dev.sagi.monotask.ui.component.statistics.TotalXpCard
 import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.harabara
+import dev.sagi.monotask.ui.theme.playfairDisplay
+import dev.sagi.monotask.ui.theme.plusJakartaSans
 import java.time.LocalDate
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -67,66 +73,65 @@ fun StatisticsTab(
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
-            start           = 20.dp,
-            end             = 20.dp,
-            top             = 20.dp,
+            start           = 16.dp,
+            end             = 16.dp,
+            top             = 16.dp,
             bottom          = bottomPadding + 16.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(40.dp)
     ) {
-
-        // Xp this week (line chart)
         item {
-            LineChart(
-                title        = "XP This Week",
-                headline     = "$totalXp XP",
-                points       = ActivityStats.buildXpPoints(activity),
-                trendPercent = ActivityStats.computeXpTrend(activity),
-                lineColor    = AceGold,
-            )
-        }
+            StatSection("Weekly Activity") {
+                // Xp this week (line chart)
+                LineChart(
+                    title        = "XP This Week",
+                    headline     = "$totalXp XP",
+                    points       = ActivityStats.buildXpPoints(activity),
+                    trendPercent = ActivityStats.computeXpTrend(activity),
+                    lineColor    = AceGold,
+                )
 
-        // Tasks this week (bar graph)
-        item {
-            BarChart(
-                title       = "Tasks This Week",
-                headline     = "${activity.sumOf { it.tasksCompleted }} completed",
-                points      = ActivityStats.buildTaskPoints(activity),
-                trendPercent = ActivityStats.computeTaskTrend(activity),
-                barColor    = MaterialTheme.colorScheme.primary,
-                animate     = true,
-            )
-        }
-
-        // 4 half-width widget cards with simple data
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                TotalTasksCard(totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
-                AceCompletionCard(aceCount = state.completedTasks.count { it.isAce },
-                    totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                TotalXpCard(totalXp = state.user.xp, modifier = Modifier.weight(1f))
-                StreakCard(streakDays = ActivityStats.computeCurrentStreak(state.activityData),
-                    modifier = Modifier.weight(1f))
+                // Tasks this week (bar graph)
+                BarChart(
+                    title       = "Tasks This Week",
+                    headline     = "${activity.sumOf { it.tasksCompleted }} completed",
+                    points      = ActivityStats.buildTaskPoints(activity),
+                    trendPercent = ActivityStats.computeTaskTrend(activity),
+                    barColor    = MaterialTheme.colorScheme.primary,
+                    animate     = true,
+                )
             }
         }
 
-        // Best day card
         item {
-            TopPerformanceCard(activityData = state.activityData)
+            StatSection("Monthly Activity") {
+                ActivityHeatmap(activityData = state.monthActivityData)
+            }
         }
 
+
+        item {
+            StatSection("All Time") {
+                // Top Performance Card
+                TopPerformanceCard(activityData = state.activityData)
+
+                // 4 half-width widget cards with simple data
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    TotalTasksCard(totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
+                    AceCompletionCard(aceCount = state.completedTasks.count { it.isAce },
+                        totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    TotalXpCard(totalXp = state.user.xp, modifier = Modifier.weight(1f))
+                    StreakCard(streakDays = ActivityStats.computeCurrentStreak(state.activityData),
+                        modifier = Modifier.weight(1f))
+                }
+            }
+        }
         // DonutChart Duo
 //        item {
 //            CompletionDonutCard(tasks, workspaces)
@@ -137,93 +142,32 @@ fun StatisticsTab(
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-composables
 // ─────────────────────────────────────────────────────────────────────────────
-
+@Composable
+fun StatSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    SectionTitle(title)
+    Column(
+        modifier            = modifier.padding(top = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        content()
+    }
+}
 @Composable
 private fun SectionTitle(text: String) {
     Text(
         text       = text,
-        style      = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold
+        style      = MaterialTheme.typography.headlineSmall,
+//        fontFamily = gloock,
+        fontWeight = FontWeight.Bold,
+        color      = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+        textAlign  = TextAlign.Center,
+        modifier   = Modifier.fillMaxWidth()
     )
 }
-
-@Composable
-private fun StatCard(label: String, value: String, emoji: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment     = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            Text(
-                text  = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-            )
-            Text(
-                text       = value,
-                style      = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color      = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
-        Text(text = emoji, fontSize = 36.sp)
-    }
-}
-
-/**
- * Minimal bar chart — will be upgraded to Vico once the dependency lands.
- * Already accepts the same data shape so the swap will be a drop-in.
- */
-@Composable
-fun SimpleBarChart(
-    bars: List<Float>,
-    labels: List<String>,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    val max = bars.maxOrNull()?.coerceAtLeast(1f) ?: 1f
-
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier              = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            verticalAlignment     = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            bars.forEach { value ->
-                val fraction = value / max
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height((120 * fraction).dp.coerceAtLeast(4.dp))
-                        .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                        .background(color.copy(alpha = 0.8f))
-                )
-            }
-        }
-        Row(
-            modifier              = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            labels.forEach { label ->
-                Text(
-                    text      = label,
-                    modifier  = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    style     = MaterialTheme.typography.labelSmall,
-                    color     = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
 
 
 @Preview(showBackground = true, showSystemUi = true)

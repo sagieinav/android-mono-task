@@ -151,12 +151,15 @@ class KanbanViewModel(
     fun restoreTask(task: Task) {
         viewModelScope.launch {
             try {
+                val xpToRemove = task.currentXp
                 taskRepository.restoreTask(userId, task.id)
                 val user = userRepository.getUserOnce(userId) ?: run {
                     _errorEvent.emit("Failed to load user profile for XP rollback")
                     return@launch
                 }
-                userRepository.addXp(userId, -task.currentXp, user.xp, user.level)
+//                userRepository.addXp(userId, -task.currentXp, user.xp, user.level)
+                userRepository.removeDailyActivity(userId, xpToRemove)
+                userRepository.removeXp(userId, xpToRemove)
             } catch (e: Exception) {
                 _errorEvent.emit("Failed to restore task: ${e.message}")
             }

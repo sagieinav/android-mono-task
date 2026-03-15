@@ -113,11 +113,18 @@ fun Modifier.monoBorder(shape: Shape): Modifier = composed {
         )
 }
 
-fun Modifier.glassBorder(shape: Shape, color: Color? = null): Modifier = composed {
+fun Modifier.glassBorder(
+    shape: Shape,
+    color: Color? = null,
+    borderWidth: Dp = 2.dp
+): Modifier = composed {
+    val innerWidth = borderWidth * 0.75f
+    val outerWidth = borderWidth * 0.25f
+
     val innerModifier =
         if (color == null) {
             // Normal, non-colored:
-            Modifier.border(1.5.dp, Color.White.copy(alpha = 0.5f), shape)
+            Modifier.border(innerWidth, Color.White.copy(alpha = 0.5f), shape)
         } else {
             // Colored:
             val brush = Brush.linearGradient(
@@ -128,13 +135,13 @@ fun Modifier.glassBorder(shape: Shape, color: Color? = null): Modifier = compose
                     Color.White.copy(alpha = 0.5f),
                 )
             )
-            Modifier.border(1.5.dp, brush, shape)
+            Modifier.border(innerWidth, brush, shape)
         }
 
     val outerModifier =
         if (color == null) {
             // Normal, non-colored:
-            Modifier.border(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), shape)
+            Modifier.border(outerWidth, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), shape)
         } else {
             // Colored:
             val brush = Brush.linearGradient(
@@ -145,7 +152,7 @@ fun Modifier.glassBorder(shape: Shape, color: Color? = null): Modifier = compose
                     MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
                 )
             )
-            Modifier.border(0.5.dp, brush, shape)
+            Modifier.border(outerWidth, brush, shape)
         }
 
     // Apply the 2 borders

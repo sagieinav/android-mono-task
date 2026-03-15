@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
+import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.AceGoldDim
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -335,7 +336,7 @@ fun StatWidgetMedium(
                                 Text(
                                     text = unit,
                                     style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.W400,
+                                    fontWeight = FontWeight.Thin,
                                     color = MaterialTheme.colorScheme.outlineVariant,
                                     modifier = Modifier.alignByBaseline()
                                 )
@@ -424,7 +425,7 @@ fun TopPerformanceCard(
         subtitle      = "your most productive day ever",
         value         = xp.toString(),
         unit          = "xp",
-        icon          = painterResource(R.drawable.ic_ace),
+        icon          = painterResource(R.drawable.ic_top_performance),
         accentColor   = AceGoldDim,
         dateLabel     = date,
         trailingValue = tasks.toString(),

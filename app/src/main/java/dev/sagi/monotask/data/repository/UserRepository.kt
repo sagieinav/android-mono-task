@@ -4,11 +4,13 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.snapshots
 import dev.sagi.monotask.MonoTaskApp
+import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.XpEvents
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
 
 class UserRepository {
 
@@ -19,13 +21,11 @@ class UserRepository {
 
     // ========== Reads ==========
 
-    // Real-time stream of the current user's profile
     fun getUserStream(userId: String): Flow<User?> =
         userDoc(userId)
             .snapshots()
             .map { it.toObject(User::class.java)?.copy(id = it.id) }
 
-    // One-shot fetch. Used for friend search and read-only profile views
     suspend fun getUserOnce(userId: String): User? {
         val doc = userDoc(userId).get().await()
         return doc.toObject(User::class.java)?.copy(id = doc.id)
@@ -33,13 +33,11 @@ class UserRepository {
 
     // ========== User Lifecycle ==========
 
-    // Creates the user document on first login. Safe to call on every login (no-op if already exists).
     suspend fun createUserIfNotExists(user: User) {
         val doc = userDoc(user.id).get().await()
         if (!doc.exists()) userDoc(user.id).set(user).await()
     }
 
-    // Updates display name and profile picture from within the app (profile settings)
     suspend fun updateProfile(userId: String, displayName: String, profilePicUrl: String) {
         userDoc(userId).update(mapOf(
             "displayName"   to displayName,
@@ -47,22 +45,18 @@ class UserRepository {
         )).await()
     }
 
-    // Marks onboarding as complete. Called on the last onboarding page.
     suspend fun completeOnboarding(userId: String) {
         userDoc(userId).update("onboarded", true).await()
     }
 
     // ========== XP ==========
 
-    // Adds XP and recalculates level
     suspend fun addXp(userId: String, amount: Int, currentXp: Int, currentLevel: Int) {
         val newXp    = (currentXp + amount).coerceAtLeast(0)
         val newLevel = XpEvents.levelForXp(newXp)
         userDoc(userId).update(mapOf("xp" to newXp, "level" to newLevel)).await()
     }
 
-    // Deducts XP atomically (for undoing a task completion)
-    // Uses a transaction to read the current XP from Firestore, preventing stale-value issues
     suspend fun removeXp(userId: String, amount: Int) {
         db.runTransaction { tx ->
             val currentXp = tx.get(userDoc(userId)).getLong("xp")?.toInt() ?: 0
@@ -73,10 +67,8 @@ class UserRepository {
 
     // ========== Daily Activity ==========
 
-    // Logs XP and task count for today. Used by the Profile activity chart.
-    // Uses set+merge so it's safe to call multiple times per day.
     suspend fun logDailyActivity(userId: String, xpEarned: Int, tasksCompleted: Int) {
-        val today = java.time.LocalDate.now().toEpochDay()
+        val today = LocalDate.now().toEpochDay()
         userDoc(userId).collection("activity").document(today.toString())
             .set(
                 mapOf(
@@ -88,9 +80,8 @@ class UserRepository {
             ).await()
     }
 
-    // Reverses the daily activity log entry. Called when undoing a task completion.
     suspend fun removeDailyActivity(userId: String, xpToSubtract: Int, tasksToSubtract: Int = 1) {
-        val today = java.time.LocalDate.now().toEpochDay()
+        val today = LocalDate.now().toEpochDay()
         userDoc(userId).collection("activity").document(today.toString())
             .set(
                 mapOf(
@@ -101,21 +92,46 @@ class UserRepository {
             ).await()
     }
 
-    // Fetches activity documents for the last 7 days (including today). Used by the XP chart
-    suspend fun getActivityLast7Days(userId: String): List<dev.sagi.monotask.data.model.DailyActivity> {
-        val today = java.time.LocalDate.now()
+    // Fetches last 7 days for the weekly charts
+    suspend fun getActivityLast7Days(userId: String): List<DailyActivity> {
+        val today     = LocalDate.now()
         val epochDays = (0..6).map { today.minusDays(it.toLong()).toEpochDay() }
-        val docs = db.collection("users").document(userId)
-            .collection("activity")
+        val docs      = userDoc(userId).collection("activity")
             .whereIn("dateEpochDay", epochDays)
-            .get()
-            .await()
-        return docs.mapNotNull { it.toObject(dev.sagi.monotask.data.model.DailyActivity::class.java) }
+            .get().await()
+        return docs.mapNotNull { it.toObject(DailyActivity::class.java) }
     }
+
+    // Fetches all activity docs for the current calendar month.
+    // Uses a range query instead of whereIn to avoid the 30-item limit
+    fun getActivityForCurrentMonth(userId: String): Flow<List<DailyActivity>> {
+        val today      = LocalDate.now()
+        val monthStart = today.withDayOfMonth(1).toEpochDay()
+        val monthEnd   = today.toEpochDay()
+        return userDoc(userId).collection("activity")
+            .whereGreaterThanOrEqualTo("dateEpochDay", monthStart)
+            .whereLessThanOrEqualTo("dateEpochDay", monthEnd)
+            .snapshots()
+            .map { snapshot ->
+                snapshot.documents.mapNotNull {
+                    it.toObject(DailyActivity::class.java)
+                }
+            }
+    }
+    suspend fun getActivityForCurrentMonthOnce(userId: String): List<DailyActivity> {
+        val today      = LocalDate.now()
+        val monthStart = today.withDayOfMonth(1).toEpochDay()
+        val monthEnd   = today.toEpochDay()   // only up to today; future days have no data
+        val docs       = userDoc(userId).collection("activity")
+            .whereGreaterThanOrEqualTo("dateEpochDay", monthStart)
+            .whereLessThanOrEqualTo("dateEpochDay", monthEnd)
+            .get().await()
+        return docs.mapNotNull { it.toObject(DailyActivity::class.java) }
+    }
+
 
     // ========== Settings ==========
 
-    // Updates the user's app preferences. Only non-null params are written.
     suspend fun updatePreferences(
         userId: String,
         hardcoreModeEnabled: Boolean? = null,
@@ -131,18 +147,15 @@ class UserRepository {
 
     // ========== Social ==========
 
-    // Adds a friend by their userId. arrayUnion prevents duplicates.
     suspend fun addFriend(userId: String, friendId: String) {
         userDoc(userId).update("friends", FieldValue.arrayUnion(friendId)).await()
     }
 
-    // Searches users by display name prefix. Used by the Add Friend screen.
     suspend fun searchUsers(query: String): List<User> {
         val result = db.collection("users")
             .whereGreaterThanOrEqualTo("displayName", query)
             .whereLessThanOrEqualTo("displayName", query + "\uF8FF")
-            .get()
-            .await()
+            .get().await()
         return result.documents.mapNotNull {
             it.toObject(User::class.java)?.copy(id = it.id)
         }

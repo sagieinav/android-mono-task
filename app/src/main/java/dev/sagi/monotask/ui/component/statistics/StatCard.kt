@@ -32,7 +32,7 @@ fun StatCard(
         blurred   = false
     ) {
         Column(
-            modifier            = Modifier.padding(horizontal = 22.dp, vertical = 18.dp),
+            modifier            = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // Header & Headline (if any)

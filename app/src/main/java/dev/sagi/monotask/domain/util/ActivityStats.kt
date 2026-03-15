@@ -57,14 +57,20 @@ object ActivityStats {
         return streak
     }
 
-    // Record streak = longest consecutive active day run across all time.
-    fun computeRecordStreak(data: List<DailyActivity>): Int {
+    // Record streak = longest consecutive active day run across all time/time range
+    fun computeRecordStreak(
+        data: List<DailyActivity>,
+        range: ClosedRange<Long>? = null
+    ): Int {
         if (data.isEmpty()) return 0
         val days = data
+            .asSequence()
             .filter { it.tasksCompleted > 0 }
+            .filter { range == null || it.dateEpochDay in range }
             .map { it.dateEpochDay }
             .toSortedSet()
             .sorted()
+            .toList()
 
         var best    = 0
         var current = 0

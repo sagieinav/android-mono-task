@@ -40,6 +40,7 @@ sealed class ProfileUiState {
         val activityData   : List<DailyActivity>   = emptyList(),
         val completedTasks : List<Task>            = emptyList(),
         val workspaces     : List<Workspace>       = emptyList(),
+        val monthActivityData: List<DailyActivity> = emptyList()
     ) : ProfileUiState()
 }
 
@@ -102,7 +103,7 @@ class ProfileViewModel(
                     badges         = emptyList(),
                 )
 
-                // Load statistics data after user is known — runs in parallel
+                // Load statistics data after user is known, runs in parallel
                 loadStatisticsData(user.id)
             }
             .launchIn(viewModelScope)
@@ -126,14 +127,23 @@ class ProfileViewModel(
             }
             .launchIn(viewModelScope)
 
+        userRepository.getActivityForCurrentMonth(uid)
+            .onEach { monthActivity ->
+                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
+                _uiState.value = current.copy(monthActivityData = monthActivity)
+            }
+            .launchIn(viewModelScope)
+
         // One-shot fetches for activity + completed tasks
         viewModelScope.launch {
             try {
                 val activity = userRepository.getActivityLast7Days(uid)
                 val tasks    = taskRepository.getAllCompletedTasksOnce(uid)
                 val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
+//                val monthActivity = userRepository.getActivityForCurrentMonth(uid)
                 _uiState.value = current.copy(
                     activityData   = activity,
+//                    monthActivityData = monthActivity,
                     completedTasks = tasks
                 )
             } catch (e: Exception) {
