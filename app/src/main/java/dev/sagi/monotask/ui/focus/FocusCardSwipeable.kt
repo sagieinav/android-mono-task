@@ -41,11 +41,16 @@ import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBorder
 import kotlin.math.roundToInt
 
-private val PILL_SIZE    = 44.dp
-private val COMPLETE_COLOR = Color(0xFF4BB24F)
-private val SNOOZE_COLOR   = Color(0xFFFF511C)
-const val SNOOZE_THRESHOLD   = 380f
-const val COMPLETE_THRESHOLD = 380f
+// ========== Swipe Constants ==========
+private val PILL_SIZE          = 44.dp
+private val COMPLETE_COLOR     = Color(0xFF4BB24F)
+private val SNOOZE_COLOR       = Color(0xFFFF511C)
+const val SNOOZE_THRESHOLD     = 380f       // drag distance (px) to trigger snooze
+const val COMPLETE_THRESHOLD   = 380f       // drag distance (px) to trigger complete
+private const val MAX_DRAG_DISTANCE   = 400f  // hard limit for drag range (px)
+private const val MAX_ROTATION_DEG    = 18f   // card tilt at full drag
+private const val EXIT_MULTIPLIER     = 1.5f  // off-screen exit distance multiplier
+private const val EXIT_ANIM_DURATION  = 280   // exit animation duration (ms)
 
 // ========== Generic pill ==========
 @Composable
@@ -176,15 +181,15 @@ fun FocusCardSwipeable(
     )
 
     val cardTargetOffset = when (exitDirection) {
-        SwipeExitDirection.RIGHT -> screenWidthPx * 1.5f
-        SwipeExitDirection.LEFT  -> -screenWidthPx * 1.5f
+        SwipeExitDirection.RIGHT -> screenWidthPx * EXIT_MULTIPLIER
+        SwipeExitDirection.LEFT  -> -screenWidthPx * EXIT_MULTIPLIER
         null                     -> offsetX
     }
 
     val animatedOffset by animateFloatAsState(
         targetValue   = cardTargetOffset,
         animationSpec = if (isExiting)
-            tween(280, easing = FastOutLinearInEasing)
+            tween(EXIT_ANIM_DURATION, easing = FastOutLinearInEasing)
         else
             spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "swipe_offset",
@@ -227,7 +232,7 @@ fun FocusCardSwipeable(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                .graphicsLayer { rotationZ = (animatedOffset / screenWidthPx) * 18f }
+                .graphicsLayer { rotationZ = (animatedOffset / screenWidthPx) * MAX_ROTATION_DEG }
                 .pointerInput(isExiting) {
                     if (isExiting) return@pointerInput
                     detectHorizontalDragGestures(
@@ -247,7 +252,7 @@ fun FocusCardSwipeable(
                         },
                         onDragCancel = { offsetX = 0f },
                         onHorizontalDrag = { _, dragAmount ->
-                            offsetX = (offsetX + dragAmount).coerceIn(-400f, 400f)
+                            offsetX = (offsetX + dragAmount).coerceIn(-MAX_DRAG_DISTANCE, MAX_DRAG_DISTANCE)
                         }
                     )
                 }

@@ -20,14 +20,14 @@ val gloock = FontFamily(
     Font(R.font.gloock, FontWeight.Normal)
 )
 
-// Option B: Playfair Display — high-contrast classic serif.
-// Variable font: one file handles all weights.
 val playfairDisplay = FontFamily(
     Font(R.font.playfair_display_bold,        FontWeight.Bold),
     Font(R.font.playfair_display,        FontWeight.SemiBold),
     Font(R.font.playfair_display,        FontWeight.Bold),
     Font(R.font.playfair_display_italic, FontWeight.Normal,  FontStyle.Italic),
 )
+
+// Other fonts considered: Playfair Display, Libre Caslon, Noto Serif, Google Sans
 
 // ─────────────────────────────────────────────────────
 // CATEGORY 2 — BODY / READING SERIF (Descriptions, onboarding, profile)

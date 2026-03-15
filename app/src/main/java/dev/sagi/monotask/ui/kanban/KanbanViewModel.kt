@@ -157,7 +157,6 @@ class KanbanViewModel(
                     _errorEvent.emit("Failed to load user profile for XP rollback")
                     return@launch
                 }
-//                userRepository.addXp(userId, -task.currentXp, user.xp, user.level)
                 userRepository.removeDailyActivity(userId, xpToRemove)
                 userRepository.removeXp(userId, xpToRemove)
             } catch (e: Exception) {

@@ -15,6 +15,7 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.data.repository.AuthRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -120,11 +121,6 @@ class AuthViewModel(
 
                 val userModel = authRepository.buildUserModel(firebaseUser)
                 userRepository.createUserIfNotExists(userModel)
-//                userRepository.syncGoogleProfile(
-//                    userId        = firebaseUser.uid,
-//                    displayName   = userModel.displayName,
-//                    profilePicUrl = userModel.profilePicUrl
-//                )
 
                 val storedUser = userRepository.getUserOnce(firebaseUser.uid) ?: run {
                     _uiState.value = AuthUiState.Error("Failed to load user profile")
@@ -148,7 +144,7 @@ class AuthViewModel(
     // ========== Other Actions ==========
 
     fun completeOnboarding() {
-        val userId = authRepository.currentUser?.uid ?: return
+        val userId = AuthUtils.currentUidOrNull() ?: return
         viewModelScope.launch {
             try {
                 userRepository.completeOnboarding(userId)

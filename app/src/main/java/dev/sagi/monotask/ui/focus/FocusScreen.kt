@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import dev.sagi.monotask.domain.util.XpEvents
-import dev.sagi.monotask.ui.component.core.EmptyState
 import dev.sagi.monotask.ui.component.core.HeroGreeting
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding

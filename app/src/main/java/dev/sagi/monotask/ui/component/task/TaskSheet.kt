@@ -67,8 +67,6 @@ private fun TaskSheet(
     var dueDateMillis by remember { mutableStateOf(initialDueDateMillis) }
     var showDateTimePicker by remember { mutableStateOf(false) }
 
-//    val shape = MaterialTheme.shapes.medium
-
     BottomSheet(title = sheetTitle, onDismissRequest = onDismiss) {
         // Column to override vertical gap for the 3 text fields
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -81,11 +79,6 @@ private fun TaskSheet(
                 tags = tags, onTagsUpdated = { tags = it }
             )
         }
-
-//        HorizontalDivider(
-//            Modifier.padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 6.dp),
-//            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)
-//        )
 
         // Spacer before chips
         Spacer(Modifier.padding(1.dp))

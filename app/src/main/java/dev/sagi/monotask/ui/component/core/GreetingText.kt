@@ -34,26 +34,8 @@ fun HeroGreeting(
     ) {
         GreetingText(
             title = "Hi, ${userName.substringBefore(" ")}",
-//            modifier = Modifier.weight(1f)  // takes remaining space, doesn't push date out
         )
-//        Text(
-//            text = timestamp.toFormattedDate(),
-//            style = MaterialTheme.typography.bodyMedium,
-//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-//        )
-
-//        Text(
-////            text = "$remaining tasks left",
-//            text = "3 tasks left",
-//            style = MaterialTheme.typography.labelMedium,
-//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-//        )
     }
-
-//    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-//        StatChip(icon = R.drawable.ic_xp,     value = "+140 XP today")
-//        StatChip(icon = R.drawable.ic_streak, value = "5 day streak")
-//    }
 }
 
 

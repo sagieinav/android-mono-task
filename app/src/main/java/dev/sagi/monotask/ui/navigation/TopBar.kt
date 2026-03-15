@@ -23,9 +23,9 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 
 
-// ─────────────────────────────────────────
-// Generic core — not used directly outside navigation/
-// ─────────────────────────────────────────
+// ==========================================
+// Generic core. Not used directly outside 'navigation/'
+// ==========================================
 @Composable
 private fun TopBarScaffold(
     leading: @Composable () -> Unit,
@@ -47,9 +47,9 @@ private fun TopBarScaffold(
 }
 
 
-// ─────────────────────────────────────────
+// ==========================================
 // Workspace TopBar (Focus + Kanban)
-// ─────────────────────────────────────────
+// ==========================================
 @Composable
 fun WorkspaceTopBar(
     workspaces: List<Workspace>,
@@ -80,9 +80,9 @@ fun WorkspaceTopBar(
 }
 
 
-// ─────────────────────────────────────────
+// ==========================================
 // Title TopBar (Profile + Settings)
-// ─────────────────────────────────────────
+// ==========================================
 @Composable
 fun TitleTopBar(
     title: String,
@@ -105,9 +105,9 @@ fun TitleTopBar(
 }
 
 
-// ─────────────────────────────────────────
+// ==========================================
 // Shared icon button pill
-// ─────────────────────────────────────────
+// ==========================================
 @Composable
 fun TopBarIconButton(
     iconRes: Int,
@@ -119,7 +119,6 @@ fun TopBarIconButton(
         blurred = false,
         shape = CircleShape,
         modifier = modifier
-//            .monoShadow(CircleShape)
             .monoShadowWorkaround(CircleShape)
             .clip(CircleShape)
             .size(40.dp)
@@ -138,9 +137,9 @@ fun TopBarIconButton(
 }
 
 
-// ─────────────────────────────────────────
+// ==========================================
 // Previews
-// ─────────────────────────────────────────
+// ==========================================
 @Preview(showBackground = true, name = "Workspace TopBar")
 @Composable
 private fun WorkspaceTopBarPreview() {

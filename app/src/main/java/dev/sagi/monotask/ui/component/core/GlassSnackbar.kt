@@ -54,19 +54,14 @@ fun GlassSnackbar(
         modifier = modifier
             .padding(10.dp) // external padding
             .monoShadow(CircleShape)
-            .wrapContentSize()
-//            .fillMaxWidth()
-        ,
+            .wrapContentSize(),
         shape = CircleShape,
         blurred = true
     ) {
         Row(
             modifier = Modifier
-                .padding(vertical = 8.dp) // internal padding
-//                .fillMaxWidth()
-            ,
+                .padding(vertical = 8.dp), // internal padding
             verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // The main message (Takes up remaining space)
             Text(
@@ -100,20 +95,6 @@ fun GlassSnackbar(
                         modifier = Modifier.size(iconSize)
                     )
                 }
-//                TextButton(
-//                    onClick = { snackbarData.performAction() },
-//                    contentPadding = PaddingValues(0.dp),
-//                    modifier = Modifier.heightIn(max = 28.dp)
-//                ) {
-//                    Text(
-//                        text = snackbarData.visuals.actionLabel!!,
-//                        color = MaterialTheme.colorScheme.primary,
-//                        style = MaterialTheme.typography.labelMedium.copy(
-//                            fontWeight = FontWeight.Bold
-//                        ),
-//                        fontFamily = ibmPlexMono
-//                    )
-//                }
             }
         }
     }

@@ -65,7 +65,6 @@ fun TaskDatePicker(
                     border = BorderStroke(
                         0.5.dp,
                         brush = glassBorder
-//                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     ),
                     shape = CircleShape,
                 ),

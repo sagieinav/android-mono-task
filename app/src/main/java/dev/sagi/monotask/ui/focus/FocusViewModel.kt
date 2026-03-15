@@ -39,6 +39,7 @@ class FocusViewModel(
     val uiEffect: SharedFlow<FocusUiEffect> = _uiEffect.asSharedFlow()
 
     // ========== Internal State ==========
+    // All mutable vars below are only accessed on Main (viewModelScope default)
 
     private lateinit var userId: String
 
@@ -62,8 +63,8 @@ class FocusViewModel(
 
     // ========== Workspace Wiring ==========
 
-    // Connects this ViewModel to the shared workspace selection.
-    // Call once right after creation (in NavGraph).
+    // Connects this ViewModel to the shared workspace selection
+    // Call once right after creation (in NavGraph)
     fun setWorkspaceSource(workspaceFlow: StateFlow<Workspace?>) {
         _workspaceSource.compareAndSet(null, workspaceFlow)
     }
@@ -141,6 +142,7 @@ class FocusViewModel(
 
                 userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
                 val completedTasks = taskRepository.getCompletedTasksOnce(userId, state.workspace.id)
+                // TODO: Persist badge evaluation results once badges are wired to Firestore
                 BadgeEngine.evaluate(completedTasks)
 
             } catch (e: Exception) {

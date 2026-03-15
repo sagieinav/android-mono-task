@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.core
+package dev.sagi.monotask.ui.focus
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -96,14 +96,9 @@ fun EmptyState(
         Text(
             text = emoji,
             style = MaterialTheme.typography.titleMedium, // cause default body font is italics
-//            fontSize = 64.sp,
             fontSize = dynamicEmojiSize,
             modifier = Modifier
-//                .scale(emojiScale.value)
-                .fillMaxWidth(0.85f)
-//                .align(Alignment.CenterHorizontally)
-//                .aspectRatio(1f)
-            ,
+                .fillMaxWidth(0.85f),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -139,16 +134,6 @@ fun EmptyStatePreview() {
     MonoTaskTheme {
         Column {
             EmptyState()
-//            EmptyState(
-//                emoji = "\uD83E\uDDBE",
-//                title = "No open tasks",
-//                subtitle = "Damn, you're a productivity machine."
-//            )
-//            EmptyState(
-//                emoji = "📋",
-//                title = "No tasks yet",
-//                subtitle = "Add your first task to get started."
-//            )
         }
     }
 }

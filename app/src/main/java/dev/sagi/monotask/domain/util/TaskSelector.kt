@@ -97,17 +97,6 @@ object TaskSelector {
      * Formula: 1 / (1 + e^(0.5 * (daysUntilDue - 3)))
      * This is a logistic (sigmoid) function centered at 3 days.
      */
-//    private fun dueDateUrgency(dueDate: Timestamp?): Double {
-//        if (dueDate == null) return 0.5  // no due date = neutral
-//
-//        val now = System.currentTimeMillis()
-//        val dueMillis = dueDate.toDate().time
-//        val daysUntilDue = (dueMillis - now) / (1000.0 * 60 * 60 * 24)
-//
-//        // Sigmoid func centered at 3 days. smooth curve, no hard cutoffs
-//        return 1.0 / (1.0 + exp(0.5 * (daysUntilDue - 3)))
-//    }
-
     private fun dueDateUrgency(dueDate: Timestamp?): Double {
         if (dueDate == null) return 0.5
 

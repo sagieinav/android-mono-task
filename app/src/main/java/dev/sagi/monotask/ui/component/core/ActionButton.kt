@@ -61,7 +61,6 @@ fun ActionButton(
             )
             .fillMaxWidth()
             .height(56.dp)
-//            .monoBorder(shape)
             .clip(shape)
             .clickable(
                 enabled = enabled,
@@ -76,9 +75,7 @@ fun ActionButton(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-//                    .graphicsLayer { this.alpha = alpha }
-                ,
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 content = content

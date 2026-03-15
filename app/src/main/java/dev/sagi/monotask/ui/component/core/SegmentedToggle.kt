@@ -29,17 +29,10 @@ fun SegmentedToggle(
     onOptionSelected: (index: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-//    Surface(
-//        shape = CircleShape,
-//        color = MaterialTheme.colorScheme.surfaceVariant,
-//        modifier = modifier
-////            .basicMonoTask(CircleShape)
-//    ) {
     GlassSurface(
         blurred = false,
         shape = CircleShape,
         modifier = modifier
-//            .basicMonoTask(CircleShape)
     ) {
         Row(Modifier
             .padding(4.dp)

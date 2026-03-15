@@ -23,9 +23,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ==========================================================================
 // UI state
-// ─────────────────────────────────────────────────────────────────────────────
+// ==========================================================================
 
 sealed class ProfileUiState {
     object Loading : ProfileUiState()
@@ -44,9 +44,9 @@ sealed class ProfileUiState {
     ) : ProfileUiState()
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ==========================================================================
 // ViewModel
-// ─────────────────────────────────────────────────────────────────────────────
+// ==========================================================================
 
 class ProfileViewModel(
     private val userRepository      : UserRepository      = MonoTaskApp.instance.userRepository,
@@ -67,15 +67,15 @@ class ProfileViewModel(
     val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
 
     private lateinit var userId: String
-    private var observing = false
+    private var observing = false   // safe: only touched on Main dispatcher
 
     init {
         viewModelScope.launch { userId = AuthUtils.awaitUid() }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
     // User observation
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
 
     fun startObserving(userFlow: StateFlow<User?>) {
         if (observing) return
@@ -109,14 +109,14 @@ class ProfileViewModel(
             .launchIn(viewModelScope)
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
     // Statistics data
     //
     // Workspaces are a live flow (subscribe once).
     // Activity + completed tasks are one-shot fetches (fresh on each profile open).
     // Both update the Ready state via copy() — safe since we're on the same
     // coroutine scope with no concurrent writes.
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
 
     private fun loadStatisticsData(uid: String) {
         // Live workspace list: updates state whenever workspaces change
@@ -140,10 +140,8 @@ class ProfileViewModel(
                 val activity = userRepository.getActivityLast7Days(uid)
                 val tasks    = taskRepository.getAllCompletedTasksOnce(uid)
                 val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
-//                val monthActivity = userRepository.getActivityForCurrentMonth(uid)
                 _uiState.value = current.copy(
                     activityData   = activity,
-//                    monthActivityData = monthActivity,
                     completedTasks = tasks
                 )
             } catch (e: Exception) {
@@ -152,9 +150,9 @@ class ProfileViewModel(
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
     // Profile editing
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
 
     fun updateProfile(displayName: String, profilePicUrl: String) {
         viewModelScope.launch {
@@ -166,9 +164,9 @@ class ProfileViewModel(
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
     // Friends
-    // ─────────────────────────────────────────────────────────────────────────
+    // ==========================================================================
 
     fun searchUsers(query: String) {
         if (query.isBlank()) {

@@ -40,21 +40,12 @@ class SettingsViewModel(
 
     private lateinit var userId: String
 
-//    init {
-//        viewModelScope.launch {
-//            userId = AuthUtils.awaitUid()
-//            loadUserSettings()
-//        }
-//    }
-init {
-    val uid = AuthUtils.currentUidOrNull()
-    if (uid != null) {
-        userId = uid
-        viewModelScope.launch { loadUserSettings() }
-    } else {
-        _uiState.value = SettingsUiState.Ready() // signed out, show defaults
+    init {
+        viewModelScope.launch {
+            userId = AuthUtils.awaitUid()
+            loadUserSettings()
+        }
     }
-}
 
     // ========== Initialization ==========
 
@@ -75,8 +66,7 @@ init {
         }
     }
 
-
-// ========== Settings Operations ==========
+    // ========== Settings Operations ==========
 
     fun updateUserPreferences(
         hardcoreModeEnabled: Boolean? = null,

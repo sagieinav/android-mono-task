@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.theme.basicMonoTask
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 @Composable
@@ -26,7 +27,7 @@ fun AuthScreen(
     onNavigateToOnboarding: () -> Unit,
     onNavigateToMain: () -> Unit
 ) {
-    val uiState by authViewModel.uiState.collectAsState()
+    val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope   = rememberCoroutineScope()
 
