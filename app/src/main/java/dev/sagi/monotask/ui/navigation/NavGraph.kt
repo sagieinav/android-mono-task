@@ -134,7 +134,7 @@ fun NavGraph(
                 FocusScreen(
                     navController = navController,
                     focusVM       = focusVM,
-                    userSessionVM = userSessionVM
+//                    userSessionVM = userSessionVM
                 )
             }
             composable(Screen.Kanban.route) {

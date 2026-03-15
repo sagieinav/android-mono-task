@@ -55,10 +55,7 @@ fun KanbanCard(
     task: Task,
     isArchive: Boolean = false,
     shape: Shape = MaterialTheme.shapes.small,
-    onEditClick: () -> Unit = {},
-    onFocusNowClick: () -> Unit = {},
-    onRestoreClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
+    onKanbanEvent: (KanbanEvent) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
@@ -72,7 +69,6 @@ fun KanbanCard(
     Box(modifier = modifier) {
         // ── Card surface ────────────────────────────────────────────────────
         Surface(
-//            onClick  = {},  // consumed by pointerInput below
             modifier = Modifier
                 .fillMaxWidth()
                 .monoShadow(cardShape)
@@ -140,7 +136,7 @@ fun KanbanCard(
             isArchive       = isArchive,
             tapOffset       = tapOffset,
             onDismiss       = { dropdownExpanded = false },
-            onEditClick     = onEditClick,
+            onEditClick     = { onKanbanEvent(KanbanEvent.OpenEditSheet(task)) },
             onFocusNowClick = { pendingAction = PendingAction.FOCUS_NOW },
             onRestoreClick  = { pendingAction = PendingAction.RESTORE },
             onDeleteClick   = { pendingAction = PendingAction.DELETE }
@@ -156,7 +152,7 @@ fun KanbanCard(
                                 "receiving a ${XpEvents.SnoozeOption.MANUAL.penalty} XP penalty.",
             confirmLabel     = "Focus",
             confirmColor     = AceGoldDim,
-            onConfirm        = onFocusNowClick
+            onConfirm        = { onKanbanEvent(KanbanEvent.FocusNow(task)) }
         )
         PendingAction.RESTORE -> GlassConfirmDialog(
             onDismissRequest = { pendingAction = null },
@@ -164,7 +160,7 @@ fun KanbanCard(
             message          = "This will move the task back to active.\n" +
                     "${task.currentXp} XP received from completion will be rolled back.",
             confirmLabel     = "Restore",
-            onConfirm        = onRestoreClick
+            onConfirm        = { onKanbanEvent(KanbanEvent.RestoreTask(task)) }
         )
         PendingAction.DELETE -> GlassConfirmDialog(
             onDismissRequest = { pendingAction = null },
@@ -172,7 +168,7 @@ fun KanbanCard(
             message          = "This operation cannot be undone.",
             confirmLabel     = "Delete",
             confirmColor     = MaterialTheme.colorScheme.error,
-            onConfirm        = onDeleteClick
+            onConfirm        = { onKanbanEvent(KanbanEvent.DeleteTask(task.id)) }
         )
         null -> Unit
     }
@@ -206,13 +202,11 @@ fun KanbanCardDropdown(
             MonoDropdownActionItem(
                 label   = "Edit Task",
                 iconRes = R.drawable.ic_edit,
-//                color = MaterialTheme.colorScheme.primary,
                 onClick = { onEditClick(); onDismiss() }
             )
             MonoDropdownActionItem(
                 label   = "Focus Now",
                 iconRes = R.drawable.ic_fire,
-//                color = AceGoldDim,
                 onClick = { onFocusNowClick(); onDismiss() }
             )
         } else {

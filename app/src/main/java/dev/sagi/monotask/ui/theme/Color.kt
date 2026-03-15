@@ -263,6 +263,14 @@ val AceGold            = Color(0xFFDEBC00) // Raw brand gold
 val AceGoldGlow        = Color(0x40FFD700) // 25% alpha - glow ring on FocusCard
 val AceGoldDim         = Color(0xFFC9A500) // Darker gold - pressed states
 
+val StreakFire         = Color(0xFFDC4F07) // Active streak icon & accent color
+val XpViolet           = Color(0xFF8B5CF6) // XP / level accent color
+
+// Fire gradient, used for the streak fire icon
+val FireGradientDeep   = Color(0xFFB45309) // base: deep amber-brown
+val FireGradientMid    = Color(0xFFD97706) // mid:  amber
+val FireGradientTip    = Color(0xFFF59E0B) // tip:  warm yellow
+
 val PenaltyRedGlow     = Color(0x33E63946) // 20% alpha - error container tint
 val SuccessGreen       = Color(0xFF06D6A0) // Raw success color
 val bonusGreen         = Color(0xCC39D540)
@@ -271,8 +279,7 @@ val penaltyRed         = Color(0xDDDE0F38)
 val GlassSurface       = Color(0xCCFFFFFF) // 80% white - frosted card overlay (light)
 val GlassSurfaceDark   = Color(0xCC1A1A2E) // 80% dark - frosted card overlay (dark)
 
-val AeroShadow         = Color(0x1A000000) // 10% black - ambient shadow
-val AeroShadowDeep     = Color(0x33000000) // 20% black - elevated card shadow
+
 
 
 // ── Importance Tag Colors ────────────────────────────────────────

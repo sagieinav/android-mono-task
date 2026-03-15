@@ -9,35 +9,24 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.ActivityStats
-import dev.sagi.monotask.domain.util.ActivityStats.computeCurrentStreak
-import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
-import dev.sagi.monotask.domain.util.ActivityStats.last7DayLabels
-import dev.sagi.monotask.domain.util.ActivityStats.last7Days
 import dev.sagi.monotask.ui.component.statistics.AceCompletionCard
 import dev.sagi.monotask.ui.component.statistics.ActivityHeatmap
 import dev.sagi.monotask.ui.component.statistics.BarChart
-import dev.sagi.monotask.ui.component.statistics.CompletionDonutCard
 import dev.sagi.monotask.ui.component.statistics.StreakCard
 import dev.sagi.monotask.ui.component.statistics.LineChart
 import dev.sagi.monotask.ui.component.statistics.TopPerformanceCard
@@ -45,10 +34,6 @@ import dev.sagi.monotask.ui.component.statistics.TotalTasksCard
 import dev.sagi.monotask.ui.component.statistics.TotalXpCard
 import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.harabara
-import dev.sagi.monotask.ui.theme.playfairDisplay
-import dev.sagi.monotask.ui.theme.plusJakartaSans
 import java.time.LocalDate
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -62,12 +47,11 @@ fun StatisticsTab(
 ) {
     val activity = state.activityData
     val tasks = state.completedTasks
-    val workspaces = state.workspaces
+    val monthActivity = state.monthActivityData
+//    val workspaces = state.workspaces
 
-    val streak = remember(activity) { computeCurrentStreak(activity) }
-    val record = remember(activity) { computeRecordStreak(activity) }
     val aceCount    = tasks.count { it.isAce }
-    val totalTasks  = tasks.size
+    val totalCompletedTasks  = tasks.size
     val totalXp = activity.sumOf { it.xpEarned }
 
     LazyColumn(
@@ -119,16 +103,27 @@ fun StatisticsTab(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    TotalTasksCard(totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
-                    AceCompletionCard(aceCount = state.completedTasks.count { it.isAce },
-                        totalTasks = state.completedTasks.size, modifier = Modifier.weight(1f))
+                    TotalTasksCard(
+                        totalTasks = totalCompletedTasks,
+                        modifier = Modifier.weight(1f)
+                    )
+                    AceCompletionCard(
+                        aceCount = aceCount,
+                        totalTasks = totalCompletedTasks,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    TotalXpCard(totalXp = state.user.xp, modifier = Modifier.weight(1f))
-                    StreakCard(streakDays = ActivityStats.computeCurrentStreak(state.activityData),
-                        modifier = Modifier.weight(1f))
+                    TotalXpCard(
+                        totalXp = totalXp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    StreakCard(
+                        activityData = state.monthActivityData,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }

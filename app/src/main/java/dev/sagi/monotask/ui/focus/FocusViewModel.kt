@@ -8,6 +8,7 @@ import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.util.ActivityStats
 import dev.sagi.monotask.domain.util.BadgeEngine
 import dev.sagi.monotask.domain.util.TaskSelector
 import dev.sagi.monotask.domain.util.XpEvents
@@ -46,6 +47,10 @@ class FocusViewModel(
     // Workspace flow injected once from NavGraph via setWorkspaceSource
     private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
 
+    // Current streak — independent of task state, drives the streak chip
+    private val _currentStreak = MutableStateFlow(0)
+    val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
+
     // Cached for undo operations
     private var lastCompletedTask: Task? = null
     private var lastSnoozedTask: Task? = null
@@ -58,6 +63,7 @@ class FocusViewModel(
         viewModelScope.launch {
             userId = AuthUtils.awaitUid()
             observeTasks()
+            observeStats()
         }
     }
 
@@ -80,6 +86,17 @@ class FocusViewModel(
             is FocusEvent.UndoCompleteTask -> undoCompleteTask()
             is FocusEvent.UndoSnoozeTask  -> undoSnoozeTask()
         }
+    }
+
+    // ========== Stats Observation ==========
+
+    private fun observeStats() {
+        // Live streak — re-emits on every Firestore snapshot for the current month
+        userRepository.getActivityForCurrentMonth(userId)
+            .onEach { activity ->
+                _currentStreak.value = ActivityStats.computeCurrentStreak(activity)
+            }
+            .launchIn(viewModelScope)
     }
 
     // ========== Task Observation ==========

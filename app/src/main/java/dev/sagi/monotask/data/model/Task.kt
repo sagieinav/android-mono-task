@@ -14,6 +14,7 @@ data class Task(
     val snoozeCount: Int = 0,
     val currentXp: Int = 0,
     val completed: Boolean = false,
+    val completedAt: Timestamp? = null,
     val createdAt: Timestamp = Timestamp.now(),
     val ownerId: String = ""
 ) {

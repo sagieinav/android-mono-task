@@ -41,8 +41,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
+import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
 import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.AceGoldDim
+import dev.sagi.monotask.ui.theme.StreakFire
+import dev.sagi.monotask.ui.theme.XpViolet
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.circleGlow
@@ -67,8 +70,8 @@ private val CutoutClearance  = CircleRadius * 2 - ContentTopPadding + 2.dp
 private val SmallCardHeight  = 140.dp
 private val MediumCardHeight = 160.dp
 
-private val StreakFireColor  = Color(0xFFFF6B35)
-private val XpVioletColor    = Color(0xFF8B5CF6)
+private val StreakFireColor  = StreakFire
+private val XpVioletColor    = XpViolet
 
 private val DateFormatter    = DateTimeFormatter.ofPattern("EEE, MMM d")
 
@@ -139,7 +142,7 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
 @Composable
 private fun WidgetValueRow(
     value: String,
-    unit: String,
+    unit: String = "",
     accentColor: Color,
 ) {
     val initialFontSize = MaterialTheme.typography.headlineMedium.fontSize
@@ -159,7 +162,7 @@ private fun WidgetValueRow(
             Text(
                 text       = unit,
                 style      = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.W400,
+                fontWeight = FontWeight.Thin,
                 color      = MaterialTheme.colorScheme.outlineVariant,
                 modifier   = Modifier.alignByBaseline()
             )
@@ -397,11 +400,12 @@ fun TotalXpCard(totalXp: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun StreakCard(streakDays: Int, modifier: Modifier = Modifier) {
+fun StreakCard(activityData: List<DailyActivity>, modifier: Modifier = Modifier) {
+    val recordDays = computeRecordStreak(activityData)
     StatWidgetSmall(
-        title       = "Streak",
-        value       = streakDays.toString(),
-        unit        = if (streakDays == 1) "day" else "days",
+        title       = "Streak Record",
+        value       = recordDays.toString(),
+        unit        = if (recordDays == 1) "day" else "days",
         icon        = painterResource(R.drawable.ic_fire),
         accentColor = StreakFireColor,
         modifier    = modifier
@@ -467,7 +471,7 @@ private fun StatWidgetsPreview() {
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         TotalXpCard(totalXp = 14250, modifier = Modifier.weight(1f))
-                        StreakCard(streakDays = 7, modifier = Modifier.weight(1f))
+                        StreakCard(activityData = emptyList(), modifier = Modifier.weight(1f))
                     }
                 }
             }

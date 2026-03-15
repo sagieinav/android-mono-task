@@ -16,17 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-// ========== UI States ==========
-sealed class KanbanUiState {
-    object Loading : KanbanUiState()
-    data class Ready(
-        val highTasks: List<Task>,
-        val mediumTasks: List<Task>,
-        val lowTasks: List<Task>,
-        val isArchive: Boolean
-    ) : KanbanUiState()
-}
-
 class KanbanViewModel(
     private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
     private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
@@ -41,8 +30,8 @@ class KanbanViewModel(
 
     private val _showCompleted = MutableStateFlow(false)
 
-    private val _errorEvent = MutableSharedFlow<String>()
-    val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
+    private val _uiEffect = MutableSharedFlow<KanbanUiEffect>()
+    val uiEffect: SharedFlow<KanbanUiEffect> = _uiEffect.asSharedFlow()
 
     // Stored so focusNow() can reference the current workspace without extra params
     private var currentWorkspace: Workspace? = null
@@ -56,6 +45,20 @@ class KanbanViewModel(
         viewModelScope.launch {
             userId = AuthUtils.awaitUid()
             observeTasks()
+        }
+    }
+
+    // ========== Event Dispatcher ==========
+
+    fun onEvent(event: KanbanEvent) {
+        when (event) {
+            is KanbanEvent.ToggleArchive   -> toggleArchive()
+            is KanbanEvent.OpenEditSheet   -> openEditSheet(event.task)
+            is KanbanEvent.DismissEditSheet -> dismissEditSheet()
+            is KanbanEvent.UpdateTask      -> updateTask(event.task)
+            is KanbanEvent.DeleteTask      -> deleteTask(event.taskId)
+            is KanbanEvent.FocusNow        -> focusNow(event.task)
+            is KanbanEvent.RestoreTask     -> restoreTask(event.task)
         }
     }
 
@@ -90,7 +93,7 @@ class KanbanViewModel(
             .launchIn(viewModelScope)
     }
 
-    fun toggleArchive() {
+    private fun toggleArchive() {
         _uiState.value = KanbanUiState.Loading
         _showCompleted.value = !_showCompleted.value
     }
@@ -106,29 +109,29 @@ class KanbanViewModel(
         )
     }
 
-// ========== Task Actions ==========
+    // ========== Task Actions ==========
 
-    fun updateTask(task: Task) {
+    private fun updateTask(task: Task) {
         viewModelScope.launch {
             try {
                 taskRepository.overwriteExistingTask(userId, task)
             } catch (e: Exception) {
-                _errorEvent.emit("Failed to update task: ${e.message}")
+                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to update task: ${e.message}"))
             }
         }
     }
 
-    fun deleteTask(taskId: String) {
+    private fun deleteTask(taskId: String) {
         viewModelScope.launch {
             try {
                 taskRepository.deleteTask(userId, taskId)
             } catch (e: Exception) {
-                _errorEvent.emit("Failed to delete task: ${e.message}")
+                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to delete task: ${e.message}"))
             }
         }
     }
 
-    fun focusNow(task: Task) {
+    private fun focusNow(task: Task) {
         val workspace = currentWorkspace ?: return
         viewModelScope.launch {
             try {
@@ -142,31 +145,39 @@ class KanbanViewModel(
                     }
                 }
                 workspaceRepository.setFocusTask(userId, workspace.id, task.id)
+                _uiEffect.emit(KanbanUiEffect.NavigateToFocus)
             } catch (e: Exception) {
-                _errorEvent.emit("Failed to set focus task: ${e.message}")
+                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to set focus task: ${e.message}"))
             }
         }
     }
 
-    fun restoreTask(task: Task) {
+    private fun restoreTask(task: Task) {
         viewModelScope.launch {
             try {
-                val xpToRemove = task.currentXp
+                val xpToRemove       = task.currentXp
+                val completionEpoch  = task.completedAt
+                    ?.toDate()
+                    ?.toInstant()
+                    ?.atZone(java.time.ZoneId.systemDefault())
+                    ?.toLocalDate()
+                    ?.toEpochDay()
+                    ?: java.time.LocalDate.now().toEpochDay()
                 taskRepository.restoreTask(userId, task.id)
                 val user = userRepository.getUserOnce(userId) ?: run {
-                    _errorEvent.emit("Failed to load user profile for XP rollback")
+                    _uiEffect.emit(KanbanUiEffect.ShowError("Failed to load user profile for XP rollback"))
                     return@launch
                 }
-                userRepository.removeDailyActivity(userId, xpToRemove)
+                userRepository.removeDailyActivity(userId, xpToRemove, dateEpochDay = completionEpoch)
                 userRepository.removeXp(userId, xpToRemove)
             } catch (e: Exception) {
-                _errorEvent.emit("Failed to restore task: ${e.message}")
+                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to restore task: ${e.message}"))
             }
         }
     }
 
-// ========== Edit Sheet ==========
+    // ========== Edit Sheet ==========
 
-    fun openEditSheet(task: Task? = null) { _editingTask.value = task ?: Task() }
-    fun dismissEditSheet()               { _editingTask.value = null }
+    private fun openEditSheet(task: Task?) { _editingTask.value = task ?: Task() }
+    private fun dismissEditSheet()         { _editingTask.value = null }
 }

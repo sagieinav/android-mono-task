@@ -44,9 +44,9 @@ import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 enum class NavTab(val label: String, val iconRes: Int) {
-    BOARD("Board", R.drawable.ic_view_kanban),
-    FOCUS("Focus", R.drawable.ic_fire),
-    PROFILE("You", R.drawable.ic_account_circle)
+    BOARD("Board", R.drawable.ic_kanban2),
+    FOCUS("Focus", R.drawable.ic_focus),
+    PROFILE("You", R.drawable.ic_user3)
 }
 
 @Composable
@@ -162,20 +162,6 @@ fun BottomNavBarPreview() {
                 .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.BottomCenter
         ) {
-
-            // ========== THE BACKGROUND (hazeSource) ==========
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .hazeSource(state = hazeState),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Just some long ass text",
-                    fontSize = 48.sp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
 
             // ========== THE FOREGROUND (hazeEffect) ==========
             BottomNavBar(

@@ -49,7 +49,11 @@ object ActivityStats {
         var streak   = 0
         var expected = LocalDate.now().toEpochDay()
         for (day in days) {
-            if (day == expected || day == expected - 1) {
+            if (day == expected) {
+                streak++
+                expected = day - 1
+            } else if (streak == 0 && day == expected - 1) {
+                // Grace: today isnt over yet, start counting from yesterday
                 streak++
                 expected = day - 1
             } else break

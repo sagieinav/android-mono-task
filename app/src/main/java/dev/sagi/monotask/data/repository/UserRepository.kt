@@ -80,9 +80,13 @@ class UserRepository {
             ).await()
     }
 
-    suspend fun removeDailyActivity(userId: String, xpToSubtract: Int, tasksToSubtract: Int = 1) {
-        val today = LocalDate.now().toEpochDay()
-        userDoc(userId).collection("activity").document(today.toString())
+    suspend fun removeDailyActivity(
+        userId: String,
+        xpToSubtract: Int,
+        tasksToSubtract: Int = 1,
+        dateEpochDay: Long = LocalDate.now().toEpochDay()
+    ) {
+        userDoc(userId).collection("activity").document(dateEpochDay.toString())
             .set(
                 mapOf(
                     "xpEarned"       to FieldValue.increment(-xpToSubtract.toLong()),

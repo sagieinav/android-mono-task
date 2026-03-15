@@ -32,14 +32,24 @@ fun FocusCard(
     modifier: Modifier = Modifier
 ) {
     val shape = MaterialTheme.shapes.large
+    val borderWidth = 5.dp
 
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = borderWidth / 2) // compenstate for the external border's width
             .heightIn(min = 200.dp)
             .then(
-                if (task.isAce) Modifier.aceTaskBorder(shape = shape, drawFraction = borderFraction)
-                else Modifier.defaultTaskBorder(shape = shape, drawFraction = borderFraction)
+                if (task.isAce) Modifier.aceTaskBorder(
+                    shape = shape,
+                    drawFraction = borderFraction,
+                    borderWidth = borderWidth
+                )
+                else Modifier.defaultTaskBorder(
+                    shape = shape,
+                    drawFraction = borderFraction,
+                    borderWidth = borderWidth
+                )
             )
     ) {
         GlassSurface(

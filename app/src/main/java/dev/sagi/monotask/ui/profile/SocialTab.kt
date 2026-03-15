@@ -50,8 +50,7 @@ fun SocialTab(
     friends: List<String>,
     searchResults: List<User>,
     isSearching: Boolean,
-    onSearchUsers: (String) -> Unit,
-    onAddFriend: (String) -> Unit,
+    onProfileEvent: (ProfileEvent) -> Unit,
     bottomPadding: Dp
 ) {
     var query by remember { mutableStateOf("") }
@@ -70,7 +69,7 @@ fun SocialTab(
         item {
             OutlinedTextField(
                 value         = query,
-                onValueChange = { query = it; onSearchUsers(it) },
+                onValueChange = { query = it; onProfileEvent(ProfileEvent.SearchUsers(it)) },
                 modifier      = Modifier.fillMaxWidth(),
                 placeholder   = { Text("Search by username…") },
                 leadingIcon   = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
@@ -102,7 +101,7 @@ fun SocialTab(
                 UserSearchRow(
                     user      = user,
                     isAlready = user.id in friends,
-                    onAdd     = { onAddFriend(user.id); query = "" }
+                    onAdd     = { onProfileEvent(ProfileEvent.AddFriend(user.id)); query = "" }
                 )
             }
         }
@@ -247,8 +246,7 @@ private fun SocialTabPreview() {
                 User(id = "3", displayName = "Ofek Fanian",  level = 7,  xp = 1200)
             ),
             isSearching    = false,
-            onSearchUsers  = {},
-            onAddFriend    = {},
+            onProfileEvent = {},
             bottomPadding  = 0.dp
         )
     }

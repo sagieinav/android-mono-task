@@ -1,23 +1,14 @@
 package dev.sagi.monotask.ui.profile
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -27,23 +18,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.monoShadow
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -58,12 +42,13 @@ fun ProfileScreen(
     val searchResults by profileVM.searchResults.collectAsStateWithLifecycle()
     val isSearching   by profileVM.isSearching.collectAsStateWithLifecycle()
 
+    val onProfileEvent: (ProfileEvent) -> Unit = remember { { profileVM.onEvent(it) } }
+
     ProfileScreenContent(
-        uiState       = uiState,
-        searchResults = searchResults,
-        isSearching   = isSearching,
-        onSearchUsers = { profileVM.searchUsers(it) },
-        onAddFriend   = { profileVM.addFriend(it) }
+        uiState        = uiState,
+        searchResults  = searchResults,
+        isSearching    = isSearching,
+        onProfileEvent = onProfileEvent
     )
 }
 
@@ -76,8 +61,7 @@ fun ProfileScreenContent(
     uiState: ProfileUiState,
     searchResults: List<User> = emptyList(),
     isSearching: Boolean = false,
-    onSearchUsers: (String) -> Unit = {},
-    onAddFriend: (String) -> Unit = {}
+    onProfileEvent: (ProfileEvent) -> Unit = {}
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
 
@@ -102,11 +86,10 @@ fun ProfileScreenContent(
 
         is ProfileUiState.Ready -> {
             ProfileReadyContent(
-                state         = uiState,
-                searchResults = searchResults,
-                isSearching   = isSearching,
-                onSearchUsers = onSearchUsers,
-                onAddFriend   = onAddFriend
+                state          = uiState,
+                searchResults  = searchResults,
+                isSearching    = isSearching,
+                onProfileEvent = onProfileEvent
             )
         }
     }
@@ -121,8 +104,7 @@ private fun ProfileReadyContent(
     state: ProfileUiState.Ready,
     searchResults: List<User>,
     isSearching: Boolean,
-    onSearchUsers: (String) -> Unit,
-    onAddFriend: (String) -> Unit
+    onProfileEvent: (ProfileEvent) -> Unit
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
     var selectedTab     by remember { mutableIntStateOf(0) }
@@ -153,12 +135,11 @@ private fun ProfileReadyContent(
             0 -> ProfileTab(state = state, bottomPadding = bottomNavPadding)
             1 -> StatisticsTab(state = state, bottomPadding = bottomNavPadding)
             2 -> SocialTab(
-                friends       = state.user.friends,
-                searchResults = searchResults,
-                isSearching   = isSearching,
-                onSearchUsers = onSearchUsers,
-                onAddFriend   = onAddFriend,
-                bottomPadding = bottomNavPadding
+                friends        = state.user.friends,
+                searchResults  = searchResults,
+                isSearching    = isSearching,
+                onProfileEvent = onProfileEvent,
+                bottomPadding  = bottomNavPadding
             )
         }
     }

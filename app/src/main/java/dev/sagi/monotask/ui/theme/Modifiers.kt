@@ -6,18 +6,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+
+
+// ========== Fire icon gradient ==========
+// Applies a bottom-to-top fire gradient tint over any icon via BlendMode.SrcIn.
+// Uses the icon's alpha channel as a mask, so icon color/tint is irrelevant.
+fun Modifier.fireIconGradient(): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithCache {
+        val gradient = Brush.linearGradient(
+            colors = listOf(FireGradientDeep, FireGradientMid, FireGradientTip),
+            start  = Offset(0f, size.height),
+            end    = Offset(0f, 0f)
+        )
+        onDrawWithContent {
+            drawContent()
+            drawRect(gradient, blendMode = BlendMode.SrcIn)
+        }
+    }
 
 
 // ========== WRAPPER: MonoTask's basic elevated, bordered design ==========

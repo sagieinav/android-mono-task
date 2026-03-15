@@ -43,6 +43,7 @@ import kotlin.intArrayOf
 // ========== Shared Border Drawing Internals ==========
 
 private const val FADE_STEPS = 10
+private val BORDER_WIDTH = 5.dp
 
 // One instance per modifier. All paths and measure reused across frames
 private class BorderDrawCache {
@@ -134,7 +135,7 @@ private fun DrawScope.drawOutlineBorder(
 @Composable
 fun Modifier.aceTaskBorder(
     shape: Shape = MaterialTheme.shapes.medium,
-    borderWidth: Dp = 5.dp,
+    borderWidth: Dp = BORDER_WIDTH,
     glassInnerWidth: Dp = 1.5.dp,
     glassOuterWidth: Dp = 1.dp,
     drawFraction: Float = 1f
@@ -227,7 +228,7 @@ fun Modifier.aceTaskBorder(
 @Composable
 fun Modifier.defaultTaskBorder(
     shape: Shape = MaterialTheme.shapes.medium,
-    borderWidth: Dp = 5.dp,
+    borderWidth: Dp = BORDER_WIDTH,
     drawFraction: Float = 1f
 ): Modifier = composed {
     val borderColor   = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)

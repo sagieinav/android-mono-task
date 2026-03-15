@@ -53,10 +53,7 @@ fun KanbanColumn(
     importance: Importance,
     tasks: List<Task>,
     isArchive: Boolean = false,
-    onEditClick: (Task) -> Unit,
-    onFocusNowClick: (Task) -> Unit,
-    onRestoreClick: (Task) -> Unit,
-    onDeleteClick: (Task) -> Unit,
+    onKanbanEvent: (KanbanEvent) -> Unit,
     modifier: Modifier = Modifier,
     animationDelayMs: Int = 0
 ) {
@@ -151,13 +148,10 @@ fun KanbanColumn(
                     ) {
                         items(displayedTasks, key = { it.id }) { task ->
                             KanbanCard(
-                                task            = task,
-                                isArchive       = isArchive,
-                                shape = cardShape,
-                                onEditClick     = { onEditClick(task) },
-                                onFocusNowClick = { onFocusNowClick(task) },
-                                onRestoreClick  = { onRestoreClick(task) },
-                                onDeleteClick   = { onDeleteClick(task) }
+                                task          = task,
+                                isArchive     = isArchive,
+                                shape         = cardShape,
+                                onKanbanEvent = onKanbanEvent
                             )
                         }
                     }
@@ -181,9 +175,9 @@ fun KanbanColumnPreview() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier              = Modifier.padding(16.dp)
         ) {
-            KanbanColumn(title = "High",   tasks = fakeTasks.filter { it.importance == Importance.HIGH },   onEditClick = {}, onFocusNowClick = {}, onRestoreClick = {}, onDeleteClick = {}, importance = Importance.HIGH,   animationDelayMs = 0)
-            KanbanColumn(title = "Medium", tasks = fakeTasks.filter { it.importance == Importance.MEDIUM }, onEditClick = {}, onFocusNowClick = {}, onRestoreClick = {}, onDeleteClick = {}, importance = Importance.MEDIUM, animationDelayMs = 80)
-            KanbanColumn(title = "Low",    tasks = fakeTasks.filter { it.importance == Importance.LOW },    onEditClick = {}, onFocusNowClick = {}, onRestoreClick = {}, onDeleteClick = {}, importance = Importance.LOW,    animationDelayMs = 160)
+            KanbanColumn(title = "High",   tasks = fakeTasks.filter { it.importance == Importance.HIGH },   onKanbanEvent = {}, importance = Importance.HIGH,   animationDelayMs = 0)
+            KanbanColumn(title = "Medium", tasks = fakeTasks.filter { it.importance == Importance.MEDIUM }, onKanbanEvent = {}, importance = Importance.MEDIUM, animationDelayMs = 80)
+            KanbanColumn(title = "Low",    tasks = fakeTasks.filter { it.importance == Importance.LOW },    onKanbanEvent = {}, importance = Importance.LOW,    animationDelayMs = 160)
         }
     }
 }

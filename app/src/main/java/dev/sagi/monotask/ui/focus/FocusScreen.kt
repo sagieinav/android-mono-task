@@ -6,12 +6,25 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -24,6 +37,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.theme.StreakFire
+import dev.sagi.monotask.ui.theme.fireIconGradient
 
 // ========== Entry Point ==========
 
@@ -31,11 +47,12 @@ import kotlinx.coroutines.launch
 fun FocusScreen(
     navController: NavHostController,
     focusVM: FocusViewModel,
-    userSessionVM: UserSessionViewModel
+//    userSessionVM: UserSessionViewModel
 ) {
     val uiState             by focusVM.uiState.collectAsStateWithLifecycle()
     val frozenForAnimation  by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
-    val userDisplayName     by userSessionVM.displayName.collectAsStateWithLifecycle()
+    val currentStreak       by focusVM.currentStreak.collectAsStateWithLifecycle()
+//    val userDisplayName     by userSessionVM.displayName.collectAsStateWithLifecycle()
     val snackbarHostState   = LocalSnackbarHostState.current
 
     val stableOnFocusEvent  = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
@@ -85,7 +102,7 @@ fun FocusScreen(
 
     FocusScreenContent(
         uiState         = displayedUiState,
-        userDisplayName = userDisplayName,
+        currentStreak   = currentStreak,
         animState       = animState,
         onFocusEvent    = stableOnFocusEvent
     )
@@ -96,11 +113,12 @@ fun FocusScreen(
 @Composable
 fun FocusScreenContent(
     uiState: FocusUiState,
-    userDisplayName: String,
+    currentStreak: Int,
     animState: FocusAnimationState,
     onFocusEvent: (FocusEvent) -> Unit
 ) {
     val innerPadding = LocalScaffoldPadding.current
+    val horizontalPadding = 20.dp
     val scope = rememberCoroutineScope()
 
     if (uiState is FocusUiState.Loading) return
@@ -109,26 +127,32 @@ fun FocusScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                top    = innerPadding.calculateTopPadding(),
-                bottom = innerPadding.calculateBottomPadding()
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding(),
+                start = horizontalPadding,
+                end = horizontalPadding
             )
     ) {
-        HeroGreeting(userName = userDisplayName)
-        Box(
-            modifier         = Modifier.fillMaxWidth().weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            when (uiState) {
-                is FocusUiState.Empty  -> EmptyState(emoji = "🦾")
-                is FocusUiState.Active -> ActiveFocusCard(
+        // Active Streak Chip
+        StreakChip(currentStreak)
+
+        // Card fills all space
+        when (uiState) {
+            is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                EmptyState(emoji = "🦾")
+            }
+            is FocusUiState.Active ->
+                ActiveFocusCard(
                     uiState      = uiState,
                     animState    = animState,
                     onFocusEvent = onFocusEvent
                 )
-                else -> {}
-            }
+            else -> {}
         }
+
+
     }
+
 
     if (uiState is FocusUiState.Active && uiState.showSnoozeSheet) {
         SnoozeBottomSheet(
@@ -138,13 +162,83 @@ fun FocusScreenContent(
     }
 }
 
-// ========== Active Card ==========
+@Composable
+fun StreakChip(
+    currentStreak: Int,
+    modifier: Modifier = Modifier
+) {
+    val streakLabel = if (currentStreak == 1) "day streak" else "days streak"
 
+    StatChip(
+        value        = currentStreak.toString(),
+        label        = streakLabel,
+        icon         = painterResource(R.drawable.ic_fire),
+//        accentColor  = StreakFire,
+        iconModifier = Modifier.fireIconGradient(),
+        modifier     = modifier
+    )
+}
+
+@Composable
+private fun StatChip(
+    value:        String,
+    label:        String,
+    icon:         Painter,
+    accentColor:  Color    = MaterialTheme.colorScheme.onSurface,
+    iconModifier: Modifier = Modifier,
+    modifier:     Modifier = Modifier
+) {
+    // Captures the rendered value-text height so the icon can match it exactly
+    var iconSizePx by remember { mutableIntStateOf(0) }
+    val density = androidx.compose.ui.platform.LocalDensity.current
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment     = Alignment.Bottom,
+        modifier = modifier
+    ) {
+        // Icon: size matches value-text height
+        // iconModifier injects optional effects (like gradient)
+        Icon(
+            painter            = icon,
+            contentDescription = null,
+//            tint               = accentColor,
+//            tint               = Color(0xFFD25E03),
+            modifier           = Modifier
+                .size(
+                    if (iconSizePx > 0) with(density) { (iconSizePx * 0.75f).toDp() } else 28.dp
+                )
+                .align(Alignment.CenterVertically)
+                .then(iconModifier)
+                .padding(end = 2.dp)
+        )
+
+        // Value / Number
+        Text(
+            text       = value,
+            style      = MaterialTheme.typography.displaySmall,
+//            color      = accentColor,
+            modifier     = Modifier.alignByBaseline(),
+            onTextLayout = { iconSizePx = it.size.height }
+        )
+
+        // Label / Unit
+        Text(
+            text  = label,
+            style = MaterialTheme.typography.labelLarge,
+            color    = MaterialTheme.colorScheme.outlineVariant,
+            modifier = Modifier.alignByBaseline()
+        )
+    }
+}
+
+// ========== Active Card ==========
 @Composable
 private fun ActiveFocusCard(
     uiState: FocusUiState.Active,
     animState: FocusAnimationState,
-    onFocusEvent: (FocusEvent) -> Unit
+    onFocusEvent: (FocusEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     // Synchronously mark dirty before the first frame draws
     SideEffect {
@@ -167,10 +261,9 @@ private fun ActiveFocusCard(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
+            .fillMaxSize()
             .graphicsLayer {
-                alpha  = animState.displayAlpha
+                alpha = animState.displayAlpha
                 scaleX = animState.displayScale
                 scaleY = animState.displayScale
             },

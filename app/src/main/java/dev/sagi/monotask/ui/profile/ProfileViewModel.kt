@@ -3,11 +3,7 @@ package dev.sagi.monotask.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sagi.monotask.MonoTaskApp
-import dev.sagi.monotask.data.model.Badge
-import dev.sagi.monotask.data.model.DailyActivity
-import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
@@ -22,31 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-
-// ==========================================================================
-// UI state
-// ==========================================================================
-
-sealed class ProfileUiState {
-    object Loading : ProfileUiState()
-    data class Error(val message: String) : ProfileUiState()
-    data class Ready(
-        val user           : User,
-        val level          : Int,
-        val levelProgress  : Float,
-        val xpIntoLevel    : Int,
-        val xpForNextLevel : Int,
-        val badges         : List<Badge>,
-        val activityData   : List<DailyActivity>   = emptyList(),
-        val completedTasks : List<Task>            = emptyList(),
-        val workspaces     : List<Workspace>       = emptyList(),
-        val monthActivityData: List<DailyActivity> = emptyList()
-    ) : ProfileUiState()
-}
-
-// ==========================================================================
-// ViewModel
-// ==========================================================================
 
 class ProfileViewModel(
     private val userRepository      : UserRepository      = MonoTaskApp.instance.userRepository,
@@ -63,14 +34,26 @@ class ProfileViewModel(
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
-    private val _errorEvent = MutableSharedFlow<String>()
-    val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
+    private val _uiEffect = MutableSharedFlow<ProfileUiEffect>()
+    val uiEffect: SharedFlow<ProfileUiEffect> = _uiEffect.asSharedFlow()
 
     private lateinit var userId: String
     private var observing = false   // safe: only touched on Main dispatcher
 
     init {
         viewModelScope.launch { userId = AuthUtils.awaitUid() }
+    }
+
+    // ==========================================================================
+    // Event Dispatcher
+    // ==========================================================================
+
+    fun onEvent(event: ProfileEvent) {
+        when (event) {
+            is ProfileEvent.SearchUsers   -> searchUsers(event.query)
+            is ProfileEvent.AddFriend     -> addFriend(event.friendId)
+            is ProfileEvent.UpdateProfile -> updateProfile(event.displayName, event.profilePicUrl)
+        }
     }
 
     // ==========================================================================
@@ -145,7 +128,7 @@ class ProfileViewModel(
                     completedTasks = tasks
                 )
             } catch (e: Exception) {
-                _errorEvent.emit("Failed to load statistics: ${e.message}")
+                _uiEffect.emit(ProfileUiEffect.ShowError("Failed to load statistics: ${e.message}"))
             }
         }
     }
@@ -154,12 +137,12 @@ class ProfileViewModel(
     // Profile editing
     // ==========================================================================
 
-    fun updateProfile(displayName: String, profilePicUrl: String) {
+    private fun updateProfile(displayName: String, profilePicUrl: String) {
         viewModelScope.launch {
             try {
                 userRepository.updateProfile(userId, displayName, profilePicUrl)
             } catch (e: Exception) {
-                _errorEvent.emit("Failed to update profile: ${e.message}")
+                _uiEffect.emit(ProfileUiEffect.ShowError("Failed to update profile: ${e.message}"))
             }
         }
     }
@@ -168,7 +151,7 @@ class ProfileViewModel(
     // Friends
     // ==========================================================================
 
-    fun searchUsers(query: String) {
+    private fun searchUsers(query: String) {
         if (query.isBlank()) {
             _searchResults.value = emptyList()
             return
@@ -180,20 +163,20 @@ class ProfileViewModel(
                     .filter { it.id != userId }
                 _searchResults.value = results
             } catch (e: Exception) {
-                _errorEvent.emit("Search failed: ${e.message}")
+                _uiEffect.emit(ProfileUiEffect.ShowError("Search failed: ${e.message}"))
             } finally {
                 _isSearching.value = false
             }
         }
     }
 
-    fun addFriend(friendId: String) {
+    private fun addFriend(friendId: String) {
         viewModelScope.launch {
             try {
                 userRepository.addFriend(userId, friendId)
                 _searchResults.value = emptyList()
             } catch (e: Exception) {
-                _errorEvent.emit("Failed to add friend: ${e.message}")
+                _uiEffect.emit(ProfileUiEffect.ShowError("Failed to add friend: ${e.message}"))
             }
         }
     }

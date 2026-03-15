@@ -26,14 +26,15 @@ fun HeroGreeting(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 8.dp),
+//            .padding(horizontal = 22.dp, vertical = 8.dp)
+        ,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         GreetingText(
-            title = "Hi, ${userName.substringBefore(" ")}",
+            title = "Hi, ${userName.substringBefore(" ")} \uD83D\uDC4B\uD83C\uDFFC",
         )
     }
 }
@@ -76,7 +77,7 @@ private fun GreetingTextHeroPreview() {
     MonoTaskTheme {
         GreetingText(
             title = "Hi, Sagi",
-            modifier = Modifier.padding(16.dp)
+//            modifier = Modifier.padding(16.dp)
         )
     }
 }
@@ -88,7 +89,7 @@ private fun GreetingTextSubtitlePreview() {
         GreetingText(
             title = "Hi, Sagi",
             subtitle = "3 tasks remaining",
-            modifier = Modifier.padding(16.dp)
+//            modifier = Modifier.padding(16.dp)
         )
     }
 }
@@ -100,7 +101,7 @@ private fun GreetingTextTopBarPreview() {
         GreetingText(
             title = "Sagi Einav",
             titleStyle = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(16.dp)
+//            modifier = Modifier.padding(16.dp)
         )
     }
 }
