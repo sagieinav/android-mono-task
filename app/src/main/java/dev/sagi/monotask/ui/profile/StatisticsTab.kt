@@ -45,14 +45,15 @@ fun StatisticsTab(
     state: ProfileUiState.Ready,
     bottomPadding: Dp
 ) {
-    val activity = state.activityData
     val tasks = state.completedTasks
-    val monthActivity = state.monthActivityData
+    val monthActivity = state.activityData
+    val weekActivity = ActivityStats.weekActivity(monthActivity) // extract weekly activity out of monthly activity
 //    val workspaces = state.workspaces
 
     val aceCount    = tasks.count { it.isAce }
     val totalCompletedTasks  = tasks.size
-    val totalXp = activity.sumOf { it.xpEarned }
+    val weeklyXP = weekActivity.sumOf { it.xpEarned }
+    val totalXP = state.user.xp
 
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
@@ -69,18 +70,18 @@ fun StatisticsTab(
                 // Xp this week (line chart)
                 LineChart(
                     title        = "XP This Week",
-                    headline     = "$totalXp XP",
-                    points       = ActivityStats.buildXpPoints(activity),
-                    trendPercent = ActivityStats.computeXpTrend(activity),
+                    headline     = "$weeklyXP XP",
+                    points       = ActivityStats.buildXpPoints(weekActivity),
+                    trendPercent = ActivityStats.computeXpTrend(weekActivity),
                     lineColor    = AceGold,
                 )
 
                 // Tasks this week (bar graph)
                 BarChart(
                     title       = "Tasks This Week",
-                    headline     = "${activity.sumOf { it.tasksCompleted }} completed",
-                    points      = ActivityStats.buildTaskPoints(activity),
-                    trendPercent = ActivityStats.computeTaskTrend(activity),
+                    headline     = "${weekActivity.sumOf { it.tasksCompleted }} completed",
+                    points      = ActivityStats.buildTaskPoints(weekActivity),
+                    trendPercent = ActivityStats.computeTaskTrend(weekActivity),
                     barColor    = MaterialTheme.colorScheme.primary,
                     animate     = true,
                 )
@@ -89,7 +90,7 @@ fun StatisticsTab(
 
         item {
             StatSection("Monthly Activity") {
-                ActivityHeatmap(activityData = state.monthActivityData)
+                ActivityHeatmap(activityData = state.activityData)
             }
         }
 
@@ -97,7 +98,7 @@ fun StatisticsTab(
         item {
             StatSection("All Time") {
                 // Top Performance Card
-                TopPerformanceCard(activityData = state.activityData)
+                TopPerformanceCard(bestDay = state.topPerformanceDay)
 
                 // 4 half-width widget cards with simple data
                 Row(
@@ -108,7 +109,7 @@ fun StatisticsTab(
                         modifier = Modifier.weight(1f)
                     )
                     TotalXpCard(
-                        totalXp = totalXp,
+                        totalXp = totalXP,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -121,7 +122,7 @@ fun StatisticsTab(
                         modifier = Modifier.weight(1f)
                     )
                     StreakCard(
-                        activityData = state.monthActivityData,
+                        activityData = state.activityData,
                         modifier = Modifier.weight(1f)
                     )
                 }

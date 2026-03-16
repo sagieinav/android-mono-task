@@ -1,5 +1,6 @@
 package dev.sagi.monotask.domain.util
 
+import android.R.attr.data
 import dev.sagi.monotask.data.model.DailyActivity
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -89,6 +90,7 @@ object ActivityStats {
 
     // ========== Date window helpers ==========
 
+
     // Returns the last 7 DailyActivity entries (null for days with no data), oldest → newest.
     fun last7Days(data: List<DailyActivity>): List<DailyActivity?> {
         val today = LocalDate.now()
@@ -107,6 +109,12 @@ object ActivityStats {
                 .getDisplayName(TextStyle.SHORT, Locale.getDefault())
                 .take(2)
         }
+    }
+
+    // Scopes a month-loaded list down to the last 7 days — no extra Firestore call needed
+    fun weekActivity(data: List<DailyActivity>): List<DailyActivity> {
+        val cutoff = LocalDate.now().minusDays(6).toEpochDay()
+        return data.filter { it.dateEpochDay >= cutoff }
     }
 
     // ========== Private internals ==========

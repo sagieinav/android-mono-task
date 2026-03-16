@@ -39,3 +39,7 @@ google-services.json
 # Unit Tests
 app/src/androidTest/
 app/src/test/
+
+# DB Seed
+serviceAccountKey.json
+seed.js

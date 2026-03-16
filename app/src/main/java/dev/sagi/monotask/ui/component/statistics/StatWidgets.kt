@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
-import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.AceGoldDim
 import dev.sagi.monotask.ui.theme.StreakFire
 import dev.sagi.monotask.ui.theme.XpViolet
@@ -414,13 +413,13 @@ fun StreakCard(activityData: List<DailyActivity>, modifier: Modifier = Modifier)
 
 @Composable
 fun TopPerformanceCard(
-    activityData: List<DailyActivity>,
+    bestDay: DailyActivity?,
     modifier: Modifier = Modifier,
 ) {
-    val best  = activityData.maxByOrNull { it.xpEarned }
-    val xp    = best?.xpEarned ?: 0
-    val tasks = best?.tasksCompleted ?: 0
-    val date  = best?.let {
+//    val best  = topPerformanceDay.maxByOrNull { it.xpEarned }
+    val xp    = bestDay?.xpEarned ?: 0
+    val tasks = bestDay?.tasksCompleted ?: 0
+    val date  = bestDay?.let {
         LocalDate.ofEpochDay(it.dateEpochDay).format(DateFormatter)
     }
 
@@ -453,11 +452,7 @@ private fun StatWidgetsPreview() {
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     TopPerformanceCard(
-                        activityData = listOf(
-                            DailyActivity(LocalDate.now().minusDays(3).toEpochDay(), 9, 820),
-                            DailyActivity(LocalDate.now().minusDays(1).toEpochDay(), 4, 310),
-                            DailyActivity(LocalDate.now().toEpochDay(),               2, 150),
-                        )
+                        bestDay = DailyActivity(LocalDate.now().toEpochDay(),               2, 150)
                     )
                     Row(
                         modifier              = Modifier.fillMaxWidth(),

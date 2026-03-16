@@ -12,16 +12,17 @@ sealed class ProfileUiState {
     object Loading : ProfileUiState()
     data class Error(val message: String) : ProfileUiState()
     data class Ready(
-        val user           : User,
-        val level          : Int,
-        val levelProgress  : Float,
-        val xpIntoLevel    : Int,
-        val xpForNextLevel : Int,
-        val badges         : List<Badge>,
-        val activityData   : List<DailyActivity>   = emptyList(),
-        val completedTasks : List<Task>            = emptyList(),
-        val workspaces     : List<Workspace>       = emptyList(),
-        val monthActivityData: List<DailyActivity> = emptyList()
+        val user                : User,
+        val level               : Int,
+        val levelProgress       : Float,
+        val xpIntoLevel         : Int,
+        val xpForNextLevel      : Int,
+        val badges              : List<Badge>,
+        val workspaces          : List<Workspace>       = emptyList(),
+        val completedTasks      : List<Task>            = emptyList(),
+        val activityData        : List<DailyActivity>   = emptyList(),
+        val topPerformanceDay   : DailyActivity?        = null,           // all-time best, one-shot
+//        val weekActivityData    : List<DailyActivity>   = emptyList(),
     ) : ProfileUiState()
 }
 

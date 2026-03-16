@@ -120,21 +120,21 @@ class ProfileViewModel(
             }
             .launchIn(viewModelScope)
 
-        // Live current-month activity (heatmap + streak record)
+        // Single live flow covering this month (can extract this week out from this)
+        // Feeds monthly heatmap and weekly charts
         userRepository.getActivity(uid, UserRepository.thisMonthRange)
-            .onEach { monthActivity ->
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
-                _uiState.value = current.copy(monthActivityData = monthActivity)
-            }
-            .launchIn(viewModelScope)
-
-        // Live last-7-days activity (weekly XP + tasks charts)
-        userRepository.getActivity(uid, UserRepository.last7DaysRange)
             .onEach { activity ->
                 val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
                 _uiState.value = current.copy(activityData = activity)
             }
             .launchIn(viewModelScope)
+
+        // One-shot fetch of best day ever (1 Firestore doc read)
+        viewModelScope.launch {
+            val topDay = userRepository.getTopPerformanceDay(uid)
+            val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
+            _uiState.value = current.copy(topPerformanceDay = topDay)
+        }
 
         // Live all completed tasks (ace ratio, total tasks, total XP cards)
         taskRepository.getAllCompletedTasks(uid)

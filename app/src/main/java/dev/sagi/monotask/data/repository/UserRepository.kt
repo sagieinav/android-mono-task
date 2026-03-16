@@ -1,6 +1,7 @@
 package dev.sagi.monotask.data.repository
 
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.snapshots
 import dev.sagi.monotask.MonoTaskApp
@@ -128,6 +129,16 @@ class UserRepository {
         else col
         return query.get().await().mapNotNull { it.toObject(DailyActivity::class.java) }
     }
+
+    // One-shot fetch of top performance day
+    suspend fun getTopPerformanceDay(userId: String): DailyActivity? =
+        userDoc(userId).collection("activity")
+            .orderBy("xpEarned", Query.Direction.DESCENDING)
+            .limit(1)
+            .get().await()
+            .mapNotNull { it.toObject(DailyActivity::class.java) }
+            .firstOrNull()
+
 
 
     // ========== Settings ==========
