@@ -14,6 +14,17 @@ import java.time.LocalDate
 
 class UserRepository {
 
+    companion object {
+        val thisMonthRange: ClosedRange<Long> get() {
+            val today = LocalDate.now()
+            return today.withDayOfMonth(1).toEpochDay()..today.toEpochDay()
+        }
+        val last7DaysRange: ClosedRange<Long> get() {
+            val today = LocalDate.now()
+            return today.minusDays(6).toEpochDay()..today.toEpochDay()
+        }
+    }
+
     private val db = MonoTaskApp.instance.db
 
     private fun userDoc(userId: String) =
@@ -96,41 +107,26 @@ class UserRepository {
             ).await()
     }
 
-    // Fetches last 7 days for the weekly charts
-    suspend fun getActivityLast7Days(userId: String): List<DailyActivity> {
-        val today     = LocalDate.now()
-        val epochDays = (0..6).map { today.minusDays(it.toLong()).toEpochDay() }
-        val docs      = userDoc(userId).collection("activity")
-            .whereIn("dateEpochDay", epochDays)
-            .get().await()
-        return docs.mapNotNull { it.toObject(DailyActivity::class.java) }
+    // Live stream, optional time range
+    fun getActivity(userId: String, range: ClosedRange<Long>? = null): Flow<List<DailyActivity>> {
+        val col   = userDoc(userId).collection("activity")
+        val query = if (range != null)
+            col.whereGreaterThanOrEqualTo("dateEpochDay", range.start)
+               .whereLessThanOrEqualTo("dateEpochDay", range.endInclusive)
+        else col
+        return query.snapshots().map { snapshot ->
+            snapshot.documents.mapNotNull { it.toObject(DailyActivity::class.java) }
+        }
     }
 
-    // Fetches all activity docs for the current calendar month.
-    // Uses a range query instead of whereIn to avoid the 30-item limit
-    fun getActivityForCurrentMonth(userId: String): Flow<List<DailyActivity>> {
-        val today      = LocalDate.now()
-        val monthStart = today.withDayOfMonth(1).toEpochDay()
-        val monthEnd   = today.toEpochDay()
-        return userDoc(userId).collection("activity")
-            .whereGreaterThanOrEqualTo("dateEpochDay", monthStart)
-            .whereLessThanOrEqualTo("dateEpochDay", monthEnd)
-            .snapshots()
-            .map { snapshot ->
-                snapshot.documents.mapNotNull {
-                    it.toObject(DailyActivity::class.java)
-                }
-            }
-    }
-    suspend fun getActivityForCurrentMonthOnce(userId: String): List<DailyActivity> {
-        val today      = LocalDate.now()
-        val monthStart = today.withDayOfMonth(1).toEpochDay()
-        val monthEnd   = today.toEpochDay()   // only up to today; future days have no data
-        val docs       = userDoc(userId).collection("activity")
-            .whereGreaterThanOrEqualTo("dateEpochDay", monthStart)
-            .whereLessThanOrEqualTo("dateEpochDay", monthEnd)
-            .get().await()
-        return docs.mapNotNull { it.toObject(DailyActivity::class.java) }
+    // One-shot fetch, optional time range
+    suspend fun getActivityOnce(userId: String, range: ClosedRange<Long>? = null): List<DailyActivity> {
+        val col   = userDoc(userId).collection("activity")
+        val query = if (range != null)
+            col.whereGreaterThanOrEqualTo("dateEpochDay", range.start)
+               .whereLessThanOrEqualTo("dateEpochDay", range.endInclusive)
+        else col
+        return query.get().await().mapNotNull { it.toObject(DailyActivity::class.java) }
     }
 
 

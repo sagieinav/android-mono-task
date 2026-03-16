@@ -107,17 +107,17 @@ fun StatisticsTab(
                         totalTasks = totalCompletedTasks,
                         modifier = Modifier.weight(1f)
                     )
-                    AceCompletionCard(
-                        aceCount = aceCount,
-                        totalTasks = totalCompletedTasks,
+                    TotalXpCard(
+                        totalXp = totalXp,
                         modifier = Modifier.weight(1f)
                     )
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    TotalXpCard(
-                        totalXp = totalXp,
+                    AceCompletionCard(
+                        aceCount = aceCount,
+                        totalTasks = totalCompletedTasks,
                         modifier = Modifier.weight(1f)
                     )
                     StreakCard(

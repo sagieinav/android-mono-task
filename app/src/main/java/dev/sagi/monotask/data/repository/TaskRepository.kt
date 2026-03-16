@@ -64,6 +64,17 @@ class TaskRepository {
         }
     }
 
+    // Live stream of ALL completed tasks across every workspace
+    fun getAllCompletedTasks(userId: String): Flow<List<Task>> =
+        tasksCollection(userId)
+            .whereEqualTo("completed", true)
+            .snapshots()
+            .map { snapshot ->
+                snapshot.documents.mapNotNull {
+                    it.toObject(Task::class.java)?.copy(id = it.id)
+                }
+            }
+
     // One-shot fetch of ALL completed tasks across every workspace
     suspend fun getAllCompletedTasksOnce(userId: String): List<Task> {
         val result = tasksCollection(userId)

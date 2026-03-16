@@ -38,7 +38,8 @@ class ProfileViewModel(
     val uiEffect: SharedFlow<ProfileUiEffect> = _uiEffect.asSharedFlow()
 
     private lateinit var userId: String
-    private var observing = false   // safe: only touched on Main dispatcher
+    private var observing          = false  // safe: only touched on Main dispatcher
+    private var statisticsLoaded   = false  // guard: loadStatisticsData subscribes live flows once
 
     init {
         viewModelScope.launch { userId = AuthUtils.awaitUid() }
@@ -77,14 +78,24 @@ class ProfileViewModel(
                 val xpForCurrent = XpEvents.xpRequiredForLevel(level)
                 val xpIntoLevel  = user.xp - xpForCurrent
 
-                _uiState.value = ProfileUiState.Ready(
+                // Preserve existing statistics fields on subsequent user-doc updates
+                // (e.g. XP change after completing a task) so widgets don't reset to zero
+                val existing = _uiState.value as? ProfileUiState.Ready
+                _uiState.value = existing?.copy(
                     user           = user,
                     level          = level,
                     levelProgress  = progress,
                     xpIntoLevel    = xpIntoLevel,
                     xpForNextLevel = xpForNext - xpForCurrent,
-                    badges         = emptyList(),
                 )
+                    ?: ProfileUiState.Ready(
+                        user           = user,
+                        level          = level,
+                        levelProgress  = progress,
+                        xpIntoLevel    = xpIntoLevel,
+                        xpForNextLevel = xpForNext - xpForCurrent,
+                        badges         = emptyList(),
+                    )
 
                 // Load statistics data after user is known, runs in parallel
                 loadStatisticsData(user.id)
@@ -93,16 +104,15 @@ class ProfileViewModel(
     }
 
     // ==========================================================================
-    // Statistics data
-    //
-    // Workspaces are a live flow (subscribe once).
-    // Activity + completed tasks are one-shot fetches (fresh on each profile open).
-    // Both update the Ready state via copy() — safe since we're on the same
-    // coroutine scope with no concurrent writes.
+    // Statistics data: all live Firestore flows, subscribed exactly once
+    // The statisticsLoaded guard prevents re-subscribing on every user doc update
     // ==========================================================================
 
     private fun loadStatisticsData(uid: String) {
-        // Live workspace list: updates state whenever workspaces change
+        if (statisticsLoaded) return
+        statisticsLoaded = true
+
+        // Live workspace list
         workspaceRepository.getWorkspaces(uid)
             .onEach { workspaces ->
                 val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
@@ -110,27 +120,29 @@ class ProfileViewModel(
             }
             .launchIn(viewModelScope)
 
-        userRepository.getActivityForCurrentMonth(uid)
+        // Live current-month activity (heatmap + streak record)
+        userRepository.getActivity(uid, UserRepository.thisMonthRange)
             .onEach { monthActivity ->
                 val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
                 _uiState.value = current.copy(monthActivityData = monthActivity)
             }
             .launchIn(viewModelScope)
 
-        // One-shot fetches for activity + completed tasks
-        viewModelScope.launch {
-            try {
-                val activity = userRepository.getActivityLast7Days(uid)
-                val tasks    = taskRepository.getAllCompletedTasksOnce(uid)
-                val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
-                _uiState.value = current.copy(
-                    activityData   = activity,
-                    completedTasks = tasks
-                )
-            } catch (e: Exception) {
-                _uiEffect.emit(ProfileUiEffect.ShowError("Failed to load statistics: ${e.message}"))
+        // Live last-7-days activity (weekly XP + tasks charts)
+        userRepository.getActivity(uid, UserRepository.last7DaysRange)
+            .onEach { activity ->
+                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
+                _uiState.value = current.copy(activityData = activity)
             }
-        }
+            .launchIn(viewModelScope)
+
+        // Live all completed tasks (ace ratio, total tasks, total XP cards)
+        taskRepository.getAllCompletedTasks(uid)
+            .onEach { tasks ->
+                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
+                _uiState.value = current.copy(completedTasks = tasks)
+            }
+            .launchIn(viewModelScope)
     }
 
     // ==========================================================================

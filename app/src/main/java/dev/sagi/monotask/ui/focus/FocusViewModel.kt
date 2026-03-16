@@ -92,7 +92,7 @@ class FocusViewModel(
 
     private fun observeStats() {
         // Live streak — re-emits on every Firestore snapshot for the current month
-        userRepository.getActivityForCurrentMonth(userId)
+        userRepository.getActivity(userId, UserRepository.thisMonthRange)
             .onEach { activity ->
                 _currentStreak.value = ActivityStats.computeCurrentStreak(activity)
             }
