@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
@@ -58,20 +59,24 @@ fun Modifier.monoShadowWorkaround(
     blur: Dp = 6.dp,
     offsetY: Dp = 2.dp,
     offsetX: Dp = 0.dp,
-) = this.drawBehind {
-    drawIntoCanvas { canvas ->
-        val paint = android.graphics.Paint().apply {
-            isAntiAlias = true
-            this.color = android.graphics.Color.TRANSPARENT
-            setShadowLayer(blur.toPx(), offsetX.toPx(), offsetY.toPx(), color.toArgb())
-        }
-        val path = shape.createOutline(size, layoutDirection, this).toAndroidPath()
+): Modifier = composed {
+    this
+        .drawBehind {
+            drawIntoCanvas { canvas ->
+                val paint = android.graphics.Paint().apply {
+                    isAntiAlias = true
+                    this.color = android.graphics.Color.TRANSPARENT
+                    setShadowLayer(blur.toPx(), offsetX.toPx(), offsetY.toPx(), color.toArgb())
+                }
+                val path = shape.createOutline(size, layoutDirection, this).toAndroidPath()
 
-        canvas.nativeCanvas.save()
-        canvas.nativeCanvas.clipOutPath(path) // block anything inside the shape
-        canvas.nativeCanvas.drawPath(path, paint)
-        canvas.nativeCanvas.restore()
-    }
+                canvas.nativeCanvas.save()
+                canvas.nativeCanvas.clipOutPath(path) // block anything inside the shape
+                canvas.nativeCanvas.drawPath(path, paint)
+                canvas.nativeCanvas.restore()
+            }
+        }
+        .clip(shape)
 }
 
 private fun Outline.toAndroidPath(): android.graphics.Path = when (this) {

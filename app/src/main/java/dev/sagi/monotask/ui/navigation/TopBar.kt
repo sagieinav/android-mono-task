@@ -21,6 +21,7 @@ import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.util.Constants
 
 
 // ==========================================
@@ -35,9 +36,17 @@ private fun TopBarScaffold(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            // standard for top/bottom bar, to avoid notch, etc...
             .statusBarsPadding()
+            .padding(
+                // horizontal: normal
+                start = Constants.Theme.SCREEN_PADDING,
+                end = Constants.Theme.SCREEN_PADDING,
+                // bottom: add a little bit on top of statusBarsPadding
+                bottom = Constants.Theme.SCREEN_PADDING / 2
+            )
             .heightIn(min = 64.dp, max = 96.dp)
-            .padding(horizontal = 18.dp),
+        ,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -118,19 +127,20 @@ fun TopBarIconButton(
     GlassSurface(
         blurred = false,
         shape = CircleShape,
+//        baseColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = modifier
             .monoShadowWorkaround(CircleShape)
             .clip(CircleShape)
-            .size(40.dp)
             .clickable { onClick() }
     ) {
         Icon(
             painter = painterResource(iconRes),
             contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(8.dp)  // padding sizes the button
+                .size(42.dp)
+                .padding(8.dp)
         )
     }
 

@@ -40,10 +40,11 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.util.Constants
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Tab 3 — Social: friend search + friends list
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 fun SocialTab(
@@ -58,10 +59,8 @@ fun SocialTab(
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
-            start = 20.dp,
-            end = 20.dp,
-            top        = 20.dp,
-            bottom     = bottomPadding + 16.dp
+            top = Constants.Theme.SCREEN_PADDING,
+            bottom = bottomPadding
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -130,16 +129,16 @@ fun SocialTab(
             }
         }
 
-        // Friend rows — IDs only for now; upgrade when a friends sub-collection lands
+        // Friend rows. IDs only for now, upgrade when a friends sub-collection lands
         items(friends, key = { it }) { friendId ->
             FriendIdRow(friendId = friendId)
         }
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Row composables
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 private fun UserSearchRow(
@@ -212,9 +211,9 @@ private fun FriendIdRow(friendId: String) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Avatar circle — first letter fallback
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 fun AvatarCircle(name: String, sizeDp: Int, modifier: Modifier = Modifier) {

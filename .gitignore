@@ -43,3 +43,4 @@ app/src/test/
 # DB Seed
 serviceAccountKey.json
 seed.js
+app/seed/

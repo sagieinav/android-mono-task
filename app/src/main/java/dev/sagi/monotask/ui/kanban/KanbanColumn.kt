@@ -57,7 +57,7 @@ fun KanbanColumn(
     modifier: Modifier = Modifier,
     animationDelayMs: Int = 0
 ) {
-    // ── Column entrance animation (first load only) ─────────────────────────
+    // ========== Column entrance animation (first load only) ==========
     var columnVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         delay(animationDelayMs.toLong())
@@ -78,14 +78,15 @@ fun KanbanColumn(
     ) {
         Column(
             modifier = modifier
-                .width(180.dp)
+                .width(170.dp)
                 .fillMaxHeight(),
+            // Header-Content gap
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             val colShape = MaterialTheme.shapes.medium
             val cardShape = MaterialTheme.shapes.small
 
-            // ── Header ─────────────────────────────────────────────────────
+            // ========== Header ==========
             GlassSurface(blurred = false, shape = colShape, modifier = Modifier) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -105,8 +106,11 @@ fun KanbanColumn(
                         fontWeight  = FontWeight.Bold,
                         color       = contentColor,
                     )
+
+                    // Push to the right
                     Spacer(Modifier.weight(1f))
-                    // ── Task count badge (fades in/out on change) ───────────
+
+                    // Task count badge (fades in/out on change):
                     Surface(
                         shape = RoundedCornerShape(100),
                         color = containerColor.copy(alpha = 0.35f),
@@ -127,8 +131,12 @@ fun KanbanColumn(
                 }
             }
 
-            // ── Body ───────────────────────────────────────────────────────
-            GlassSurface(blurred = false, shape = colShape, modifier = Modifier.fillMaxSize()) {
+            // ========== Body ==========
+            GlassSurface(
+                blurred = false,
+                shape = colShape,
+                modifier = Modifier.fillMaxSize()
+            ) {
                 val archiveKey = isArchive
                 AnimatedContent(
                     targetState    = tasks,
@@ -141,9 +149,11 @@ fun KanbanColumn(
                 ) { displayedTasks ->
                     LazyColumn(
                         modifier            = Modifier
+                            // internal col padding:
                             .padding(8.dp)
                             .clip(cardShape),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
+                        // card padding:
                         contentPadding      = PaddingValues(bottom = 8.dp),
                     ) {
                         items(displayedTasks, key = { it.id }) { task ->

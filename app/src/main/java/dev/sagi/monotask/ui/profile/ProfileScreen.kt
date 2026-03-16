@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.profile
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,12 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.util.Constants
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -51,9 +54,9 @@ fun ProfileScreen(
     )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Content
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 fun ProfileScreenContent(
@@ -94,9 +97,9 @@ fun ProfileScreenContent(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Ready state
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 private fun ProfileReadyContent(
@@ -112,7 +115,11 @@ private fun ProfileReadyContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = scaffoldPadding.calculateTopPadding())
+            .padding(
+                top = scaffoldPadding.calculateTopPadding(),
+                start = Constants.Theme.SCREEN_PADDING,
+                end = Constants.Theme.SCREEN_PADDING
+            ),
     ) {
         PrimaryTabRow(
             selectedTabIndex = selectedTab,

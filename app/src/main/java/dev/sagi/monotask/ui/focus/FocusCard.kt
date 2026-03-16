@@ -4,11 +4,13 @@ package dev.sagi.monotask.ui.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,8 +63,12 @@ fun FocusCard(
         ) {}
 
         Column(
-            modifier            = Modifier.fillMaxWidth().padding(20.dp),
+            modifier            = Modifier
+                .fillMaxWidth()
+//                .matchParentSize()
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(40.dp)
+//            verticalArrangement = Arrangement.SpaceBetween
         ) {
             FocusCardHeader(task = task, hideXpLabel = hideXpLabel)
             FocusCardBody(task)
@@ -112,8 +118,9 @@ private fun FocusCardBody(task: Task) {
             Text(
                 text = task.description,
                 style = MaterialTheme.typography.bodyMedium,
+                fontStyle = FontStyle.Italic,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
-                maxLines = 4,
+                maxLines = 8,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -124,10 +131,6 @@ private fun FocusCardBody(task: Task) {
 
 @Composable
 private fun FocusCardFooter(task: Task) {
-    val maxVisible = 4
-    val visibleTags = task.tags.take(maxVisible)
-    val overflowCount = task.tags.size - maxVisible
-
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -135,10 +138,10 @@ private fun FocusCardFooter(task: Task) {
         maxLines = 2,
     ) {
         ImportanceTag(importance = task.importance)
-        visibleTags.forEach { CustomTag(label = it) }
-        if (overflowCount > 0) CustomTag(label = "+$overflowCount")
+        task.tags.forEach { CustomTag(label = it) }
     }
 }
+
 
 // ========== Preview ==========
 

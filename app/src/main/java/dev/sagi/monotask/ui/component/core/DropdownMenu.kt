@@ -46,6 +46,7 @@ import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.gloock
 import dev.sagi.monotask.ui.theme.harabara
 import dev.sagi.monotask.ui.theme.lora
+import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import dev.sagi.monotask.ui.theme.notoSerif
 import dev.sagi.monotask.ui.theme.playfairDisplay
 import kotlinx.coroutines.delay
@@ -69,8 +70,9 @@ fun DropdownTriggerPill(
     GlassSurface(
         blurred = false,
         shape = CircleShape,
+//        baseColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = modifier
-            .monoShadow(CircleShape)
+            .monoShadowWorkaround(CircleShape)
             .clickable(onClick = onClick)
     ) {
         Row(

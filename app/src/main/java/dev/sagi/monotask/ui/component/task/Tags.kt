@@ -19,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,11 +47,15 @@ fun TaskTag(
     val borderColor = lerp(Color.Black, contentColor, 0.85f).copy(alpha = 0.2f)
 
     // Size-specific
-    val textStyle = if (size == TagSize.SMALL) MaterialTheme.typography.labelSmall
-                    else MaterialTheme.typography.labelLarge
+    val textStyle =
+        MaterialTheme.typography.labelLarge.copy(
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Center,
+                trim = LineHeightStyle.Trim.Both)
+        )
     val fontSize = if (size == TagSize.DEFAULT) 16.sp else 10.sp
-    val horizontalPadding = if (size == TagSize.SMALL) 5.dp else 8.dp
-    val verticalPadding = if (size == TagSize.SMALL) 0.dp else 1.dp
+    val horizontalPadding = if (size == TagSize.SMALL) 4.dp else 8.dp
+    val verticalPadding = if (size == TagSize.SMALL) 0.7.dp else 2.dp
     val borderWidth = if (size == TagSize.SMALL) 1.dp else 1.5.dp
 
     Surface(
@@ -65,6 +71,7 @@ fun TaskTag(
                 else horizontalPadding,
             )
         ) {
+//            val fontFamily =
             Text(
                 text = label.lowercase(),
                 style = textStyle,

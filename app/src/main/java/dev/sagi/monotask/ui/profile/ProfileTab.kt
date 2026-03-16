@@ -34,10 +34,11 @@ import dev.sagi.monotask.data.model.BadgeIds
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.util.Constants
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Tab 1 — Profile: XP bar + badges grid
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 fun ProfileTab(
@@ -47,10 +48,8 @@ fun ProfileTab(
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
-            start = 20.dp,
-            end = 20.dp,
-            top        = 20.dp,
-            bottom     = bottomPadding + 16.dp
+            top = Constants.Theme.SCREEN_PADDING,
+            bottom = bottomPadding
         ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -75,9 +74,9 @@ fun ProfileTab(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Header
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 fun ProfileHeader(
@@ -128,9 +127,9 @@ fun ProfileHeader(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 // Level chip
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
 
 @Composable
 fun LevelChip(level: Int, modifier: Modifier = Modifier) {
@@ -156,9 +155,9 @@ fun LevelChip(level: Int, modifier: Modifier = Modifier) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// All defined badges — always shown, locked/greyed if not earned
-// ─────────────────────────────────────────────────────────────────────────────
+// ====================
+// All defined badges. Always shown, locked/greyed if not earned
+// ====================
 
 private val allBadges = listOf(
     Badge(id = BadgeIds.TOP_PERFORMER,    name = "Top Performer",    description = "Complete 10 high-importance tasks in a row"),

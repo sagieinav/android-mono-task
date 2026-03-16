@@ -57,6 +57,24 @@ val notoSerif = FontFamily(
     Font(R.font.noto_serif_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
+val plantagenet = FontFamily(
+    Font(R.font.plantagenet, FontWeight.Normal, FontStyle.Normal),
+    Font(R.font.plantagenet_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.plantagenet, FontWeight.Bold, FontStyle.Normal)
+)
+
+val ptSerif = FontFamily(
+    Font(R.font.pt_serif, FontWeight.Normal, FontStyle.Normal),
+    Font(R.font.pt_serif_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.pt_serif, FontWeight.Bold, FontStyle.Normal)
+)
+
+val merriweather = FontFamily(
+    Font(R.font.merriweather, FontWeight.Normal, FontStyle.Normal),
+    Font(R.font.merriweather_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.merriweather, FontWeight.Bold, FontStyle.Normal)
+)
+
 // ─────────────────────────────────────────────────────
 // CATEGORY 3 — UI CHROME (Buttons, chips, labels, nav, titles)
 // Used for: titleLarge/Medium/Small, labelLarge/Medium, bodySmall
@@ -107,7 +125,7 @@ val harabara = FontFamily(
 // e.g. replace `gloock` with `playfairDisplay` for titles.
 // ─────────────────────────────────────────────────────
 private val heroFont    = gloock            // gloock, playfairDisplay
-private val bodyFont    = notoSerif         // libreCaslon, notoSerif, lora
+private val bodyFont    = lora         // libreCaslon, notoSerif, lora, plantagenet, ptSerif, merriweather
 private val uiFont      = googleSans        // googleSans, roboto, plusJakartaSans
 private val dataFont    = ibmPlexMono       // no alternative needed
 

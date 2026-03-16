@@ -6,7 +6,10 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -68,97 +71,117 @@ fun NavGraph(
     val settingsState by settingsVM.uiState.collectAsStateWithLifecycle()
     val authState by authVM.uiState.collectAsStateWithLifecycle()
 
+    val hardcoreMode = (settingsState as? SettingsUiState.Ready)?.hardcoreModeEnabled ?: false
     val isLoading = authState is AuthUiState.Loading || settingsState is SettingsUiState.Loading
-    if (isLoading) {
+
+    // Hold the initial destination in a state variable
+    var initialStartDestination by remember { mutableStateOf<String?>(null) }
+
+    // Wait for the initial load to finish, then lock in the destination once
+    LaunchedEffect(authState, settingsState) {
+        if (initialStartDestination == null && !isLoading) {
+            initialStartDestination = if (authState is AuthUiState.SignedIn) Screen.Main.route else Screen.Auth.route
+        }
+    }
+
+    // Capture the locked in start destination in a local, immutable variable
+    val startDestination = initialStartDestination
+
+    // Prevent the NavHost from building until we know exactly where to start.
+    if (startDestination == null) {
         LoadingSpinner()
         return
     }
 
-    val startDestination = if (authState is AuthUiState.SignedIn)
-        Screen.Main.route else Screen.Auth.route
 
-    LaunchedEffect(authState) {
-        if (authState is AuthUiState.SignedOut) {
-            navController.navigate(Screen.Auth.route) {
-                popUpTo(0) { inclusive = true }
+    Box(modifier = Modifier.fillMaxSize()) {
+        // LaunchedEffect of AuthScreen, to catch first login and logouts
+        LaunchedEffect(authState) {
+            if (authState is AuthUiState.SignedOut) {
+                navController.navigate(Screen.Auth.route) {
+                    popUpTo(0) { inclusive = true }
+                }
             }
         }
-    }
 
-    val hardcoreMode = (settingsState as? SettingsUiState.Ready)?.hardcoreModeEnabled ?: false
-
-    NavHost(
-        navController = navController,
-        startDestination = startDestination,
-        enterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
-        exitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) },
-        popEnterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
-        popExitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) }
-    ) {
-        navigation(
-            startDestination = Screen.Login.route,
-            route = Screen.Auth.route
+        // The Navigation Host:
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            enterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
+            exitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) },
+            popEnterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
+            popExitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) }
         ) {
-            composable(Screen.Login.route) {
-                AuthScreen(
-                    authViewModel = authVM,
-                    onNavigateToOnboarding = {
-                        navController.navigate(Screen.Onboarding.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
+            navigation(
+                startDestination = Screen.Login.route,
+                route = Screen.Auth.route
+            ) {
+                composable(Screen.Login.route) {
+                    AuthScreen(
+                        authViewModel = authVM,
+                        onNavigateToOnboarding = {
+                            navController.navigate(Screen.Onboarding.route) {
+                                popUpTo(Screen.Login.route) { inclusive = true }
+                            }
+                        },
+                        onNavigateToMain = {
+                            navController.navigate(Screen.Main.route) {
+                                popUpTo(Screen.Auth.route) { inclusive = true }
+                            }
                         }
-                    },
-                    onNavigateToMain = {
-                        navController.navigate(Screen.Main.route) {
-                            popUpTo(Screen.Auth.route) { inclusive = true }
+                    )
+                }
+                composable(Screen.Onboarding.route) {
+                    OnboardingScreen(
+                        authViewModel = authVM,
+                        onFinish = {
+                            navController.navigate(Screen.Main.route) {
+                                popUpTo(Screen.Auth.route) { inclusive = true }
+                            }
                         }
-                    }
-                )
-            }
-            composable(Screen.Onboarding.route) {
-                OnboardingScreen(
-                    authViewModel = authVM,
-                    onFinish = {
-                        navController.navigate(Screen.Main.route) {
-                            popUpTo(Screen.Auth.route) { inclusive = true }
-                        }
-                    }
-                )
-            }
-        }
-
-        navigation(startDestination = Screen.Focus.route, route = Screen.Main.route) {
-            composable(Screen.Focus.route) {
-                val focusVM: FocusViewModel = viewModel()
-                // Wire workspace source once. Observation starts automatically in init
-                focusVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
-                FocusScreen(
-                    navController = navController,
-                    focusVM       = focusVM,
-//                    userSessionVM = userSessionVM
-                )
-            }
-            composable(Screen.Kanban.route) {
-                val kanbanVM: KanbanViewModel = viewModel()
-                kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
-                if (hardcoreMode) {
-                    LaunchedEffect(Unit) { navController.popBackStack() }
-                } else {
-                    KanbanScreen(
-                        navController = navController,
-                        kanbanVM      = kanbanVM
                     )
                 }
             }
-            composable(Screen.Profile.route) {
-                val profileVM: ProfileViewModel = viewModel()
-                LaunchedEffect(Unit) {
-                    profileVM.startObserving(userSessionVM.currentUser)
+
+            navigation(startDestination = Screen.Focus.route, route = Screen.Main.route) {
+                composable(Screen.Focus.route) {
+                    val focusVM: FocusViewModel = viewModel()
+                    // Wire workspace source once. Observation starts automatically in init
+                    focusVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
+                    FocusScreen(
+                        navController = navController,
+                        focusVM       = focusVM,
+//                    userSessionVM = userSessionVM
+                    )
                 }
-                ProfileScreen(
-                    navController = navController,
-                    profileVM     = profileVM
-                )
+                composable(Screen.Kanban.route) {
+                    val kanbanVM: KanbanViewModel = viewModel()
+                    kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
+                    if (hardcoreMode) {
+                        LaunchedEffect(Unit) { navController.popBackStack() }
+                    } else {
+                        KanbanScreen(
+                            navController = navController,
+                            kanbanVM      = kanbanVM
+                        )
+                    }
+                }
+                composable(Screen.Profile.route) {
+                    val profileVM: ProfileViewModel = viewModel()
+                    LaunchedEffect(Unit) {
+                        profileVM.startObserving(userSessionVM.currentUser)
+                    }
+                    ProfileScreen(
+                        navController = navController,
+                        profileVM     = profileVM
+                    )
+                }
             }
+        }
+        // Overlay the spinner for any mid-session loading without destroying the graph
+        if (isLoading) {
+            LoadingSpinner()
         }
     }
 }

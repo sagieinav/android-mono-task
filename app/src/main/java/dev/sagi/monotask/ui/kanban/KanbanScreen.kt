@@ -16,6 +16,7 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.task.EditTaskSheet
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
+import dev.sagi.monotask.util.Constants
 import java.util.Date
 
 private const val COLUMN_STAGGER_MS = 80
@@ -77,25 +78,30 @@ fun KanbanScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // No horizontal padding, for smooth horizontal scrolling
             .padding(
                 top    = innerPadding.calculateTopPadding(),
                 bottom = innerPadding.calculateBottomPadding()
-            ),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ),
+        // gap between toggle and content
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         SegmentedToggle(
             options          = listOf("Active", "Archive"),
             selectedIndex    = if (uiState is KanbanUiState.Ready && uiState.isArchive) 1 else 0,
             onOptionSelected = { onKanbanEvent(KanbanEvent.ToggleArchive) },
-            modifier         = Modifier.align(Alignment.CenterHorizontally)
+            modifier         = Modifier
+                .align(Alignment.CenterHorizontally)
+//                .padding(Constants.Theme.SCREEN_PADDING)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = Constants.Theme.SCREEN_PADDING)
+            ,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             KanbanColumn(
                 title             = "High",

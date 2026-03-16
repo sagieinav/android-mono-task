@@ -39,12 +39,23 @@ import dev.sagi.monotask.ui.component.core.MonoDropdownMenuGlass
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.FlowRowOverflow
+import androidx.compose.foundation.layout.FlowRowOverflowScope
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ripple
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontWeight
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.AceGoldDim
+import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.libreCaslon
+import dev.sagi.monotask.ui.theme.lora
+import dev.sagi.monotask.ui.theme.merriweather
+import dev.sagi.monotask.ui.theme.notoSerif
+import dev.sagi.monotask.ui.theme.plantagenet
+import dev.sagi.monotask.ui.theme.playfairDisplay
+import dev.sagi.monotask.ui.theme.ptSerif
 
 
 // Tracks which confirm dialog is pending
@@ -67,7 +78,7 @@ fun KanbanCard(
     val cardShape = MaterialTheme.shapes.small
 
     Box(modifier = modifier) {
-        // ── Card surface ────────────────────────────────────────────────────
+        // ========== Card surface ==========
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -101,23 +112,25 @@ fun KanbanCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 11.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // ── Title ───────────────────────────────────────────────────
+                // ========== Title ==========
                 Text(
                     text     = task.title,
-                    style    = MaterialTheme.typography.titleMedium,
+                    style    = MaterialTheme.typography.labelLarge,
                     color    = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // ── Tags ────────────────────────────────────────────────────
+                // ========== Tags ==========
+
                 if (task.tags.isNotEmpty()) {
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement   = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement   = Arrangement.spacedBy(2.dp),
+                        maxLines = 2
                     ) {
                         task.tags.forEach { tag ->
                             CustomTag(size = TagSize.SMALL, label = tag)
@@ -125,12 +138,12 @@ fun KanbanCard(
                     }
                 }
 
-                // ── Due date ────────────────────────────────────────────────
+                // ========== Due date ==========
                 task.dueDate?.let { DueDateLabel(timestamp = it, small = true) }
             }
         }
 
-        // ── Context menu ────────────────────────────────────────────────────
+        // ========== Context menu ==========
         KanbanCardDropdown(
             expanded        = dropdownExpanded,
             isArchive       = isArchive,
@@ -143,7 +156,7 @@ fun KanbanCard(
         )
     }
 
-    // ── Confirm dialogs ──────────────────────────────────────────────────────
+    // ========== Confirm dialogs ==========
     when (pendingAction) {
         PendingAction.FOCUS_NOW -> GlassConfirmDialog(
             onDismissRequest = { pendingAction = null },

@@ -49,6 +49,7 @@ fun AuthScreen(
     Surface(
         modifier = Modifier
             .fillMaxSize()
+            // Apply system bars padding, cause this is outside of MainScaffold
             .systemBarsPadding(),
         color = MaterialTheme.colorScheme.background
     ) {

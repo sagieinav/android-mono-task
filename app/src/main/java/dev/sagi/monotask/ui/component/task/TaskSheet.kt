@@ -195,7 +195,7 @@ private fun TaskTitleAndDescriptionInput(
             )
         },
         singleLine = false,
-        maxLines = 3,
+        maxLines = 4,
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences
         ),

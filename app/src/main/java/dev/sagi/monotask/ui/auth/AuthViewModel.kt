@@ -10,16 +10,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.FirebaseAuth
 import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.repository.AuthRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
 import dev.sagi.monotask.util.AuthUtils
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 // ========== UI States ==========
 
@@ -43,6 +46,7 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Loading)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
+    private var authStateListener: FirebaseAuth.AuthStateListener? = null
     private var isSigningIn = false
 
     init {
@@ -50,26 +54,35 @@ class AuthViewModel(
     }
 
     // ========== Auth State Observation ==========
-
     private fun observeAuthState() {
-        MonoTaskApp.instance.auth.addAuthStateListener { firebaseAuth ->
-            if (isSigningIn) return@addAuthStateListener
+        // Define the listener and save it to the variable
+        authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            if (isSigningIn) return@AuthStateListener
+
             val user = firebaseAuth.currentUser
             if (user == null) {
                 _uiState.value = AuthUiState.SignedOut
             } else {
                 viewModelScope.launch {
                     try {
-                        val storedUser = userRepository.getUserOnce(user.uid)
+                        // Enforce an 8-second timeout for the network/cache fetch
+                        val storedUser = withTimeout(8000L) {
+                            userRepository.getUserOnce(user.uid)
+                        }
                         _uiState.value = AuthUiState.SignedIn(
                             requiresOnboarding = storedUser?.onboarded == false
                         )
+                    } catch (e: TimeoutCancellationException) {
+                        _uiState.value = AuthUiState.Error("Network timeout. Please check your connection.")
                     } catch (e: Exception) {
                         _uiState.value = AuthUiState.Error("Failed to check user status: ${e.message}")
                     }
                 }
             }
         }
+
+        // 3. Give the variable to your MonoTaskApp Firebase auth instance
+        MonoTaskApp.instance.auth.addAuthStateListener(authStateListener!!)
     }
 
     // ========== Sign In ==========
@@ -158,5 +171,13 @@ class AuthViewModel(
     // SettingsScreen calls this through a callback, not its own logout path.
     fun signOut() {
         authRepository.signOut()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // If the listener exists, tell the MonoTaskApp instance to remove it
+        authStateListener?.let {
+            MonoTaskApp.instance.auth.removeAuthStateListener(it)
+        }
     }
 }

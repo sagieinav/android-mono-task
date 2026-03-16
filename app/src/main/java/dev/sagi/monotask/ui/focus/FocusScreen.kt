@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.StreakFire
 import dev.sagi.monotask.ui.theme.fireIconGradient
+import dev.sagi.monotask.util.Constants
 
 // ========== Entry Point ==========
 
@@ -118,7 +119,6 @@ fun FocusScreenContent(
     onFocusEvent: (FocusEvent) -> Unit
 ) {
     val innerPadding = LocalScaffoldPadding.current
-    val horizontalPadding = 20.dp
     val scope = rememberCoroutineScope()
 
     if (uiState is FocusUiState.Loading) return
@@ -129,8 +129,8 @@ fun FocusScreenContent(
             .padding(
                 top = innerPadding.calculateTopPadding(),
                 bottom = innerPadding.calculateBottomPadding(),
-                start = horizontalPadding,
-                end = horizontalPadding
+                start = Constants.Theme.SCREEN_PADDING,
+                end = Constants.Theme.SCREEN_PADDING
             )
     ) {
         // Active Streak Chip
@@ -159,6 +159,57 @@ fun FocusScreenContent(
             onDismissRequest = { onFocusEvent(FocusEvent.DismissSnooze) },
             onSnooze         = { option -> animState.onSnoozeConfirmed(option, scope) }
         )
+    }
+}
+
+// ========== Active Card ==========
+@Composable
+private fun ActiveFocusCard(
+    uiState: FocusUiState.Active,
+    animState: FocusAnimationState,
+    onFocusEvent: (FocusEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Synchronously mark dirty before the first frame draws
+    SideEffect {
+        animState.checkIfNeedsReset(uiState.focusTask.id, uiState.restoreVersion)
+    }
+
+    LaunchedEffect(uiState.focusTask.id, uiState.restoreVersion) {
+        animState.resetCard()
+        val entrySpec = spring<Float>(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness    = Spring.StiffnessLow
+        )
+        launch { animState.alpha.animateTo(1f, tween(300)) }
+        launch { animState.scale.animateTo(1f, entrySpec) }
+        launch {
+            animState.border.animateTo(1f,   tween(1600, easing = EaseInQuart))
+            animState.border.animateTo(1.1f, tween(200))
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                alpha = animState.displayAlpha
+                scaleX = animState.displayScale
+                scaleY = animState.displayScale
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        key(uiState.focusTask.id, uiState.restoreVersion) {
+            FocusCardSwipeable(
+                task               = uiState.focusTask,
+                exitTrigger        = animState.snoozeExitTrigger,
+                borderFraction     = animState.displayBorder,
+                onSwipeRight       = { onFocusEvent(FocusEvent.CompleteTask) },
+                onSwipeLeft        = { onFocusEvent(FocusEvent.OpenSnooze) },
+                onSnoozeCardExited = { animState.onSnoozeCardExited() },
+                modifier           = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -232,56 +283,6 @@ private fun StatChip(
     }
 }
 
-// ========== Active Card ==========
-@Composable
-private fun ActiveFocusCard(
-    uiState: FocusUiState.Active,
-    animState: FocusAnimationState,
-    onFocusEvent: (FocusEvent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Synchronously mark dirty before the first frame draws
-    SideEffect {
-        animState.checkIfNeedsReset(uiState.focusTask.id, uiState.restoreVersion)
-    }
-
-    LaunchedEffect(uiState.focusTask.id, uiState.restoreVersion) {
-        animState.resetCard()
-        val entrySpec = spring<Float>(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness    = Spring.StiffnessLow
-        )
-        launch { animState.alpha.animateTo(1f, tween(300)) }
-        launch { animState.scale.animateTo(1f, entrySpec) }
-        launch {
-            animState.border.animateTo(1f,   tween(1600, easing = EaseInQuart))
-            animState.border.animateTo(1.1f, tween(200))
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                alpha = animState.displayAlpha
-                scaleX = animState.displayScale
-                scaleY = animState.displayScale
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        key(uiState.focusTask.id, uiState.restoreVersion) {
-            FocusCardSwipeable(
-                task               = uiState.focusTask,
-                exitTrigger        = animState.snoozeExitTrigger,
-                borderFraction     = animState.displayBorder,
-                onSwipeRight       = { onFocusEvent(FocusEvent.CompleteTask) },
-                onSwipeLeft        = { onFocusEvent(FocusEvent.OpenSnooze) },
-                onSnoozeCardExited = { animState.onSnoozeCardExited() },
-                modifier           = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
 
 // ========== Animation State ==========
 

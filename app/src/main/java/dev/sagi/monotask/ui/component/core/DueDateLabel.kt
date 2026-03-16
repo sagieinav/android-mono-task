@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.util.ext.toRelativeDate
@@ -31,10 +32,7 @@ fun DueDateLabel(
     else
         MaterialTheme.colorScheme.onSurface.copy(alpha = if (small) 0.4f else 0.45f)
 
-//    val iconSize = if (small) 13.dp else 18.dp
-    val textStyle = if (small)
-        MaterialTheme.typography.labelSmall
-    else
+    val textStyle =
         MaterialTheme.typography.titleSmall.copy(
             lineHeightStyle = LineHeightStyle(
                 alignment = LineHeightStyle.Alignment.Proportional,
@@ -42,11 +40,15 @@ fun DueDateLabel(
             )
         )
 
+    val fontSize = if (small) 9.sp else 14.sp
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+
+        // Icon only for big label
         if (!small) {
             Icon(
                 painter = painterResource(R.drawable.ic_due_soon),
@@ -57,12 +59,14 @@ fun DueDateLabel(
                 tint = dateColor
             )
         }
+
         Text(
             text = relativeDate.text,
             style = textStyle,
+            fontSize = fontSize,
             fontWeight = if (small) FontWeight.Normal else FontWeight.SemiBold,
             color = dateColor,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }

@@ -34,6 +34,7 @@ import dev.sagi.monotask.ui.component.statistics.TotalTasksCard
 import dev.sagi.monotask.ui.component.statistics.TotalXpCard
 import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.util.Constants
 import java.time.LocalDate
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -58,10 +59,8 @@ fun StatisticsTab(
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
-            start           = 16.dp,
-            end             = 16.dp,
-            top             = 16.dp,
-            bottom          = bottomPadding + 16.dp
+            top = Constants.Theme.SCREEN_PADDING,
+            bottom = bottomPadding
         ),
         verticalArrangement = Arrangement.spacedBy(40.dp)
     ) {

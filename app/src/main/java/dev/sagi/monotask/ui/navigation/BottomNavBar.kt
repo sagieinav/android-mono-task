@@ -42,6 +42,7 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.util.Constants
 
 enum class NavTab(val label: String, val iconRes: Int) {
     BOARD("Board", R.drawable.ic_kanban2),
@@ -68,47 +69,43 @@ fun BottomNavBar(
     )
     val dotColor = MaterialTheme.colorScheme.scrim
 
-    Box(
-        modifier = modifier
+    GlassSurface(
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
-    ) {
-        GlassSurface(
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(),
+            .padding(Constants.Theme.SCREEN_PADDING),
 //            baseColor = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
 //            blurred = false
+    ) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
+            val tabWidth = maxWidth / tabs.size
+            val dotX = tabWidth * (animatedIndex + 0.5f) - 2.dp // -2.dp centers the 4.dp dot
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                val tabWidth = maxWidth / tabs.size
-                val dotX = tabWidth * (animatedIndex + 0.5f) - 2.dp // -2.dp centers the 4.dp dot
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    tabs.forEach { tab ->
-                        NavDockItem(
-                            tab = tab,
-                            isSelected = tab == selectedTab,
-                            onClick = { onTabSelected(tab) }
-                        )
-                    }
+                tabs.forEach { tab ->
+                    NavDockItem(
+                        tab = tab,
+                        isSelected = tab == selectedTab,
+                        onClick = { onTabSelected(tab) }
+                    )
                 }
-
-                // Sliding dot indicator
-                Box(
-                    modifier = Modifier
-                        .offset(x = dotX, y = 50.dp) // Boring math
-                        .size(4.dp)
-                        .background(dotColor, CircleShape)
-                )
             }
+
+            // Sliding dot indicator
+            Box(
+                modifier = Modifier
+                    .offset(x = dotX, y = 50.dp) // Boring math
+                    .size(4.dp)
+                    .background(dotColor, CircleShape)
+            )
         }
     }
 }
@@ -120,13 +117,13 @@ private fun RowScope.NavDockItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val iconSize = 36
+    val iconSize = 38.dp
 
     Box(
         modifier = Modifier
             .weight(1f)
             .height(56.dp)
-            .clip(MaterialTheme.shapes.medium)
+//            .clip(MaterialTheme.shapes.medium)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -138,7 +135,7 @@ private fun RowScope.NavDockItem(
         Icon(
             painter = painterResource(tab.iconRes),
             contentDescription = tab.label,
-            modifier = Modifier.size(iconSize.dp),
+            modifier = Modifier.size(iconSize),
             tint = if (isSelected)
                 MaterialTheme.colorScheme.scrim
             else
@@ -151,7 +148,7 @@ private fun RowScope.NavDockItem(
 @Preview(showBackground = true)
 @Composable
 fun BottomNavBarPreview() {
-    val hazeState = LocalHazeState.current
+//    val hazeState = LocalHazeState.current
     var selected by remember { mutableStateOf(NavTab.FOCUS) }
 
     MonoTaskTheme {
