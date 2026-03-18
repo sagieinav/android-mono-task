@@ -62,7 +62,7 @@ fun AuthScreen(
             verticalArrangement = Arrangement.Top
         ) {
             Image(
-                painter            = painterResource(id = R.drawable.ic_monotask),
+                painter            = painterResource(id = R.drawable.logo_monotask_raw),
                 contentDescription = "App Logo",
                 modifier           = Modifier.width(180.dp)
             )

@@ -43,7 +43,7 @@ fun BottomSheet(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val hazeState = LocalHazeState.current
+//    val hazeState = LocalHazeState.current
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,

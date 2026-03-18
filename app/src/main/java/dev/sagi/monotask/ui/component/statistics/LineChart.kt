@@ -74,6 +74,13 @@ private val TouchBottomBuffer     = 28.dp
 
 // ========== Models ==========
 
+private data class CachedChartData(
+    val width: Float,
+    val offsets: List<Offset>,
+    val fullPath: Path,
+    val pm: PathMeasure,
+)
+
 private data class SelectedPoint(
     val label: String,
     val value: Float,
@@ -171,6 +178,9 @@ private fun ChartCanvas(
     val density = LocalDensity.current
     val drawHeightPx = with(density) { drawHeight.toPx() }
 
+    // Cached path data. Rebuilt only when points or canvas size change, not every animation frame
+    val cachedRef = remember { mutableStateOf<CachedChartData?>(null) }
+
     LaunchedEffect(animate, points) {
         if (animate) {
             animProgress.snapTo(0f)
@@ -182,25 +192,39 @@ private fun ChartCanvas(
 
     val currentProgress = if (userProgress >= 0f) userProgress else animProgress.value
 
-    fun updateSelection(tapX: Float, width: Float) {
-        val progress = (tapX / width).coerceIn(0f, 1f)
-        val minV     = points.minOf { it.value }
-        val maxV     = points.maxOf { it.value }
-        val range    = maxV - minV
-        val offsets  = points.mapIndexed { i, p ->
+    fun resolveCache(w: Float): CachedChartData? {
+        cachedRef.value?.let { if (it.width == w) return it }
+        if (points.size < 2) return null
+        val minV    = points.minOf { it.value }
+        val maxV    = points.maxOf { it.value }
+        val range   = maxV - minV
+        val offsets = points.mapIndexed { i, p ->
             Offset(
-                x = (i.toFloat() / (points.size - 1)) * width,
+                x = (i.toFloat() / (points.size - 1)) * w,
                 y = drawHeightPx * (1f - if (range > 0f) (p.value - minV) / range else 0.5f)
             )
         }
+        val path = buildSmoothPath(offsets)
+        val pm   = PathMeasure().also { it.setPath(path, false) }
+        return CachedChartData(w, offsets, path, pm).also { cachedRef.value = it }
+    }
+
+    fun updateSelection(tapX: Float, width: Float) {
+        val cache    = resolveCache(width) ?: return
+        val progress = (tapX / width).coerceIn(0f, 1f)
         val idx      = (progress * (points.size - 1)).roundToInt().coerceIn(0, points.size - 1)
-        userProgress  = progress   // ← this state change triggers drawWithContent to re-read currentProgress
+        userProgress  = progress
         selectedPoint = SelectedPoint(
             label          = points[idx].label,
             value          = interpolateAt(points, progress),
-            screenPosition = getPointAtProgress(buildSmoothPath(offsets), progress)
+            screenPosition = cache.pm.let { pm ->
+                pm.getPosition(pm.length * progress.coerceIn(0f, 1f))
+            }
         )
     }
+
+    // Invalidate cache when points change
+    LaunchedEffect(points) { cachedRef.value = null }
 
     Box(modifier = modifier) {
         Box(
@@ -237,28 +261,19 @@ private fun ChartCanvas(
                         )
                     }
 
-                    if (points.size < 2) { drawContent(); return@drawWithContent }
+                    val cache = resolveCache(w)
+                    if (cache == null) { drawContent(); return@drawWithContent }
 
-                    val minV    = points.minOf { it.value }
-                    val maxV    = points.maxOf { it.value }
-                    val range   = maxV - minV
-                    val offsets = points.mapIndexed { i, p ->
-                        Offset(
-                            x = (i.toFloat() / (points.size - 1)) * w,
-                            y = h * (1f - if (range > 0f) (p.value - minV) / range else 0.5f)
-                        )
-                    }
-
-                    val fullPath = buildSmoothPath(offsets)
-                    drawPath(fullPath, gridColor, style = Stroke(GuidLineWidth.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+                    drawPath(cache.fullPath, gridColor, style = Stroke(GuidLineWidth.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
 
                     if (currentProgress <= 0f) { drawContent(); return@drawWithContent }
 
-                    val animPath = getAnimatedPath(fullPath, currentProgress)
-                    drawFillGradient(fullPath, currentProgress, h, offsets.first().x, lineColor)
+                    val animPath = getAnimatedPath(cache.fullPath, cache.pm, currentProgress)
+                    drawFillGradient(cache.fullPath, cache.pm, currentProgress, h, cache.offsets.first().x, lineColor)
                     drawLineGlow(animPath, lineColor)
                     drawPath(animPath, lineColor, style = Stroke(LineWidth.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-                    drawEndpointIndicator(getPointAtProgress(fullPath, currentProgress), lineColor)
+                    val endPoint = cache.pm.let { it.getPosition(it.length * currentProgress.coerceIn(0f, 1f)) }
+                    drawEndpointIndicator(endPoint, lineColor)
 
                     drawContent()
                 }
@@ -307,22 +322,15 @@ private fun buildSmoothPath(pts: List<Offset>): Path = Path().apply {
     }
 }
 
-private fun getAnimatedPath(full: Path, progress: Float): Path {
+private fun getAnimatedPath(full: Path, pm: PathMeasure, progress: Float): Path {
     if (progress >= 1f) return full
     if (progress <= 0f) return Path()
-    val pm = PathMeasure().also { it.setPath(full, false) }
     return Path().also { pm.getSegment(0f, pm.length * progress, it, true) }
 }
 
-private fun getPointAtProgress(full: Path, progress: Float): Offset {
-    val pm = PathMeasure().also { it.setPath(full, false) }
-    return pm.getPosition(pm.length * progress.coerceIn(0f, 1f))
-}
-
 private fun DrawScope.drawFillGradient(
-    full: Path, progress: Float, height: Float, firstX: Float, color: Color
+    full: Path, pm: PathMeasure, progress: Float, height: Float, firstX: Float, color: Color
 ) {
-    val pm     = PathMeasure().also { it.setPath(full, false) }
     val target = pm.length * progress
     val path   = Path().apply {
         var started = false

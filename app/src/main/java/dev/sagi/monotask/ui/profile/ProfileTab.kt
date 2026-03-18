@@ -1,17 +1,26 @@
 package dev.sagi.monotask.ui.profile
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -20,8 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,7 +42,10 @@ import coil3.compose.AsyncImage
 import dev.sagi.monotask.data.model.Badge
 import dev.sagi.monotask.data.model.BadgeIds
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.domain.util.DiceBearHelper
+import dev.sagi.monotask.ui.component.core.BottomSheet
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.util.Constants
 
@@ -43,8 +56,16 @@ import dev.sagi.monotask.util.Constants
 @Composable
 fun ProfileTab(
     state: ProfileUiState.Ready,
+    onEvent: (ProfileEvent) -> Unit,
     bottomPadding: Dp
 ) {
+    if (state.showAvatarPicker) {
+        AvatarPicker(
+            user      = state.user,
+            onSelect  = { preset -> onEvent(ProfileEvent.SelectAvatar(preset)) },
+            onDismiss = { onEvent(ProfileEvent.DismissAvatarPicker) }
+        )
+    }
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
@@ -55,8 +76,9 @@ fun ProfileTab(
     ) {
         item {
             ProfileHeader(
-                user     = state.user,
-                modifier = Modifier.padding(vertical = 6.dp)
+                user          = state.user,
+                modifier      = Modifier.padding(vertical = 6.dp),
+                onAvatarClick = { onEvent(ProfileEvent.OpenAvatarPicker) }
             )
         }
         item {
@@ -67,7 +89,6 @@ fun ProfileTab(
                 modifier       = Modifier.fillMaxWidth()
             )
         }
-
         item {
             BadgesSection(earnedBadgeIds = state.badges.filter { it.earned }.map { it.id })
         }
@@ -81,6 +102,7 @@ fun ProfileTab(
 @Composable
 fun ProfileHeader(
     user: User,
+    onAvatarClick: () -> Unit = { },   // opens avatar picker
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -90,33 +112,14 @@ fun ProfileHeader(
     ) {
         Box(
             modifier         = Modifier
-                .size(120.dp)
+                .size(128.dp)
                 .clip(CircleShape)
-                .glassBorder(CircleShape),
+                .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+                .glassBorder(CircleShape)
+                .clickable { onAvatarClick() },
             contentAlignment = Alignment.Center
         ) {
-            if (user.profilePicUrl.isNotEmpty()) {
-                AsyncImage(
-                    model              = user.profilePicUrl,
-                    contentDescription = "Profile picture",
-                    contentScale       = ContentScale.Crop,
-                    modifier           = Modifier.fillMaxSize()
-                )
-            } else {
-                Box(
-                    modifier         = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text       = user.displayName.firstOrNull()?.uppercase() ?: "?",
-                        style      = MaterialTheme.typography.displayMedium,
-                        color      = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+            AvatarImage(user = user, modifier = Modifier.fillMaxSize())
         }
 
         Text(
@@ -128,32 +131,83 @@ fun ProfileHeader(
 }
 
 // ====================
-// Level chip
+// Shared avatar image — handles auto (DiceBear URL) vs preset (local drawable)
 // ====================
 
 @Composable
-fun LevelChip(level: Int, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.tertiary
-                    )
-                )
-            )
-            .padding(horizontal = 14.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text       = "Level $level",
-            style      = MaterialTheme.typography.labelLarge,
-            color      = MaterialTheme.colorScheme.onPrimary,
-            fontWeight = FontWeight.Bold
+fun AvatarImage(user: User, modifier: Modifier = Modifier) {
+    val scaledModifier = modifier.graphicsLayer {
+        scaleX       = 0.95f
+        scaleY       = 0.95f
+        translationY = size.height * 0.05f
+    }
+    if (user.isAutoAvatar) {
+        AsyncImage(
+            model              = user.resolvedAvatarUrl(),
+            contentDescription = "Avatar",
+            contentScale       = ContentScale.Fit,
+            modifier           = scaledModifier
+        )
+    } else {
+        Image(
+            painter            = painterResource(user.avatarPreset),
+            contentDescription = "Avatar",
+            contentScale       = ContentScale.Fit,
+            modifier           = scaledModifier
         )
     }
 }
+
+// ====================
+// Avatar Picker (bottom sheet)
+// ====================
+
+@Composable
+fun AvatarPicker(
+    user: User,
+    onSelect: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options: List<DiceBearHelper.AvatarPreset?> = listOf(null) + DiceBearHelper.PRESETS
+
+    BottomSheet(
+        title            = "Choose Your Avatar",
+        onDismissRequest = onDismiss
+    ) {
+        LazyVerticalGrid(
+            columns               = GridCells.Fixed(3),
+            contentPadding        = PaddingValues(Constants.Theme.SCREEN_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement   = Arrangement.spacedBy(16.dp),
+            modifier              = Modifier.wrapContentHeight().heightIn(max = 360.dp)
+        ) {
+            items(options) { preset ->
+                val displayUser = if (preset == null) user.copy(avatarPreset = 0)
+                                  else user.copy(avatarPreset = preset.drawable)
+                val isSelected  = (preset == null && user.isAutoAvatar) ||
+                                   preset?.drawable == user.avatarPreset
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .clip(CircleShape)
+                        .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+                        .then(
+                            if (isSelected) Modifier.border(
+                                shape = CircleShape,
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            else Modifier.glassBorder(shape = CircleShape, width = 3.dp)
+                        )
+                        .clickable { onSelect(preset?.drawable ?: 0) }
+                ) {
+                    AvatarImage(user = displayUser, modifier = Modifier.fillMaxSize())
+                }
+            }
+        }
+    }
+}
+
 
 // ====================
 // All defined badges. Always shown, locked/greyed if not earned
@@ -186,7 +240,6 @@ private fun BadgesSection(earnedBadgeIds: List<String>) {
                         modifier = Modifier.weight(1f)
                     )
                 }
-                // Filler if odd count
                 if (rowBadges.size < 2) Spacer(Modifier.weight(1f))
             }
         }
@@ -265,7 +318,8 @@ private fun ProfileTabPreview() {
                 ),
                 activityData   = emptyList()
             ),
-            bottomPadding = 0.dp
+            bottomPadding = 0.dp,
+            onEvent = {}
         )
     }
 }

@@ -121,10 +121,10 @@ fun Modifier.monoBorder(shape: Shape): Modifier = composed {
 fun Modifier.glassBorder(
     shape: Shape,
     color: Color? = null,
-    borderWidth: Dp = 2.dp
+    width: Dp = 2.dp
 ): Modifier = composed {
-    val innerWidth = borderWidth * 0.75f
-    val outerWidth = borderWidth * 0.25f
+    val innerWidth = width * 0.75f
+    val outerWidth = width * 0.25f
 
     val innerModifier =
         if (color == null) {

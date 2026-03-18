@@ -147,12 +147,11 @@ fun NavGraph(
             navigation(startDestination = Screen.Focus.route, route = Screen.Main.route) {
                 composable(Screen.Focus.route) {
                     val focusVM: FocusViewModel = viewModel()
-                    // Wire workspace source once. Observation starts automatically in init
                     focusVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
+                    focusVM.setUserSource(userSessionVM.currentUser)
                     FocusScreen(
                         navController = navController,
                         focusVM       = focusVM,
-//                    userSessionVM = userSessionVM
                     )
                 }
                 composable(Screen.Kanban.route) {

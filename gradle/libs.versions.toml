@@ -31,6 +31,7 @@ composeunstyled = "1.49.6"
 composeunstyledPlatformtheme = "1.49.6"
 composeunstyledTheming = "1.49.6"
 composeunstyledPrimitives = "1.49.6"
+material3 = "1.4.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -68,6 +69,7 @@ google-play-services-auth = { group = "com.google.android.gms", name = "play-ser
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 #composeunstyled-platformtheme = { module = "com.composables:composeunstyled-platformtheme", version.ref = "composeunstyledPlatformtheme" }
 #composeunstyled-primitives = { module = "com.composables:composeunstyled-primitives", version.ref = "composeunstyledPrimitives" }
 #composeunstyled-theming = { module = "com.composables:composeunstyled-theming", version.ref = "composeunstyledTheming" }

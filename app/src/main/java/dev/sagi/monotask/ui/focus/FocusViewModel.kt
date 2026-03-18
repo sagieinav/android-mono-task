@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
@@ -47,6 +48,9 @@ class FocusViewModel(
     // Workspace flow injected once from NavGraph via setWorkspaceSource
     private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
 
+    // User flow injected once from NavGraph via setUserSource (avoids redundant getUserOnce calls)
+    private var _userSource: StateFlow<User?>? = null
+
     // Current streak — independent of task state, drives the streak chip
     private val _currentStreak = MutableStateFlow(0)
     val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
@@ -67,12 +71,14 @@ class FocusViewModel(
         }
     }
 
-    // ========== Workspace Wiring ==========
+    // ========== External Wiring (call once from NavGraph) ==========
 
-    // Connects this ViewModel to the shared workspace selection
-    // Call once right after creation (in NavGraph)
     fun setWorkspaceSource(workspaceFlow: StateFlow<Workspace?>) {
         _workspaceSource.compareAndSet(null, workspaceFlow)
+    }
+
+    fun setUserSource(userFlow: StateFlow<User?>) {
+        if (_userSource == null) _userSource = userFlow
     }
 
     // ========== Event Handler ==========
@@ -146,13 +152,13 @@ class FocusViewModel(
                 _uiEffect.emit(FocusUiEffect.ShowUndoComplete("Task completed"))
 
                 taskRepository.markTaskCompleted(userId, state.focusTask.id)
-                val userDoc = userRepository.getUserOnce(userId) ?: run {
+                val user = _userSource?.value ?: run {
                     _frozenForAnimation.value = false
                     _uiEffect.emit(FocusUiEffect.ShowError("Failed to load user profile for XP update"))
                     return@launch
                 }
 
-                userRepository.addXp(userId, xpGained, userDoc.xp, userDoc.level)
+                userRepository.addXp(userId, xpGained, user.xp, user.level)
 
                 delay(300)
                 _frozenForAnimation.value = false

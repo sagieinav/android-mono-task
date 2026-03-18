@@ -1,5 +1,6 @@
 package dev.sagi.monotask.data.repository
 
+import androidx.annotation.DrawableRes
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
@@ -20,10 +21,10 @@ class UserRepository {
             val today = LocalDate.now()
             return today.withDayOfMonth(1).toEpochDay()..today.toEpochDay()
         }
-        val last7DaysRange: ClosedRange<Long> get() {
-            val today = LocalDate.now()
-            return today.minusDays(6).toEpochDay()..today.toEpochDay()
-        }
+//        val last7DaysRange: ClosedRange<Long> get() {
+//            val today = LocalDate.now()
+//            return today.minusDays(6).toEpochDay()..today.toEpochDay()
+//        }
     }
 
     private val db = MonoTaskApp.instance.db
@@ -50,11 +51,16 @@ class UserRepository {
         if (!doc.exists()) userDoc(user.id).set(user).await()
     }
 
-    suspend fun updateProfile(userId: String, displayName: String, profilePicUrl: String) {
-        userDoc(userId).update(mapOf(
-            "displayName"   to displayName,
-            "profilePicUrl" to profilePicUrl
-        )).await()
+    suspend fun updateProfile(userId: String, displayName: String) {
+        userDoc(userId)
+            .update("displayName", displayName)
+            .await()
+    }
+
+    suspend fun updateAvatarPreset(userId: String, @DrawableRes preset: Int) {
+        userDoc(userId)
+            .update("avatarPreset", preset)
+            .await()
     }
 
     suspend fun completeOnboarding(userId: String) {

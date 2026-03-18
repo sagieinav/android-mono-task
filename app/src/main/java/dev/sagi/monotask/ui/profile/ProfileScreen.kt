@@ -43,6 +43,7 @@ fun ProfileScreen(
     val uiState       by profileVM.uiState.collectAsStateWithLifecycle()
     val searchResults by profileVM.searchResults.collectAsStateWithLifecycle()
     val isSearching   by profileVM.isSearching.collectAsStateWithLifecycle()
+    val isRefreshing  by profileVM.isRefreshing.collectAsStateWithLifecycle()
 
     val onProfileEvent: (ProfileEvent) -> Unit = remember { { profileVM.onEvent(it) } }
 
@@ -50,6 +51,7 @@ fun ProfileScreen(
         uiState        = uiState,
         searchResults  = searchResults,
         isSearching    = isSearching,
+        isRefreshing   = isRefreshing,
         onProfileEvent = onProfileEvent
     )
 }
@@ -63,6 +65,7 @@ fun ProfileScreenContent(
     uiState: ProfileUiState,
     searchResults: List<User> = emptyList(),
     isSearching: Boolean = false,
+    isRefreshing: Boolean = false,
     onProfileEvent: (ProfileEvent) -> Unit = {}
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
@@ -91,6 +94,7 @@ fun ProfileScreenContent(
                 state          = uiState,
                 searchResults  = searchResults,
                 isSearching    = isSearching,
+                isRefreshing   = isRefreshing,
                 onProfileEvent = onProfileEvent
             )
         }
@@ -106,6 +110,7 @@ private fun ProfileReadyContent(
     state: ProfileUiState.Ready,
     searchResults: List<User>,
     isSearching: Boolean,
+    isRefreshing: Boolean,
     onProfileEvent: (ProfileEvent) -> Unit
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
@@ -138,8 +143,13 @@ private fun ProfileReadyContent(
         val bottomNavPadding: Dp = scaffoldPadding.calculateBottomPadding()
 
         when (selectedTab) {
-            0 -> ProfileTab(state = state, bottomPadding = bottomNavPadding)
-            1 -> StatisticsTab(state = state, bottomPadding = bottomNavPadding)
+            0 -> ProfileTab(state = state, bottomPadding = bottomNavPadding, onEvent = onProfileEvent)
+            1 -> StatisticsTab(
+                state        = state,
+                isRefreshing = isRefreshing,
+                onRefresh    = { onProfileEvent(ProfileEvent.RefreshPage) },
+                bottomPadding = bottomNavPadding
+            )
             2 -> SocialTab(
                 friends        = state.user.friends,
                 searchResults  = searchResults,

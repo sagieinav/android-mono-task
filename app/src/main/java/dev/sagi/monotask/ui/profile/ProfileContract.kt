@@ -1,10 +1,10 @@
 package dev.sagi.monotask.ui.profile
 
+import androidx.annotation.DrawableRes
 import dev.sagi.monotask.data.model.Badge
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.data.model.Workspace
 
 // ========== UI States ==========
 
@@ -18,10 +18,10 @@ sealed class ProfileUiState {
         val xpIntoLevel         : Int,
         val xpForNextLevel      : Int,
         val badges              : List<Badge>,
-        val workspaces          : List<Workspace>       = emptyList(),
         val completedTasks      : List<Task>            = emptyList(),
         val activityData        : List<DailyActivity>   = emptyList(),
         val topPerformanceDay   : DailyActivity?        = null,           // all-time best, one-shot
+        val showAvatarPicker    : Boolean = false
 //        val weekActivityData    : List<DailyActivity>   = emptyList(),
     ) : ProfileUiState()
 }
@@ -29,9 +29,14 @@ sealed class ProfileUiState {
 // ========== Event Callbacks ==========
 
 sealed interface ProfileEvent {
+    data object RefreshPage : ProfileEvent
     data class SearchUsers(val query: String) : ProfileEvent
     data class AddFriend(val friendId: String) : ProfileEvent
-    data class UpdateProfile(val displayName: String, val profilePicUrl: String) : ProfileEvent
+    data class UpdateProfile(val displayName: String) : ProfileEvent
+    data class SelectAvatar(@DrawableRes val preset: Int) : ProfileEvent
+    object ResetAvatar         : ProfileEvent
+    object OpenAvatarPicker    : ProfileEvent
+    object DismissAvatarPicker : ProfileEvent
 }
 
 // ========== One-Shot UI Effects ==========

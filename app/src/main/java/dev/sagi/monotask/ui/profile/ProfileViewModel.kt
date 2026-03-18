@@ -1,12 +1,12 @@
 package dev.sagi.monotask.ui.profile
 
+import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
-import dev.sagi.monotask.data.repository.WorkspaceRepository
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,9 +20,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val userRepository      : UserRepository      = MonoTaskApp.instance.userRepository,
-    private val workspaceRepository : WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
-    private val taskRepository      : TaskRepository      = MonoTaskApp.instance.taskRepository,
+    private val userRepository : UserRepository = MonoTaskApp.instance.userRepository,
+    private val taskRepository : TaskRepository = MonoTaskApp.instance.taskRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -37,9 +36,13 @@ class ProfileViewModel(
     private val _uiEffect = MutableSharedFlow<ProfileUiEffect>()
     val uiEffect: SharedFlow<ProfileUiEffect> = _uiEffect.asSharedFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private lateinit var userId: String
+
     private var observing          = false  // safe: only touched on Main dispatcher
-    private var statisticsLoaded   = false  // guard: loadStatisticsData subscribes live flows once
+    private var statisticsLoaded   = false  // guard: loadStatisticsData runs once
 
     init {
         viewModelScope.launch { userId = AuthUtils.awaitUid() }
@@ -51,9 +54,14 @@ class ProfileViewModel(
 
     fun onEvent(event: ProfileEvent) {
         when (event) {
+            is ProfileEvent.RefreshPage   -> refreshPage()
             is ProfileEvent.SearchUsers   -> searchUsers(event.query)
             is ProfileEvent.AddFriend     -> addFriend(event.friendId)
-            is ProfileEvent.UpdateProfile -> updateProfile(event.displayName, event.profilePicUrl)
+            is ProfileEvent.UpdateProfile -> updateProfile(event.displayName)
+            is ProfileEvent.SelectAvatar  -> selectAvatar(event.preset)
+            is ProfileEvent.OpenAvatarPicker  -> setAvatarPicker(true)
+            is ProfileEvent.DismissAvatarPicker -> setAvatarPicker(false)
+            is ProfileEvent.ResetAvatar   -> selectAvatar(0)
         }
     }
 
@@ -104,57 +112,71 @@ class ProfileViewModel(
     }
 
     // ==========================================================================
-    // Statistics data: all live Firestore flows, subscribed exactly once
-    // The statisticsLoaded guard prevents re-subscribing on every user doc update
+    // Statistics data: one-shot fetches, loaded once when user is known
     // ==========================================================================
 
     private fun loadStatisticsData(uid: String) {
         if (statisticsLoaded) return
         statisticsLoaded = true
+        fetchStatistics(uid)
+    }
 
-        // Live workspace list
-        workspaceRepository.getWorkspaces(uid)
-            .onEach { workspaces ->
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
-                _uiState.value = current.copy(workspaces = workspaces)
-            }
-            .launchIn(viewModelScope)
+    private fun refreshPage() {
+        if (!::userId.isInitialized) return
+        _isRefreshing.value = true
+        fetchStatistics(userId)
+    }
 
-        // Single live flow covering this month (can extract this week out from this)
-        // Feeds monthly heatmap and weekly charts
-        userRepository.getActivity(uid, UserRepository.thisMonthRange)
-            .onEach { activity ->
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
+    private fun fetchStatistics(uid: String) {
+        viewModelScope.launch {
+            // All fetches run concurrently
+            launch {
+                val activity = userRepository.getActivityOnce(uid, UserRepository.thisMonthRange)
+                val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
                 _uiState.value = current.copy(activityData = activity)
             }
-            .launchIn(viewModelScope)
-
-        // One-shot fetch of best day ever (1 Firestore doc read)
-        viewModelScope.launch {
-            val topDay = userRepository.getTopPerformanceDay(uid)
-            val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
-            _uiState.value = current.copy(topPerformanceDay = topDay)
-        }
-
-        // Live all completed tasks (ace ratio, total tasks, total XP cards)
-        taskRepository.getAllCompletedTasks(uid)
-            .onEach { tasks ->
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@onEach
+            launch {
+                val topDay = userRepository.getTopPerformanceDay(uid)
+                val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                _uiState.value = current.copy(topPerformanceDay = topDay)
+            }
+            launch {
+                val tasks = taskRepository.getAllCompletedTasksOnce(uid)
+                val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
                 _uiState.value = current.copy(completedTasks = tasks)
             }
-            .launchIn(viewModelScope)
+
+            // Wait for all child coroutines to complete, then clear refreshing
+            _isRefreshing.value = false
+        }
     }
 
     // ==========================================================================
     // Profile editing
     // ==========================================================================
 
-    private fun updateProfile(displayName: String, profilePicUrl: String) {
+    private fun updateProfile(displayName: String) {
         viewModelScope.launch {
             try {
-                userRepository.updateProfile(userId, displayName, profilePicUrl)
+                userRepository.updateProfile(userId, displayName)
             } catch (e: Exception) {
                 _uiEffect.emit(ProfileUiEffect.ShowError("Failed to update profile: ${e.message}"))
+            }
+        }
+    }
+
+    private fun setAvatarPicker(show: Boolean) {
+        val current = _uiState.value as? ProfileUiState.Ready ?: return
+        _uiState.value = current.copy(showAvatarPicker = show)
+    }
+
+    private fun selectAvatar(@DrawableRes preset: Int) {
+        viewModelScope.launch {
+            try {
+                userRepository.updateAvatarPreset(userId, preset)
+                setAvatarPicker(false)   // auto-dismiss after selection
+            } catch (e: Exception) {
+                _uiEffect.emit(ProfileUiEffect.ShowError("Failed to update avatar: ${e.message}"))
             }
         }
     }

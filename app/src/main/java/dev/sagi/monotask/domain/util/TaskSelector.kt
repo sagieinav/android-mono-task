@@ -4,6 +4,7 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import com.google.firebase.Timestamp
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
@@ -16,16 +17,16 @@ object TaskSelector {
     // Returns the single highest-priority task from a list (the task displayed on the Focus Hub)
     fun getTopTask(tasks: List<Task>, workspace: Workspace, excludeId: String? = null): Task? {
         if (tasks.isEmpty()) return null
+        val now = now()
 
         val candidates = if (excludeId != null) tasks.filter { it.id != excludeId } else tasks
         val pool = candidates.ifEmpty { tasks } // fallback if only 1 task exists
 
         val nonSnoozed = pool.filter { it.snoozeCount == 0 }
         return (nonSnoozed.ifEmpty { pool })
-            .maxByOrNull { priorityScore(it, workspace) }
+            .maxByOrNull { priorityScore(it, workspace, now) }
     }
 
-    // Add alongside getTopTask()
     fun getTopTaskByDueDate(
         tasks: List<Task>,
         workspace: Workspace,
@@ -33,13 +34,14 @@ object TaskSelector {
     ): Task? {
         val candidates = tasks.filter { it.id != excludeId }
         if (candidates.isEmpty()) return null
+        val now = now()
 
         val withDueDate = candidates.filter { it.dueDate != null }
 
         return if (withDueDate.isNotEmpty()) {
             withDueDate.sortedWith(
-                compareBy<Task> { it.dueDate!!.toDate() }      // 1. soonest due date
-                    .thenBy { priorityScore(it, workspace) }   // 2. tiebreaker: normal priority
+                compareBy<Task> { it.dueDate!!.toDate() }              // 1. soonest due date
+                    .thenBy { priorityScore(it, workspace, now) }           // 2. tiebreaker: normal priority
             ).first()
         } else {
             // Fallback: no tasks have a due date → normal priority
@@ -47,10 +49,18 @@ object TaskSelector {
         }
     }
 
-
     // Returns all tasks sorted by priority score descending
-    fun getSortedTasks(tasks: List<Task>, workspace: Workspace): List<Task> =
-        tasks.sortedByDescending { priorityScore(it, workspace) }
+    fun getSortedTasks(tasks: List<Task>, workspace: Workspace): List<Task> {
+        val now = now()
+        return tasks.sortedByDescending { priorityScore(it, workspace, now) }
+    }
+
+    // Computed once per scoring pass and threaded through to avoid repeated system calls
+    private data class Now(val timeZone: TimeZone, val today: LocalDate)
+    private fun now(): Now {
+        val tz = TimeZone.currentSystemDefault()
+        return Now(tz, Clock.System.now().toLocalDateTime(tz).date)
+    }
 
     /**
      * Core scoring function.
@@ -65,8 +75,8 @@ object TaskSelector {
      *   LOW = 0.33, MEDIUM = 0.66, HIGH = 1.0
      *   Simple linear scale - straightforward to explain and defend.
      */
-    private fun priorityScore(task: Task, workspace: Workspace): Double {
-        val dueDateScore = dueDateUrgency(task.dueDate)
+    private fun priorityScore(task: Task, workspace: Workspace, now: Now): Double {
+        val dueDateScore = dueDateUrgency(task.dueDate, now)
         val importanceScore = importanceScore(task.importance)
         val noise = Random.nextDouble(
             -workspace.randomnessFactor.toDouble(),
@@ -97,13 +107,11 @@ object TaskSelector {
      * Formula: 1 / (1 + e^(0.5 * (daysUntilDue - 3)))
      * This is a logistic (sigmoid) function centered at 3 days.
      */
-    private fun dueDateUrgency(dueDate: Timestamp?): Double {
+    private fun dueDateUrgency(dueDate: Timestamp?, now: Now): Double {
         if (dueDate == null) return 0.5
 
-        val timeZone = TimeZone.currentSystemDefault()
-        val today = Clock.System.now().toLocalDateTime(timeZone).date
-        val due = Instant.fromEpochMilliseconds(dueDate.toDate().time).toLocalDateTime(timeZone).date
-        val daysUntilDue = today.daysUntil(due).toDouble()
+        val due = Instant.fromEpochMilliseconds(dueDate.toDate().time).toLocalDateTime(now.timeZone).date
+        val daysUntilDue = now.today.daysUntil(due).toDouble()
 
         // Sigmoid func centered at 3 days
         return 1.0 / (1.0 + exp(0.5 * (daysUntilDue - 3)))

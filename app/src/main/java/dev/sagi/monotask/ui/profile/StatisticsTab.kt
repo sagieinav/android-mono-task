@@ -10,12 +10,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,9 +32,11 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.ActivityStats
+import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.component.statistics.AceCompletionCard
 import dev.sagi.monotask.ui.component.statistics.ActivityHeatmap
 import dev.sagi.monotask.ui.component.statistics.BarChart
+import dev.sagi.monotask.ui.component.statistics.CompletionDonutCard
 import dev.sagi.monotask.ui.component.statistics.StreakCard
 import dev.sagi.monotask.ui.component.statistics.LineChart
 import dev.sagi.monotask.ui.component.statistics.TopPerformanceCard
@@ -41,96 +51,121 @@ import java.time.LocalDate
 // Tab 2 — Statistics: XP stat card, heatmap, bar charts
 // ─────────────────────────────────────────────────────────────────────────────
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatisticsTab(
     state: ProfileUiState.Ready,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     bottomPadding: Dp
 ) {
     val tasks = state.completedTasks
     val monthActivity = state.activityData
-    val weekActivity = ActivityStats.weekActivity(monthActivity) // extract weekly activity out of monthly activity
-//    val workspaces = state.workspaces
+    val weekActivity = remember(monthActivity) { ActivityStats.weekActivity(monthActivity) }
 
-    val aceCount    = tasks.count { it.isAce }
-    val totalCompletedTasks  = tasks.size
-    val weeklyXP = weekActivity.sumOf { it.xpEarned }
-    val totalXP = state.user.xp
+    val aceCount           = remember(tasks) { tasks.count { it.isAce } }
+    val totalCompletedTasks = tasks.size
+    val weeklyXP           = remember(weekActivity) { weekActivity.sumOf { it.xpEarned } }
+    val weeklyTasks        = remember(weekActivity) { weekActivity.sumOf { it.tasksCompleted } }
+    val totalXP            = state.user.xp
 
-    LazyColumn(
-        modifier            = Modifier.fillMaxSize(),
-        contentPadding      = PaddingValues(
-            top = Constants.Theme.SCREEN_PADDING,
-            bottom = bottomPadding
-        ),
-        verticalArrangement = Arrangement.spacedBy(40.dp)
+    val refreshState = rememberPullToRefreshState()
+    val refreshThreshold = 40.dp
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh    = onRefresh,
+        modifier     = Modifier.fillMaxSize(),
+        state        = refreshState,
+        threshold    = refreshThreshold,
+        indicator    = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = refreshState,
+                isRefreshing = isRefreshing,
+                color = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                maxDistance = refreshThreshold,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+            )
+        }
     ) {
-        item {
-            StatSection("Weekly Activity") {
-                // Xp this week (line chart)
-                LineChart(
-                    title        = "XP This Week",
-                    headline     = "$weeklyXP XP",
-                    points       = ActivityStats.buildXpPoints(weekActivity),
-                    trendPercent = ActivityStats.computeXpTrend(weekActivity),
-                    lineColor    = AceGold,
-                )
-
-                // Tasks this week (bar graph)
-                BarChart(
-                    title       = "Tasks This Week",
-                    headline     = "${weekActivity.sumOf { it.tasksCompleted }} completed",
-                    points      = ActivityStats.buildTaskPoints(weekActivity),
-                    trendPercent = ActivityStats.computeTaskTrend(weekActivity),
-                    barColor    = MaterialTheme.colorScheme.primary,
-                    animate     = true,
-                )
-            }
-        }
-
-        item {
-            StatSection("Monthly Activity") {
-                ActivityHeatmap(activityData = state.activityData)
-            }
-        }
-
-
-        item {
-            StatSection("All Time") {
-                // Top Performance Card
-                TopPerformanceCard(bestDay = state.topPerformanceDay)
-
-                // 4 half-width widget cards with simple data
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    TotalTasksCard(
-                        totalTasks = totalCompletedTasks,
-                        modifier = Modifier.weight(1f)
+        LazyColumn(
+            modifier            = Modifier
+                .fillMaxSize()
+                // For pulling content down together with refresh indicator:
+                .graphicsLayer {
+                    translationY = refreshState.distanceFraction * refreshThreshold.toPx()
+                },
+            contentPadding      = PaddingValues(
+                top = Constants.Theme.SCREEN_PADDING,
+                bottom = bottomPadding
+            ),
+            verticalArrangement = Arrangement.spacedBy(40.dp)
+        ) {
+            item {
+                StatSection("Weekly Activity") {
+                    // Xp this week (line chart)
+                    LineChart(
+                        title        = "XP This Week",
+                        headline     = "$weeklyXP XP",
+                        points       = ActivityStats.buildXpPoints(weekActivity),
+                        trendPercent = ActivityStats.computeXpTrend(weekActivity),
+                        lineColor    = AceGold,
                     )
-                    TotalXpCard(
-                        totalXp = totalXP,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    AceCompletionCard(
-                        aceCount = aceCount,
-                        totalTasks = totalCompletedTasks,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StreakCard(
-                        activityData = state.activityData,
-                        modifier = Modifier.weight(1f)
+
+                    // Tasks this week (bar graph)
+                    BarChart(
+                        title       = "Tasks This Week",
+                        headline     = "$weeklyTasks completed",
+                        points      = ActivityStats.buildTaskPoints(weekActivity),
+                        trendPercent = ActivityStats.computeTaskTrend(weekActivity),
+                        barColor    = MaterialTheme.colorScheme.primary,
+                        animate     = true,
                     )
                 }
             }
+
+            item {
+                StatSection("Monthly Activity") {
+                    ActivityHeatmap(activityData = state.activityData)
+                }
+            }
+
+            item {
+                StatSection("All Time") {
+                    // Top Performance Card
+                    TopPerformanceCard(bestDay = state.topPerformanceDay)
+
+                    // 4 half-width widget cards with simple data
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        TotalTasksCard(
+                            totalTasks = totalCompletedTasks,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TotalXpCard(
+                            totalXp = totalXP,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        AceCompletionCard(
+                            aceCount = aceCount,
+                            totalTasks = totalCompletedTasks,
+                            modifier = Modifier.weight(1f)
+                        )
+                        StreakCard(
+                            activityData = state.activityData,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
         }
-        // DonutChart Duo
-//        item {
-//            CompletionDonutCard(tasks, workspaces)
-//        }
     }
 }
 
@@ -177,6 +212,8 @@ private fun StatisticsTabPreview() {
             contentAlignment = Alignment.Center
         ) {
             StatisticsTab(
+                isRefreshing = false,
+                onRefresh = {},
                 state = ProfileUiState.Ready(
                     user           = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),
                     level          = 25,

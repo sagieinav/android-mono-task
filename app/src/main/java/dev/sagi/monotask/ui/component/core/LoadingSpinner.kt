@@ -43,7 +43,7 @@ fun LoadingSpinner(
         if (useContained) {
             ContainedLoadingIndicator(
                 indicatorColor = MaterialTheme.colorScheme.primary,
-                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
 //                modifier = modifier
 //                    .align(Alignment.Center)
                 modifier = Modifier.size(indicatorSize).background(Color.Transparent)

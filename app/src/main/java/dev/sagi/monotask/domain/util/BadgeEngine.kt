@@ -8,15 +8,20 @@ object BadgeEngine {
 
     /**
      * Evaluates which badges the user has earned after a task completion.
-     * Returns a list of newly earned badge IDs.
+     * Skips badges already in [alreadyEarned] to avoid redundant computation.
+     * Returns the full list of earned badge IDs (existing + newly earned).
      */
-    fun evaluate(completedTasks: List<Task>): List<String> {
-        val earned = mutableListOf<String>()
+    fun evaluate(completedTasks: List<Task>, alreadyEarned: Set<String> = emptySet()): List<String> {
+        val earned = alreadyEarned.toMutableList()
 
-        if (hasTopPerformer(completedTasks))    earned.add(BadgeIds.TOP_PERFORMER)
-        if (hasConsistencyKing(completedTasks)) earned.add(BadgeIds.CONSISTENCY_KING)
-        if (hasFastFinisher(completedTasks))    earned.add(BadgeIds.FAST_FINISHER)
-        if (hasKnowledgeSeeker(completedTasks)) earned.add(BadgeIds.KNOWLEDGE_SEEKER)
+        if (BadgeIds.TOP_PERFORMER !in alreadyEarned && hasTopPerformer(completedTasks))
+            earned.add(BadgeIds.TOP_PERFORMER)
+        if (BadgeIds.CONSISTENCY_KING !in alreadyEarned && hasConsistencyKing(completedTasks))
+            earned.add(BadgeIds.CONSISTENCY_KING)
+        if (BadgeIds.FAST_FINISHER !in alreadyEarned && hasFastFinisher(completedTasks))
+            earned.add(BadgeIds.FAST_FINISHER)
+        if (BadgeIds.KNOWLEDGE_SEEKER !in alreadyEarned && hasKnowledgeSeeker(completedTasks))
+            earned.add(BadgeIds.KNOWLEDGE_SEEKER)
 
         return earned
     }

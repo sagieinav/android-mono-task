@@ -251,7 +251,7 @@ private fun HeatmapCell(
 
         CellState.FUTURE -> baseModifier
             .glassBackground(baseColor = inactiveColor)
-            .glassBorder(shape = shape, borderWidth = borderWidth)
+            .glassBorder(shape = shape, width = borderWidth)
 
         CellState.INACTIVE_PAST -> baseModifier
             .drawBehind {
@@ -269,12 +269,12 @@ private fun HeatmapCell(
                 }
             }
             .glassBackground()
-            .glassBorder(shape = shape, borderWidth = borderWidth)
+            .glassBorder(shape = shape, width = borderWidth)
 
         CellState.ACTIVE -> baseModifier
             .background(activeColor)
             .glassBackground(baseColor = activeColor)
-            .glassBorder(shape = shape, color = activeColor, borderWidth = borderWidth)
+            .glassBorder(shape = shape, color = activeColor, width = borderWidth)
     }
 
     val finalModifier = if (isToday && state != CellState.EMPTY) {

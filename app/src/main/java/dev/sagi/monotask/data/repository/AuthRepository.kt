@@ -36,7 +36,7 @@ class AuthRepository {
             id          = firebaseUser.uid,
             displayName = firebaseUser.displayName ?: "MonoTask User",
             email       = firebaseUser.email ?: "",
-            profilePicUrl = ""
+//            profilePicUrl = ""
         )
     }
 }

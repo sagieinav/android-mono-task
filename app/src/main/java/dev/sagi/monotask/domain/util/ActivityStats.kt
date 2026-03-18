@@ -1,6 +1,5 @@
 package dev.sagi.monotask.domain.util
 
-import android.R.attr.data
 import dev.sagi.monotask.data.model.DailyActivity
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -44,7 +43,7 @@ object ActivityStats {
         val days = data
             .filter { it.tasksCompleted > 0 }
             .map { it.dateEpochDay }
-            .toSortedSet()
+            .distinct()
             .sortedDescending()
 
         var streak   = 0
@@ -73,7 +72,7 @@ object ActivityStats {
             .filter { it.tasksCompleted > 0 }
             .filter { range == null || it.dateEpochDay in range }
             .map { it.dateEpochDay }
-            .toSortedSet()
+            .distinct()
             .sorted()
             .toList()
 
