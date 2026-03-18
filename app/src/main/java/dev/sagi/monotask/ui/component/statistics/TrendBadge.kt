@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.bonusGreen
 
@@ -32,9 +34,9 @@ fun TrendBadge(trendPercent: Int) {
             verticalAlignment     = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            val iconRes = if (trendUp) R.drawable.ic_trending_up else R.drawable.ic_trending_down
             Icon(
-                imageVector        = if (trendUp) Icons.AutoMirrored.Filled.TrendingUp
-                else Icons.AutoMirrored.Filled.TrendingDown,
+                painter = painterResource(iconRes),
                 contentDescription = null,
                 tint               = tint,
                 modifier           = Modifier.size(14.dp)

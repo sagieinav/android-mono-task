@@ -13,7 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.theme.ibmPlexMono
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import dev.sagi.monotask.ui.theme.nationalPark

@@ -55,13 +55,13 @@ fun WorkspaceDropdownGlass(
                     label = workspace.name,
                     selected = isSelected,
                     onClick = { onWorkspaceSelected(workspace); expanded = false },
-                    trailingContent = if (isSelected) ({
-                        Icon(
-                            painter = painterResource(R.drawable.ic_check_circle),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }) else null
+//                    trailingContent = if (isSelected) ({
+//                        Icon(
+//                            painter = painterResource(R.drawable.ic_check_circle),
+//                            contentDescription = null,
+//                            modifier = Modifier.size(18.dp)
+//                        )
+//                    }) else null
                 )
             }
 
@@ -72,7 +72,7 @@ fun WorkspaceDropdownGlass(
 
             MonoDropdownActionItem(
                 label = "New Workspace",
-                iconRes = R.drawable.ic_add,
+                iconRes = R.drawable.ic_add_m3,
                 onClick = { onAddWorkspace(); expanded = false }
             )
         }

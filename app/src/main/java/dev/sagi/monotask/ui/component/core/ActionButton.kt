@@ -1,8 +1,6 @@
 package dev.sagi.monotask.ui.component.core
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -120,7 +118,7 @@ private fun ActionButtonDestructivePreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             ActionButton(onClick = {}, color = penaltyRed) {
-                Icon(painterResource(R.drawable.ic_delete), contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(painterResource(R.drawable.ic_delete_alt), contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("Delete Task", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             }

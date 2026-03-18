@@ -205,12 +205,12 @@ fun KanbanCardDropdown(
         if (!isArchive) {
             MonoDropdownActionItem(
                 label   = "Edit Task",
-                iconRes = R.drawable.ic_edit,
+                iconRes = R.drawable.ic_edit_alt,
                 onClick = { onEditClick(); onDismiss() }
             )
             MonoDropdownActionItem(
                 label   = "Focus Now",
-                iconRes = R.drawable.ic_fire,
+                iconRes = R.drawable.ic_focus,
                 onClick = { onFocusNowClick(); onDismiss() }
             )
         } else {
@@ -253,41 +253,3 @@ fun KanbanCardPreview() {
     }
 }
 
-
-@Composable
-private fun KanbanCardDropdownContent(isArchive: Boolean) {
-    GlassSurface(
-        shape    = MaterialTheme.shapes.medium,
-        modifier = Modifier.widthIn(min = 100.dp, max = 220.dp)
-    ) {
-        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            if (!isArchive) {
-                MonoDropdownActionItem(label = "Edit Task",  iconRes = R.drawable.ic_edit,    onClick = {})
-                MonoDropdownActionItem(label = "Focus Now",  iconRes = R.drawable.ic_fire,    onClick = {})
-            } else {
-                MonoDropdownActionItem(label = "Restore Task", iconRes = R.drawable.ic_restore, onClick = {})
-            }
-            MonoDropdownActionItem(label = "Delete Task", iconRes = R.drawable.ic_delete, onClick = {})
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Dropdown — Active")
-@Composable
-private fun KanbanCardDropdownActivePreview() {
-    MonoTaskTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            KanbanCardDropdownContent(isArchive = false)
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Dropdown — Archive")
-@Composable
-private fun KanbanCardDropdownArchivePreview() {
-    MonoTaskTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            KanbanCardDropdownContent(isArchive = true)
-        }
-    }
-}

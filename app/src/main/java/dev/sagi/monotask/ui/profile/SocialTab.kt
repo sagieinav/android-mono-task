@@ -96,7 +96,7 @@ fun SocialTab(
                     fontWeight = FontWeight.Medium
                 )
             }
-            items(searchResults, key = { it.id }) { user ->
+            items(searchResults, key = { "search_${it.id}" }) { user ->
                 UserSearchRow(
                     user      = user,
                     isAlready = user.id in friends,
@@ -130,7 +130,7 @@ fun SocialTab(
         }
 
         // Friend rows. IDs only for now, upgrade when a friends sub-collection lands
-        items(friends, key = { it }) { friendId ->
+        items(friends, key = { "friend_$it" }) { friendId ->
             FriendIdRow(friendId = friendId)
         }
     }

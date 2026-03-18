@@ -21,6 +21,7 @@ import dev.sagi.monotask.ui.component.task.CustomTag
 import dev.sagi.monotask.ui.component.task.DueDateLabel
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.task.ImportanceTag
+import dev.sagi.monotask.ui.component.task.XpLabelCurrent
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.aceTaskBorder
 import dev.sagi.monotask.ui.theme.defaultTaskBorder

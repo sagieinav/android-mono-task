@@ -51,7 +51,6 @@ import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.ibmPlexMono
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -132,7 +131,7 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
             painter            = icon,
             contentDescription = null,
             tint               = accentColor.copy(alpha = 0.8f),
-            modifier           = Modifier.size(24.dp)
+            modifier           = Modifier.size(26.dp)
         )
     }
 }

@@ -189,7 +189,7 @@ private fun TaskTitleAndDescriptionInput(
         label = "Description",
         leadingIcon = {
             Icon(
-                painter = painterResource(R.drawable.ic_description2),
+                painter = painterResource(R.drawable.ic_bubble_text),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
             )

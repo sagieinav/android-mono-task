@@ -21,7 +21,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.ui.component.task.XpLabelCompletion
 import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBorder
 import kotlin.math.roundToInt

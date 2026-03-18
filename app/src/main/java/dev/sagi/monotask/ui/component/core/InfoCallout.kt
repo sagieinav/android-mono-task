@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.nationalPark
 
 @Composable
 fun InfoCallout(
@@ -33,7 +32,7 @@ fun InfoCallout(
     icon: Painter? = painterResource(R.drawable.ic_info_circle),
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     bodyColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-    iconSize: Dp = 13.dp,
+    iconSize: Dp = 16.dp,
     horizontalPadding: Dp = 20.dp
 ) {
     Column(
@@ -57,12 +56,8 @@ fun InfoCallout(
             }
             Text(
                 text       = title,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    lineHeightStyle = LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.Both
-                    )
-                ),
+                style      = MaterialTheme.typography.bodySmall,
+                fontFamily = nationalPark,
                 fontWeight = FontWeight.Bold,
                 color      = titleColor,
                 modifier   = Modifier

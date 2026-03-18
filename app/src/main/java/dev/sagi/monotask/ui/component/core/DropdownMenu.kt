@@ -3,7 +3,6 @@ package dev.sagi.monotask.ui.component.core
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -27,29 +26,15 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.monoShadow
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.text.style.TextAlign
-import dev.sagi.monotask.ui.theme.AceGold
-import dev.sagi.monotask.ui.theme.AceGoldDim
 import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.googleSans
-import dev.sagi.monotask.ui.theme.harabara
-import dev.sagi.monotask.ui.theme.lora
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
-import dev.sagi.monotask.ui.theme.notoSerif
-import dev.sagi.monotask.ui.theme.playfairDisplay
 import kotlinx.coroutines.delay
 
 // ========================================
@@ -81,21 +66,22 @@ fun DropdownTriggerPill(
                 .padding(start = 16.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val color = MaterialTheme.colorScheme.onSurfaceVariant
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = color,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.widthIn(max = 120.dp)
             )
             Spacer(Modifier.width(2.dp))
             Icon(
-                painter = painterResource(R.drawable.ic_keyboard_arrow_down),
+                painter = painterResource(R.drawable.ic_chevron),
                 contentDescription = null,
                 modifier = Modifier.rotate(chevronRotation),
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = color
             )
         }
     }
@@ -227,63 +213,11 @@ fun MonoDropdownMenuGlass(
     )
 }
 
-
-// ========================================
-// Generic Item
-// ========================================
-//@Composable
-//fun MonoDropdownItem(
-//    label: String,
-//    selected: Boolean = false,
-//    onClick: () -> Unit,
-//    trailingContent: @Composable (() -> Unit)? = null
-//) {
-//    GlassSurface(
-//        blurred = false,
-//        shape = MaterialTheme.shapes.small,
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(horizontal = 8.dp, vertical = 2.dp)
-//            .clip(MaterialTheme.shapes.small)
-//            .clickable(onClick = onClick)
-//            // `selected` indication
-//            .then(
-//                if (!selected) Modifier
-//                else Modifier.border(
-//                    width = 0.4.dp,
-//                    color = Color.Black.copy(alpha = 0.2f),
-//                    shape = MaterialTheme.shapes.small
-//                )
-//            )
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-////                .background(
-////                    if (selected) MaterialTheme.colorScheme.surfaceDim.copy(alpha = 0.6f)
-////                    else Color.Transparent
-////                )
-//                .padding(horizontal = 12.dp, vertical = 8.dp)
-//,
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = label,
-//                style = MaterialTheme.typography.titleMedium,
-//                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-//                color = MaterialTheme.colorScheme.onSurface
-//            )
-//            trailingContent?.invoke()
-//        }
-//    }
-//}
 @Composable
 fun MonoDropdownItem(
     label: String,
     selected: Boolean = false,
-    onClick: () -> Unit,
-    trailingContent: @Composable (() -> Unit)? = null
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -309,8 +243,14 @@ fun MonoDropdownItem(
         )
 
         // 'selected' icon inside a box, to ensure padding on long titles:
-        Box(Modifier.padding(start = 8.dp)) {
-            trailingContent?.invoke() // 'selected' icon
+        if (selected) {
+            Box(Modifier.padding(start = 8.dp)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check_circle),
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
@@ -342,7 +282,7 @@ fun MonoDropdownActionItem(
             contentDescription = null,
             tint = color,
             modifier = Modifier
-                .size(18.dp)
+                .size(20.dp)
         )
         Text(
             text = label,
@@ -397,15 +337,7 @@ private fun DropdownItemSelectedPreview() {
             MonoDropdownItem(
                 label = "Education",
                 selected = true,
-                onClick = {},
-                trailingContent = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_check_circle),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(18.dp)
-                    )
-                }
+                onClick = {}
             )
         }
     }

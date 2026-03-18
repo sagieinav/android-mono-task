@@ -1,15 +1,9 @@
-package dev.sagi.monotask.ui.focus
+package dev.sagi.monotask.ui.component.task
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.EaseInOutExpo
 import androidx.compose.animation.core.EaseInOutQuart
-import androidx.compose.animation.core.EaseInOutQuint
-import androidx.compose.animation.core.EaseInOutSine
-import androidx.compose.animation.core.EaseOutCubic
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -30,11 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
@@ -43,30 +34,20 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import androidx.compose.ui.unit.IntOffset
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.theme.bonusGreen
-import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.googleSans
-import dev.sagi.monotask.ui.theme.harabara
-import dev.sagi.monotask.ui.theme.libreCaslon
-import dev.sagi.monotask.ui.theme.lora
-import dev.sagi.monotask.ui.theme.playfairDisplay
-import dev.sagi.monotask.ui.theme.plusJakartaSans
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 @Composable
 fun XpLabelCurrent(xp: Int, modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_xp),
             contentDescription = null,
-            modifier = modifier.size(16.dp),
+            modifier = modifier.size(17.dp),
             tint = MaterialTheme.colorScheme.primary
         )
         Text(
