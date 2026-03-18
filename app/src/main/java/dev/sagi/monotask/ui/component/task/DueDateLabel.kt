@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.core
+package dev.sagi.monotask.ui.component.task
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -33,7 +33,7 @@ fun DueDateLabel(
         MaterialTheme.colorScheme.onSurface.copy(alpha = if (small) 0.4f else 0.45f)
 
     val textStyle =
-        MaterialTheme.typography.titleSmall.copy(
+        MaterialTheme.typography.labelLarge.copy(
             lineHeightStyle = LineHeightStyle(
                 alignment = LineHeightStyle.Alignment.Proportional,
                 trim = LineHeightStyle.Trim.Both

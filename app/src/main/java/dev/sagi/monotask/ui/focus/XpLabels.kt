@@ -71,7 +71,7 @@ fun XpLabelCurrent(xp: Int, modifier: Modifier = Modifier) {
         )
         Text(
             text = "$xp XP",
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.labelLarge
                 .copy(
                     lineHeightStyle = LineHeightStyle(
                         alignment = LineHeightStyle.Alignment.Proportional,
@@ -171,7 +171,7 @@ fun XpLabelCompletion(
     ) {
         Text(
             text       = "+$xpDelta XP",
-            style      = MaterialTheme.typography.titleSmall.copy(
+            style      = MaterialTheme.typography.labelLarge.copy(
                 brush = textBrush,
                 lineHeightStyle = LineHeightStyle(
                     alignment = LineHeightStyle.Alignment.Proportional,

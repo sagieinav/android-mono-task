@@ -51,7 +51,8 @@ fun SnoozeBottomSheet(
 //            "Choose your next task",
             "CHOOSE YOUR NEXT TASK",
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f),
 
             modifier = Modifier.fillMaxWidth()
@@ -88,6 +89,7 @@ fun SnoozeBottomSheet(
 //            textAlign = TextAlign.Center
 //        )
 
+        // Info for manual snooze
         InfoCallout(
             title    = "MANUAL SNOOZE",
             body     = "Want to pick a specific next task? Tap it on the Kanban board and hit 'Focus Now'!",

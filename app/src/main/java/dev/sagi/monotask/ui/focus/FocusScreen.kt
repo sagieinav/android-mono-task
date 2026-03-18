@@ -276,6 +276,7 @@ private fun StatChip(
         // Label / Unit
         Text(
             text  = label,
+            fontWeight = FontWeight.Thin,
             style = MaterialTheme.typography.labelLarge,
             color    = MaterialTheme.colorScheme.outlineVariant,
             modifier = Modifier.alignByBaseline()

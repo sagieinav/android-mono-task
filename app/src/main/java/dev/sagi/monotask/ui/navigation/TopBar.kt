@@ -139,7 +139,7 @@ fun TopBarIconButton(
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(42.dp)
+                .size(40.dp)
                 .padding(8.dp)
         )
     }

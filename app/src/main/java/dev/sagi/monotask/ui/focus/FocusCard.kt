@@ -18,7 +18,7 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.task.CustomTag
-import dev.sagi.monotask.ui.component.core.DueDateLabel
+import dev.sagi.monotask.ui.component.task.DueDateLabel
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.task.ImportanceTag
 import dev.sagi.monotask.ui.theme.MonoTaskTheme

@@ -51,6 +51,7 @@ import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.ibmPlexMono
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -207,10 +208,14 @@ fun StatWidgetSmall(
                 .padding(top = ContentTopPadding, bottom = ContentBottomPadding),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.padding(end = titleEndPadding)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(end = titleEndPadding)
+            ) {
                 Text(
                     text     = title,
                     style    = MaterialTheme.typography.titleMedium,
+                    lineHeight = 20.sp, // reduce vertical "padding" when wrapped
                     color    = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -281,7 +286,10 @@ fun StatWidgetMedium(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.Top
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
                     // Main title
                     Text(
                         text     = title,

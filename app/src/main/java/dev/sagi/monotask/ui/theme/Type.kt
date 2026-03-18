@@ -2,6 +2,7 @@ package dev.sagi.monotask.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -97,11 +98,48 @@ val googleSans = FontFamily(
     Font(R.font.google_sans_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
-// Option C: Roboto — Android system default. Safe fallback.
-val roboto = FontFamily(
-    Font(R.font.roboto,        FontWeight.Normal),
-    Font(R.font.roboto_italic, FontWeight.Normal, FontStyle.Italic),
+
+val mplusRounded = FontFamily(
+    Font(R.font.mplus_rounded)
 )
+
+val nationalPark = FontFamily(
+    Font(R.font.national_park)
+)
+
+val asap = FontFamily(
+    Font(R.font.asap)
+)
+
+val NationalParkTypography = Typography(
+    headlineSmall = TextStyle(
+        fontFamily = nationalPark,
+        fontSize = 26.sp,
+        fontWeight = FontWeight.Bold
+    ),
+    titleLarge = TextStyle(
+        fontFamily = nationalPark,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold
+    ),
+    titleMedium = TextStyle(
+        fontFamily = nationalPark,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold
+    ),
+    titleSmall = TextStyle(
+        fontFamily = nationalPark,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Bold
+    ),
+    labelLarge = TextStyle(
+        fontFamily = nationalPark,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Bold
+    ),
+
+)
+
 
 // ─────────────────────────────────────────────────────
 // CATEGORY 4 — DATA / MONOSPACE (XP values, levels, due dates, stats)
@@ -124,10 +162,11 @@ val harabara = FontFamily(
 // To swap a font, change the variable assigned here.
 // e.g. replace `gloock` with `playfairDisplay` for titles.
 // ─────────────────────────────────────────────────────
-private val heroFont    = gloock            // gloock, playfairDisplay
-private val bodyFont    = lora         // libreCaslon, notoSerif, lora, plantagenet, ptSerif, merriweather
-private val uiFont      = googleSans        // googleSans, roboto, plusJakartaSans
-private val dataFont    = ibmPlexMono       // no alternative needed
+private val heroFont        = gloock            // gloock, playfairDisplay
+private val uiFont          = nationalPark       // Normal Sans: googleSans, roboto, plusJakartaSans
+                                            // Rounded Sans: mplusRounded, nationalPark
+private val dataFont        = googleSans       // no alternative needed
+private val contentFont     = lora              // libreCaslon, notoSerif, lora, plantagenet, ptSerif, merriweather
 
 // ─────────────────────────────────────────────────────
 // TYPOGRAPHY SCALE
@@ -137,50 +176,94 @@ private val dataFont    = ibmPlexMono       // no alternative needed
 //   body             → reading text
 //   label            → UI chrome (smallest, most frequent)
 // ─────────────────────────────────────────────────────
+
+// Helper to remove line height padding
+private fun TextStyle.withNoPadding() = copy(
+    lineHeightStyle = LineHeightStyle(
+        alignment = LineHeightStyle.Alignment.Center,
+        trim = LineHeightStyle.Trim.Both
+    )
+)
 val baseline = Typography()
 
 val AppTypography = Typography(
 
-    // Splash / onboarding hero text
-    displayLarge  = baseline.displayLarge.copy(fontFamily = heroFont),
-    displayMedium = baseline.displayMedium.copy(fontFamily = heroFont),
-    displaySmall  = baseline.displaySmall.copy(fontFamily = heroFont),
+    displayLarge  = baseline.displayLarge.copy(fontFamily = heroFont).withNoPadding(),
+    displayMedium = baseline.displayMedium.copy(fontFamily = heroFont).withNoPadding(),
+    displaySmall  = baseline.displaySmall.copy(fontFamily = heroFont).withNoPadding(),
 
-    // THE Focus Card task title (most prominent text in the app)
-    headlineLarge  = baseline.headlineLarge.copy(fontFamily = heroFont),
-    headlineMedium = baseline.headlineMedium.copy(fontFamily = heroFont),
-    headlineSmall  = baseline.headlineSmall.copy(fontFamily = uiFont),
+    headlineLarge  = baseline.headlineLarge.copy(fontFamily = heroFont).withNoPadding(),
+    headlineMedium = baseline.headlineMedium.copy(fontFamily = heroFont).withNoPadding(),
+    headlineSmall  = baseline.headlineSmall.copy(fontFamily = uiFont).withNoPadding(),
 
-    // Screen names, workspace headers
     titleLarge  = baseline.titleLarge.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.Bold),
+        fontFamily = uiFont, fontWeight = FontWeight.Bold).withNoPadding(),
     titleMedium = baseline.titleMedium.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.SemiBold),
+        fontFamily = uiFont, fontWeight = FontWeight.SemiBold).withNoPadding(),
     titleSmall  = baseline.titleSmall.copy(
-        fontFamily = plusJakartaSans, fontWeight = FontWeight.Normal,
-        lineHeightStyle = LineHeightStyle(
-            alignment = LineHeightStyle.Alignment.Center,
-            trim = LineHeightStyle.Trim.FirstLineTop
-        ),
-    ),
+        fontFamily = uiFont).withNoPadding(),
 
-    // Task descriptions, onboarding copy, settings text
-    bodyLarge  = baseline.bodyLarge.copy(fontFamily = bodyFont),
-    bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFont),
-    bodySmall  = baseline.bodySmall.copy(fontFamily = uiFont),
-
-    // Buttons, chips, priority tags
     labelLarge  = baseline.labelLarge.copy(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.Bold,
-        platformStyle = PlatformTextStyle(includeFontPadding = false)
-    ),
-    labelMedium = baseline.labelMedium.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.Bold,
-        platformStyle = PlatformTextStyle(includeFontPadding = false)
-    ),
+        fontFamily = plusJakartaSans,
+        fontWeight = FontWeight.Bold
+    ).withNoPadding(),
 
+    labelMedium = baseline.labelMedium.copy(
+        fontFamily = dataFont, fontWeight = FontWeight.Bold).withNoPadding(),
     labelSmall  = baseline.labelSmall.copy(
-        fontFamily = plusJakartaSans, fontSize = 10.sp,
-    )
+        fontFamily = dataFont, fontSize = 10.sp).withNoPadding(),
+
+    bodyLarge  = baseline.bodyLarge.copy(fontFamily = contentFont).withNoPadding(),
+    bodyMedium = baseline.bodyMedium.copy(fontFamily = contentFont).withNoPadding(),
+    bodySmall  = baseline.bodySmall.copy(fontFamily = uiFont).withNoPadding()
 )
+
+//val AppTypography = Typography(
+//
+//    // ========== DISPLAY (largest headings) ==========
+//    displayLarge  = baseline.displayLarge.copy(fontFamily = heroFont),
+//    displayMedium = baseline.displayMedium.copy(fontFamily = heroFont),
+//    displaySmall  = baseline.displaySmall.copy(fontFamily = heroFont),
+//
+//    // ========== HEADLINE ==========
+//    headlineLarge  = baseline.headlineLarge.copy(fontFamily = heroFont),
+//    headlineMedium = baseline.headlineMedium.copy(fontFamily = heroFont),
+//    headlineSmall  = baseline.headlineSmall.copy(fontFamily = uiFont),
+////    headlineSmall  = NationalParkTypography.headlineSmall,
+//
+//    // ========== TITLE, UI ==========
+//    titleLarge  = baseline.titleLarge.copy(
+//        fontFamily = uiFont, fontWeight = FontWeight.Bold),
+//    titleMedium = baseline.titleMedium.copy(
+//        fontFamily = uiFont, fontWeight = FontWeight.SemiBold,
+//    ),
+////    titleLarge = NationalParkTypography.titleLarge,
+////    titleMedium = NationalParkTypography.titleMedium,
+//    titleSmall  = baseline.titleSmall.copy(
+//        fontFamily = uiFont,
+//    ),
+//
+//    // ========== SMALL LABELS ==========
+//    labelLarge  = baseline.labelLarge.copy(
+//        fontFamily = plusJakartaSans,
+//        fontWeight = FontWeight.Bold,
+//        lineHeightStyle = LineHeightStyle(
+//            alignment = LineHeightStyle.Alignment.Center,
+//            trim = LineHeightStyle.Trim.FirstLineTop
+//        )
+//    ),
+//
+////    labelLarge = NationalParkTypography.labelLarge,
+//    labelMedium = baseline.labelMedium.copy(
+//        fontFamily = dataFont, fontWeight = FontWeight.Bold,
+//    ),
+//
+//    labelSmall  = baseline.labelSmall.copy(
+//        fontFamily = dataFont, fontSize = 10.sp,
+//    ),
+//
+//    // ========== BODY / CONTENT ==========
+//    bodyLarge  = baseline.bodyLarge.copy(fontFamily = contentFont),
+//    bodyMedium = baseline.bodyMedium.copy(fontFamily = contentFont),
+//    bodySmall  = baseline.bodySmall.copy(fontFamily = uiFont)
+//)

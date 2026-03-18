@@ -104,14 +104,24 @@ fun GlassConfirmDialog(
         },
         buttons = {
             TextButton(onClick = onDismissRequest) {
-                Text(dismissLabel, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                Text(
+                    dismissLabel,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Normal
+                )
             }
             Spacer(Modifier.width(8.dp))
             TextButton(onClick = {
                 onConfirm()
                 onDismissRequest()
             }) {
-                Text(confirmLabel, color = confirmColor, fontWeight = FontWeight.SemiBold)
+                Text(
+                    confirmLabel,
+                    color = confirmColor,
+                    style = MaterialTheme.typography.titleMedium,
+//                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     )
@@ -154,7 +164,9 @@ fun TextInputDialog(
             TextButton(onClick = onDismiss) {
                 Text(
                     dismissLabel,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Normal
                 )
             }
             Spacer(Modifier.width(8.dp))
@@ -166,7 +178,8 @@ fun TextInputDialog(
                     confirmLabel,
                     color = if (canConfirm) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.titleMedium,
+//                    fontWeight = FontWeight.SemiBold
                 )
             }
         }

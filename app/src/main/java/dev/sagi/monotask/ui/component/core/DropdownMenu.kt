@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -38,12 +37,14 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.text.style.TextAlign
 import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.AceGoldDim
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.googleSans
 import dev.sagi.monotask.ui.theme.harabara
 import dev.sagi.monotask.ui.theme.lora
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
@@ -184,7 +185,7 @@ fun MonoDropdownMenuGlass(
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(vertical = 6.dp)
+                        .padding(6.dp)
                         .width(IntrinsicSize.Max),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
@@ -287,7 +288,6 @@ fun MonoDropdownItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 0.dp)
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
             .then(
@@ -296,7 +296,7 @@ fun MonoDropdownItem(
                     .glassBorder(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.surfaceContainer)
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = 12.dp, vertical = 9.dp)
         ,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -307,7 +307,11 @@ fun MonoDropdownItem(
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
             color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
-        trailingContent?.invoke() // 'selected' icon
+
+        // 'selected' icon inside a box, to ensure padding on long titles:
+        Box(Modifier.padding(start = 8.dp)) {
+            trailingContent?.invoke() // 'selected' icon
+        }
     }
 }
 
@@ -326,7 +330,6 @@ fun MonoDropdownActionItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 0.dp) // outer padding
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
             .padding(start = 8.dp, end = 12.dp)
@@ -337,14 +340,17 @@ fun MonoDropdownActionItem(
         Icon(
             painter = painterResource(iconRes),
             contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = color
+            tint = color,
+            modifier = Modifier
+                .size(18.dp)
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.titleSmall,
+//            fontFamily = googleSans,
             fontWeight = FontWeight.Bold,
-            color = color
+            color = color,
+            modifier = Modifier
         )
     }
 }
@@ -396,7 +402,8 @@ private fun DropdownItemSelectedPreview() {
                     Icon(
                         painter = painterResource(R.drawable.ic_check_circle),
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier
+                            .size(18.dp)
                     )
                 }
             )

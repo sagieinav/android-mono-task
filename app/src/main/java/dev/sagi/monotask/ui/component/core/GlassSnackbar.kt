@@ -16,8 +16,8 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.ibmPlexMono
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.nationalPark
 import dev.sagi.monotask.ui.theme.plusJakartaSans
-import dev.sagi.monotask.ui.theme.roboto
 
 @Composable
 fun GlassSnackbarDismissable(
@@ -68,8 +68,8 @@ fun GlassSnackbar(
                 text = snackbarData.visuals.message,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelMedium,
-                fontFamily = ibmPlexMono,
+                style = MaterialTheme.typography.labelLarge,
+                fontFamily = nationalPark,
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .padding(horizontal = 22.dp)

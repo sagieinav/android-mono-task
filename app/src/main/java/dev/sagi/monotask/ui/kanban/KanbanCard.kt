@@ -27,7 +27,7 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.task.CustomTag
-import dev.sagi.monotask.ui.component.core.DueDateLabel
+import dev.sagi.monotask.ui.component.task.DueDateLabel
 import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
 import dev.sagi.monotask.ui.component.task.TagSize
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -39,8 +39,6 @@ import dev.sagi.monotask.ui.component.core.MonoDropdownMenuGlass
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.FlowRowOverflow
-import androidx.compose.foundation.layout.FlowRowOverflowScope
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ripple
 import androidx.compose.ui.graphics.Shape
@@ -48,14 +46,6 @@ import androidx.compose.ui.text.font.FontWeight
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.AceGoldDim
-import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.libreCaslon
-import dev.sagi.monotask.ui.theme.lora
-import dev.sagi.monotask.ui.theme.merriweather
-import dev.sagi.monotask.ui.theme.notoSerif
-import dev.sagi.monotask.ui.theme.plantagenet
-import dev.sagi.monotask.ui.theme.playfairDisplay
-import dev.sagi.monotask.ui.theme.ptSerif
 
 
 // Tracks which confirm dialog is pending
@@ -118,7 +108,8 @@ fun KanbanCard(
                 // ========== Title ==========
                 Text(
                     text     = task.title,
-                    style    = MaterialTheme.typography.labelLarge,
+                    style    = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
                     color    = MaterialTheme.colorScheme.onSurface,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
