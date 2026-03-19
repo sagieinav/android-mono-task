@@ -65,15 +65,13 @@ fun KanbanCard(
     var cardWindowPos    by remember { mutableStateOf(IntOffset.Zero) }
     val interactionSource = remember { MutableInteractionSource() }
 
-    val cardShape = MaterialTheme.shapes.small
-
     Box(modifier = modifier) {
         // ========== Card surface ==========
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .monoShadow(cardShape)
-                .invincibleBorder(cardShape)
+                .monoShadow(shape)
+                .invincibleBorder(shape)
                 .onGloballyPositioned { coords ->
                     val pos = coords.positionInWindow()
                     cardWindowPos = IntOffset(pos.x.toInt(), pos.y.toInt())
@@ -96,7 +94,7 @@ fun KanbanCard(
                         }
                     )
                 },
-            shape = cardShape,
+            shape = shape,
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(

@@ -57,6 +57,7 @@ import dev.sagi.monotask.util.Constants
 fun ProfileTab(
     state: ProfileUiState.Ready,
     onEvent: (ProfileEvent) -> Unit,
+    topPadding: Dp,
     bottomPadding: Dp
 ) {
     if (state.showAvatarPicker) {
@@ -69,7 +70,7 @@ fun ProfileTab(
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
-            top = Constants.Theme.SCREEN_PADDING,
+            top    = topPadding,
             bottom = bottomPadding
         ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -131,7 +132,7 @@ fun ProfileHeader(
 }
 
 // ====================
-// Shared avatar image — handles auto (DiceBear URL) vs preset (local drawable)
+// Shared avatar image
 // ====================
 
 @Composable
@@ -318,6 +319,7 @@ private fun ProfileTabPreview() {
                 ),
                 activityData   = emptyList()
             ),
+            topPadding    = 0.dp,
             bottomPadding = 0.dp,
             onEvent = {}
         )

@@ -33,6 +33,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
+import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import kotlinx.coroutines.delay
@@ -228,7 +229,8 @@ fun MonoDropdownItem(
                 if (!selected) Modifier
                 else Modifier
                     .glassBorder(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+//                    .background(MaterialTheme.colorScheme.surfaceContainer)
             )
             .padding(horizontal = 12.dp, vertical = 9.dp)
         ,

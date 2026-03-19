@@ -52,6 +52,7 @@ fun SocialTab(
     searchResults: List<User>,
     isSearching: Boolean,
     onProfileEvent: (ProfileEvent) -> Unit,
+    topPadding: Dp,
     bottomPadding: Dp
 ) {
     var query by remember { mutableStateOf("") }
@@ -59,7 +60,7 @@ fun SocialTab(
     LazyColumn(
         modifier            = Modifier.fillMaxSize(),
         contentPadding      = PaddingValues(
-            top = Constants.Theme.SCREEN_PADDING,
+            top    = topPadding,
             bottom = bottomPadding
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -246,6 +247,7 @@ private fun SocialTabPreview() {
             ),
             isSearching    = false,
             onProfileEvent = {},
+            topPadding = 0.dp,
             bottomPadding  = 0.dp
         )
     }

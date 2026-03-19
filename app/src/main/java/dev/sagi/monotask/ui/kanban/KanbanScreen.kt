@@ -92,7 +92,7 @@ fun KanbanScreenContent(
             onOptionSelected = { onKanbanEvent(KanbanEvent.ToggleArchive) },
             modifier         = Modifier
                 .align(Alignment.CenterHorizontally)
-//                .padding(Constants.Theme.SCREEN_PADDING)
+                .padding(top = Constants.Theme.SCREEN_PADDING / 2)
         )
 
         Row(

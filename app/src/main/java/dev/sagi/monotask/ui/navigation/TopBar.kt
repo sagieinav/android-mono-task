@@ -1,5 +1,7 @@
 package dev.sagi.monotask.ui.navigation
 
+import android.R.id.tabs
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -7,18 +9,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.rememberHazeState
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.core.GlassTabRow
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
+import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import dev.sagi.monotask.util.Constants
@@ -29,8 +36,10 @@ import dev.sagi.monotask.util.Constants
 // ==========================================
 @Composable
 private fun TopBarScaffold(
-    leading: @Composable () -> Unit,
-    trailing: @Composable () -> Unit,
+//    leading: @Composable () -> Unit,
+//    trailing: @Composable () -> Unit,
+    leading: @Composable RowScope.() -> Unit,
+    trailing: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -43,9 +52,10 @@ private fun TopBarScaffold(
                 start = Constants.Theme.SCREEN_PADDING,
                 end = Constants.Theme.SCREEN_PADDING,
                 // bottom: add a little bit on top of statusBarsPadding
-                bottom = Constants.Theme.SCREEN_PADDING / 2
+//                bottom = Constants.Theme.SCREEN_PADDING / 2
             )
             .heightIn(min = 64.dp, max = 96.dp)
+            .background(Color.Transparent)
         ,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -102,12 +112,47 @@ fun TitleTopBar(
     TopBarScaffold(
         modifier = modifier,
         leading = {
-            Text(
-                text = title,
-                style = titleStyle,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            GlassSurface(
+//                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = titleStyle,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 12.dp)
+                )
+            }
+        },
+        trailing = { trailingIcon?.invoke() }
+    )
+}
+
+@Composable
+fun TitleTopBarV2(
+    tabs: List<String>,
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    trailingIcon: (@Composable () -> Unit)? = null
+) {
+    val localHaze       = rememberHazeState()
+    TopBarScaffold(
+        modifier = modifier,
+        leading = {
+            CompositionLocalProvider(LocalHazeState provides localHaze) {
+
+                GlassTabRow(
+                    tabs          = tabs,
+                    selectedIndex = selectedTab,
+                    onTabSelected = onTabSelected,
+                    modifier      = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+//                        .padding(vertical = 4.dp, horizontal = 12.dp)
+                        .padding(end = 12.dp)
+                )
+            }
         },
         trailing = { trailingIcon?.invoke() }
     )
@@ -125,7 +170,7 @@ fun TopBarIconButton(
     modifier: Modifier = Modifier
 ) {
     GlassSurface(
-        blurred = false,
+//        blurred = false,
         shape = CircleShape,
 //        baseColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = modifier

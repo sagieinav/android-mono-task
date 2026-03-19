@@ -57,6 +57,7 @@ fun StatisticsTab(
     state: ProfileUiState.Ready,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
+    topPadding: Dp,
     bottomPadding: Dp
 ) {
     val tasks = state.completedTasks
@@ -87,6 +88,7 @@ fun StatisticsTab(
                 maxDistance = refreshThreshold,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
+                    .padding(top = topPadding)  // position below floating tab row
             )
         }
     ) {
@@ -98,7 +100,7 @@ fun StatisticsTab(
                     translationY = refreshState.distanceFraction * refreshThreshold.toPx()
                 },
             contentPadding      = PaddingValues(
-                top = Constants.Theme.SCREEN_PADDING,
+                top    = topPadding,
                 bottom = bottomPadding
             ),
             verticalArrangement = Arrangement.spacedBy(40.dp)
@@ -212,8 +214,9 @@ private fun StatisticsTabPreview() {
             contentAlignment = Alignment.Center
         ) {
             StatisticsTab(
-                isRefreshing = false,
-                onRefresh = {},
+                isRefreshing  = false,
+                onRefresh     = {},
+                topPadding    = 0.dp,
                 state = ProfileUiState.Ready(
                     user           = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),
                     level          = 25,
