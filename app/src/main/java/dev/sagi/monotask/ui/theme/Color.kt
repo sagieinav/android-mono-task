@@ -1,4 +1,5 @@
 package dev.sagi.monotask.ui.theme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF0058BC)
@@ -40,7 +41,7 @@ val surfaceDimLight = Color(0xFFD6D4D4)
 val surfaceBrightLight = Color(0xFFF6F2F2)
 val surfaceContainerLowestLight = Color(0xFFF8F8F8)
 val surfaceContainerLowLight = Color(0xFFF6F3F2)
-val surfaceContainerLight = Color(0xFFF0EEED)
+val surfaceContainerLight = Color(0xFFEEEEEE)
 val surfaceContainerHighLight = Color(0xFFE7E7E7)
 val surfaceContainerHighestLight = Color(0xFFE4E2E1)
 

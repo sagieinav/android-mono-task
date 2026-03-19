@@ -25,12 +25,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.monoShadow
+import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.util.Constants
 
 private val TAB_TRACK_SHAPE = CircleShape
 private val TAB_PILL_SHAPE  = CircleShape
@@ -45,8 +50,10 @@ fun GlassTabRow(
     GlassSurface(
         shape    = TAB_TRACK_SHAPE,
         modifier = modifier
-            .fillMaxWidth(),
-        blurred  = true
+            .fillMaxWidth()
+            .monoShadowWorkaround(CircleShape),
+        blurred  = true,
+        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
     ) {
         Box(
             modifier = Modifier
@@ -71,9 +78,16 @@ fun GlassTabRow(
                         .offset(x = pillOffset)
                         .width(tabWidth)
                         .fillMaxHeight()
+                        .shadow(
+                            elevation    = 8.dp,
+                            shape        = CircleShape,
+                            ambientColor = Color.Black.copy(alpha = 0.3f),
+                            spotColor    = Color.Black.copy(alpha = 0.6f)
+                        )
                         .clip(TAB_PILL_SHAPE)
                         .glassBorder(TAB_PILL_SHAPE)
-                        .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+                        .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerLow)
+//                        .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerHigh)
                 )
             }
 
@@ -91,7 +105,10 @@ fun GlassTabRow(
                             ) {
                                 if (!isSelected) onTabSelected(index)
                             }
-                            .padding(vertical = 5.5.dp),
+//                            .padding(vertical = 5.5.dp)
+                            .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
+
+                        ,
                         contentAlignment = Alignment.Center
                     ) {
                         Text(

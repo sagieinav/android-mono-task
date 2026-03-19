@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.util.Constants
 import kotlinx.coroutines.delay
 
 // ========================================
@@ -59,12 +60,16 @@ fun DropdownTriggerPill(
         shape = CircleShape,
 //        baseColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = modifier
+            .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
             .monoShadowWorkaround(CircleShape)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
     ) {
         Row(
             modifier = Modifier
-                .padding(start = 16.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
+                .padding(start = 16.dp, end = 10.dp)
+                .align(Alignment.Center)
+                ,
             verticalAlignment = Alignment.CenterVertically
         ) {
             val color = MaterialTheme.colorScheme.onSurfaceVariant

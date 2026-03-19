@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.monoShadow
 
 @Composable
 fun SegmentedToggle(
@@ -84,7 +85,7 @@ fun SegmentedToggle(
                             elevation    = 8.dp,
                             shape        = CircleShape,
                             ambientColor = Color.Black.copy(alpha = 0.3f),
-                            spotColor    = Color.Black.copy(alpha = 0.8f)
+                            spotColor    = Color.Black.copy(alpha = 0.6f)
                         )
                         .clip(CircleShape)
                         .glassBorder(CircleShape)

@@ -1,24 +1,16 @@
-@file:OptIn(ExperimentalHazeMaterialsApi::class)
 package dev.sagi.monotask.ui.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.rememberHazeState
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.component.task.CreateTaskSheet
@@ -28,7 +20,6 @@ import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.GlassSnackbar
 import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.theme.LocalProfileTabState
@@ -89,7 +80,7 @@ fun MainScaffold(
                             onAddWorkspace = { showCreateWorkspaceDialog = true },
                             onAddTaskClick = { showCreateSheet = true }
                         )
-                    Screen.Profile.route -> TitleTopBarV2(
+                    Screen.Profile.route -> TitleTopBar(
                         tabs          = profileTabs,
                         selectedTab   = profileTabState.value,
                         onTabSelected = { profileTabState.value = it },
@@ -101,18 +92,6 @@ fun MainScaffold(
                             )
                         }
                     )
-//                        TitleTopBar(
-//                            title = stringResource(R.string.app_name),
-//                            modifier = Modifier.background(Color.Transparent),
-//                            titleStyle = MaterialTheme.typography.headlineLarge,
-//                            trailingIcon = {
-//                                TopBarIconButton(
-//                                    iconRes = R.drawable.ic_settings,
-//                                    contentDescription = "Settings",
-//                                    onClick = { navController.navigate(Screen.Settings.route) }
-//                                )
-//                            }
-//                        )
                 }
             },
             bottomBar = {
