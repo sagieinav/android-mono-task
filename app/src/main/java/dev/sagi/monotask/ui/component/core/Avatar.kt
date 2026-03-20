@@ -1,0 +1,123 @@
+package dev.sagi.monotask.ui.component.core
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.domain.util.DiceBearHelper
+import dev.sagi.monotask.ui.theme.glassBackground
+import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.glassBorderPremium
+import dev.sagi.monotask.util.Constants
+
+// Raw avatar image: handles auto (DiceBear) vs preset drawable
+// Apply sizing and clipping from the outside via modifier
+@Composable
+fun AvatarImage(user: User, modifier: Modifier = Modifier) {
+    val scaledModifier = modifier.graphicsLayer {
+        scaleX       = 0.95f
+        scaleY       = 0.95f
+        translationY = size.height * 0.05f
+    }
+    if (user.isAutoAvatar) {
+        AsyncImage(
+            model              = user.resolvedAvatarUrl(),
+            contentDescription = "Avatar",
+            contentScale       = ContentScale.Fit,
+            modifier           = scaledModifier
+        )
+    } else {
+        Image(
+            painter            = painterResource(user.avatarPreset),
+            contentDescription = "Avatar",
+            contentScale       = ContentScale.Fit,
+            modifier           = scaledModifier
+        )
+    }
+}
+
+// Avatar with the standard glass treatment (clip + background + border)
+@Composable
+fun AvatarBox(
+    user     : User,
+    modifier : Modifier = Modifier
+) {
+    Box(
+        modifier         = modifier
+            .clip(CircleShape)
+            .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+            .glassBorderPremium(CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        AvatarImage(user = user, modifier = Modifier.fillMaxSize())
+    }
+}
+
+
+// Avatar Picker (bottom sheet)
+@Composable
+fun AvatarPicker(
+    user: User,
+    onSelect: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options: List<DiceBearHelper.AvatarPreset?> = listOf(null) + DiceBearHelper.PRESETS
+
+    BottomSheet(
+        title            = "Choose Your Avatar",
+        onDismissRequest = onDismiss
+    ) {
+        LazyVerticalGrid(
+            columns               = GridCells.Fixed(3),
+            contentPadding        = PaddingValues(Constants.Theme.SCREEN_PADDING),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement   = Arrangement.spacedBy(16.dp),
+            modifier              = Modifier.wrapContentHeight().heightIn(max = 360.dp)
+        ) {
+            items(options) { preset ->
+                val displayUser = if (preset == null) user.copy(avatarPreset = 0)
+                else user.copy(avatarPreset = preset.drawable)
+                val isSelected  = (preset == null && user.isAutoAvatar) ||
+                        preset?.drawable == user.avatarPreset
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .clip(CircleShape)
+                        .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+                        .then(
+                            if (isSelected) Modifier.border(
+                                shape = CircleShape,
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            else Modifier.glassBorder(shape = CircleShape, width = 3.dp)
+                        )
+                        .clickable { onSelect(preset?.drawable ?: 0) }
+                ) {
+                    AvatarImage(user = displayUser, modifier = Modifier.fillMaxSize())
+                }
+            }
+        }
+    }
+}

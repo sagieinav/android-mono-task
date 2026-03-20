@@ -34,17 +34,15 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.invincibleBorder
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.MonoDropdownActionItem
-import dev.sagi.monotask.ui.component.core.MonoDropdownMenuGlass
+import dev.sagi.monotask.ui.component.core.GlassDropdownActionItem
+import dev.sagi.monotask.ui.component.core.GlassDropdownMenu
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ripple
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import dev.sagi.monotask.domain.util.XpEvents
-import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.AceGoldDim
 
 
@@ -128,7 +126,9 @@ fun KanbanCard(
                 }
 
                 // ========== Due date ==========
-                task.dueDate?.let { DueDateLabel(timestamp = it, small = true) }
+                if (!isArchive) {
+                    task.dueDate?.let { DueDateLabel(timestamp = it, small = true) }
+                }
             }
         }
 
@@ -194,31 +194,31 @@ fun KanbanCardDropdown(
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    MonoDropdownMenuGlass(
+    GlassDropdownMenu(
         expanded  = expanded,
         onDismiss = onDismiss,
         tapOffset    = tapOffset,
         modifier  = modifier
     ) {
         if (!isArchive) {
-            MonoDropdownActionItem(
+            GlassDropdownActionItem(
                 label   = "Edit Task",
                 iconRes = R.drawable.ic_edit_alt,
                 onClick = { onEditClick(); onDismiss() }
             )
-            MonoDropdownActionItem(
+            GlassDropdownActionItem(
                 label   = "Focus Now",
                 iconRes = R.drawable.ic_focus,
                 onClick = { onFocusNowClick(); onDismiss() }
             )
         } else {
-            MonoDropdownActionItem(
+            GlassDropdownActionItem(
                 label   = "Restore Task",
                 iconRes = R.drawable.ic_restore,
                 onClick = { onRestoreClick(); onDismiss() }
             )
         }
-        MonoDropdownActionItem(
+        GlassDropdownActionItem(
             label   = "Delete Task",
             iconRes = R.drawable.ic_delete,
             color = MaterialTheme.colorScheme.error,

@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,11 +30,10 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.ActivityStats
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.component.core.SectionTitle
 import dev.sagi.monotask.ui.component.statistics.AceCompletionCard
 import dev.sagi.monotask.ui.component.statistics.ActivityHeatmap
 import dev.sagi.monotask.ui.component.statistics.BarChart
-import dev.sagi.monotask.ui.component.statistics.CompletionDonutCard
 import dev.sagi.monotask.ui.component.statistics.StreakCard
 import dev.sagi.monotask.ui.component.statistics.LineChart
 import dev.sagi.monotask.ui.component.statistics.TopPerformanceCard
@@ -44,7 +41,6 @@ import dev.sagi.monotask.ui.component.statistics.TotalTasksCard
 import dev.sagi.monotask.ui.component.statistics.TotalXpCard
 import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.util.Constants
 import java.time.LocalDate
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -122,8 +118,7 @@ fun StatisticsTab(
                         headline     = "$weeklyTasks completed",
                         points      = ActivityStats.buildTaskPoints(weekActivity),
                         trendPercent = ActivityStats.computeTaskTrend(weekActivity),
-                        barColor    = MaterialTheme.colorScheme.primary,
-                        animate     = true,
+                        animate     = true
                     )
                 }
             }
@@ -188,20 +183,6 @@ fun StatSection(
         content()
     }
 }
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text       = text,
-        style      = MaterialTheme.typography.headlineSmall,
-//        fontFamily = gloock,
-        fontWeight = FontWeight.Bold,
-        color      = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-        textAlign  = TextAlign.Center,
-        modifier   = Modifier.fillMaxWidth()
-    )
-}
-
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun StatisticsTabPreview() {
@@ -223,7 +204,7 @@ private fun StatisticsTabPreview() {
                     levelProgress  = 0.73f,
                     xpIntoLevel    = 2115,
                     xpForNextLevel = 2326,
-                    badges         = emptyList(),
+                    achievements         = emptyList(),
                     activityData   = listOf(
                         DailyActivity(dateEpochDay = today.minusDays(6).toEpochDay(), xpEarned = 120, tasksCompleted = 4),
                         DailyActivity(dateEpochDay = today.minusDays(5).toEpochDay(), xpEarned = 0,   tasksCompleted = 0),

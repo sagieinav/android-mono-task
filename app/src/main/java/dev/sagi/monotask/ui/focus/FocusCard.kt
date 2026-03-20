@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,6 +27,7 @@ import dev.sagi.monotask.ui.component.task.XpLabelCurrent
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.aceTaskBorder
 import dev.sagi.monotask.ui.theme.defaultTaskBorder
+import dev.sagi.monotask.ui.theme.monoShadow
 
 // ========== FocusCard ==========
 @Composable
@@ -54,6 +57,12 @@ fun FocusCard(
                     borderWidth = borderWidth
                 )
             )
+//            .shadow(
+//                elevation = 16.dp,
+//                shape = shape,
+//                ambientColor = Color.Black.copy(alpha = 0.02f),
+//                spotColor = Color.Black.copy(alpha = 0.2f)
+//            )
     ) {
         GlassSurface(
             shape    = shape,

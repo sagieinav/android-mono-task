@@ -117,4 +117,15 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.extended)
 
+
+    androidTestImplementation(libs.androidx.concurrent.futures)
+    androidTestImplementation(libs.androidx.concurrent.futures.ktx)
+
+    configurations.all {
+        resolutionStrategy {
+            force("androidx.concurrent:concurrent-futures:1.2.0")
+            force("androidx.concurrent:concurrent-futures-ktx:1.2.0")
+        }
+    }
+
 }

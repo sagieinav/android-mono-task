@@ -51,17 +51,17 @@ import kotlinx.coroutines.launch
 
 // ========== Design constants ==========
 
-private val BarWidth              = 32.dp
-private val BarCornerRadius       = 10.dp
-private val ChartHeight           = 140.dp
-private val TooltipClearance      = 30.dp
+private val BarWidth                      = 32.dp
+private val BarCornerRadius               = 10.dp
+private val ChartHeight                   = 140.dp
+private val TooltipClearance              = 30.dp
 
-private const val MaxSelectedFraction = 0.82f
-private const val BarActiveAlpha      = 1.0f
-private const val BarTodayAlpha       = 0.5f
-private const val StripeLineAlpha     = 0.22f
-private val BarGlowBlur           = 12.dp
-private const val BarGlowAlpha    = 0.35f
+private const val MaxSelectedFraction     = 0.82f
+private const val BarActiveAlpha          = 1.0f
+private const val BarTodayAlpha           = 0.6f
+private const val StripeLineAlpha         = 0.22f
+private val BarGlowBlur                   = 12.dp
+private const val BarGlowAlpha            = 0.35f
 
 // ========== BarChart ==========
 
@@ -75,7 +75,7 @@ fun BarChart(
     barColor: Color = MaterialTheme.colorScheme.primary,
     animate: Boolean = true,
 ) {
-    val textColor  = MaterialTheme.colorScheme.onSurface
+//    val textColor  = MaterialTheme.colorScheme.onSurface
     val labelColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
 
     StatCard(
@@ -179,7 +179,7 @@ private fun BarChartContent(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .offset(y = -(barHeight + TooltipClearance - 20.dp))
+                            .offset(y = -(barHeight + TooltipClearance - 24.dp))
                             .graphicsLayer(alpha = selectionAnim)
                     ) {
                         BarTooltip(point = point, barColor = barColor)

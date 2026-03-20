@@ -1,7 +1,7 @@
 package dev.sagi.monotask.ui.profile
 
 import androidx.annotation.DrawableRes
-import dev.sagi.monotask.data.model.Badge
+import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
@@ -17,7 +17,7 @@ sealed class ProfileUiState {
         val levelProgress       : Float,
         val xpIntoLevel         : Int,
         val xpForNextLevel      : Int,
-        val badges              : List<Badge>,
+        val achievements        : List<Achievement>,
         val completedTasks      : List<Task>            = emptyList(),
         val activityData        : List<DailyActivity>   = emptyList(),
         val topPerformanceDay   : DailyActivity?        = null,           // all-time best, one-shot

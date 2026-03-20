@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
@@ -45,13 +44,13 @@ fun WorkspaceDropdownGlass(
             onClick = { expanded = !expanded }
         )
 
-        MonoDropdownMenuGlass(
+        GlassDropdownMenu(
             expanded = expanded,
             onDismiss = { expanded = false }
         ) {
             workspaces.forEach { workspace ->
                 val isSelected = workspace.id == selectedWorkspace?.id
-                MonoDropdownItem(
+                GlassDropdownItem(
                     label = workspace.name,
                     selected = isSelected,
                     onClick = { onWorkspaceSelected(workspace); expanded = false },
@@ -70,7 +69,7 @@ fun WorkspaceDropdownGlass(
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
             )
 
-            MonoDropdownActionItem(
+            GlassDropdownActionItem(
                 label = "New Workspace",
                 iconRes = R.drawable.ic_add_m3,
                 onClick = { onAddWorkspace(); expanded = false }

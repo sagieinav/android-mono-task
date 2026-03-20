@@ -7,6 +7,9 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
@@ -28,19 +31,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import dev.sagi.monotask.R
+import dev.sagi.monotask.data.model.AchievementTier
+import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.XpEvents
-import dev.sagi.monotask.ui.component.core.HeroGreeting
-import dev.sagi.monotask.ui.shared.UserSessionViewModel
+import dev.sagi.monotask.ui.component.core.AvatarBox
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
+import dev.sagi.monotask.ui.theme.fireIconGradient
+import dev.sagi.monotask.ui.theme.googleSans
+import dev.sagi.monotask.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.theme.StreakFire
-import dev.sagi.monotask.ui.theme.fireIconGradient
-import dev.sagi.monotask.util.Constants
 
 // ========== Entry Point ==========
 
@@ -50,14 +54,14 @@ fun FocusScreen(
     focusVM: FocusViewModel,
 //    userSessionVM: UserSessionViewModel
 ) {
-    val uiState             by focusVM.uiState.collectAsStateWithLifecycle()
-    val frozenForAnimation  by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
-    val currentStreak       by focusVM.currentStreak.collectAsStateWithLifecycle()
-//    val userDisplayName     by userSessionVM.displayName.collectAsStateWithLifecycle()
-    val snackbarHostState   = LocalSnackbarHostState.current
+    val uiState            by focusVM.uiState.collectAsStateWithLifecycle()
+    val frozenForAnimation by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
+    val currentStreak      by focusVM.currentStreak.collectAsStateWithLifecycle()
+    val currentUser        by focusVM.currentUser.collectAsStateWithLifecycle()
+    val snackbarHostState  = LocalSnackbarHostState.current
 
-    val stableOnFocusEvent  = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
-    val animState           = rememberFocusAnimationState(onFocusEvent = stableOnFocusEvent)
+    val stableOnFocusEvent = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
+    val animState          = rememberFocusAnimationState(onFocusEvent = stableOnFocusEvent)
 
     // Hold off UI updates while a completion animation is playing,
     // so Firestore snapshots don't interrupt the card animation mid-way
@@ -72,9 +76,9 @@ fun FocusScreen(
             when (effect) {
                 is FocusUiEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
-                        message         = effect.message,
+                        message           = effect.message,
                         withDismissAction = true,
-                        duration        = SnackbarDuration.Short
+                        duration          = SnackbarDuration.Short
                     )
                 }
                 is FocusUiEffect.ShowUndoComplete -> {
@@ -97,15 +101,27 @@ fun FocusScreen(
                         focusVM.onEvent(FocusEvent.UndoSnoozeTask)
                     }
                 }
+                is FocusUiEffect.ShowAchievementUnlocked -> {
+                    val tierLabel = when (effect.tier) {
+                        AchievementTier.BRONZE -> "🥉"
+                        AchievementTier.SILVER -> "🥈"
+                        AchievementTier.GOLD   -> "🥇"
+                    }
+                    snackbarHostState.showSnackbar(
+                        message  = "$tierLabel Achievement unlocked: ${effect.name}",
+                        duration = SnackbarDuration.Short
+                    )
+                }
             }
         }
     }
 
     FocusScreenContent(
-        uiState         = displayedUiState,
-        currentStreak   = currentStreak,
-        animState       = animState,
-        onFocusEvent    = stableOnFocusEvent
+        uiState       = displayedUiState,
+        currentStreak = currentStreak,
+        currentUser   = currentUser,
+        animState     = animState,
+        onFocusEvent  = stableOnFocusEvent
     )
 }
 
@@ -113,13 +129,14 @@ fun FocusScreen(
 
 @Composable
 fun FocusScreenContent(
-    uiState: FocusUiState,
-    currentStreak: Int,
-    animState: FocusAnimationState,
-    onFocusEvent: (FocusEvent) -> Unit
+    uiState       : FocusUiState,
+    currentStreak : Int,
+    currentUser   : User?,
+    animState     : FocusAnimationState,
+    onFocusEvent  : (FocusEvent) -> Unit
 ) {
     val innerPadding = LocalScaffoldPadding.current
-    val scope = rememberCoroutineScope()
+    val scope        = rememberCoroutineScope()
 
     if (uiState is FocusUiState.Loading) return
 
@@ -127,16 +144,14 @@ fun FocusScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                top = innerPadding.calculateTopPadding(),
+                top    = innerPadding.calculateTopPadding(),
                 bottom = innerPadding.calculateBottomPadding(),
-                start = Constants.Theme.SCREEN_PADDING,
-                end = Constants.Theme.SCREEN_PADDING
+                start  = Constants.Theme.SCREEN_PADDING,
+                end    = Constants.Theme.SCREEN_PADDING
             )
     ) {
-        // Active Streak Chip
-        StreakChip(currentStreak)
+        UserHeader(user = currentUser, currentStreak = currentStreak)
 
-        // Card fills all space
         when (uiState) {
             is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 EmptyState(emoji = "🦾")
@@ -149,10 +164,7 @@ fun FocusScreenContent(
                 )
             else -> {}
         }
-
-
     }
-
 
     if (uiState is FocusUiState.Active && uiState.showSnoozeSheet) {
         SnoozeBottomSheet(
@@ -163,14 +175,14 @@ fun FocusScreenContent(
 }
 
 // ========== Active Card ==========
+
 @Composable
 private fun ActiveFocusCard(
-    uiState: FocusUiState.Active,
-    animState: FocusAnimationState,
-    onFocusEvent: (FocusEvent) -> Unit,
-    modifier: Modifier = Modifier
+    uiState      : FocusUiState.Active,
+    animState    : FocusAnimationState,
+    onFocusEvent : (FocusEvent) -> Unit,
+    modifier     : Modifier = Modifier
 ) {
-    // Synchronously mark dirty before the first frame draws
     SideEffect {
         animState.checkIfNeedsReset(uiState.focusTask.id, uiState.restoreVersion)
     }
@@ -190,10 +202,10 @@ private fun ActiveFocusCard(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .graphicsLayer {
-                alpha = animState.displayAlpha
+                alpha  = animState.displayAlpha
                 scaleX = animState.displayScale
                 scaleY = animState.displayScale
             },
@@ -213,73 +225,73 @@ private fun ActiveFocusCard(
     }
 }
 
+// ========== User Header ==========
+
+@Composable
+fun UserHeader(
+    user          : User?,
+    currentStreak : Int,
+    modifier      : Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.padding(vertical = 8.dp)
+    ) {
+        user?.let {
+            AvatarBox(
+                user = it,
+                modifier = Modifier.size(58.dp)
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text       = user?.displayName ?: "",
+                style      = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color      = MaterialTheme.colorScheme.onSurface,
+                modifier   = Modifier
+                    .padding(start = 1.dp) // optical correction
+            )
+            StreakChip(currentStreak)
+        }
+    }
+}
+
+// ========== Streak Chip ==========
+
 @Composable
 fun StreakChip(
-    currentStreak: Int,
-    modifier: Modifier = Modifier
+    currentStreak : Int,
+    modifier      : Modifier = Modifier
 ) {
     val streakLabel = if (currentStreak == 1) "day streak" else "days streak"
 
-    StatChip(
-        value        = currentStreak.toString(),
-        label        = streakLabel,
-        icon         = painterResource(R.drawable.ic_fire),
-//        accentColor  = StreakFire,
-        iconModifier = Modifier.fireIconGradient(),
-        modifier     = modifier
-    )
-}
-
-@Composable
-private fun StatChip(
-    value:        String,
-    label:        String,
-    icon:         Painter,
-    accentColor:  Color    = MaterialTheme.colorScheme.onSurface,
-    iconModifier: Modifier = Modifier,
-    modifier:     Modifier = Modifier
-) {
-    // Captures the rendered value-text height so the icon can match it exactly
-    var iconSizePx by remember { mutableIntStateOf(0) }
-    val density = androidx.compose.ui.platform.LocalDensity.current
-
     Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment     = Alignment.Bottom,
+        verticalAlignment     = Alignment.CenterVertically,
         modifier = modifier
     ) {
-        // Icon: size matches value-text height
-        // iconModifier injects optional effects (like gradient)
         Icon(
-            painter            = icon,
+            painter            = painterResource(R.drawable.ic_fire),
             contentDescription = null,
-//            tint               = accentColor,
-//            tint               = Color(0xFFD25E03),
             modifier           = Modifier
-                .size(
-                    if (iconSizePx > 0) with(density) { (iconSizePx * 0.75f).toDp() } else 28.dp
-                )
-                .align(Alignment.CenterVertically)
-                .then(iconModifier)
-                .padding(end = 2.dp)
+                .size(18.dp)
+                .fireIconGradient()
+                .padding(bottom = 1.5.dp) // optical correction
         )
-
-        // Value / Number
+        Spacer(Modifier.padding(horizontal = 1.dp))
         Text(
-            text       = value,
-            style      = MaterialTheme.typography.displaySmall,
-//            color      = accentColor,
-            modifier     = Modifier.alignByBaseline(),
-            onTextLayout = { iconSizePx = it.size.height }
+            text  = "$currentStreak ",
+            fontWeight = FontWeight.Black,
+            fontFamily = googleSans,
+            color = MaterialTheme.colorScheme.onSurface,
         )
-
-        // Label / Unit
         Text(
-            text  = label,
+            text  = streakLabel,
             fontWeight = FontWeight.Thin,
+            fontFamily = googleSans,
             style = MaterialTheme.typography.labelLarge,
-            color    = MaterialTheme.colorScheme.outlineVariant,
-            modifier = Modifier.alignByBaseline()
+            color = MaterialTheme.colorScheme.outlineVariant
         )
     }
 }
@@ -307,23 +319,21 @@ class FocusAnimationState(
     val scale  = Animatable(0.22f)
     val border = Animatable(0f)
 
-    private var needsReset by mutableStateOf(true)
-    private var lastCardKey: Pair<String, Int>? = null
+    private var needsReset  by mutableStateOf(true)
+    private var lastCardKey : Pair<String, Int>? = null
 
-    val displayAlpha:  Float get() = if (needsReset) 0f    else alpha.value
-    val displayScale:  Float get() = if (needsReset) 0.22f else scale.value
-    val displayBorder: Float get() = if (needsReset) 0f    else border.value
+    val displayAlpha  : Float get() = if (needsReset) 0f    else alpha.value
+    val displayScale  : Float get() = if (needsReset) 0.22f else scale.value
+    val displayBorder : Float get() = if (needsReset) 0f    else border.value
 
-    // Called during composition. Sets needsReset only when the card identity changes
     fun checkIfNeedsReset(taskId: String, restoreVersion: Int) {
         val key = taskId to restoreVersion
         if (key != lastCardKey) {
             lastCardKey = key
-            needsReset = true
+            needsReset  = true
         }
     }
 
-    // Called from LaunchedEffect. Snaps values then clears the reset flag
     suspend fun resetCard() {
         alpha.snapTo(0f)
         scale.snapTo(0.22f)
@@ -337,17 +347,17 @@ class FocusAnimationState(
         scope.launch {
             onFocusEvent(FocusEvent.DismissSnooze)
             delay(100)
-            pendingSnoozeAction = { onFocusEvent(FocusEvent.ExecuteSnooze(option)) }
-            isSnoozeExiting  = true
-            snoozeExitTrigger = SwipeExitDirection.LEFT
+            pendingSnoozeAction  = { onFocusEvent(FocusEvent.ExecuteSnooze(option)) }
+            isSnoozeExiting      = true
+            snoozeExitTrigger    = SwipeExitDirection.LEFT
         }
     }
 
     fun onSnoozeCardExited() {
         pendingSnoozeAction?.invoke()
-        pendingSnoozeAction  = null
-        snoozeExitTrigger    = null
-        isSnoozeExiting      = false
+        pendingSnoozeAction = null
+        snoozeExitTrigger   = null
+        isSnoozeExiting     = false
     }
 }
 

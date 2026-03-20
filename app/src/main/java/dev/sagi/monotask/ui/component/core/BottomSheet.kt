@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.sagi.monotask.ui.theme.LocalHazeState
+import dev.sagi.monotask.ui.theme.nationalPark
 import dev.sagi.monotask.ui.theme.penaltyRed
 
 
@@ -43,7 +44,6 @@ fun BottomSheet(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-//    val hazeState = LocalHazeState.current
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -62,7 +62,8 @@ fun BottomSheet(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
+                fontFamily = nationalPark,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth(),

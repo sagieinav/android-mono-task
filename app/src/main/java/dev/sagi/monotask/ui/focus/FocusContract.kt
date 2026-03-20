@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.focus
 
+import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.domain.util.XpEvents
@@ -27,8 +28,14 @@ sealed interface FocusEvent {
     object UndoSnoozeTask : FocusEvent
 }
 
+// ========== One-Shot UI Effects ==========
 sealed interface FocusUiEffect {
     data class ShowError(val message: String) : FocusUiEffect
     data class ShowUndoComplete(val message: String) : FocusUiEffect
     data class ShowUndoSnooze(val message: String) : FocusUiEffect
+    // Emitted once per newly earned tier after task completion
+    data class ShowAchievementUnlocked(
+        val name : String,
+        val tier : AchievementTier
+    ) : FocusUiEffect
 }

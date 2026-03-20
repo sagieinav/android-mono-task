@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.theme
 
+import android.graphics.Path
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +9,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -17,13 +19,17 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.atan2
 
 
 // ========== Fire icon gradient ==========
@@ -45,7 +51,10 @@ fun Modifier.fireIconGradient(): Modifier = this
 
 
 // ========== WRAPPER: MonoTask's basic elevated, bordered design ==========
-fun Modifier.basicMonoTask(shape: Shape): Modifier = composed {
+fun Modifier.basicMonoTask(
+    shape: Shape,
+    elevation: Dp = 4.dp
+): Modifier = composed {
     this
         .monoShadow(shape)
         .monoBorder(shape)
@@ -79,33 +88,16 @@ fun Modifier.monoShadowWorkaround(
         .clip(shape)
 }
 
-private fun Outline.toAndroidPath(): android.graphics.Path = when (this) {
-    is Outline.Rectangle -> android.graphics.Path().apply {
-        addRect(rect.left, rect.top, rect.right, rect.bottom, android.graphics.Path.Direction.CW)
-    }
-    is Outline.Rounded -> android.graphics.Path().apply {
-        addRoundRect(
-            android.graphics.RectF(roundRect.left, roundRect.top, roundRect.right, roundRect.bottom),
-            floatArrayOf(
-                roundRect.topLeftCornerRadius.x,     roundRect.topLeftCornerRadius.y,
-                roundRect.topRightCornerRadius.x,    roundRect.topRightCornerRadius.y,
-                roundRect.bottomRightCornerRadius.x, roundRect.bottomRightCornerRadius.y,
-                roundRect.bottomLeftCornerRadius.x,  roundRect.bottomLeftCornerRadius.y,
-            ),
-            android.graphics.Path.Direction.CW
-        )
-    }
-    is Outline.Generic -> path.asAndroidPath()
-}
-
-
-fun Modifier.monoShadow(shape: Shape): Modifier = composed {
+fun Modifier.monoShadow(
+    shape: Shape,
+    elevation: Dp = 4.dp
+): Modifier = composed {
     this
         .shadow(
-            elevation = 4.dp,
+            elevation = elevation,
             shape = shape,
             ambientColor = Color.Black.copy(alpha = 0.05f),
-            spotColor = Color.Black.copy(alpha = 0.3f)
+            spotColor = Color.Black.copy(alpha = 0.35f)
         )
 }
 
@@ -116,6 +108,56 @@ fun Modifier.monoBorder(shape: Shape): Modifier = composed {
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             shape = shape
         )
+}
+
+// This is more expensive to use. Mainly for big, noticeable components
+fun Modifier.glassBorderPremium(
+    shape: Shape,
+    width: Dp = 2.dp
+): Modifier = composed {
+    val innerWidth = width * 1.5f
+    val outerWidth = width * 0.5f
+
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+
+    drawWithContent {
+        drawContent()
+
+        val cornerFraction = (atan2(
+            size.height / 2.0,
+            size.width / 2.0
+        ) / (2 * Math.PI)).toFloat()
+
+        val bright = Color.White.copy(alpha = 0.65f)
+        val dark   = Color.White.copy(alpha = 0.05f)
+
+        val brush = Brush.sweepGradient(
+            colorStops = arrayOf(
+                0f                      to bright,
+                cornerFraction          to bright,
+                (0.5f - cornerFraction) to dark,
+                (0.5f + cornerFraction) to bright,
+                (1f - cornerFraction)   to dark,
+                1f                      to bright,
+            ),
+            center = Offset(size.width / 2f, size.height / 2f)
+        )
+
+        val outline = shape.createOutline(size, layoutDirection, this)
+
+        // Inner glass stroke
+        drawOutline(
+            outline = outline,
+            brush   = brush,
+            style   = Stroke(width = innerWidth.toPx())
+        )
+        // Outer definition stroke
+        drawOutline(
+            outline = outline,
+            brush   = SolidColor(outlineVariant.copy(alpha = 0.4f)),
+            style   = Stroke(width = outerWidth.toPx())
+        )
+    }
 }
 
 fun Modifier.glassBorder(
@@ -225,4 +267,23 @@ fun Modifier.circleGlow(
             paint
         )
     }
+}
+
+private fun Outline.toAndroidPath(): Path = when (this) {
+    is Outline.Rectangle -> Path().apply {
+        addRect(rect.left, rect.top, rect.right, rect.bottom, Path.Direction.CW)
+    }
+    is Outline.Rounded -> Path().apply {
+        addRoundRect(
+            android.graphics.RectF(roundRect.left, roundRect.top, roundRect.right, roundRect.bottom),
+            floatArrayOf(
+                roundRect.topLeftCornerRadius.x,     roundRect.topLeftCornerRadius.y,
+                roundRect.topRightCornerRadius.x,    roundRect.topRightCornerRadius.y,
+                roundRect.bottomRightCornerRadius.x, roundRect.bottomRightCornerRadius.y,
+                roundRect.bottomLeftCornerRadius.x,  roundRect.bottomLeftCornerRadius.y,
+            ),
+            Path.Direction.CW
+        )
+    }
+    is Outline.Generic -> path.asAndroidPath()
 }

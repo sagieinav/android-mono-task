@@ -10,7 +10,7 @@ import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
 import dev.sagi.monotask.domain.util.ActivityStats
-import dev.sagi.monotask.domain.util.BadgeEngine
+import dev.sagi.monotask.domain.util.AchievementEngine
 import dev.sagi.monotask.domain.util.TaskSelector
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.util.AuthUtils
@@ -20,9 +20,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class FocusViewModel(
-    private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
-    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
-    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
+    private val taskRepository      : TaskRepository      = MonoTaskApp.instance.taskRepository,
+    private val userRepository      : UserRepository      = MonoTaskApp.instance.userRepository,
+    private val workspaceRepository : WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
 ) : ViewModel() {
 
     // ========== State ==========
@@ -45,21 +45,24 @@ class FocusViewModel(
 
     private lateinit var userId: String
 
-    // Workspace flow injected once from NavGraph via setWorkspaceSource
-    private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
-
     // User flow injected once from NavGraph via setUserSource (avoids redundant getUserOnce calls)
     private var _userSource: StateFlow<User?>? = null
+
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
     // Current streak — independent of task state, drives the streak chip
     private val _currentStreak = MutableStateFlow(0)
     val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
 
     // Cached for undo operations
-    private var lastCompletedTask: Task? = null
-    private var lastSnoozedTask: Task? = null
-    private var lastXpAwarded: Int = 0
-    private var lastActiveState: FocusUiState.Active? = null
+    private var lastCompletedTask : Task? = null
+    private var lastSnoozedTask   : Task? = null
+    private var lastXpAwarded     : Int   = 0
+
+    // Workspace flow injected once from NavGraph via setWorkspaceSource
+    private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
+    private var lastActiveState  : FocusUiState.Active? = null
 
     // ========== Init ==========
 
@@ -78,26 +81,29 @@ class FocusViewModel(
     }
 
     fun setUserSource(userFlow: StateFlow<User?>) {
-        if (_userSource == null) _userSource = userFlow
+        if (_userSource == null) {
+            _userSource = userFlow
+            viewModelScope.launch { userFlow.collect { _currentUser.value = it } }
+        }
     }
 
     // ========== Event Handler ==========
 
     fun onEvent(event: FocusEvent) {
         when (event) {
-            is FocusEvent.CompleteTask    -> completeTask()
-            is FocusEvent.OpenSnooze      -> openSnoozeSheet()
-            is FocusEvent.DismissSnooze   -> dismissSnoozeSheet()
-            is FocusEvent.ExecuteSnooze   -> snoozeTask(event.option)
+            is FocusEvent.CompleteTask     -> completeTask()
+            is FocusEvent.OpenSnooze       -> openSnoozeSheet()
+            is FocusEvent.DismissSnooze    -> dismissSnoozeSheet()
+            is FocusEvent.ExecuteSnooze    -> snoozeTask(event.option)
             is FocusEvent.UndoCompleteTask -> undoCompleteTask()
-            is FocusEvent.UndoSnoozeTask  -> undoSnoozeTask()
+            is FocusEvent.UndoSnoozeTask   -> undoSnoozeTask()
         }
     }
 
     // ========== Stats Observation ==========
 
     private fun observeStats() {
-        // Live streak — re-emits on every Firestore snapshot for the current month
+        // Live streak: re-emits on every Firestore snapshot for the current month
         userRepository.getActivity(userId, UserRepository.thisMonthRange)
             .onEach { activity ->
                 _currentStreak.value = ActivityStats.computeCurrentStreak(activity)
@@ -143,30 +149,52 @@ class FocusViewModel(
         val state    = _uiState.value as? FocusUiState.Active ?: return
         val xpGained = state.focusTask.currentXp
 
-        lastCompletedTask    = state.focusTask
-        lastXpAwarded        = xpGained
+        lastCompletedTask         = state.focusTask
+        lastXpAwarded             = xpGained
         _frozenForAnimation.value = true
 
         viewModelScope.launch {
             try {
                 _uiEffect.emit(FocusUiEffect.ShowUndoComplete("Task completed"))
 
-                taskRepository.markTaskCompleted(userId, state.focusTask.id)
                 val user = _userSource?.value ?: run {
                     _frozenForAnimation.value = false
                     _uiEffect.emit(FocusUiEffect.ShowError("Failed to load user profile for XP update"))
                     return@launch
                 }
 
+                // Snapshot achievements BEFORE this task is counted so we can diff after.
+                // getAllCompletedTasksOnce covers all workspaces — achievements are cross-workspace.
+                val tasksBefore        = taskRepository.getAllCompletedTasksOnce(userId)
+                val achievementsBefore = AchievementEngine.evaluate(tasksBefore, user.level)
+
+                // Persist completion + XP
+                taskRepository.markTaskCompleted(userId, state.focusTask.id)
                 userRepository.addXp(userId, xpGained, user.xp, user.level)
 
                 delay(300)
                 _frozenForAnimation.value = false
 
                 userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
-                val completedTasks = taskRepository.getCompletedTasksOnce(userId, state.workspace.id)
-                // TODO: Persist badge evaluation results once badges are wired to Firestore
-                BadgeEngine.evaluate(completedTasks)
+
+                // Evaluate AFTER by appending the just-completed task in memory —
+                // avoids a second Firestore fetch.
+                val levelAfter        = XpEvents.levelForXp(user.xp + xpGained)
+                val tasksAfter        = tasksBefore + state.focusTask
+                val achievementsAfter = AchievementEngine.evaluate(tasksAfter, levelAfter)
+
+                // Emit an unlock effect for each tier newly earned this completion
+                achievementsAfter.forEach { newProgress ->
+                    val oldProgress = achievementsBefore.find { it.category == newProgress.category }
+                    if (newProgress.earnedTier != null && newProgress.earnedTier != oldProgress?.earnedTier) {
+                        _uiEffect.emit(
+                            FocusUiEffect.ShowAchievementUnlocked(
+                                name = newProgress.displayName,
+                                tier = newProgress.earnedTier
+                            )
+                        )
+                    }
+                }
 
             } catch (e: Exception) {
                 _frozenForAnimation.value = false

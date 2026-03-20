@@ -1,33 +1,29 @@
 package dev.sagi.monotask.ui.profile
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.glassBackground
-import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.monoShadow
-import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 
 
 @Composable
@@ -39,48 +35,70 @@ fun XpBar(
 ) {
     val progress = currentXp.toFloat() / xpForNextLevel.toFloat()
 
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 800),
-        label = "xp_progress"
-    )
+    val animatable = remember { Animatable(0f) }
+    LaunchedEffect(progress) {
+        animatable.animateTo(
+            targetValue = progress,
+            animationSpec = tween(durationMillis = 800)
+        )
+    }
 
-    Column(modifier = modifier) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = modifier
+    ) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.alignByBaseline()
+            ) {
+                Text(
+                    text       = "Lv.",
+                    style      = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Thin,
+                    color      = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
+                    modifier   = Modifier.alignByBaseline()
+                )
+                Text(
+                    text     = "$level",
+                    style    = MaterialTheme.typography.headlineMedium,
+                    color    = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.alignByBaseline()
+                )
+            }
             Text(
-                text = "Level $level",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "$currentXp / $xpForNextLevel XP",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onBackground
+                text     = "$currentXp / $xpForNextLevel XP",
+                style      = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Thin,
+                color    = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
+                modifier = Modifier.alignByBaseline()
             )
         }
 
-        Spacer(modifier = Modifier.height(2.dp))
-
         Box(
-            // Progress Bar
             modifier = Modifier
                 .fillMaxWidth()
-                .height(20.dp)
-                .clip(RoundedCornerShape(50))
+                .height(12.dp)
+                .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            // Inside (filled) progress
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(animatedProgress)
+                    .fillMaxWidth(animatable.value)
                     .fillMaxHeight()
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primaryContainer.copy(0.7f),
+                                MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    )
             )
         }
 

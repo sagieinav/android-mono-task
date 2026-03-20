@@ -1,15 +1,11 @@
 package dev.sagi.monotask.ui.profile
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,27 +18,26 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import dev.sagi.monotask.data.model.Badge
-import dev.sagi.monotask.data.model.BadgeIds
+import dev.sagi.monotask.R
+import dev.sagi.monotask.data.model.Achievement
+import dev.sagi.monotask.data.model.AchievementCategory
+import dev.sagi.monotask.data.model.AchievementMilestone
+import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.DiceBearHelper
+import dev.sagi.monotask.ui.component.core.AvatarBox
+import dev.sagi.monotask.ui.component.core.AvatarImage
+import dev.sagi.monotask.ui.component.core.AvatarPicker
 import dev.sagi.monotask.ui.component.core.BottomSheet
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
@@ -50,7 +45,7 @@ import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.util.Constants
 
 // ====================
-// Tab 1 — Profile: XP bar + badges grid
+// Tab 1 — Profile: XP bar + achievements grid
 // ====================
 
 @Composable
@@ -73,25 +68,30 @@ fun ProfileTab(
             top    = topPadding,
             bottom = bottomPadding
         ),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(36.dp)
     ) {
+        // Avatar + Name + Level & XP
         item {
             ProfileHeader(
                 user          = state.user,
                 modifier      = Modifier.padding(vertical = 6.dp),
                 onAvatarClick = { onEvent(ProfileEvent.OpenAvatarPicker) }
             )
-        }
-        item {
             XpBar(
                 level          = state.level,
                 currentXp      = state.xpIntoLevel,
                 xpForNextLevel = state.xpForNextLevel,
-                modifier       = Modifier.fillMaxWidth()
+                modifier       = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+//                    .padding(bottom = 24.dp) // more space between this and "Achievements"
             )
         }
+//        item {
+//
+//        }
         item {
-            BadgesSection(earnedBadgeIds = state.badges.filter { it.earned }.map { it.id })
+            AchievementsSection(achievements = state.achievements)
         }
     }
 }
@@ -111,17 +111,12 @@ fun ProfileHeader(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Box(
-            modifier         = Modifier
+        AvatarBox(
+            user     = user,
+            modifier = Modifier
                 .size(128.dp)
-                .clip(CircleShape)
-                .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
-                .glassBorder(CircleShape)
-                .clickable { onAvatarClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            AvatarImage(user = user, modifier = Modifier.fillMaxSize())
-        }
+                .clickable { onAvatarClick() }
+        )
 
         Text(
             text       = user.displayName.ifEmpty { "MonoTask User" },
@@ -131,197 +126,67 @@ fun ProfileHeader(
     }
 }
 
-// ====================
-// Shared avatar image
-// ====================
-
-@Composable
-fun AvatarImage(user: User, modifier: Modifier = Modifier) {
-    val scaledModifier = modifier.graphicsLayer {
-        scaleX       = 0.95f
-        scaleY       = 0.95f
-        translationY = size.height * 0.05f
-    }
-    if (user.isAutoAvatar) {
-        AsyncImage(
-            model              = user.resolvedAvatarUrl(),
-            contentDescription = "Avatar",
-            contentScale       = ContentScale.Fit,
-            modifier           = scaledModifier
-        )
-    } else {
-        Image(
-            painter            = painterResource(user.avatarPreset),
-            contentDescription = "Avatar",
-            contentScale       = ContentScale.Fit,
-            modifier           = scaledModifier
-        )
-    }
-}
 
 // ====================
-// Avatar Picker (bottom sheet)
+// Preview
 // ====================
-
-@Composable
-fun AvatarPicker(
-    user: User,
-    onSelect: (Int) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val options: List<DiceBearHelper.AvatarPreset?> = listOf(null) + DiceBearHelper.PRESETS
-
-    BottomSheet(
-        title            = "Choose Your Avatar",
-        onDismissRequest = onDismiss
-    ) {
-        LazyVerticalGrid(
-            columns               = GridCells.Fixed(3),
-            contentPadding        = PaddingValues(Constants.Theme.SCREEN_PADDING),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement   = Arrangement.spacedBy(16.dp),
-            modifier              = Modifier.wrapContentHeight().heightIn(max = 360.dp)
-        ) {
-            items(options) { preset ->
-                val displayUser = if (preset == null) user.copy(avatarPreset = 0)
-                                  else user.copy(avatarPreset = preset.drawable)
-                val isSelected  = (preset == null && user.isAutoAvatar) ||
-                                   preset?.drawable == user.avatarPreset
-                Box(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .clip(CircleShape)
-                        .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
-                        .then(
-                            if (isSelected) Modifier.border(
-                                shape = CircleShape,
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            else Modifier.glassBorder(shape = CircleShape, width = 3.dp)
-                        )
-                        .clickable { onSelect(preset?.drawable ?: 0) }
-                ) {
-                    AvatarImage(user = displayUser, modifier = Modifier.fillMaxSize())
-                }
-            }
-        }
-    }
-}
-
-
-// ====================
-// All defined badges. Always shown, locked/greyed if not earned
-// ====================
-
-private val allBadges = listOf(
-    Badge(id = BadgeIds.TOP_PERFORMER,    name = "Top Performer",    description = "Complete 10 high-importance tasks in a row"),
-    Badge(id = BadgeIds.CONSISTENCY_KING, name = "Consistency King", description = "Stay active for 7 consecutive days"),
-    Badge(id = BadgeIds.KNOWLEDGE_SEEKER, name = "Knowledge Seeker", description = "Complete 5 tasks tagged 'study'"),
-    Badge(id = BadgeIds.FAST_FINISHER,    name = "Fast Finisher",    description = "Complete a task within 1 hour of adding it"),
-)
-
-@Composable
-private fun BadgesSection(earnedBadgeIds: List<String>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text       = "Badges",
-            style      = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        allBadges.chunked(2).forEach { rowBadges ->
-            Row(
-                modifier              = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                rowBadges.forEach { badge ->
-                    BadgeCard(
-                        badge    = badge,
-                        earned   = badge.id in earnedBadgeIds,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                if (rowBadges.size < 2) Spacer(Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun BadgeCard(
-    badge: Badge,
-    earned: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val containerColor = if (earned)
-        MaterialTheme.colorScheme.primaryContainer
-    else
-        MaterialTheme.colorScheme.surfaceVariant
-
-    val contentColor = if (earned)
-        MaterialTheme.colorScheme.onPrimaryContainer
-    else
-        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(containerColor)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text     = if (earned) badgeEmoji(badge.id) else "🔒",
-            fontSize = 32.sp
-        )
-        Text(
-            text       = badge.name,
-            style      = MaterialTheme.typography.labelLarge,
-            color      = contentColor,
-            fontWeight = if (earned) FontWeight.SemiBold else FontWeight.Normal,
-            textAlign  = TextAlign.Center
-        )
-        Text(
-            text      = badge.description,
-            style     = MaterialTheme.typography.bodySmall,
-            color     = contentColor,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-private fun badgeEmoji(badgeId: String): String = when (badgeId) {
-    BadgeIds.TOP_PERFORMER    -> "⚡"
-    BadgeIds.CONSISTENCY_KING -> "👑"
-    BadgeIds.KNOWLEDGE_SEEKER -> "📚"
-    BadgeIds.FAST_FINISHER    -> "🚀"
-    else                      -> "🏅"
-}
-
 
 @Preview(showBackground = true)
 @Composable
 private fun ProfileTabPreview() {
+    fun tierDef(tier: AchievementTier, name: String, desc: String) = AchievementMilestone(tier, name, desc)
+
     MonoTaskTheme {
         ProfileTab(
             state = ProfileUiState.Ready(
-                user           = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),
-                level          = 25,
+                user           = User(id = "1", displayName = "Sagi Einav", level = 14, xp = 12450),
+                level          = 14,
                 levelProgress  = 0.73f,
-                xpIntoLevel    = 2115,
-                xpForNextLevel = 2326,
-                badges         = listOf(
-                    Badge(id = BadgeIds.TOP_PERFORMER,    name = "Top Performer",    description = "Complete 10 high-importance tasks in a row", earned = true),
-                    Badge(id = BadgeIds.CONSISTENCY_KING, name = "Consistency King", description = "Stay active for 7 consecutive days",          earned = false),
-                    Badge(id = BadgeIds.KNOWLEDGE_SEEKER, name = "Knowledge Seeker", description = "Add 20 tasks with descriptions",              earned = true),
-                    Badge(id = BadgeIds.FAST_FINISHER,    name = "Fast Finisher",    description = "Complete a task within 1 hour of adding it",  earned = false)
+                xpIntoLevel    = 572,
+                xpForNextLevel = 1443,
+                achievements   = listOf(
+                    Achievement(
+                        category   = AchievementCategory.STREAKS,
+//                        emoji      = "🔥",
+                        iconRes = R.drawable.ic_fire,
+                        earnedTier = AchievementTier.SILVER,
+                        bronze     = tierDef(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                        silver     = tierDef(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
+                        gold       = tierDef(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+                    ),
+                    Achievement(
+                        category   = AchievementCategory.TASK_VOLUME,
+//                        emoji      = "✅",
+                        iconRes = R.drawable.ic_task_alt,
+                        earnedTier = AchievementTier.GOLD,
+                        bronze     = tierDef(AchievementTier.BRONZE, "Warming Up",   "Complete 5 tasks"),
+                        silver     = tierDef(AchievementTier.SILVER, "Century",      "Complete 100 tasks"),
+                        gold       = tierDef(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
+                    ),
+                    Achievement(
+                        category   = AchievementCategory.DISCIPLINE,
+//                        emoji      = "🧠",
+                        iconRes = R.drawable.ic_bolt,
+                        earnedTier = AchievementTier.BRONZE,
+                        bronze     = tierDef(AchievementTier.BRONZE, "No Excuses",    "50%+ ace ratio (20+ tasks)"),
+                        silver     = tierDef(AchievementTier.SILVER, "Iron Will",     "70%+ ace ratio (20+ tasks)"),
+                        gold       = tierDef(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio (20+ tasks)")
+                    ),
+                    Achievement(
+                        category   = AchievementCategory.XP_LEVELING,
+//                        emoji      = "🏅",
+                        iconRes = R.drawable.ic_star_shine,
+                        earnedTier = null,
+                        bronze     = tierDef(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
+                        silver     = tierDef(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
+                        gold       = tierDef(AchievementTier.GOLD,   "Legend",      "Reach level 30")
+                    ),
                 ),
-                activityData   = emptyList()
+                activityData = emptyList()
             ),
             topPadding    = 0.dp,
             bottomPadding = 0.dp,
-            onEvent = {}
+            onEvent       = {}
         )
     }
 }

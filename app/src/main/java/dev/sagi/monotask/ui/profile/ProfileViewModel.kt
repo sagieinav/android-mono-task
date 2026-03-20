@@ -7,6 +7,7 @@ import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
+import dev.sagi.monotask.domain.util.AchievementEngine
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -41,8 +42,8 @@ class ProfileViewModel(
 
     private lateinit var userId: String
 
-    private var observing          = false  // safe: only touched on Main dispatcher
-    private var statisticsLoaded   = false  // guard: loadStatisticsData runs once
+    private var observing        = false  // safe: only touched on Main dispatcher
+    private var statisticsLoaded = false  // guard: loadStatisticsData runs once
 
     init {
         viewModelScope.launch { userId = AuthUtils.awaitUid() }
@@ -54,14 +55,14 @@ class ProfileViewModel(
 
     fun onEvent(event: ProfileEvent) {
         when (event) {
-            is ProfileEvent.RefreshPage   -> refreshPage()
-            is ProfileEvent.SearchUsers   -> searchUsers(event.query)
-            is ProfileEvent.AddFriend     -> addFriend(event.friendId)
-            is ProfileEvent.UpdateProfile -> updateProfile(event.displayName)
-            is ProfileEvent.SelectAvatar  -> selectAvatar(event.preset)
-            is ProfileEvent.OpenAvatarPicker  -> setAvatarPicker(true)
+            is ProfileEvent.RefreshPage         -> refreshPage()
+            is ProfileEvent.SearchUsers         -> searchUsers(event.query)
+            is ProfileEvent.AddFriend           -> addFriend(event.friendId)
+            is ProfileEvent.UpdateProfile       -> updateProfile(event.displayName)
+            is ProfileEvent.SelectAvatar        -> selectAvatar(event.preset)
+            is ProfileEvent.OpenAvatarPicker    -> setAvatarPicker(true)
             is ProfileEvent.DismissAvatarPicker -> setAvatarPicker(false)
-            is ProfileEvent.ResetAvatar   -> selectAvatar(0)
+            is ProfileEvent.ResetAvatar         -> selectAvatar(0)
         }
     }
 
@@ -95,17 +96,15 @@ class ProfileViewModel(
                     levelProgress  = progress,
                     xpIntoLevel    = xpIntoLevel,
                     xpForNextLevel = xpForNext - xpForCurrent,
+                ) ?: ProfileUiState.Ready(
+                    user           = user,
+                    level          = level,
+                    levelProgress  = progress,
+                    xpIntoLevel    = xpIntoLevel,
+                    xpForNextLevel = xpForNext - xpForCurrent,
+                    achievements   = emptyList(),
                 )
-                    ?: ProfileUiState.Ready(
-                        user           = user,
-                        level          = level,
-                        levelProgress  = progress,
-                        xpIntoLevel    = xpIntoLevel,
-                        xpForNextLevel = xpForNext - xpForCurrent,
-                        badges         = emptyList(),
-                    )
 
-                // Load statistics data after user is known, runs in parallel
                 loadStatisticsData(user.id)
             }
             .launchIn(viewModelScope)
@@ -129,24 +128,26 @@ class ProfileViewModel(
 
     private fun fetchStatistics(uid: String) {
         viewModelScope.launch {
-            // All fetches run concurrently
             launch {
                 val activity = userRepository.getActivityOnce(uid, UserRepository.thisMonthRange)
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
                 _uiState.value = current.copy(activityData = activity)
             }
             launch {
-                val topDay = userRepository.getTopPerformanceDay(uid)
+                val topDay  = userRepository.getTopPerformanceDay(uid)
                 val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
                 _uiState.value = current.copy(topPerformanceDay = topDay)
             }
             launch {
-                val tasks = taskRepository.getAllCompletedTasksOnce(uid)
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
-                _uiState.value = current.copy(completedTasks = tasks)
+                val tasks    = taskRepository.getAllCompletedTasksOnce(uid)
+                val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                val achievements = AchievementEngine.evaluate(tasks, current.level)
+                _uiState.value = current.copy(
+                    completedTasks = tasks,
+                    achievements   = achievements
+                )
             }
 
-            // Wait for all child coroutines to complete, then clear refreshing
             _isRefreshing.value = false
         }
     }
@@ -174,7 +175,7 @@ class ProfileViewModel(
         viewModelScope.launch {
             try {
                 userRepository.updateAvatarPreset(userId, preset)
-                setAvatarPicker(false)   // auto-dismiss after selection
+                setAvatarPicker(false)
             } catch (e: Exception) {
                 _uiEffect.emit(ProfileUiEffect.ShowError("Failed to update avatar: ${e.message}"))
             }

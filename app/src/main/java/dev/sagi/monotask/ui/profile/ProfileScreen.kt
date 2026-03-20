@@ -1,6 +1,5 @@
 package dev.sagi.monotask.ui.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -166,7 +165,7 @@ private fun ProfileScreenPreview() {
                         levelProgress = 0.73f,
                         xpIntoLevel = 2115,
                         xpForNextLevel = 2326,
-                        badges = emptyList(),
+                        achievements = emptyList(),
                         activityData = emptyList()
                     )
                 )

@@ -29,6 +29,7 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
+import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.harabara
 
 enum class TagSize { DEFAULT, SMALL }
@@ -59,7 +60,8 @@ fun TaskTag(
     val borderWidth = if (size == TagSize.SMALL) 1.dp else 1.5.dp
 
     Surface(
-        modifier = modifier.border(borderWidth, borderColor, tagShape),
+        modifier = modifier
+            .border(borderWidth, borderColor, tagShape),
         shape = tagShape,
         color = containerColor,
     ) {

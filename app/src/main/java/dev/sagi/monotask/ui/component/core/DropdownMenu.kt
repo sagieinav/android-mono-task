@@ -2,7 +2,6 @@ package dev.sagi.monotask.ui.component.core
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -94,33 +93,11 @@ fun DropdownTriggerPill(
 }
 
 
-
-// ========================================
-// Material Style Container
-// ========================================
-@Composable
-fun MonoDropdownMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismiss,
-        modifier = modifier.background(MaterialTheme.colorScheme.surfaceContainerLow),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        content()
-    }
-}
-
-
 // ========================================
 // Glass Style Container
 // ========================================
 @Composable
-fun MonoDropdownMenuGlass(
+fun GlassDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
@@ -189,7 +166,7 @@ fun MonoDropdownMenuGlass(
 }
 
 @Composable
-fun MonoDropdownMenuGlass(
+fun GlassDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     tapOffset: IntOffset,
@@ -210,7 +187,7 @@ fun MonoDropdownMenuGlass(
             )
         }
     }
-    MonoDropdownMenuGlass(
+    GlassDropdownMenu(
         expanded             = expanded,
         onDismiss            = onDismiss,
         popupPositionProvider = positionProvider,
@@ -220,11 +197,14 @@ fun MonoDropdownMenuGlass(
 }
 
 @Composable
-fun MonoDropdownItem(
+fun GlassDropdownItem(
     label: String,
     selected: Boolean = false,
     onClick: () -> Unit
 ) {
+    val selectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+    val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -246,7 +226,7 @@ fun MonoDropdownItem(
             text = label,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            color = if (selected) selectedColor else unselectedColor
         )
 
         // 'selected' icon inside a box, to ensure padding on long titles:
@@ -255,6 +235,7 @@ fun MonoDropdownItem(
                 Icon(
                     painter = painterResource(R.drawable.ic_check_circle),
                     contentDescription = null,
+                    tint = selectedColor,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -268,7 +249,7 @@ fun MonoDropdownItem(
 // Generic Action/Footer Item
 // ========================================
 @Composable
-fun MonoDropdownActionItem(
+fun GlassDropdownActionItem(
     label: String,
     iconRes: Int,
     color: Color = MaterialTheme.colorScheme.onSurface,
@@ -331,7 +312,7 @@ private fun TriggerPillOpenPreview() {
 private fun DropdownItemPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
-            MonoDropdownItem(label = "Education", selected = false, onClick = {})
+            GlassDropdownItem(label = "Education", selected = false, onClick = {})
         }
     }
 }
@@ -341,7 +322,7 @@ private fun DropdownItemPreview() {
 private fun DropdownItemSelectedPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
-            MonoDropdownItem(
+            GlassDropdownItem(
                 label = "Education",
                 selected = true,
                 onClick = {}
@@ -355,7 +336,7 @@ private fun DropdownItemSelectedPreview() {
 private fun DropdownActionItemPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
-            MonoDropdownActionItem(label = "New Workspace", iconRes = R.drawable.ic_add, onClick = {})
+            GlassDropdownActionItem(label = "New Workspace", iconRes = R.drawable.ic_add, onClick = {})
         }
     }
 }
