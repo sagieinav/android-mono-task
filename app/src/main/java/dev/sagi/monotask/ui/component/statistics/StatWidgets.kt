@@ -43,9 +43,7 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
 import dev.sagi.monotask.ui.component.core.ValueLabel
-import dev.sagi.monotask.ui.theme.AceGoldDim
-import dev.sagi.monotask.ui.theme.StreakFire
-import dev.sagi.monotask.ui.theme.XpViolet
+import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.circleGlow
@@ -64,14 +62,9 @@ private val ContentTopPadding = 14.dp
 private val ContentBottomPadding = 10.dp
 private val ContentHorizPadding = 16.dp
 
-// The cutout circle bottom edge relative to content top — used to clear date label
-private val CutoutClearance  = CircleRadius * 2 - ContentTopPadding + 2.dp
 
 private val SmallCardHeight  = 140.dp
 private val MediumCardHeight = 160.dp
-
-private val StreakFireColor  = StreakFire
-private val XpVioletColor    = XpViolet
 
 private val DateFormatter    = DateTimeFormatter.ofPattern("EEE, MMM d")
 
@@ -355,7 +348,7 @@ fun AceCompletionCard(aceCount: Int, totalTasks: Int, modifier: Modifier = Modif
         value       = "$pct%",
         unit        = "ratio",
         icon        = painterResource(R.drawable.ic_ace),
-        accentColor = AceGoldDim,
+        accentColor = MaterialTheme.customColors.aceDim,
         subtitle    = "$aceCount ace tasks",
         modifier    = modifier
     )
@@ -368,7 +361,7 @@ fun TotalXpCard(totalXp: Int, modifier: Modifier = Modifier) {
         value       = totalXp.toString(),
         unit        = "xp",
         icon        = painterResource(R.drawable.ic_xp),
-        accentColor = XpVioletColor,
+        accentColor = MaterialTheme.customColors.xp,
         modifier    = modifier
     )
 }
@@ -381,7 +374,7 @@ fun StreakCard(activityData: List<DailyActivity>, modifier: Modifier = Modifier)
         value       = recordDays.toString(),
         unit        = if (recordDays == 1) "day" else "days",
         icon        = painterResource(R.drawable.ic_fire),
-        accentColor = StreakFireColor,
+        accentColor = MaterialTheme.customColors.streak,
         modifier    = modifier
     )
 }
@@ -404,7 +397,7 @@ fun TopPerformanceCard(
         value         = xp.toString(),
         unit          = "xp",
         icon          = painterResource(R.drawable.ic_top_performance),
-        accentColor   = AceGoldDim,
+        accentColor   = MaterialTheme.customColors.aceDim,
         dateLabel     = date,
         trailingValue = tasks.toString(),
         trailingUnit  = if (tasks == 1) "task" else "tasks",

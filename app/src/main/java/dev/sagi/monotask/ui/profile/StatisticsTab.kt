@@ -35,7 +35,7 @@ import dev.sagi.monotask.ui.component.statistics.LineChart
 import dev.sagi.monotask.ui.component.statistics.TopPerformanceCard
 import dev.sagi.monotask.ui.component.statistics.TotalTasksCard
 import dev.sagi.monotask.ui.component.statistics.TotalXpCard
-import dev.sagi.monotask.ui.theme.AceGold
+import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import java.time.LocalDate
 
@@ -106,7 +106,7 @@ fun StatisticsTab(
                         headlineUnit = "xp",
                         points       = ActivityStats.buildXpPoints(weekActivity),
                         trendPercent = ActivityStats.computeXpTrend(weekActivity),
-                        lineColor    = AceGold,
+                        lineColor    = MaterialTheme.customColors.xp,
                     )
 
                     // Tasks this week (bar graph)

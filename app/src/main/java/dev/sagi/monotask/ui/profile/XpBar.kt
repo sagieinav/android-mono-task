@@ -20,10 +20,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.lerp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.customColors
 
 
 @Composable
@@ -91,14 +94,12 @@ fun XpBar(
                     .fillMaxWidth(animatable.value)
                     .fillMaxHeight()
                     .clip(CircleShape)
-                    .background(
+                    .background(run {
+                        val xpColor = MaterialTheme.customColors.xp
                         Brush.horizontalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primaryContainer.copy(0.7f),
-                                MaterialTheme.colorScheme.primary
-                            )
+                            colors = listOf(lerp(xpColor, Color.White, 0.3f), xpColor)
                         )
-                    )
+                    })
             )
         }
 

@@ -43,7 +43,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import dev.sagi.monotask.domain.util.XpEvents
-import dev.sagi.monotask.ui.theme.AceGoldDim
+import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.glassBorder
 
 
@@ -155,7 +155,7 @@ fun KanbanCard(
             message          = "Your current focus task will be snoozed, " +
                                 "receiving a ${XpEvents.SnoozeOption.MANUAL.penalty} XP penalty.",
             confirmLabel     = "Focus",
-            confirmColor     = AceGoldDim,
+            confirmColor     = MaterialTheme.customColors.aceDim,
             onConfirm        = { onKanbanEvent(KanbanEvent.FocusNow(task)) }
         )
         PendingAction.RESTORE -> GlassConfirmDialog(
@@ -181,8 +181,8 @@ fun KanbanCard(
 // ========================================
 // Kanban Card Context Menu
 // ========================================
-// Active:  Edit Task | Focus Now | Delete Task
-// Archive: Restore Task | Delete Task
+// Active:  Edit Task / Focus Now / Delete Task
+// Archive: Restore Task / Delete Task
 
 @Composable
 fun KanbanCardDropdown(

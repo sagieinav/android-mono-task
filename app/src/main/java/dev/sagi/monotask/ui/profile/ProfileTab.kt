@@ -46,7 +46,7 @@ import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.util.Constants
 
 // ====================
-// Tab 1 — Profile: XP bar + achievements grid
+// Tab 1: Profile: XP bar + achievements grid
 // ====================
 
 @Composable
@@ -139,8 +139,6 @@ fun ProfileHeader(
 @Preview(showBackground = true)
 @Composable
 private fun ProfileTabPreview() {
-    fun tierDef(tier: AchievementTier, name: String, desc: String) = AchievementMilestone(tier, name, desc)
-
     MonoTaskTheme {
         ProfileTab(
             state = ProfileUiState.Ready(
@@ -152,39 +150,43 @@ private fun ProfileTabPreview() {
                 achievements   = listOf(
                     Achievement(
                         category   = AchievementCategory.STREAKS,
-//                        emoji      = "🔥",
                         iconRes = R.drawable.ic_fire,
                         earnedTier = AchievementTier.SILVER,
-                        bronze     = tierDef(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
-                        silver     = tierDef(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
-                        gold       = tierDef(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+                        milestones = listOf(
+                            AchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                            AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
+                            AchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+            )
                     ),
                     Achievement(
                         category   = AchievementCategory.TASK_VOLUME,
-//                        emoji      = "✅",
                         iconRes = R.drawable.ic_task_alt,
                         earnedTier = AchievementTier.GOLD,
-                        bronze     = tierDef(AchievementTier.BRONZE, "Warming Up",   "Complete 5 tasks"),
-                        silver     = tierDef(AchievementTier.SILVER, "Century",      "Complete 100 tasks"),
-                        gold       = tierDef(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
+                        milestones = listOf(
+                            AchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                            AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
+                            AchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+            )
                     ),
                     Achievement(
                         category   = AchievementCategory.DISCIPLINE,
-//                        emoji      = "🧠",
                         iconRes = R.drawable.ic_bolt,
                         earnedTier = AchievementTier.BRONZE,
-                        bronze     = tierDef(AchievementTier.BRONZE, "No Excuses",    "50%+ ace ratio (20+ tasks)"),
-                        silver     = tierDef(AchievementTier.SILVER, "Iron Will",     "70%+ ace ratio (20+ tasks)"),
-                        gold       = tierDef(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio (20+ tasks)")
+                        milestones = listOf(
+                            AchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                            AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
+                            AchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+            )
                     ),
                     Achievement(
                         category   = AchievementCategory.XP_LEVELING,
-//                        emoji      = "🏅",
                         iconRes = R.drawable.ic_star_shine,
                         earnedTier = null,
-                        bronze     = tierDef(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
-                        silver     = tierDef(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
-                        gold       = tierDef(AchievementTier.GOLD,   "Legend",      "Reach level 30")
+                        milestones = listOf(
+                            AchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                            AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
+                            AchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+            )
                     ),
                 ),
                 activityData = emptyList()

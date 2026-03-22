@@ -6,15 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,34 +21,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.AchievementCategory
-import dev.sagi.monotask.data.model.AchievementColorBronze
-import dev.sagi.monotask.data.model.AchievementColorGold
-import dev.sagi.monotask.data.model.AchievementColorSilver
 import dev.sagi.monotask.data.model.AchievementMilestone
 import dev.sagi.monotask.data.model.AchievementTier
-import dev.sagi.monotask.ui.component.core.GlassDialog
 import dev.sagi.monotask.ui.component.core.GlassTooltip
-import dev.sagi.monotask.ui.component.core.SectionTitle
 import dev.sagi.monotask.ui.theme.HexagonShape
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
-import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.glassBorderPremium
 import dev.sagi.monotask.ui.theme.monoShadow
+import android.graphics.Color as AndroidColor
+import dev.sagi.monotask.ui.theme.customColors
+
+@Composable
+private fun AchievementTier?.badgeColor(): Color {
+    val colors = MaterialTheme.customColors
+    return when (this) {
+        AchievementTier.GOLD   -> colors.achievementGold
+        AchievementTier.SILVER -> colors.achievementSilver
+        AchievementTier.BRONZE -> colors.achievementBronze
+        null                   -> colors.achievementLocked
+    }
+}
 
 enum class AchievementBadgeStyle { FULL, CONCISE }
 
@@ -76,7 +79,7 @@ fun AchievementSectionRow(
 //                hexSizeFraction = 1f,
                 modifier        = Modifier.weight(1f)
                     // padding decreases the badges' size
-                    .padding(horizontal = 2.dp)
+//                    .padding(horizontal = 2.dp)
             )
         }
     }
@@ -92,8 +95,14 @@ fun HexagonAchievementBadge(
     badgeStyle      : AchievementBadgeStyle = AchievementBadgeStyle.FULL,
     modifier        : Modifier = Modifier
 ) {
-    val tierColor = achievement.tierColor
-    val iconColor = lerp(tierColor, Color.Black, fraction = 0.15f)
+    val tierColor = achievement.earnedTier.badgeColor()
+    // Icon Color: saturate a bit, mix with a bit of black, then reduce alpha
+    val iconColor = lerp(
+        tierColor.saturate(0.15f),
+        Color.Black,
+        fraction = 0.15f
+    )
+        .copy(alpha = 0.8f)
     val alpha = if (achievement.isLocked) 0.35f else 1f
 
     var showTooltip by remember { mutableStateOf(false) }
@@ -189,19 +198,17 @@ private fun AchievementTooltipContent(
                 }
             }
             // Line 2: NEXT tier description
-            achievement.nextTierColor?.let { nextColor ->
+            achievement.nextTier?.let { nextMilestone ->
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text       = "NEXT",
                         fontWeight = FontWeight.Bold,
-                        color      = nextColor
+                        color      = nextMilestone.tier.badgeColor()
                     )
-                    achievement.nextTier?.description?.let { text ->
-                        Text(
-                            text  = text,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-                        )
-                    }
+                    Text(
+                        text  = nextMilestone.description,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                    )
                 }
             }
         }
@@ -230,6 +237,14 @@ private fun AchievementTooltipContent(
     }
 }
 
+// Helper for saturating the icons' colors
+fun Color.saturate(boost: Float): Color {
+    val hsv = FloatArray(3)
+    AndroidColor.colorToHSV(this.toArgb(), hsv)
+    hsv[1] = (hsv[1] + boost).coerceIn(0f, 1f) // additive boost keeps low-saturation tiers consistent
+    return Color(AndroidColor.HSVToColor(hsv))
+}
+
 
 // ========== Preview ==========
 private fun previewAchievementMilestone(tier: AchievementTier, name: String, description: String) =
@@ -245,33 +260,41 @@ private fun AchievementsSectionRowPreview() {
                     category   = AchievementCategory.STREAKS,
                     iconRes    = R.drawable.ic_fire,
                     earnedTier = AchievementTier.SILVER,
-                    bronze     = previewAchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
-                    silver     = previewAchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
-                    gold       = previewAchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+                    milestones = listOf(
+                        previewAchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                        previewAchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
+                        previewAchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+                    )
                 ),
                 Achievement(
                     category   = AchievementCategory.TASK_VOLUME,
                     iconRes    = R.drawable.ic_task_alt,
                     earnedTier = AchievementTier.GOLD,
-                    bronze     = previewAchievementMilestone(AchievementTier.BRONZE, "Warming Up",   "Complete 5 tasks"),
-                    silver     = previewAchievementMilestone(AchievementTier.SILVER, "Century",      "Complete 100 tasks"),
-                    gold       = previewAchievementMilestone(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
+                    milestones = listOf(
+                        previewAchievementMilestone(AchievementTier.BRONZE, "Warming Up",   "Complete 5 tasks"),
+                        previewAchievementMilestone(AchievementTier.SILVER, "Century",      "Complete 100 tasks"),
+                        previewAchievementMilestone(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
+                    )
                 ),
                 Achievement(
                     category   = AchievementCategory.DISCIPLINE,
                     iconRes    = R.drawable.ic_bolt,
                     earnedTier = AchievementTier.BRONZE,
-                    bronze     = previewAchievementMilestone(AchievementTier.BRONZE, "No Excuses",    "50%+ ace ratio (20+ tasks)"),
-                    silver     = previewAchievementMilestone(AchievementTier.SILVER, "Iron Will",     "70%+ ace ratio (20+ tasks)"),
-                    gold       = previewAchievementMilestone(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio (20+ tasks)")
+                    milestones = listOf(
+                        previewAchievementMilestone(AchievementTier.BRONZE, "No Excuses",    "50%+ ace ratio (20+ tasks)"),
+                        previewAchievementMilestone(AchievementTier.SILVER, "Iron Will",     "70%+ ace ratio (20+ tasks)"),
+                        previewAchievementMilestone(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio (20+ tasks)")
+                    )
                 ),
                 Achievement(
                     category   = AchievementCategory.XP_LEVELING,
                     iconRes    = R.drawable.ic_star_shine,
                     earnedTier = null,
-                    bronze     = previewAchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
-                    silver     = previewAchievementMilestone(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
-                    gold       = previewAchievementMilestone(AchievementTier.GOLD,   "Legend",      "Reach level 30")
+                    milestones = listOf(
+                        previewAchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
+                        previewAchievementMilestone(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
+                        previewAchievementMilestone(AchievementTier.GOLD,   "Legend",      "Reach level 30")
+                    )
                 )
             )
         )

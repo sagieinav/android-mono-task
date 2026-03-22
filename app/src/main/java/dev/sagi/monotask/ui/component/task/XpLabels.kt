@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,7 +49,7 @@ fun XpLabelCurrent(xp: Int, modifier: Modifier = Modifier) {
             painter = painterResource(R.drawable.ic_xp),
             contentDescription = null,
             modifier = modifier.size(17.dp),
-            tint = MaterialTheme.colorScheme.primary
+            tint = MaterialTheme.customColors.xp
         )
         Text(
             text = "$xp XP",
@@ -59,7 +60,7 @@ fun XpLabelCurrent(xp: Int, modifier: Modifier = Modifier) {
                         trim = LineHeightStyle.Trim.Both
                     )),
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.customColors.xp
         )
     }
 }
@@ -84,7 +85,7 @@ fun XpLabelCompletion(
     val offsetY = remember { Animatable(XP_INITIAL_OFFSET_Y) }
     val alpha   = remember { Animatable(0f) }
     val shimmer = remember { Animatable(0f) }
-    val color   = MaterialTheme.colorScheme.primary
+    val color   = MaterialTheme.customColors.xp
 
     LaunchedEffect(visible) {
         if (visible) {

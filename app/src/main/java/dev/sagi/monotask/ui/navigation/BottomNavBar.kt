@@ -38,11 +38,10 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.Constants
 
 enum class NavTab(val label: String, val iconRes: Int) {
-    BOARD("Board", R.drawable.ic_kanban),
-//    POMODORO("Pomodoro", R.drawable.ic_settings),
+    BOARD("Board", R.drawable.ic_stack_tick),
+//    BRIEFING("Briefing", R.drawable.ic_flag_bolt),
     FOCUS("Focus", R.drawable.ic_focus),
-//    STATISTICS("Statistics", R.drawable.ic_statistics),
-//    SETTINGS("Settings", R.drawable.ic_settings),
+//    STATISTICS("Statistics", R.drawable.ic_trending_up),
     PROFILE("You", R.drawable.ic_user_circle)
 }
 
@@ -112,7 +111,7 @@ private fun RowScope.NavDockItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val iconSize = 38.dp
+    val iconSize = 36.dp
 
     Box(
         modifier = Modifier
@@ -143,7 +142,6 @@ private fun RowScope.NavDockItem(
 @Preview(showBackground = true)
 @Composable
 fun BottomNavBarPreview() {
-//    val hazeState = LocalHazeState.current
     var selected by remember { mutableStateOf(NavTab.FOCUS) }
 
     MonoTaskTheme {

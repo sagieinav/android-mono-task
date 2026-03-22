@@ -29,9 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import dev.sagi.monotask.data.model.AchievementColorBronze
-import dev.sagi.monotask.data.model.AchievementColorSilver
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.nationalPark
 import kotlinx.coroutines.delay
 
@@ -140,7 +139,7 @@ private fun GlassTooltipPreview() {
                 Text(
                     text       = "CURRENT",
                     fontWeight = FontWeight.Bold,
-                    color      = AchievementColorBronze
+                    color      = MaterialTheme.customColors.achievementBronze
                 )
                 Text(
                     text  = "Complete 5 tasks",
@@ -152,7 +151,7 @@ private fun GlassTooltipPreview() {
                 Text(
                     text       = "NEXT",
                     fontWeight = FontWeight.Bold,
-                    color      = AchievementColorSilver
+                    color      = MaterialTheme.customColors.achievementSilver
                 )
                 Text(
                     text  = "Complete 100 tasks",

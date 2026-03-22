@@ -55,7 +55,7 @@ import dev.sagi.monotask.ui.component.core.StreakChip
 import dev.sagi.monotask.ui.component.core.StreakChipSize
 import dev.sagi.monotask.ui.component.statistics.LineChart
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.XpViolet
+import dev.sagi.monotask.ui.theme.customColors
 
 // ====================
 // Tab 3: Social. invite link + friends list
@@ -319,7 +319,7 @@ private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
                 headlineUnit = "xp",
                 points       = xpPoints,
                 trendPercent = xpTrend,
-                lineColor    = XpViolet,
+                lineColor    = MaterialTheme.customColors.xp,
                 animate      = false,
                 chartHeight  = 80.dp,
                 shape = MaterialTheme.shapes.medium,

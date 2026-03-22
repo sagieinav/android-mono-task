@@ -1,6 +1,5 @@
 package dev.sagi.monotask.domain.util
 
-import androidx.compose.ui.res.painterResource
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.AchievementCategory
 import dev.sagi.monotask.data.model.Achievement
@@ -15,18 +14,8 @@ object AchievementEngine {
         val templates = evaluate(emptyList(), level)
         return templates.map { template ->
             val computedTier = when (template.category) {
-                AchievementCategory.STREAKS     -> when {
-                    stats.longestStreak >= 30 -> AchievementTier.GOLD
-                    stats.longestStreak >= 7  -> AchievementTier.SILVER
-                    stats.longestStreak >= 3  -> AchievementTier.BRONZE
-                    else                      -> null
-                }
-                AchievementCategory.TASK_VOLUME -> when {
-                    stats.totalTasksCompleted >= 500 -> AchievementTier.GOLD
-                    stats.totalTasksCompleted >= 100 -> AchievementTier.SILVER
-                    stats.totalTasksCompleted >= 5   -> AchievementTier.BRONZE
-                    else                             -> null
-                }
+                AchievementCategory.STREAKS     -> tierFor(stats.longestStreak,        bronze = 3,    silver = 7,   gold = 30)
+                AchievementCategory.TASK_VOLUME -> tierFor(stats.totalTasksCompleted,  bronze = 5,    silver = 100, gold = 500)
                 AchievementCategory.DISCIPLINE  -> if (stats.totalTasksCompleted >= 20) {
                     val ratio = stats.aceCount.toFloat() / stats.totalTasksCompleted
                     when {
@@ -36,12 +25,7 @@ object AchievementEngine {
                         else           -> null
                     }
                 } else null
-                AchievementCategory.XP_LEVELING -> when {
-                    level >= 30 -> AchievementTier.GOLD
-                    level >= 15 -> AchievementTier.SILVER
-                    level >= 5  -> AchievementTier.BRONZE
-                    else        -> null
-                }
+                AchievementCategory.XP_LEVELING -> tierFor(level, bronze = 5, silver = 15, gold = 30)
             }
             // earnedAchievements is the source of truth for previously-reached tiers.
             // Raw counter fields (e.g. longestStreak) can be stale for older users,
@@ -50,6 +34,13 @@ object AchievementEngine {
                 ?.let { runCatching { AchievementTier.valueOf(it) }.getOrNull() }
             template.copy(earnedTier = maxTier(computedTier, storedTier))
         }
+    }
+
+    private fun tierFor(value: Int, bronze: Int, silver: Int, gold: Int): AchievementTier? = when {
+        value >= gold   -> AchievementTier.GOLD
+        value >= silver -> AchievementTier.SILVER
+        value >= bronze -> AchievementTier.BRONZE
+        else            -> null
     }
 
     private fun maxTier(a: AchievementTier?, b: AchievementTier?): AchievementTier? {
@@ -69,40 +60,30 @@ object AchievementEngine {
     // ========== Streaks ==========
 
     private fun evaluateStreaks(tasks: List<Task>): Achievement {
-        val streak = maxStreak(tasks)
-        val earned = when {
-            streak >= 30 -> AchievementTier.GOLD
-            streak >= 7  -> AchievementTier.SILVER
-            streak >= 3  -> AchievementTier.BRONZE
-            else         -> null
-        }
         return Achievement(
             category   = AchievementCategory.STREAKS,
-            iconRes       = R.drawable.ic_fire,
-            earnedTier = earned,
-            bronze     = AchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
-            silver     = AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
-            gold       = AchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+            iconRes    = R.drawable.ic_fire,
+            earnedTier = tierFor(maxStreak(tasks), bronze = 3, silver = 7, gold = 30),
+            milestones = listOf(
+                AchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
+                AchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+            )
         )
     }
 
     // ========== Task Volume ==========
 
     private fun evaluateTaskVolume(tasks: List<Task>): Achievement {
-        val count  = tasks.size
-        val earned = when {
-            count >= 500 -> AchievementTier.GOLD
-            count >= 100 -> AchievementTier.SILVER
-            count >= 5   -> AchievementTier.BRONZE
-            else         -> null
-        }
         return Achievement(
             category   = AchievementCategory.TASK_VOLUME,
             iconRes    = R.drawable.ic_task_alt,
-            earnedTier = earned,
-            bronze     = AchievementMilestone(AchievementTier.BRONZE, "Warming Up",   "Complete 5 tasks"),
-            silver     = AchievementMilestone(AchievementTier.SILVER, "Century",      "Complete 100 tasks"),
-            gold       = AchievementMilestone(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
+            earnedTier = tierFor(tasks.size, bronze = 5, silver = 100, gold = 500),
+            milestones = listOf(
+                AchievementMilestone(AchievementTier.BRONZE, "Warming Up",   "Complete 5 tasks"),
+                AchievementMilestone(AchievementTier.SILVER, "Century",      "Complete 100 tasks"),
+                AchievementMilestone(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
+            )
         )
     }
 
@@ -121,30 +102,28 @@ object AchievementEngine {
 
         return Achievement(
             category   = AchievementCategory.DISCIPLINE,
-            iconRes       = R.drawable.ic_bolt,
+            iconRes    = R.drawable.ic_bolt,
             earnedTier = earned,
-            bronze     = AchievementMilestone(AchievementTier.BRONZE, "No Excuses",    "50%+ ace ratio"),
-            silver     = AchievementMilestone(AchievementTier.SILVER, "Iron Will",     "70%+ ace ratio"),
-            gold       = AchievementMilestone(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio")
+            milestones = listOf(
+                AchievementMilestone(AchievementTier.BRONZE, "No Excuses",    "50%+ ace ratio"),
+                AchievementMilestone(AchievementTier.SILVER, "Iron Will",     "70%+ ace ratio"),
+                AchievementMilestone(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio")
+            )
         )
     }
 
     // ========== XP & Leveling ==========
 
     private fun evaluateXpLeveling(level: Int): Achievement {
-        val earned = when {
-            level >= 30 -> AchievementTier.GOLD
-            level >= 15 -> AchievementTier.SILVER
-            level >= 5  -> AchievementTier.BRONZE
-            else        -> null
-        }
         return Achievement(
             category   = AchievementCategory.XP_LEVELING,
-            iconRes       = R.drawable.ic_medal,
-            earnedTier = earned,
-            bronze     = AchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
-            silver     = AchievementMilestone(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
-            gold       = AchievementMilestone(AchievementTier.GOLD,   "Legend",      "Reach level 30")
+            iconRes    = R.drawable.ic_medal,
+            earnedTier = tierFor(level, bronze = 5, silver = 15, gold = 30),
+            milestones = listOf(
+                AchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
+                AchievementMilestone(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
+                AchievementMilestone(AchievementTier.GOLD,   "Legend",      "Reach level 30")
+            )
         )
     }
 

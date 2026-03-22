@@ -7,6 +7,16 @@ import androidx.compose.ui.graphics.Color
 import kotlin.math.abs
 
 data class CustomColors(
+    // Concept colors: single source of truth for semantic roles
+    val xp     : Color,   // XP / level accent
+    val streak : Color,   // streak fire accent
+    val ace    : Color,   // ace task gold accent
+    val aceDim : Color,   // ace gold, slightly darker (borders, muted accents)
+    // Achievement tier badge background colors (static metallic shades)
+    val achievementGold   : Color,
+    val achievementSilver : Color,
+    val achievementBronze : Color,
+    val achievementLocked : Color,
     // Importance
     val importanceHighBackground: Color,
     val importanceHighContent: Color,
@@ -45,6 +55,15 @@ data class CustomColors(
 }
 
 val lightCustomColors = CustomColors(
+    xp              = XpViolet,
+    streak          = StreakFire,
+    ace             = AceGold,
+    aceDim          = AceGoldDim,
+    achievementGold   = Color(0xFFDAA321),
+    achievementSilver = Color(0xFFCACACC),
+    achievementBronze = Color(0xFFB78457),
+    achievementLocked = Color(0xFFE1E1E1),
+
     importanceHighBackground   = ImportanceHighBackground,
     importanceHighContent      = ImportanceHighContent,
     importanceMediumBackground = ImportanceMediumBackground,
