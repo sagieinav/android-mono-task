@@ -174,9 +174,7 @@ fun KanbanColumn(
                 ) { displayedTasks ->
                     LazyColumn(
                         modifier            = Modifier
-                            // internal col padding:
-                            .clip(cardShape)
-                        ,
+                            .clip(cardShape),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         // card padding, handles shadow overflow nicely:
                         contentPadding = PaddingValues(8.dp),

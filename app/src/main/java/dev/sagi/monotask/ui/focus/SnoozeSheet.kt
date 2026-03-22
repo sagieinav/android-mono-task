@@ -28,7 +28,9 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.penaltyRed
 import androidx.compose.ui.text.style.TextAlign
 import dev.sagi.monotask.domain.util.XpEvents
@@ -150,3 +152,27 @@ fun ChooseSnoozeButton(
     }
 }
 
+
+// ========== Preview ==========
+
+@Preview(showBackground = true)
+@Composable
+private fun ChooseSnoozeButtonPreview() {
+    MonoTaskTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ChooseSnoozeButton(
+                icon      = painterResource(R.drawable.ic_due_soon),
+                label     = "Due Soon",
+                xpPenalty = XpEvents.SnoozeOption.BY_DUE_DATE.penalty
+            )
+            ChooseSnoozeButton(
+                icon      = painterResource(R.drawable.ic_skip),
+                label     = "Next in Queue",
+                xpPenalty = XpEvents.SnoozeOption.NEXT_IN_QUEUE.penalty
+            )
+        }
+    }
+}

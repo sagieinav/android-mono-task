@@ -12,9 +12,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import dev.sagi.monotask.ui.auth.AuthUiState
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.component.task.CreateTaskSheet
 import dev.sagi.monotask.ui.component.workspace.CreateWorkspaceDialog
+import dev.sagi.monotask.ui.profile.InviteSheet
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalHazeState
@@ -31,12 +33,15 @@ fun MainScaffold(
     authVM: AuthViewModel,
     settingsVM: SettingsViewModel,
     workspaceVM: WorkspaceViewModel,
-    userSessionVM: UserSessionViewModel
+    userSessionVM: UserSessionViewModel,
+    pendingInviteUid: String? = null,
+    onInviteDismissed: () -> Unit = {}
 ) {
     val hazeState = rememberHazeState()
     val snackbarHostState = remember { SnackbarHostState() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val authState by authVM.uiState.collectAsStateWithLifecycle()
 
     val mainScreens = listOf(Screen.Focus.route, Screen.Kanban.route, Screen.Profile.route)
     val showBottomBar = currentRoute in mainScreens
@@ -104,7 +109,9 @@ fun MainScaffold(
                             lastNavTime = now
                             val route = when (tab) {
                                 NavTab.BOARD -> Screen.Kanban.route
+//                                NavTab.STATISTICS -> {}
                                 NavTab.FOCUS -> Screen.Focus.route
+//                                NavTab.SETTINGS -> Screen.Settings.route
                                 NavTab.PROFILE -> Screen.Profile.route
                             }
                             navController.navigate(route) {
@@ -146,6 +153,13 @@ fun MainScaffold(
                             showCreateWorkspaceDialog = false
                         },
                         onDismiss = { showCreateWorkspaceDialog = false }
+                    )
+                }
+
+                if (pendingInviteUid != null && authState is AuthUiState.SignedIn) {
+                    InviteSheet(
+                        senderUid = pendingInviteUid,
+                        onDismiss = onInviteDismissed
                     )
                 }
             }

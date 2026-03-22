@@ -22,7 +22,6 @@ sealed class ProfileUiState {
         val activityData        : List<DailyActivity>   = emptyList(),
         val topPerformanceDay   : DailyActivity?        = null,           // all-time best, one-shot
         val showAvatarPicker    : Boolean = false
-//        val weekActivityData    : List<DailyActivity>   = emptyList(),
     ) : ProfileUiState()
 }
 
@@ -30,13 +29,11 @@ sealed class ProfileUiState {
 
 sealed interface ProfileEvent {
     data object RefreshPage : ProfileEvent
-    data class SearchUsers(val query: String) : ProfileEvent
-    data class AddFriend(val friendId: String) : ProfileEvent
     data class UpdateProfile(val displayName: String) : ProfileEvent
     data class SelectAvatar(@DrawableRes val preset: Int) : ProfileEvent
-    object ResetAvatar         : ProfileEvent
-    object OpenAvatarPicker    : ProfileEvent
-    object DismissAvatarPicker : ProfileEvent
+    object ResetAvatar            : ProfileEvent
+    object OpenAvatarPicker       : ProfileEvent
+    object DismissAvatarPicker    : ProfileEvent
 }
 
 // ========== One-Shot UI Effects ==========

@@ -1,9 +1,12 @@
 package dev.sagi.monotask.ui.profile
 
+import android.content.Context
+import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
@@ -16,7 +19,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,11 +35,11 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<List<User>>(emptyList())
-    val searchResults: StateFlow<List<User>> = _searchResults.asStateFlow()
+    private val _friendUsers = MutableStateFlow<List<User>?>(null)
+    val friendUsers: StateFlow<List<User>?> = _friendUsers.asStateFlow()
 
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+    private val _friendActivities = MutableStateFlow<Map<String, List<DailyActivity>>>(emptyMap())
+    val friendActivities: StateFlow<Map<String, List<DailyActivity>>> = _friendActivities.asStateFlow()
 
     private val _uiEffect = MutableSharedFlow<ProfileUiEffect>()
     val uiEffect: SharedFlow<ProfileUiEffect> = _uiEffect.asSharedFlow()
@@ -58,8 +63,6 @@ class ProfileViewModel @Inject constructor(
     fun onEvent(event: ProfileEvent) {
         when (event) {
             is ProfileEvent.RefreshPage         -> refreshPage()
-            is ProfileEvent.SearchUsers         -> searchUsers(event.query)
-            is ProfileEvent.AddFriend           -> addFriend(event.friendId)
             is ProfileEvent.UpdateProfile       -> updateProfile(event.displayName)
             is ProfileEvent.SelectAvatar        -> selectAvatar(event.preset)
             is ProfileEvent.OpenAvatarPicker    -> setAvatarPicker(true)
@@ -110,6 +113,19 @@ class ProfileViewModel @Inject constructor(
                 loadStatisticsData(user.id)
             }
             .launchIn(viewModelScope)
+
+        // Reactively fetch full User objects whenever the friends ID list changes
+        userFlow
+            .map { it?.friends ?: emptyList() }
+            .distinctUntilChanged()
+            .onEach { friendIds ->
+                val users = friendIds.mapNotNull { userRepository.getUserById(it) }
+                _friendUsers.value = users
+                _friendActivities.value = users.associate { user ->
+                    user.id to userRepository.getActivityOnce(user.id, UserRepository.thisMonthRange)
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     // ==========================================================================
@@ -141,13 +157,28 @@ class ProfileViewModel @Inject constructor(
                 _uiState.value = current.copy(topPerformanceDay = topDay)
             }
             launch {
-                val tasks    = taskRepository.getAllCompletedTasksOnce(uid)
-                val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                val tasks        = taskRepository.getAllCompletedTasksOnce(uid)
+                val current      = _uiState.value as? ProfileUiState.Ready ?: return@launch
                 val achievements = AchievementEngine.evaluate(tasks, current.level)
                 _uiState.value = current.copy(
                     completedTasks = tasks,
                     achievements   = achievements
                 )
+
+                // Patch Firestore if stats are stale (one-time migration for pre-UserStats data).
+                // Only writes when the computed values exceed what's stored.
+                val computedStreak = AchievementEngine.computeLongestStreak(tasks)
+                val storedStats    = current.user.stats
+                val earnedMap      = achievements
+                    .filter { it.earnedTier != null }
+                    .associate { it.category.name to it.earnedTier!!.name }
+                if (computedStreak > storedStats.longestStreak || earnedMap != storedStats.earnedAchievements) {
+                    userRepository.patchEarnedStats(
+                        userId             = uid,
+                        longestStreak      = maxOf(computedStreak, storedStats.longestStreak),
+                        earnedAchievements = storedStats.earnedAchievements + earnedMap
+                    )
+                }
             }
 
             _isRefreshing.value = false
@@ -185,37 +216,18 @@ class ProfileViewModel @Inject constructor(
     }
 
     // ==========================================================================
-    // Friends
+    // Friends & Invite
     // ==========================================================================
 
-    private fun searchUsers(query: String) {
-        if (query.isBlank()) {
-            _searchResults.value = emptyList()
-            return
-        }
-        viewModelScope.launch {
-            try {
-                _isSearching.value = true
-                val results = userRepository.searchUsers(query)
-                    .filter { it.id != userId }
-                _searchResults.value = results
-            } catch (e: Exception) {
-                _uiEffect.emit(ProfileUiEffect.ShowError("Search failed: ${e.message}"))
-            } finally {
-                _isSearching.value = false
-            }
-        }
-    }
+    fun generateInviteLink(): String = "monotask://invite?uid=$userId"
 
-    private fun addFriend(friendId: String) {
-        viewModelScope.launch {
-            try {
-                userRepository.addFriend(userId, friendId)
-                _searchResults.value = emptyList()
-            } catch (e: Exception) {
-                _uiEffect.emit(ProfileUiEffect.ShowError("Failed to add friend: ${e.message}"))
-            }
+    fun shareInviteLink(context: Context) {
+        val link   = generateInviteLink()
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, "Join me on MonoTask! $link")
         }
+        context.startActivity(Intent.createChooser(intent, "Share invite link"))
     }
 
     // ==========================================================================

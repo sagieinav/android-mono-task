@@ -14,9 +14,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.theme.LocalProfileTabState
@@ -33,19 +35,21 @@ fun ProfileScreen(
     navController: NavHostController,
     profileVM: ProfileViewModel
 ) {
-    val uiState       by profileVM.uiState.collectAsStateWithLifecycle()
-    val searchResults by profileVM.searchResults.collectAsStateWithLifecycle()
-    val isSearching   by profileVM.isSearching.collectAsStateWithLifecycle()
-    val isRefreshing  by profileVM.isRefreshing.collectAsStateWithLifecycle()
+    val uiState          by profileVM.uiState.collectAsStateWithLifecycle()
+    val isRefreshing     by profileVM.isRefreshing.collectAsStateWithLifecycle()
+    val friendUsers      by profileVM.friendUsers.collectAsStateWithLifecycle()
+    val friendActivities by profileVM.friendActivities.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
     val onProfileEvent: (ProfileEvent) -> Unit = remember { { profileVM.onEvent(it) } }
 
     ProfileScreenContent(
-        uiState        = uiState,
-        searchResults  = searchResults,
-        isSearching    = isSearching,
-        isRefreshing   = isRefreshing,
-        onProfileEvent = onProfileEvent
+        uiState          = uiState,
+        isRefreshing     = isRefreshing,
+        friendUsers      = friendUsers,
+        friendActivities = friendActivities,
+        onProfileEvent   = onProfileEvent,
+        onShareInvite    = { profileVM.shareInviteLink(context) }
     )
 }
 
@@ -55,11 +59,12 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileScreenContent(
-    uiState: ProfileUiState,
-    searchResults: List<User> = emptyList(),
-    isSearching: Boolean = false,
-    isRefreshing: Boolean = false,
-    onProfileEvent: (ProfileEvent) -> Unit = {}
+    uiState          : ProfileUiState,
+    isRefreshing     : Boolean = false,
+    friendUsers      : List<User>? = null,
+    friendActivities : Map<String, List<DailyActivity>> = emptyMap(),
+    onProfileEvent   : (ProfileEvent) -> Unit = {},
+    onShareInvite    : () -> Unit = {}
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
 
@@ -84,11 +89,12 @@ fun ProfileScreenContent(
 
         is ProfileUiState.Ready -> {
             ProfileReadyContent(
-                state          = uiState,
-                searchResults  = searchResults,
-                isSearching    = isSearching,
-                isRefreshing   = isRefreshing,
-                onProfileEvent = onProfileEvent
+                state            = uiState,
+                isRefreshing     = isRefreshing,
+                friendUsers      = friendUsers,
+                friendActivities = friendActivities,
+                onProfileEvent   = onProfileEvent,
+                onShareInvite    = onShareInvite
             )
         }
     }
@@ -100,11 +106,12 @@ fun ProfileScreenContent(
 
 @Composable
 private fun ProfileReadyContent(
-    state: ProfileUiState.Ready,
-    searchResults: List<User>,
-    isSearching: Boolean,
-    isRefreshing: Boolean,
-    onProfileEvent: (ProfileEvent) -> Unit
+    state            : ProfileUiState.Ready,
+    isRefreshing     : Boolean,
+    friendUsers      : List<User>?,
+    friendActivities : Map<String, List<DailyActivity>>,
+    onProfileEvent   : (ProfileEvent) -> Unit,
+    onShareInvite    : () -> Unit
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
     val topBarHeight    = scaffoldPadding.calculateTopPadding()
@@ -139,12 +146,11 @@ private fun ProfileReadyContent(
                     bottomPadding = bottomPadding
                 )
                 2 -> SocialTab(
-                    friends        = state.user.friends,
-                    searchResults  = searchResults,
-                    isSearching    = isSearching,
-                    onProfileEvent = onProfileEvent,
-                    topPadding     = contentTopPadding,
-                    bottomPadding  = bottomPadding
+                    friendUsers      = friendUsers,
+                    friendActivities = friendActivities,
+                    onShareInvite    = onShareInvite,
+                    topPadding       = contentTopPadding,
+                    bottomPadding    = bottomPadding
                 )
             }
         }

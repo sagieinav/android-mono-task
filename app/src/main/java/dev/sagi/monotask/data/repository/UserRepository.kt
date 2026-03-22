@@ -7,12 +7,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.snapshots
+import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.data.model.UserStats
 import dev.sagi.monotask.domain.util.XpEvents
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 class UserRepository(private val db: FirebaseFirestore) {
@@ -161,8 +164,61 @@ class UserRepository(private val db: FirebaseFirestore) {
 
     // ========== Social ==========
 
+    // One-time fetch by ID. Clear alias used by friend-loading flows
+    suspend fun getUserById(uid: String): User? = getUserOnce(uid)
+
     suspend fun addFriend(userId: String, friendId: String) {
         userDoc(userId).update("friends", FieldValue.arrayUnion(friendId)).await()
+    }
+
+    // Atomic batch: write both sides of friendship simultaneously
+    suspend fun addFriendBatch(userId: String, friendId: String) {
+        db.batch().apply {
+            update(userDoc(userId),   "friends", FieldValue.arrayUnion(friendId))
+            update(userDoc(friendId), "friends", FieldValue.arrayUnion(userId))
+        }.commit().await()
+    }
+
+    suspend fun updateUserStats(
+        userId         : String,
+        xpGained       : Int,
+        wasAce         : Boolean,
+        newAchievements: List<Achievement>
+    ) {
+        val todayEpoch = LocalDate.now().toEpochDay()
+        val weekStart  = LocalDate.now().with(DayOfWeek.MONDAY).toEpochDay()
+
+        db.runTransaction { tx ->
+            val snap    = tx.get(userDoc(userId))
+            val current = snap.toObject(User::class.java)?.stats ?: UserStats()
+
+            val weeklyXp = if (current.weekStartEpochDay < weekStart) xpGained
+                           else current.weeklyXp + xpGained
+
+            val yesterday = todayEpoch - 1
+            val newStreak = when {
+                current.lastActiveEpochDay == todayEpoch -> current.currentStreak
+                current.lastActiveEpochDay == yesterday  -> current.currentStreak + 1
+                else                                     -> 1
+            }
+
+            val updatedAchievements = current.earnedAchievements.toMutableMap()
+            newAchievements.forEach { a ->
+                if (a.earnedTier != null) updatedAchievements[a.category.name] = a.earnedTier.name
+            }
+
+            val updated = current.copy(
+                totalTasksCompleted = current.totalTasksCompleted + 1,
+                aceCount            = current.aceCount + if (wasAce) 1 else 0,
+                currentStreak       = newStreak,
+                longestStreak       = maxOf(current.longestStreak, newStreak),
+                weeklyXp            = weeklyXp,
+                weekStartEpochDay   = weekStart,
+                lastActiveEpochDay  = todayEpoch,
+                earnedAchievements  = updatedAchievements
+            )
+            tx.update(userDoc(userId), "stats", updated)
+        }.await()
     }
 
     suspend fun searchUsers(query: String): List<User> {
@@ -176,6 +232,20 @@ class UserRepository(private val db: FirebaseFirestore) {
             it.toObject(User::class.java)?.copy(id = it.id)
                 ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${it.id}"); null }
         }
+    }
+
+    // One-time migration: write back stats derived from the full task history
+    // Called after ProfileViewModel computes achievements from tasks, so that
+    // evaluateFromStats() (used in Social tab) sees consistent data going forward
+    suspend fun patchEarnedStats(
+        userId             : String,
+        longestStreak      : Int,
+        earnedAchievements : Map<String, String>
+    ) {
+        userDoc(userId).update(mapOf(
+            "stats.longestStreak"      to longestStreak,
+            "stats.earnedAchievements" to earnedAchievements
+        )).await()
     }
 
     // ========== Admin ==========

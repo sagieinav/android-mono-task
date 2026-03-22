@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -12,22 +11,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.core.ValueLabel
 
 // Usage: StatCard(title = "XP this week") { ...content... }
 @Composable
 fun StatCard(
     modifier: Modifier = Modifier,
     title: String? = null,
-    headline: String? = null,
+    headlineValue: String? = null,
+    headlineUnit: String? = null,
     badge: (@Composable () -> Unit)? = null,
+    shape: Shape = MaterialTheme.shapes.large,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     GlassSurface(
         modifier  = modifier.fillMaxWidth(),
-        shape     = MaterialTheme.shapes.large,
+        shape     = shape,
         baseColor = MaterialTheme.colorScheme.surfaceContainer,
         blurred   = false
     ) {
@@ -36,7 +38,7 @@ fun StatCard(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // Header & Headline (if any)
-            if (title != null || headline != null) {
+            if (title != null || headlineValue != null) {
                 Row(
                     modifier              = Modifier.fillMaxWidth().padding(bottom = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -50,12 +52,8 @@ fun StatCard(
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
                             )
                         }
-                        headline?. let {
-                            Text(
-                                text       = headline,
-                                style      = MaterialTheme.typography.headlineMedium,
-                                color      = MaterialTheme.colorScheme.onSurface
-                            )
+                        headlineValue?. let {
+                            ValueLabel(headlineValue, headlineUnit)
                         }
                     }
                     badge?.invoke()

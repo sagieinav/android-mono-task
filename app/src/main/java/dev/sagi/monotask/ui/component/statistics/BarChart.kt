@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -68,12 +69,14 @@ private const val BarGlowAlpha            = 0.35f
 @Composable
 fun BarChart(
     title: String,
-    headline: String,
+    headlineValue: String,
     points: List<ChartPoint>,
     trendPercent: Int,
-    modifier: Modifier = Modifier,
+    headlineUnit: String? = null,
     barColor: Color = MaterialTheme.colorScheme.primary,
+    shape: Shape = MaterialTheme.shapes.large,
     animate: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
 //    val textColor  = MaterialTheme.colorScheme.onSurface
     val labelColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
@@ -81,7 +84,9 @@ fun BarChart(
     StatCard(
         modifier = modifier,
         title    = title,
-        headline = headline,
+        headlineValue = headlineValue,
+        headlineUnit = headlineUnit,
+        shape = shape,
         badge    = if (trendPercent != 0) {{ TrendBadge(trendPercent) }} else null
     ) {
 
@@ -279,7 +284,8 @@ private fun BarChartPreview() {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             BarChart(
                 title        = "Tasks this week",
-                headline     = "23 completed",
+                headlineValue     = "23",
+                headlineUnit = "completed",
                 trendPercent = 42,
                 points       = listOf(
                     ChartPoint(3f, "Sat"), ChartPoint(0f, "Sun"),

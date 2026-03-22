@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -22,8 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -43,9 +39,9 @@ import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import java.time.LocalDate
 
-// ─────────────────────────────────────────────────────────────────────────────
+// =========================
 // Tab 2 — Statistics: XP stat card, heatmap, bar charts
-// ─────────────────────────────────────────────────────────────────────────────
+// =========================
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -106,7 +102,8 @@ fun StatisticsTab(
                     // Xp this week (line chart)
                     LineChart(
                         title        = "XP This Week",
-                        headline     = "$weeklyXP XP",
+                        headlineValue     = "$weeklyXP",
+                        headlineUnit = "xp",
                         points       = ActivityStats.buildXpPoints(weekActivity),
                         trendPercent = ActivityStats.computeXpTrend(weekActivity),
                         lineColor    = AceGold,
@@ -115,7 +112,8 @@ fun StatisticsTab(
                     // Tasks this week (bar graph)
                     BarChart(
                         title       = "Tasks This Week",
-                        headline     = "$weeklyTasks completed",
+                        headlineValue     = "$weeklyTasks",
+                        headlineUnit = "completed",
                         points      = ActivityStats.buildTaskPoints(weekActivity),
                         trendPercent = ActivityStats.computeTaskTrend(weekActivity),
                         animate     = true
@@ -166,9 +164,9 @@ fun StatisticsTab(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// =========================
 // Sub-composables
-// ─────────────────────────────────────────────────────────────────────────────
+// =========================
 @Composable
 fun StatSection(
     title: String,
@@ -216,7 +214,6 @@ private fun StatisticsTabPreview() {
                     )
                 ),
                 bottomPadding = 0.dp,
-//            modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
         }

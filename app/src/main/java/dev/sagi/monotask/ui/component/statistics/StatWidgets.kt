@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
+import dev.sagi.monotask.ui.component.core.ValueLabel
 import dev.sagi.monotask.ui.theme.AceGoldDim
 import dev.sagi.monotask.ui.theme.StreakFire
 import dev.sagi.monotask.ui.theme.XpViolet
@@ -136,39 +137,6 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
     }
 }
 
-// ========== Shared value row ==========
-
-@Composable
-private fun WidgetValueRow(
-    value: String,
-    unit: String = "",
-    accentColor: Color,
-) {
-    val initialFontSize = MaterialTheme.typography.headlineMedium.fontSize
-    var fontSize by remember(value) { mutableStateOf(initialFontSize) }
-
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text     = value,
-            style    = MaterialTheme.typography.headlineMedium.copy(fontSize = fontSize),
-            color    = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.alignByBaseline(),
-            onTextLayout = { result ->
-                if (result.hasVisualOverflow && fontSize > 18.sp) fontSize *= 0.9f
-            }
-        )
-        if (unit.isNotEmpty()) {
-            Text(
-                text       = unit,
-                style      = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Thin,
-                color      = MaterialTheme.colorScheme.outlineVariant,
-                modifier   = Modifier.alignByBaseline()
-            )
-        }
-    }
-}
-
 // ========== StatWidgetSmall ==========
 // Half-width card. Placed in a 2-column Row by the caller
 
@@ -228,7 +196,7 @@ fun StatWidgetSmall(
                 }
             }
 
-            WidgetValueRow(value = value, unit = unit, accentColor = accentColor)
+            ValueLabel(value = value, unit = unit, accentColor = accentColor)
         }
 
         // ========== Circle icon ==========
@@ -326,7 +294,7 @@ fun StatWidgetMedium(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.Bottom
             ) {
-                WidgetValueRow(value = value, unit = unit, accentColor = accentColor)
+                ValueLabel(value = value, unit = unit, accentColor = accentColor)
                 // Trailing value and unit (if not null)
                 trailingValue?. let { value ->
                     Column(horizontalAlignment = Alignment.End) {

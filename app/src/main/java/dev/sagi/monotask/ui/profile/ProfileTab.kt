@@ -39,6 +39,7 @@ import dev.sagi.monotask.ui.component.core.AvatarBox
 import dev.sagi.monotask.ui.component.core.AvatarImage
 import dev.sagi.monotask.ui.component.core.AvatarPicker
 import dev.sagi.monotask.ui.component.core.BottomSheet
+import dev.sagi.monotask.ui.component.core.SectionTitle
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
@@ -87,11 +88,14 @@ fun ProfileTab(
 //                    .padding(bottom = 24.dp) // more space between this and "Achievements"
             )
         }
-//        item {
-//
-//        }
+
         item {
-            AchievementsSection(achievements = state.achievements)
+            SectionTitle("Achievements")
+//            AchievementSectionGrid(achievements = state.achievements)
+            AchievementSectionRow(
+                achievements = state.achievements,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
         }
     }
 }

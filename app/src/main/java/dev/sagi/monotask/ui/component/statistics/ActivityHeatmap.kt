@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,6 +60,7 @@ private enum class CellState { ACTIVE, INACTIVE_PAST, FUTURE, EMPTY }
 @Composable
 fun ActivityHeatmap(
     activityData: List<DailyActivity>,
+    shape: Shape = MaterialTheme.shapes.large,
     modifier: Modifier = Modifier,
 ) {
     val today      = remember { LocalDate.now() }
@@ -98,7 +100,8 @@ fun ActivityHeatmap(
     StatCard(
         modifier = modifier,
         title = "Activity Heatmap",
-        headline = monthName
+        headlineValue = monthName,
+        shape = shape
     ) {
         Row(
             modifier              = Modifier.fillMaxWidth(),

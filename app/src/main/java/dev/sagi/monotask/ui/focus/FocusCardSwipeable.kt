@@ -30,19 +30,25 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.task.XpLabelCompletion
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBorder
 import kotlin.math.roundToInt
 
 // ========== Swipe Constants ==========
 private val PILL_SIZE          = 44.dp
+private val GLOW_INSET         = 24.dp   // extra padding around pill so shadow fits within the RenderNode texture (shadow radius = 20dp + 4dp buffer)
 private val COMPLETE_COLOR     = Color(0xFF4BB24F)
 private val SNOOZE_COLOR       = Color(0xFFFF511C)
 const val SNOOZE_THRESHOLD     = 380f       // drag distance (px) to trigger snooze
@@ -87,27 +93,41 @@ fun SwipePill(
         fraction = (progress * progress * 1.2f).coerceIn(0f, 1f)
     )
 
+    // Outer box is enlarged by GLOW_INSET on each side so the shadow from circleGlow
+    // fits within the RenderNode bounds and doesn't get clipped to a rectangle.
     Box(
         modifier = modifier
-            .size(PILL_SIZE * maxScale)
+            .size(PILL_SIZE * maxScale + GLOW_INSET * 2)
             .graphicsLayer {
                 val currentScale = lerp(baseScale / maxScale, 1f, progress) * burstScale.value
                 scaleX       = currentScale
                 scaleY       = currentScale
                 translationX = offsetX
             }
-            .circleGlow(color = currentColor.copy(alpha = 0.25f), radius = 20.dp, offsetY = 0.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f + progress / 2f))
-            .glassBorder(CircleShape),
+            .circleGlow(
+                color        = currentColor.copy(alpha = 0.25f),
+                radius       = 20.dp,                      // glow blur radius
+                circleRadius = PILL_SIZE * maxScale / 2,   // shadow drawn at actual pill radius, not the enlarged box
+                offsetY      = 0.dp
+            ),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            painter            = painterResource(iconRes),
-            contentDescription = null,
-            tint               = currentColor,
-            modifier           = Modifier.fillMaxSize().scale(1.43f)
-        )
+        // Inner box: actual pill visual (clip + background)
+        Box(
+            modifier = Modifier
+                .size(PILL_SIZE * maxScale)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f + progress / 2f))
+                .glassBorder(CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter            = painterResource(iconRes),
+                contentDescription = null,
+                tint               = currentColor,
+                modifier           = Modifier.fillMaxSize().scale(1.43f)
+            )
+        }
     }
 }
 
@@ -276,7 +296,8 @@ fun FocusCardSwipeable(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(start = 16.dp)
-                    .graphicsLayer { alpha = pillAlpha }
+                    .offset(x = -GLOW_INSET)   // shifts layout left so the outer hardware layer
+                    .graphicsLayer { alpha = pillAlpha }  // has room for the glow on the left
             )
             SnoozePill(
                 syncedOffset = animatedOffset,
@@ -284,7 +305,8 @@ fun FocusCardSwipeable(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 16.dp)
-                    .graphicsLayer { alpha = pillAlpha }
+                    .offset(x = GLOW_INSET)    // shifts layout right so the outer hardware layer
+                    .graphicsLayer { alpha = pillAlpha }  // has room for the glow on the right
             )
         }
     }
@@ -292,3 +314,30 @@ fun FocusCardSwipeable(
 
 
 enum class SwipeExitDirection { RIGHT, LEFT }
+
+
+// ========== Preview ==========
+
+@Preview(showBackground = true, name = "SwipePill, Idle")
+@Composable
+private fun SwipePillPreview() {
+    MonoTaskTheme {
+        Row(
+            modifier              = Modifier.padding(24.dp),
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            SwipePill(
+                iconRes  = R.drawable.ic_check_circle,
+                iconTint = Color(0xFF4BB24F),
+                progress = 0.3f,
+                offsetX  = 0f
+            )
+            SwipePill(
+                iconRes  = R.drawable.ic_next_plan,
+                iconTint = Color(0xFFFF511C),
+                progress = 1.0f,
+                offsetX  = 0f
+            )
+        }
+    }
+}

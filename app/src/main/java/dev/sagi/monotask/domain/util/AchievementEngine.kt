@@ -7,8 +7,57 @@ import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.AchievementMilestone
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.data.model.UserStats
 
 object AchievementEngine {
+
+    fun evaluateFromStats(stats: UserStats, level: Int): List<Achievement> {
+        val templates = evaluate(emptyList(), level)
+        return templates.map { template ->
+            val computedTier = when (template.category) {
+                AchievementCategory.STREAKS     -> when {
+                    stats.longestStreak >= 30 -> AchievementTier.GOLD
+                    stats.longestStreak >= 7  -> AchievementTier.SILVER
+                    stats.longestStreak >= 3  -> AchievementTier.BRONZE
+                    else                      -> null
+                }
+                AchievementCategory.TASK_VOLUME -> when {
+                    stats.totalTasksCompleted >= 500 -> AchievementTier.GOLD
+                    stats.totalTasksCompleted >= 100 -> AchievementTier.SILVER
+                    stats.totalTasksCompleted >= 5   -> AchievementTier.BRONZE
+                    else                             -> null
+                }
+                AchievementCategory.DISCIPLINE  -> if (stats.totalTasksCompleted >= 20) {
+                    val ratio = stats.aceCount.toFloat() / stats.totalTasksCompleted
+                    when {
+                        ratio >= 0.90f -> AchievementTier.GOLD
+                        ratio >= 0.70f -> AchievementTier.SILVER
+                        ratio >= 0.50f -> AchievementTier.BRONZE
+                        else           -> null
+                    }
+                } else null
+                AchievementCategory.XP_LEVELING -> when {
+                    level >= 30 -> AchievementTier.GOLD
+                    level >= 15 -> AchievementTier.SILVER
+                    level >= 5  -> AchievementTier.BRONZE
+                    else        -> null
+                }
+            }
+            // earnedAchievements is the source of truth for previously-reached tiers.
+            // Raw counter fields (e.g. longestStreak) can be stale for older users,
+            // so we take the maximum of both to never downgrade a tier.
+            val storedTier = stats.earnedAchievements[template.category.name]
+                ?.let { runCatching { AchievementTier.valueOf(it) }.getOrNull() }
+            template.copy(earnedTier = maxTier(computedTier, storedTier))
+        }
+    }
+
+    private fun maxTier(a: AchievementTier?, b: AchievementTier?): AchievementTier? {
+        if (a == null) return b
+        if (b == null) return a
+        val order = listOf(AchievementTier.BRONZE, AchievementTier.SILVER, AchievementTier.GOLD)
+        return if (order.indexOf(a) >= order.indexOf(b)) a else b
+    }
 
     fun evaluate(completedTasks: List<Task>, level: Int): List<Achievement> = listOf(
         evaluateStreaks(completedTasks),
@@ -91,7 +140,7 @@ object AchievementEngine {
         }
         return Achievement(
             category   = AchievementCategory.XP_LEVELING,
-            iconRes       = R.drawable.ic_star_shine,
+            iconRes       = R.drawable.ic_medal,
             earnedTier = earned,
             bronze     = AchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
             silver     = AchievementMilestone(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
@@ -100,6 +149,8 @@ object AchievementEngine {
     }
 
     // ========== Helpers ==========
+
+    fun computeLongestStreak(tasks: List<Task>): Int = maxStreak(tasks)
 
     // Longest consecutive active-day streak across all-time completed tasks
     private fun maxStreak(tasks: List<Task>): Int {

@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.focus
+package dev.sagi.monotask.ui.component.core
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -64,10 +64,11 @@ fun TypewriterText(
 
 @Composable
 fun EmptyState(
-    title: String = "You're all caught up!",
-    subtitle: String = "No tasks here. Enjoy the moment.",
-    emoji: String = "🎉",
-    modifier: Modifier = Modifier
+    title: String,
+    subtitle: String? = null,
+    emoji: String? = null,
+    modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null
 ) {
     val emojiScale = remember { Animatable(0.2f) }
     val delayBefore = 600L
@@ -93,15 +94,19 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = emoji,
-            style = MaterialTheme.typography.titleMedium, // cause default body font is italics
-            fontSize = dynamicEmojiSize,
-            modifier = Modifier
-                .fillMaxWidth(0.85f),
-            textAlign = TextAlign.Center
-        )
+        emoji?. let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.titleMedium, // cause default body font is italics
+                fontSize = dynamicEmojiSize,
+                modifier = Modifier
+                    .fillMaxWidth(0.85f),
+                textAlign = TextAlign.Center
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
+
         TypewriterText(
             text = title,
             delayBefore = delayBefore,
@@ -113,17 +118,27 @@ fun EmptyState(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
         )
+
         Spacer(modifier = Modifier.height(6.dp))
-        TypewriterText(
-            text = subtitle,
-            delayBefore = delayBefore + (title.length * 50L),  // starts after title finishes
-            charDelay = 25L,
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontSize = dynamicFontSizeSmall
-            ),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.outline,
-        )
+
+        subtitle?. let {
+            TypewriterText(
+                text = it,
+                delayBefore = delayBefore + (title.length * 50L),  // starts after title finishes
+                charDelay = 25L,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = dynamicFontSizeSmall
+                ),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.outline,
+            )
+        }
+        
+        // Optional action
+        action?. let {
+            Spacer(modifier = Modifier.height(24.dp))
+            it()
+        }
     }
 }
 
@@ -133,7 +148,11 @@ fun EmptyState(
 fun EmptyStatePreview() {
     MonoTaskTheme {
         Column {
-            EmptyState()
+            EmptyState(
+                emoji = "🦾",
+                title = "You're all caught up!",
+                subtitle = "No tasks here. Enjoy the moment."
+            )
         }
     }
 }

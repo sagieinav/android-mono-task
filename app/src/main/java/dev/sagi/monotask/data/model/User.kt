@@ -4,16 +4,28 @@ import androidx.annotation.Keep
 import dev.sagi.monotask.domain.util.DiceBearHelper
 
 @Keep
+data class UserStats(
+    val totalTasksCompleted : Int                 = 0,
+    val aceCount            : Int                 = 0,
+    val currentStreak       : Int                 = 0,
+    val longestStreak       : Int                 = 0,
+    val weeklyXp            : Int                 = 0,
+    val weekStartEpochDay   : Long                = 0L,
+    val lastActiveEpochDay  : Long                = 0L,
+    val earnedAchievements  : Map<String, String> = emptyMap()
+)
+
+@Keep
 data class User(
     val id: String = "",
     val displayName: String = "",
     val email: String = "",
-//    val avatarSeed: String = "",   // "" = auto-generated from id; otherwise, chosen preset key
     val avatarPreset: Int = 0,   // 0 = auto-generated from uid; otherwise, R.drawable.avatar_micahXX
     val level: Int = 1,
     val xp: Int = 0,
     val currentWorkspaceId: String = "",
     val friends: List<String> = emptyList(),        // List of user IDs
+    val stats  : UserStats   = UserStats(),
 
     // Persistent user settings
     val onboarded: Boolean = false,               // For first-launch onboarding

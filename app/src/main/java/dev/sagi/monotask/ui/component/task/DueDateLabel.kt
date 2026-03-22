@@ -12,12 +12,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.ext.toRelativeDate
 
 @Composable
@@ -68,5 +72,30 @@ fun DueDateLabel(
             color = dateColor,
             textAlign = TextAlign.Center,
         )
+    }
+}
+
+
+// ========== Previews ==========
+
+@Preview(showBackground = true, name = "DueDateLabel, Upcoming")
+@Composable
+private fun DueDateLabelUpcomingPreview() {
+    MonoTaskTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            DueDateLabel(timestamp = Timestamp(System.currentTimeMillis() / 1000 + 86400 * 2, 0))
+            DueDateLabel(timestamp = Timestamp(System.currentTimeMillis() / 1000 + 86400 * 2, 0), small = true)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "DueDateLabel, Overdue")
+@Composable
+private fun DueDateLabelOverduePreview() {
+    MonoTaskTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            DueDateLabel(timestamp = Timestamp(System.currentTimeMillis() / 1000 - 86400 * 2, 0))
+            DueDateLabel(timestamp = Timestamp(System.currentTimeMillis() / 1000 - 86400 * 2, 0), small = true)
+        }
     }
 }

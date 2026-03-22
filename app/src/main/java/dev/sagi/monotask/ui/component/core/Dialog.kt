@@ -27,9 +27,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 @Composable
 fun GlassDialog(
@@ -127,7 +129,6 @@ fun GlassConfirmDialog(
     )
 }
 
-
 @Composable
 fun TextInputDialog(
     title: String,
@@ -186,3 +187,33 @@ fun TextInputDialog(
     )
 }
 
+
+// ========== Previews ==========
+
+@Preview(showBackground = true, name = "GlassConfirmDialog")
+@Composable
+private fun GlassConfirmDialogPreview() {
+    MonoTaskTheme {
+        GlassConfirmDialog(
+            onDismissRequest = {},
+            title            = "Delete Task",
+            message          = "Are you sure you want to delete this task? This action cannot be undone.",
+            confirmLabel     = "Delete",
+            onConfirm        = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "TextInputDialog")
+@Composable
+private fun TextInputDialogPreview() {
+    MonoTaskTheme {
+        TextInputDialog(
+            title        = "New Workspace",
+            placeholder  = "Workspace name",
+            confirmLabel = "Create",
+            onConfirm    = {},
+            onDismiss    = {}
+        )
+    }
+}

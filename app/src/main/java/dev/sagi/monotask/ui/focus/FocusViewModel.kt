@@ -165,10 +165,10 @@ class FocusViewModel @Inject constructor(
                     return@launch
                 }
 
-                // Snapshot achievements BEFORE this task is counted so we can diff after.
-                // getAllCompletedTasksOnce covers all workspaces — achievements are cross-workspace.
+                // Snapshot achievements BEFORE this task is counted so we can diff after
+                // getAllCompletedTasksOnce covers all workspaces, achievements are cross-workspace
                 val tasksBefore        = taskRepository.getAllCompletedTasksOnce(userId)
-                val achievementsBefore = AchievementEngine.evaluate(tasksBefore, user.level)
+                val achievementsBefore = AchievementEngine.evaluateFromStats(user.stats, user.level)
 
                 // Persist completion + XP
                 taskRepository.markTaskCompleted(userId, state.focusTask.id)
@@ -179,24 +179,28 @@ class FocusViewModel @Inject constructor(
 
                 userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
 
-                // Evaluate AFTER by appending the just-completed task in memory —
+                // Evaluate AFTER by appending the just-completed task in memory
                 // avoids a second Firestore fetch.
                 val levelAfter        = XpEvents.levelForXp(user.xp + xpGained)
                 val tasksAfter        = tasksBefore + state.focusTask
                 val achievementsAfter = AchievementEngine.evaluate(tasksAfter, levelAfter)
 
                 // Emit an unlock effect for each tier newly earned this completion
-                achievementsAfter.forEach { newProgress ->
+                val newlyUnlocked = achievementsAfter.filter { newProgress ->
                     val oldProgress = achievementsBefore.find { it.category == newProgress.category }
-                    if (newProgress.earnedTier != null && newProgress.earnedTier != oldProgress?.earnedTier) {
-                        _uiEffect.emit(
-                            FocusUiEffect.ShowAchievementUnlocked(
-                                name = newProgress.displayName,
-                                tier = newProgress.earnedTier
-                            )
-                        )
-                    }
+                    newProgress.earnedTier != null && newProgress.earnedTier != oldProgress?.earnedTier
                 }
+                newlyUnlocked.forEach { newProgress ->
+                    _uiEffect.emit(
+                        FocusUiEffect.ShowAchievementUnlocked(
+                            name = newProgress.displayName,
+                            tier = newProgress.earnedTier!!
+                        )
+                    )
+                }
+
+                // Update denormalized stats on User doc (non-critical, failure does not affect task completion)
+                try { userRepository.updateUserStats(userId, xpGained, state.focusTask.isAce, newlyUnlocked) } catch (_: Exception) {}
 
             } catch (e: Exception) {
                 _frozenForAnimation.value = false

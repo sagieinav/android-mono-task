@@ -39,7 +39,10 @@ import dev.sagi.monotask.util.Constants
 
 enum class NavTab(val label: String, val iconRes: Int) {
     BOARD("Board", R.drawable.ic_kanban),
+//    POMODORO("Pomodoro", R.drawable.ic_settings),
     FOCUS("Focus", R.drawable.ic_focus),
+//    STATISTICS("Statistics", R.drawable.ic_statistics),
+//    SETTINGS("Settings", R.drawable.ic_settings),
     PROFILE("You", R.drawable.ic_user_circle)
 }
 
@@ -64,11 +67,10 @@ fun BottomNavBar(
 
     GlassSurface(
         shape = MaterialTheme.shapes.large,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(Constants.Theme.SCREEN_PADDING),
 //            baseColor = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
-//            blurred = false
     ) {
         BoxWithConstraints(
             modifier = Modifier
@@ -124,7 +126,7 @@ private fun RowScope.NavDockItem(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Because of the Box, the icon is mathematically centered
+        // Because of the Box, the icon is centered
         Icon(
             painter = painterResource(tab.iconRes),
             contentDescription = tab.label,

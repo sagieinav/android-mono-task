@@ -36,10 +36,10 @@ import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.AvatarBox
+import dev.sagi.monotask.ui.component.core.EmptyState
+import dev.sagi.monotask.ui.component.core.StreakChip
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
-import dev.sagi.monotask.ui.theme.fireIconGradient
-import dev.sagi.monotask.ui.theme.googleSans
 import dev.sagi.monotask.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun FocusScreen(
-    navController: NavHostController,
+//    navController: NavHostController,
     focusVM: FocusViewModel,
 //    userSessionVM: UserSessionViewModel
 ) {
@@ -154,7 +154,11 @@ fun FocusScreenContent(
 
         when (uiState) {
             is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                EmptyState(emoji = "🦾")
+                EmptyState(
+                    emoji = "🦾",
+                    title = "You're all caught up!",
+                    subtitle = "No tasks here. Enjoy the moment."
+                )
             }
             is FocusUiState.Active ->
                 ActiveFocusCard(
@@ -257,45 +261,6 @@ fun UserHeader(
         }
     }
 }
-
-// ========== Streak Chip ==========
-
-@Composable
-fun StreakChip(
-    currentStreak : Int,
-    modifier      : Modifier = Modifier
-) {
-    val streakLabel = if (currentStreak == 1) "day streak" else "days streak"
-
-    Row(
-        verticalAlignment     = Alignment.CenterVertically,
-        modifier = modifier
-    ) {
-        Icon(
-            painter            = painterResource(R.drawable.ic_fire),
-            contentDescription = null,
-            modifier           = Modifier
-                .size(18.dp)
-                .fireIconGradient()
-                .padding(bottom = 1.5.dp) // optical correction
-        )
-        Spacer(Modifier.padding(horizontal = 1.dp))
-        Text(
-            text  = "$currentStreak ",
-            fontWeight = FontWeight.Black,
-            fontFamily = googleSans,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text  = streakLabel,
-            fontWeight = FontWeight.Thin,
-            fontFamily = googleSans,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.outlineVariant
-        )
-    }
-}
-
 
 // ========== Animation State ==========
 

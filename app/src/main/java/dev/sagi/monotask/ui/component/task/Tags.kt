@@ -55,7 +55,7 @@ fun TaskTag(
                 trim = LineHeightStyle.Trim.Both)
         )
     val fontSize = if (size == TagSize.DEFAULT) 16.sp else 10.sp
-    val horizontalPadding = if (size == TagSize.SMALL) 4.dp else 8.dp
+    val horizontalPadding = if (size == TagSize.SMALL) 5.dp else 8.dp
     val verticalPadding = if (size == TagSize.SMALL) 0.7.dp else 2.dp
     val borderWidth = if (size == TagSize.SMALL) 1.dp else 1.5.dp
 

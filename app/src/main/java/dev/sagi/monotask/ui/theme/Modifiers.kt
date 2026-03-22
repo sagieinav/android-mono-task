@@ -250,13 +250,18 @@ fun Modifier.invincibleBorder(shape: Shape): Modifier = composed {
 }
 
 
+// circleRadius: the radius of the shadow circle drawn. Defaults to size.width/2 (fills the box).
+// Pass a smaller value when the composable is intentionally larger than the content circle
+// (e.g. to give the shadow room to render without being clipped by the RenderNode boundary).
 fun Modifier.circleGlow(
     color: Color,
     radius: Dp = 10.dp,
+    circleRadius: Dp? = null,
     offsetY: Dp = 0.dp
 ) = this.drawBehind {
     if (color.alpha < 0.05f) return@drawBehind
     drawIntoCanvas { canvas ->
+        val shadowRadius = circleRadius?.toPx() ?: (size.width / 2f)
         val paint = Paint().asFrameworkPaint().apply {
             isAntiAlias = true
             this.color = android.graphics.Color.TRANSPARENT
@@ -270,7 +275,7 @@ fun Modifier.circleGlow(
         canvas.nativeCanvas.drawCircle(
             size.width / 2f,
             size.height / 2f,
-            size.width / 2f,
+            shadowRadius,
             paint
         )
     }

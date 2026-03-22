@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.*
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 
 // When clicking `Add Workspace`
@@ -54,13 +56,6 @@ fun WorkspaceDropdownGlass(
                     label = workspace.name,
                     selected = isSelected,
                     onClick = { onWorkspaceSelected(workspace); expanded = false },
-//                    trailingContent = if (isSelected) ({
-//                        Icon(
-//                            painter = painterResource(R.drawable.ic_check_circle),
-//                            contentDescription = null,
-//                            modifier = Modifier.size(18.dp)
-//                        )
-//                    }) else null
                 )
             }
 
@@ -73,6 +68,47 @@ fun WorkspaceDropdownGlass(
                 label = "New Workspace",
                 iconRes = R.drawable.ic_add_m3,
                 onClick = { onAddWorkspace(); expanded = false }
+            )
+        }
+    }
+}
+
+
+// ========== Previews ==========
+
+private val previewWorkspaces = listOf(
+    Workspace(id = "1", name = "Personal"),
+    Workspace(id = "2", name = "Work"),
+    Workspace(id = "3", name = "Side Projects")
+)
+
+@Preview(showBackground = true, name = "WorkspaceDropdown, Collapsed")
+@Composable
+private fun WorkspaceDropdownCollapsedPreview() {
+    MonoTaskTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            WorkspaceDropdownGlass(
+                workspaces        = previewWorkspaces,
+                selectedWorkspace = previewWorkspaces.first(),
+                onWorkspaceSelected = {},
+                onAddWorkspace    = {},
+                previewExpanded   = false
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "WorkspaceDropdown, Expanded")
+@Composable
+private fun WorkspaceDropdownExpandedPreview() {
+    MonoTaskTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            WorkspaceDropdownGlass(
+                workspaces        = previewWorkspaces,
+                selectedWorkspace = previewWorkspaces.first(),
+                onWorkspaceSelected = {},
+                onAddWorkspace    = {},
+                previewExpanded   = true
             )
         }
     }

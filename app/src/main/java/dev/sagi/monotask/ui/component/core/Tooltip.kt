@@ -110,7 +110,7 @@ private fun GlassTooltipShell(
 ) {
     GlassSurface(
         shape    = MaterialTheme.shapes.small,
-        modifier = modifier.widthIn(min = 130.dp, max = 280.dp)
+        modifier = modifier.widthIn(max = 280.dp)
     ) {
         ProvideTextStyle(
             MaterialTheme.typography.labelSmall.copy(fontFamily = nationalPark)

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -34,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asAndroidPath
@@ -65,7 +65,9 @@ private val GlowStrokeWidth       = 10.dp
 private val GlowBlurRadius        = 8.dp
 private const val GlowAlpha       = 0.25f
 private const val GradientTopAlpha    = 0.4f
-private const val GradientBottomAlpha = 0.07f
+private const val GradientMiddleAlpha = 0.15f
+
+private const val GradientBottomAlpha = 0.02f
 private val DotHaloRadius         = 12.dp
 private val DotFillRadius         = 7.dp
 private val DotCenterRadius       = 3.5.dp
@@ -91,27 +93,31 @@ private data class SelectedPoint(
 
 @Composable
 fun LineChart(
-    title: String,
-    headline: String,
+    headlineValue: String,
     points: List<ChartPoint>,
     trendPercent: Int,
+    headlineUnit: String? = null,
     modifier: Modifier = Modifier,
+    title: String? = null,
     lineColor: Color = AceGold,
+    shape: Shape = MaterialTheme.shapes.large,
     animate: Boolean = true,
+    chartHeight: Dp = 140.dp,
 ) {
     val gridColor  = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-    val textColor  = MaterialTheme.colorScheme.onSurface
+//    val textColor  = MaterialTheme.colorScheme.onSurface
     val labelColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
 
     StatCard(
         modifier = modifier,
         title    = title,
-        headline = headline,
+        headlineValue = headlineValue,
+        headlineUnit = headlineUnit,
+        shape = shape,
         badge    = if (trendPercent != 0) {{ TrendBadge(trendPercent) }} else null
     ) {
 
         // ========== Chart ==========
-        val chartHeight = 140.dp
 
         Row(
             modifier              = Modifier.fillMaxWidth(),
@@ -345,7 +351,12 @@ private fun DrawScope.drawFillGradient(
     drawPath(
         path  = path,
         brush = Brush.verticalGradient(
-            listOf(color.copy(alpha = GradientTopAlpha), color.copy(alpha = GradientBottomAlpha), Color.Transparent)
+            listOf(
+                color.copy(alpha = GradientTopAlpha),
+                color.copy(alpha = GradientMiddleAlpha),
+                color.copy(alpha = GradientBottomAlpha),
+                Color.Transparent
+            )
         ),
         style = Fill
     )
@@ -382,7 +393,8 @@ private fun LineChartPreview() {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             LineChart(
                 title        = "XP Activity this week",
-                headline     = "72340 XP",
+                headlineValue     = "72340",
+                headlineUnit = "xp",
                 trendPercent = 42,
                 points       = listOf(
                     ChartPoint(120f, "Sat"), ChartPoint(0f,   "Sun"),
