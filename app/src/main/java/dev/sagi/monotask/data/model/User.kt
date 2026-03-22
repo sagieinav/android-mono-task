@@ -1,7 +1,9 @@
 package dev.sagi.monotask.data.model
 
+import androidx.annotation.Keep
 import dev.sagi.monotask.domain.util.DiceBearHelper
 
+@Keep
 data class User(
     val id: String = "",
     val displayName: String = "",

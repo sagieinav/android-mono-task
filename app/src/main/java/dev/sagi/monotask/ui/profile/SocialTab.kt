@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.ui.component.core.MonoTextField
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.Constants
 
@@ -67,15 +68,23 @@ fun SocialTab(
     ) {
         // Search field
         item {
-            OutlinedTextField(
+            MonoTextField(
                 value         = query,
                 onValueChange = { query = it; onProfileEvent(ProfileEvent.SearchUsers(it)) },
                 modifier      = Modifier.fillMaxWidth(),
-                placeholder   = { Text("Search by username…") },
+                label         = "Search by username…",
                 leadingIcon   = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
                 singleLine    = true,
-                shape         = RoundedCornerShape(16.dp)
             )
+//            OutlinedTextField(
+//                value         = query,
+//                onValueChange = { query = it; onProfileEvent(ProfileEvent.SearchUsers(it)) },
+//                modifier      = Modifier.fillMaxWidth(),
+//                placeholder   = { Text("Search by username…") },
+//                leadingIcon   = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
+//                singleLine    = true,
+//                shape         = RoundedCornerShape(16.dp)
+//            )
         }
 
         // Search loading indicator

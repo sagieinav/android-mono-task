@@ -3,7 +3,7 @@ package dev.sagi.monotask.ui.profile
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.sagi.monotask.MonoTaskApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
@@ -19,10 +19,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProfileViewModel(
-    private val userRepository : UserRepository = MonoTaskApp.instance.userRepository,
-    private val taskRepository : TaskRepository = MonoTaskApp.instance.taskRepository,
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
+    private val userRepository : UserRepository,
+    private val taskRepository : TaskRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -40,7 +42,7 @@ class ProfileViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    private lateinit var userId: String
+    private var userId: String = ""
 
     private var observing        = false  // safe: only touched on Main dispatcher
     private var statisticsLoaded = false  // guard: loadStatisticsData runs once
@@ -121,7 +123,7 @@ class ProfileViewModel(
     }
 
     private fun refreshPage() {
-        if (!::userId.isInitialized) return
+        if (userId.isEmpty()) return
         _isRefreshing.value = true
         fetchStatistics(userId)
     }
@@ -214,5 +216,15 @@ class ProfileViewModel(
                 _uiEffect.emit(ProfileUiEffect.ShowError("Failed to add friend: ${e.message}"))
             }
         }
+    }
+
+    // ==========================================================================
+    // Lifecycle
+    // ==========================================================================
+
+    override fun onCleared() {
+        super.onCleared()
+        // viewModelScope is canceled here, stopping the user stream launched via
+        // launchIn(viewModelScope) in startObserving(), and any in-flight statistics fetches
     }
 }

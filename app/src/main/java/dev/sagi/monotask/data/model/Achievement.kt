@@ -1,5 +1,6 @@
 package dev.sagi.monotask.data.model
 
+import androidx.annotation.Keep
 import androidx.compose.ui.graphics.Color
 
 enum class AchievementTier { BRONZE, SILVER, GOLD }
@@ -15,6 +16,7 @@ enum class AchievementCategory {
     }
 }
 
+@Keep
 data class AchievementMilestone(
     val tier        : AchievementTier,
     val name        : String,

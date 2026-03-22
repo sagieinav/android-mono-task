@@ -2,7 +2,7 @@ package dev.sagi.monotask.ui.shared
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.sagi.monotask.MonoTaskApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.util.AuthUtils
@@ -13,14 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-/**
- * Single source of truth for the current user's profile.
- * Activity-scoped. All other ViewModels that need user data should
- * read from [currentUser] instead of opening their own Firestore listener.
- */
-class UserSessionViewModel(
-    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository
+
+// Single source of truth for the current user's profile. Activity-scoped
+
+@HiltViewModel
+class UserSessionViewModel @Inject constructor(
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _currentUser = MutableStateFlow<User?>(null)
@@ -41,5 +41,11 @@ class UserSessionViewModel(
         userRepository.getUserStream(userId).collect {
             _currentUser.value = it
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // viewModelScope is canceled here, stopping the Firestore user stream
+        // and the stateIn sharing coroutine for displayName
     }
 }

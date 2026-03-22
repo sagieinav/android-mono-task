@@ -1,12 +1,11 @@
 package dev.sagi.monotask.util
 
 import com.google.firebase.auth.FirebaseAuth
-import dev.sagi.monotask.MonoTaskApp
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 object AuthUtils {
-    private val auth get() = MonoTaskApp.instance.auth
+    private val auth get() = FirebaseAuth.getInstance()
 
     // Suspends until a Firebase UID is available
     suspend fun awaitUid(): String {

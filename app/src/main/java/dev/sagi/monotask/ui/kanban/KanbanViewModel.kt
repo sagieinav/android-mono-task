@@ -2,7 +2,7 @@ package dev.sagi.monotask.ui.kanban
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.sagi.monotask.MonoTaskApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
@@ -15,11 +15,13 @@ import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class KanbanViewModel(
-    private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
-    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
-    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
+@HiltViewModel
+class KanbanViewModel @Inject constructor(
+    private val taskRepository: TaskRepository,
+    private val userRepository: UserRepository,
+    private val workspaceRepository: WorkspaceRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<KanbanUiState>(KanbanUiState.Loading)
@@ -36,7 +38,7 @@ class KanbanViewModel(
     // Stored so focusNow() can reference the current workspace without extra params
     private var currentWorkspace: Workspace? = null
 
-    private lateinit var userId: String
+    private var userId: String = ""
 
     // Holds the workspace flow. Set once via [setWorkspaceSource], observation starts automatically.
     private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
@@ -180,4 +182,12 @@ class KanbanViewModel(
 
     private fun openEditSheet(task: Task?) { _editingTask.value = task ?: Task() }
     private fun dismissEditSheet()         { _editingTask.value = null }
+
+    // ========== Lifecycle ==========
+
+    override fun onCleared() {
+        super.onCleared()
+        // viewModelScope is canceled here, stopping the active Firestore task stream
+        // launched via launchIn(viewModelScope) in observeTasks()
+    }
 }

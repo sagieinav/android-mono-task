@@ -2,7 +2,7 @@ package dev.sagi.monotask.ui.focus
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.sagi.monotask.MonoTaskApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.Workspace
@@ -18,11 +18,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FocusViewModel(
-    private val taskRepository      : TaskRepository      = MonoTaskApp.instance.taskRepository,
-    private val userRepository      : UserRepository      = MonoTaskApp.instance.userRepository,
-    private val workspaceRepository : WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
+@HiltViewModel
+class FocusViewModel @Inject constructor(
+    private val taskRepository      : TaskRepository,
+    private val userRepository      : UserRepository,
+    private val workspaceRepository : WorkspaceRepository,
 ) : ViewModel() {
 
     // ========== State ==========
@@ -43,7 +45,7 @@ class FocusViewModel(
     // ========== Internal State ==========
     // All mutable vars below are only accessed on Main (viewModelScope default)
 
-    private lateinit var userId: String
+    private var userId: String = ""
 
     // User flow injected once from NavGraph via setUserSource (avoids redundant getUserOnce calls)
     private var _userSource: StateFlow<User?>? = null
@@ -288,5 +290,13 @@ class FocusViewModel(
     private fun dismissSnoozeSheet() {
         val state = _uiState.value as? FocusUiState.Active ?: return
         _uiState.value = state.copy(showSnoozeSheet = false)
+    }
+
+    // ========== Lifecycle ==========
+
+    override fun onCleared() {
+        super.onCleared()
+        // viewModelScope is canceled here, which stops all active Firestore streams
+        // (task observation, streak observation) launched via launchIn(viewModelScope)
     }
 }

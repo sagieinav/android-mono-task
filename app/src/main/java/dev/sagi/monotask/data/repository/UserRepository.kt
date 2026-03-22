@@ -1,11 +1,12 @@
 package dev.sagi.monotask.data.repository
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.snapshots
-import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.util.XpEvents
@@ -14,20 +15,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 
-class UserRepository {
+class UserRepository(private val db: FirebaseFirestore) {
 
     companion object {
         val thisMonthRange: ClosedRange<Long> get() {
             val today = LocalDate.now()
             return today.withDayOfMonth(1).toEpochDay()..today.toEpochDay()
         }
-//        val last7DaysRange: ClosedRange<Long> get() {
-//            val today = LocalDate.now()
-//            return today.minusDays(6).toEpochDay()..today.toEpochDay()
-//        }
     }
-
-    private val db = MonoTaskApp.instance.db
 
     private fun userDoc(userId: String) =
         db.collection("users").document(userId)
@@ -37,11 +32,15 @@ class UserRepository {
     fun getUserStream(userId: String): Flow<User?> =
         userDoc(userId)
             .snapshots()
-            .map { it.toObject(User::class.java)?.copy(id = it.id) }
+            .map {
+                it.toObject(User::class.java)?.copy(id = it.id)
+                    ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${it.id}"); null }
+            }
 
     suspend fun getUserOnce(userId: String): User? {
         val doc = userDoc(userId).get().await()
         return doc.toObject(User::class.java)?.copy(id = doc.id)
+            ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${doc.id}"); null }
     }
 
     // ========== User Lifecycle ==========
@@ -145,8 +144,6 @@ class UserRepository {
             .mapNotNull { it.toObject(DailyActivity::class.java) }
             .firstOrNull()
 
-
-
     // ========== Settings ==========
 
     suspend fun updatePreferences(
@@ -169,12 +166,15 @@ class UserRepository {
     }
 
     suspend fun searchUsers(query: String): List<User> {
+        // "\uF8FF" is the last character in the Unicode private-use area, used as a
+        // high-value sentinel for Firestore prefix range queries (equivalent to "starts with").
         val result = db.collection("users")
             .whereGreaterThanOrEqualTo("displayName", query)
             .whereLessThanOrEqualTo("displayName", query + "\uF8FF")
             .get().await()
         return result.documents.mapNotNull {
             it.toObject(User::class.java)?.copy(id = it.id)
+                ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${it.id}"); null }
         }
     }
 

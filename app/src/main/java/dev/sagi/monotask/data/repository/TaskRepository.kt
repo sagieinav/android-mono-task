@@ -1,16 +1,15 @@
 package dev.sagi.monotask.data.repository
 
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
-import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.domain.util.XpEvents
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
-class TaskRepository {
-
-    private val db = MonoTaskApp.instance.db
+class TaskRepository(private val db: FirebaseFirestore) {
 
     // Returns the Firestore collection for a specific user's tasks
     // All task operations are scoped under the user's document
@@ -31,6 +30,7 @@ class TaskRepository {
             .map { snapshot ->
                 snapshot.documents.mapNotNull {
                     it.toObject(Task::class.java)?.copy(id = it.id)
+                        ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
                 }
             }
 
@@ -45,6 +45,7 @@ class TaskRepository {
             .get().await()
         return result.documents.mapNotNull {
             it.toObject(Task::class.java)?.copy(id = it.id)
+                ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
         }
     }
 
@@ -61,6 +62,7 @@ class TaskRepository {
             .await()
         return result.documents.mapNotNull {
             it.toObject(Task::class.java)?.copy(id = it.id)
+                ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
         }
     }
 
@@ -72,6 +74,7 @@ class TaskRepository {
             .map { snapshot ->
                 snapshot.documents.mapNotNull {
                     it.toObject(Task::class.java)?.copy(id = it.id)
+                        ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
                 }
             }
 
@@ -83,6 +86,7 @@ class TaskRepository {
             .await()
         return result.documents.mapNotNull {
             it.toObject(Task::class.java)?.copy(id = it.id)
+                ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
         }
     }
 

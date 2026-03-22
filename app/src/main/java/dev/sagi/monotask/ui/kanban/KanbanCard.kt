@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.theme.AceGoldDim
+import dev.sagi.monotask.ui.theme.glassBorder
 
 
 // Tracks which confirm dialog is pending
@@ -68,8 +69,9 @@ fun KanbanCard(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .monoShadow(shape)
-                .invincibleBorder(shape)
+//                .invincibleBorder(shape)
+                .glassBorder(shape)
+                .monoShadow(shape, strength = 0.8f)
                 .onGloballyPositioned { coords ->
                     val pos = coords.positionInWindow()
                     cardWindowPos = IntOffset(pos.x.toInt(), pos.y.toInt())

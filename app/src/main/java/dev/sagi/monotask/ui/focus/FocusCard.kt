@@ -43,7 +43,7 @@ fun FocusCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = borderWidth / 2) // compenstate for the external border's width
+            .padding(horizontal = borderWidth / 2) // compensate for the external border's width
             .heightIn(min = 200.dp)
             .then(
                 if (task.isAce) Modifier.aceTaskBorder(

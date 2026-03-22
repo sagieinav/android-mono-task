@@ -68,36 +68,43 @@ fun Modifier.monoShadowWorkaround(
     blur: Dp = 6.dp,
     offsetY: Dp = 2.dp,
     offsetX: Dp = 0.dp,
-): Modifier = composed {
-    this
-        .drawBehind {
-            drawIntoCanvas { canvas ->
-                val paint = android.graphics.Paint().apply {
-                    isAntiAlias = true
-                    this.color = android.graphics.Color.TRANSPARENT
-                    setShadowLayer(blur.toPx(), offsetX.toPx(), offsetY.toPx(), color.toArgb())
-                }
-                val path = shape.createOutline(size, layoutDirection, this).toAndroidPath()
+): Modifier = this.drawWithCache {
+    // Calculate and cache objects ONLY when the layout size changes
+    val paint = android.graphics.Paint().apply {
+        isAntiAlias = true
+        this.color = android.graphics.Color.TRANSPARENT
+        setShadowLayer(
+            blur.toPx(),
+            offsetX.toPx(),
+            offsetY.toPx(),
+            color.toArgb()
+        )
+    }
 
-                canvas.nativeCanvas.save()
-                canvas.nativeCanvas.clipOutPath(path) // block anything inside the shape
-                canvas.nativeCanvas.drawPath(path, paint)
-                canvas.nativeCanvas.restore()
-            }
+    val path = shape.createOutline(size, layoutDirection, this).toAndroidPath()
+
+    // The actual draw phase (runs every frame, but does no allocations)
+    onDrawBehind {
+        drawIntoCanvas { canvas ->
+            canvas.nativeCanvas.save()
+            canvas.nativeCanvas.clipOutPath(path) // Block inside the shape
+            canvas.nativeCanvas.drawPath(path, paint)
+            canvas.nativeCanvas.restore()
         }
-        .clip(shape)
-}
+    }
+}.clip(shape)
 
 fun Modifier.monoShadow(
     shape: Shape,
-    elevation: Dp = 4.dp
+    elevation: Dp = 4.dp,
+    strength: Float = 1f
 ): Modifier = composed {
     this
         .shadow(
             elevation = elevation,
             shape = shape,
-            ambientColor = Color.Black.copy(alpha = 0.05f),
-            spotColor = Color.Black.copy(alpha = 0.35f)
+            ambientColor = Color.Black.copy(alpha = 0.05f * strength),
+            spotColor = Color.Black.copy(alpha = 0.35f * strength)
         )
 }
 
@@ -128,7 +135,7 @@ fun Modifier.glassBorderPremium(
             size.width / 2.0
         ) / (2 * Math.PI)).toFloat()
 
-        val bright = Color.White.copy(alpha = 0.65f)
+        val bright = Color.White.copy(alpha = 0.6f)
         val dark   = Color.White.copy(alpha = 0.05f)
 
         val brush = Brush.sweepGradient(

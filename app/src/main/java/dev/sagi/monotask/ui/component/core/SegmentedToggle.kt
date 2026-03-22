@@ -33,6 +33,7 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoShadow
+import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 
 @Composable
 fun SegmentedToggle(
@@ -70,7 +71,7 @@ fun SegmentedToggle(
     GlassSurface(
         blurred  = false,
         shape    = CircleShape,
-        modifier = modifier
+        modifier = modifier.monoShadowWorkaround(CircleShape)
     ) {
         Box(modifier = Modifier.padding(4.dp)) {
 

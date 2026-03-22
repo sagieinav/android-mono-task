@@ -3,7 +3,7 @@ package dev.sagi.monotask.ui.shared
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
-import dev.sagi.monotask.MonoTaskApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
@@ -22,11 +22,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.Date
+import javax.inject.Inject
 
-class WorkspaceViewModel(
-    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
-    private val taskRepository: TaskRepository = MonoTaskApp.instance.taskRepository,
-    private val userPrefs: UserPrefsRepository = MonoTaskApp.instance.userPrefsRepository,
+@HiltViewModel
+class WorkspaceViewModel @Inject constructor(
+    private val workspaceRepository: WorkspaceRepository,
+    private val taskRepository: TaskRepository,
+    private val userPrefs: UserPrefsRepository,
 ) : ViewModel() {
 
     private val _workspaces = MutableStateFlow<List<Workspace>>(emptyList())
@@ -38,7 +40,8 @@ class WorkspaceViewModel(
     private val _errorEvent = MutableSharedFlow<String>()
     val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
 
-    private lateinit var userId: String
+    // Safe default. Only used after awaitUid() completes in init
+    private var userId: String = ""
 
     init {
         viewModelScope.launch {
@@ -120,5 +123,13 @@ class WorkspaceViewModel(
                 _errorEvent.emit("Failed to create task: ${e.message}")
             }
         }
+    }
+
+    // ========== Lifecycle ==========
+
+    override fun onCleared() {
+        super.onCleared()
+        // viewModelScope is canceled here, stopping the Firestore workspace stream
+        // launched via launchIn(viewModelScope) in observeWorkspaces()
     }
 }

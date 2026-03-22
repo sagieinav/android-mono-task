@@ -1,15 +1,14 @@
 package dev.sagi.monotask.data.repository
 
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
-import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.Workspace
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
-class WorkspaceRepository {
-
-    private val db = MonoTaskApp.instance.db
+class WorkspaceRepository(private val db: FirebaseFirestore) {
 
     private fun workspacesCollection(userId: String) =
         db.collection("users").document(userId).collection("workspaces")
@@ -21,6 +20,7 @@ class WorkspaceRepository {
             .map { snapshot ->
                 snapshot.documents.mapNotNull {
                     it.toObject(Workspace::class.java)?.copy(id = it.id)
+                        ?: run { Log.w("WorkspaceRepository", "Failed to deserialize workspace doc ${it.id}"); null }
                 }
             }
 
@@ -28,7 +28,7 @@ class WorkspaceRepository {
     // Called alongside createUserIfNotExists in AuthViewModel
     suspend fun createDefaultWorkspaces(userId: String) {
         val defaults = listOf(
-            Workspace(name = "Personal",    ownerId = userId),
+            Workspace(name = "Personal",   ownerId = userId),
             Workspace(name = "Education",  ownerId = userId)
         )
         defaults.forEach { workspace ->

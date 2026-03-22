@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,6 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,7 +45,12 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
+import dev.sagi.monotask.ui.theme.glassBackground
+import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.harabara
+import dev.sagi.monotask.ui.theme.invincibleBorder
+import dev.sagi.monotask.ui.theme.monoShadow
+import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import kotlinx.coroutines.delay
 
 private const val ANIM_DURATION   = 250
@@ -87,7 +96,12 @@ fun KanbanColumn(
             val cardShape = MaterialTheme.shapes.small
 
             // ========== Header ==========
-            GlassSurface(blurred = false, shape = colShape, modifier = Modifier) {
+            GlassSurface(
+                blurred = false,
+                shape = colShape,
+                modifier = Modifier
+                    .monoShadowWorkaround(colShape)
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -111,9 +125,18 @@ fun KanbanColumn(
                     Spacer(Modifier.weight(1f))
 
                     // Task count badge (fades in/out on change):
+                    val countBadgeBorderColor = lerp(Color.Black, contentColor, 0.85f).copy(alpha = 0.08f)
                     Surface(
-                        shape = RoundedCornerShape(100),
+                        shape = CircleShape,
                         color = containerColor.copy(alpha = 0.35f),
+//                        color = containerColor.copy(alpha = 0.3f),
+                        modifier = Modifier
+                            // subtle border for readability
+                            .border(
+                                shape = CircleShape,
+                                width = 0.5.dp,
+                                color = countBadgeBorderColor
+                            )
                     ) {
                         AnimatedContent(
                             targetState  = tasks.size,
@@ -135,7 +158,9 @@ fun KanbanColumn(
             GlassSurface(
                 blurred = false,
                 shape = colShape,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .monoShadowWorkaround(colShape)
             ) {
                 val archiveKey = isArchive
                 AnimatedContent(
@@ -150,11 +175,11 @@ fun KanbanColumn(
                     LazyColumn(
                         modifier            = Modifier
                             // internal col padding:
-                            .padding(8.dp)
-                            .clip(cardShape),
+                            .clip(cardShape)
+                        ,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        // card padding:
-                        contentPadding      = PaddingValues(bottom = 8.dp),
+                        // card padding, handles shadow overflow nicely:
+                        contentPadding = PaddingValues(8.dp),
                     ) {
                         items(displayedTasks, key = { it.id }) { task ->
                             KanbanCard(

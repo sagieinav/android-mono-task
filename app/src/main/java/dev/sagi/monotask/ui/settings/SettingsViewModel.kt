@@ -3,7 +3,7 @@ package dev.sagi.monotask.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import dev.sagi.monotask.MonoTaskApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import javax.inject.Inject
 
 // ========== UI States ==========
 sealed class SettingsUiState {
@@ -29,9 +30,11 @@ sealed class SettingsUiState {
     data class Error(val message: String) : SettingsUiState()
 }
 
-class SettingsViewModel(
-    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
-    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository,
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val workspaceRepository: WorkspaceRepository,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
@@ -40,39 +43,31 @@ class SettingsViewModel(
     private val _errorEvent = MutableSharedFlow<String>()
     val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
 
-//    private lateinit var userId: String
     private var authStateListener: FirebaseAuth.AuthStateListener? = null
 
     init {
-//        viewModelScope.launch {
-//            userId = AuthUtils.awaitUid()
-//            loadUserSettings()
-//        }
         observeAuthState()
     }
 
     // ========== Initialization ==========
 
     private fun observeAuthState() {
-        authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             if (user == null) {
-                // User is logged out. Emit default Ready state to unblock the UI
-//                userId = null
                 _uiState.value = SettingsUiState.Ready()
             } else {
-                // User is logged in. Save the ID and fetch their actual settings
-//                userId = user.uid
                 viewModelScope.launch {
                     loadUserSettings(user.uid)
                 }
             }
         }
-        MonoTaskApp.instance.auth.addAuthStateListener(authStateListener!!)
+        authStateListener = listener
+        auth.addAuthStateListener(listener)
     }
 
     private suspend fun loadUserSettings(uid: String) {
-        _uiState.value = SettingsUiState.Loading // Show loading while fetching
+        _uiState.value = SettingsUiState.Loading
         try {
             val user = withTimeout(8000L) {
                 userRepository.getUserOnce(uid)
@@ -103,7 +98,7 @@ class SettingsViewModel(
         val current = _uiState.value as? SettingsUiState.Ready ?: return
 
         // Grab the ID straight from Firebase right when the user clicks save
-        val currentUserId = MonoTaskApp.instance.auth.currentUser?.uid ?: return
+        val currentUserId = auth.currentUser?.uid ?: return
 
         // Optimistic UI update
         _uiState.value = current.copy(
@@ -136,9 +131,6 @@ class SettingsViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        authStateListener?.let {
-            MonoTaskApp.instance.auth.removeAuthStateListener(it)
-        }
+        authStateListener?.let { auth.removeAuthStateListener(it) }
     }
-
 }

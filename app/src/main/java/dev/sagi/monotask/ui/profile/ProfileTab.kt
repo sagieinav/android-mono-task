@@ -115,6 +115,7 @@ fun ProfileHeader(
             user     = user,
             modifier = Modifier
                 .size(128.dp)
+                .clip(CircleShape)
                 .clickable { onAvatarClick() }
         )
 

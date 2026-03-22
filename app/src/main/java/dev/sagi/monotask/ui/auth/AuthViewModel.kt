@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
-import dev.sagi.monotask.MonoTaskApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.repository.AuthRepository
 import dev.sagi.monotask.data.repository.UserRepository
@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import javax.inject.Inject
 
 // ========== UI States ==========
 
@@ -37,17 +38,19 @@ data class GoogleSignInData(val idToken: String, val profilePicUrl: String?)
 
 // ========== ViewModel ==========
 
-class AuthViewModel(
-    private val authRepository: AuthRepository = MonoTaskApp.instance.authRepository,
-    private val userRepository: UserRepository = MonoTaskApp.instance.userRepository,
-    private val workspaceRepository: WorkspaceRepository = MonoTaskApp.instance.workspaceRepository
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
+    private val workspaceRepository: WorkspaceRepository,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Loading)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     private var authStateListener: FirebaseAuth.AuthStateListener? = null
-    private var isSigningIn = false
+    private var isSigningIn = false  // safe: only read/written on Main dispatcher
 
     init {
         observeAuthState()
@@ -55,8 +58,7 @@ class AuthViewModel(
 
     // ========== Auth State Observation ==========
     private fun observeAuthState() {
-        // Define the listener and save it to the variable
-        authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             if (isSigningIn) return@AuthStateListener
 
             val user = firebaseAuth.currentUser
@@ -80,9 +82,8 @@ class AuthViewModel(
                 }
             }
         }
-
-        // 3. Give the variable to your MonoTaskApp Firebase auth instance
-        MonoTaskApp.instance.auth.addAuthStateListener(authStateListener!!)
+        authStateListener = listener
+        auth.addAuthStateListener(listener)
     }
 
     // ========== Sign In ==========
@@ -175,9 +176,6 @@ class AuthViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        // If the listener exists, tell the MonoTaskApp instance to remove it
-        authStateListener?.let {
-            MonoTaskApp.instance.auth.removeAuthStateListener(it)
-        }
+        authStateListener?.let { auth.removeAuthStateListener(it) }
     }
 }

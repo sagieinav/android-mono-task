@@ -1,14 +1,12 @@
 package dev.sagi.monotask.data.repository
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import dev.sagi.monotask.MonoTaskApp
 import dev.sagi.monotask.data.model.User
 import kotlinx.coroutines.tasks.await
 
-class AuthRepository {
-
-    private val auth = MonoTaskApp.instance.auth
+class AuthRepository(private val auth: FirebaseAuth) {
 
     val currentUser: FirebaseUser? get() = auth.currentUser
     val signedIn: Boolean          get() = auth.currentUser != null
@@ -36,7 +34,6 @@ class AuthRepository {
             id          = firebaseUser.uid,
             displayName = firebaseUser.displayName ?: "MonoTask User",
             email       = firebaseUser.email ?: "",
-//            profilePicUrl = ""
         )
     }
 }

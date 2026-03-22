@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import dev.sagi.monotask.ui.auth.AuthViewModel
@@ -146,7 +146,7 @@ fun NavGraph(
 
             navigation(startDestination = Screen.Focus.route, route = Screen.Main.route) {
                 composable(Screen.Focus.route) {
-                    val focusVM: FocusViewModel = viewModel()
+                    val focusVM: FocusViewModel = hiltViewModel()
                     focusVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
                     focusVM.setUserSource(userSessionVM.currentUser)
                     FocusScreen(
@@ -155,7 +155,7 @@ fun NavGraph(
                     )
                 }
                 composable(Screen.Kanban.route) {
-                    val kanbanVM: KanbanViewModel = viewModel()
+                    val kanbanVM: KanbanViewModel = hiltViewModel()
                     kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
                     if (hardcoreMode) {
                         LaunchedEffect(Unit) { navController.popBackStack() }
@@ -167,7 +167,7 @@ fun NavGraph(
                     }
                 }
                 composable(Screen.Profile.route) {
-                    val profileVM: ProfileViewModel = viewModel()
+                    val profileVM: ProfileViewModel = hiltViewModel()
                     LaunchedEffect(Unit) {
                         profileVM.startObserving(userSessionVM.currentUser)
                     }
