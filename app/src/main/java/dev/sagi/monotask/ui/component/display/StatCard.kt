@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.component.display
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,9 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.core.ValueLabel
 
-// Usage: StatCard(title = "XP this week") { ...content... }
+// Usage: StatCard(title = "XP Earned") { ...content... }
 @Composable
 fun StatCard(
     modifier: Modifier = Modifier,

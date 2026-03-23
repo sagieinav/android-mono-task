@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.core
+package dev.sagi.monotask.ui.component.display
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -49,3 +49,14 @@ private fun SectionTitlePreview() {
         SectionTitle(text = "Achievements")
     }
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//private fun SectionTitleButtonPreview() {
+//    MonoTaskTheme {
+//        SectionTitle(
+//            text = "Achievements",
+//            trailingContent =
+//        )
+//    }
+//}

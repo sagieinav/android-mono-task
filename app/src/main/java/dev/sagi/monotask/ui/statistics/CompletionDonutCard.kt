@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.statistics
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -6,6 +6,9 @@ import androidx.compose.ui.Modifier
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
+import dev.sagi.monotask.ui.component.display.DonutItem
+import dev.sagi.monotask.ui.component.display.DonutRowCard
+import dev.sagi.monotask.ui.component.display.DonutSegment
 import dev.sagi.monotask.ui.theme.customColors
 
 // ========== CompletionDonutCard ==========
@@ -22,9 +25,21 @@ fun CompletionDonutCard(
     val wsMap  = workspaces.associateBy { it.id }
 
     val importanceSegments = listOf(
-        DonutSegment("High",   tasks.count { it.importance == Importance.HIGH   }.toFloat(), colors.importanceHighContent),
-        DonutSegment("Medium", tasks.count { it.importance == Importance.MEDIUM }.toFloat(), colors.importanceMediumContent),
-        DonutSegment("Low",    tasks.count { it.importance == Importance.LOW    }.toFloat(), colors.importanceLowContent),
+        DonutSegment(
+            "High",
+            tasks.count { it.importance == Importance.HIGH }.toFloat(),
+            colors.importanceHighContent
+        ),
+        DonutSegment(
+            "Medium",
+            tasks.count { it.importance == Importance.MEDIUM }.toFloat(),
+            colors.importanceMediumContent
+        ),
+        DonutSegment(
+            "Low",
+            tasks.count { it.importance == Importance.LOW }.toFloat(),
+            colors.importanceLowContent
+        ),
     ).filter { it.value > 0f }
 
     val workspaceSegments = tasks
@@ -39,6 +54,6 @@ fun CompletionDonutCard(
 
     DonutRowCard(title = "Task Completion Distribution", modifier = modifier) {
         DonutItem(title = "Importance", segments = importanceSegments)
-        DonutItem(title = "Workspace",  segments = workspaceSegments)
+        DonutItem(title = "Workspace", segments = workspaceSegments)
     }
 }

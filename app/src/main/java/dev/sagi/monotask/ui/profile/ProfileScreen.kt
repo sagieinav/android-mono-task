@@ -1,27 +1,37 @@
 package dev.sagi.monotask.ui.profile
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.ui.component.core.AvatarBox
+import dev.sagi.monotask.ui.component.core.AvatarPicker
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
-import dev.sagi.monotask.ui.theme.LocalProfileTabState
+import dev.sagi.monotask.ui.component.display.SectionTitle
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.Constants
@@ -36,7 +46,6 @@ fun ProfileScreen(
     profileVM: ProfileViewModel
 ) {
     val uiState          by profileVM.uiState.collectAsStateWithLifecycle()
-    val isRefreshing     by profileVM.isRefreshing.collectAsStateWithLifecycle()
     val friendUsers      by profileVM.friendUsers.collectAsStateWithLifecycle()
     val friendActivities by profileVM.friendActivities.collectAsStateWithLifecycle()
 
@@ -45,7 +54,6 @@ fun ProfileScreen(
 
     ProfileScreenContent(
         uiState          = uiState,
-        isRefreshing     = isRefreshing,
         friendUsers      = friendUsers,
         friendActivities = friendActivities,
         onProfileEvent   = onProfileEvent,
@@ -60,7 +68,6 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenContent(
     uiState          : ProfileUiState,
-    isRefreshing     : Boolean = false,
     friendUsers      : List<User>? = null,
     friendActivities : Map<String, List<DailyActivity>> = emptyMap(),
     onProfileEvent   : (ProfileEvent) -> Unit = {},
@@ -90,7 +97,6 @@ fun ProfileScreenContent(
         is ProfileUiState.Ready -> {
             ProfileReadyContent(
                 state            = uiState,
-                isRefreshing     = isRefreshing,
                 friendUsers      = friendUsers,
                 friendActivities = friendActivities,
                 onProfileEvent   = onProfileEvent,
@@ -107,7 +113,6 @@ fun ProfileScreenContent(
 @Composable
 private fun ProfileReadyContent(
     state            : ProfileUiState.Ready,
-    isRefreshing     : Boolean,
     friendUsers      : List<User>?,
     friendActivities : Map<String, List<DailyActivity>>,
     onProfileEvent   : (ProfileEvent) -> Unit,
@@ -116,44 +121,92 @@ private fun ProfileReadyContent(
     val scaffoldPadding = LocalScaffoldPadding.current
     val topBarHeight    = scaffoldPadding.calculateTopPadding()
     val bottomPadding   = scaffoldPadding.calculateBottomPadding()
-    val contentTopPadding = topBarHeight
 
-    var selectedTab     by LocalProfileTabState.current
+    if (state.showAvatarPicker) {
+        AvatarPicker(
+            user      = state.user,
+            onSelect  = { preset -> onProfileEvent(ProfileEvent.SelectAvatar(preset)) },
+            onDismiss = { onProfileEvent(ProfileEvent.DismissAvatarPicker) }
+        )
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = Constants.Theme.SCREEN_PADDING / 2)
+            .padding(horizontal = Constants.Theme.SCREEN_PADDING)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = Constants.Theme.SCREEN_PADDING)
-//                .background(MaterialTheme.colorScheme.background)
+        LazyColumn(
+            modifier            = Modifier.fillMaxSize(),
+            contentPadding      = PaddingValues(top = topBarHeight, bottom = bottomPadding),
+            verticalArrangement = Arrangement.spacedBy(36.dp)
         ) {
-            when (selectedTab) {
-                0 -> ProfileTab(
-                    state         = state,
-                    topPadding    = contentTopPadding,
-                    bottomPadding = bottomPadding,
-                    onEvent       = onProfileEvent
+            // Avatar + Name + XP bar
+            item {
+                ProfileHeader(
+                    user          = state.user,
+                    modifier      = Modifier.padding(vertical = 6.dp),
+                    onAvatarClick = { onProfileEvent(ProfileEvent.OpenAvatarPicker) }
                 )
-                1 -> StatisticsTab(
-                    state         = state,
-                    isRefreshing  = isRefreshing,
-                    onRefresh     = { onProfileEvent(ProfileEvent.RefreshPage) },
-                    topPadding    = contentTopPadding,
-                    bottomPadding = bottomPadding
+                XpBar(
+                    level          = state.level,
+                    currentXp      = state.xpIntoLevel,
+                    xpForNextLevel = state.xpForNextLevel,
+                    modifier       = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
                 )
-                2 -> SocialTab(
+            }
+
+            // Achievements
+            item {
+                SectionTitle("Achievements")
+                AchievementSectionRow(
+                    achievements = state.achievements,
+                    modifier     = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            // Friends
+            item {
+                FriendsSection(
                     friendUsers      = friendUsers,
                     friendActivities = friendActivities,
-                    onShareInvite    = onShareInvite,
-                    topPadding       = contentTopPadding,
-                    bottomPadding    = bottomPadding
+                    onShareInvite    = onShareInvite
                 )
             }
         }
+    }
+}
+
+// ====================
+// Header
+// ====================
+
+@Composable
+fun ProfileHeader(
+    user: User,
+    modifier: Modifier = Modifier,
+    onAvatarClick: () -> Unit = { }
+) {
+    Column(
+        modifier            = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        AvatarBox(
+            user     = user,
+            modifier = Modifier
+                .size(128.dp)
+                .clip(CircleShape)
+                .clickable { onAvatarClick() }
+        )
+
+        Text(
+            text       = user.displayName.ifEmpty { "MonoTask User" },
+            style      = MaterialTheme.typography.headlineMedium,
+//            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
@@ -163,7 +216,7 @@ private fun ProfileReadyContent(
 private fun ProfileScreenPreview() {
     MonoTaskTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
+            androidx.compose.runtime.CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
                 ProfileScreenContent(
                     uiState = ProfileUiState.Ready(
                         user = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),

@@ -2,11 +2,6 @@ package dev.sagi.monotask.ui.theme
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
@@ -18,7 +13,4 @@ val LocalScaffoldPadding = staticCompositionLocalOf<PaddingValues> { PaddingValu
 val LocalSnackbarHostState = staticCompositionLocalOf<SnackbarHostState> {
     error("No SnackbarHostState provided.")
 }
-
-val LocalProfileTabState: ProvidableCompositionLocal<MutableState<Int>> =
-    compositionLocalOf { mutableIntStateOf(0) }
 

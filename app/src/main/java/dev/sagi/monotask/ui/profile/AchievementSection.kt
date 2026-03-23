@@ -65,8 +65,8 @@ enum class AchievementBadgeStyle { FULL, CONCISE }
 @Composable
 fun AchievementSectionRow(
     achievements : List<Achievement>,
-    badgeStyle   : AchievementBadgeStyle = AchievementBadgeStyle.FULL,
-    modifier     : Modifier = Modifier
+    modifier     : Modifier = Modifier,
+    badgeStyle   : AchievementBadgeStyle = AchievementBadgeStyle.FULL
 ) {
     Row(
         modifier              = modifier.fillMaxWidth(),
@@ -76,7 +76,6 @@ fun AchievementSectionRow(
             HexagonAchievementBadge(
                 achievement     = achievement,
                 badgeStyle      = badgeStyle,
-//                hexSizeFraction = 1f,
                 modifier        = Modifier.weight(1f)
                     // padding decreases the badges' size
 //                    .padding(horizontal = 2.dp)
@@ -92,8 +91,8 @@ fun AchievementSectionRow(
 @Composable
 fun HexagonAchievementBadge(
     achievement     : Achievement,
-    badgeStyle      : AchievementBadgeStyle = AchievementBadgeStyle.FULL,
-    modifier        : Modifier = Modifier
+    modifier        : Modifier = Modifier,
+    badgeStyle      : AchievementBadgeStyle = AchievementBadgeStyle.FULL
 ) {
     val tierColor = achievement.earnedTier.badgeColor()
     // Icon Color: saturate a bit, mix with a bit of black, then reduce alpha

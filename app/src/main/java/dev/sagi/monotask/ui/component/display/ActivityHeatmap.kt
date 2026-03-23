@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.component.display
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -104,28 +104,28 @@ fun ActivityHeatmap(
         shape = shape
     ) {
         Row(
-            modifier              = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment     = Alignment.Top
+            verticalAlignment = Alignment.Top
         ) {
 
             // ========== Grid ==========
             Column(
-                modifier            = Modifier.weight(0.65f),
+                modifier = Modifier.weight(0.65f),
                 verticalArrangement = Arrangement.spacedBy(CellSpacing)
             ) {
                 // Day-of-week labels
                 Row(
-                    modifier              = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(CellSpacing)
                 ) {
                     DayLabels.forEach { label ->
                         Text(
-                            text      = label,
-                            style     = MaterialTheme.typography.labelSmall,
-                            color     = labelColor,
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = labelColor,
                             textAlign = TextAlign.Center,
-                            modifier  = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -133,7 +133,7 @@ fun ActivityHeatmap(
                 // Week rows
                 weeks.forEach { week ->
                     Row(
-                        modifier              = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(CellSpacing)
                     ) {
                         week.forEach { date ->
@@ -144,11 +144,11 @@ fun ActivityHeatmap(
                                 else -> CellState.INACTIVE_PAST
                             }
                             HeatmapCell(
-                                state            = state,
-                                isToday          = date == today,
-                                activeColor      = activeColor,
-                                inactiveColor    = inactiveColor,
-                                modifier         = Modifier.weight(1f)
+                                state = state,
+                                isToday = date == today,
+                                activeColor = activeColor,
+                                inactiveColor = inactiveColor,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
@@ -166,20 +166,20 @@ fun ActivityHeatmap(
 
             // ========== Side panel ==========
             Column(
-                modifier            = Modifier.weight(0.35f),
+                modifier = Modifier.weight(0.35f),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 SideStat(
                     label = "Completed",
                     value = totalTasksThisMonth.toString(),
                     titleColor = MaterialTheme.colorScheme.primary,
-                    unit  = if (totalTasksThisMonth == 1) "task" else "tasks"
+                    unit = if (totalTasksThisMonth == 1) "task" else "tasks"
                 )
                 SideStat(
                     label = "Best Streak",
                     value = bestStreak.toString(),
                     titleColor = MaterialTheme.customColors.aceDim,
-                    unit  = if (bestStreak == 1) "day" else "days"
+                    unit = if (bestStreak == 1) "day" else "days"
                 )
             }
         }

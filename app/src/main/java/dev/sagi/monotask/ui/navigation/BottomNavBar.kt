@@ -39,10 +39,10 @@ import dev.sagi.monotask.util.Constants
 
 enum class NavTab(val label: String, val iconRes: Int) {
     BOARD("Board", R.drawable.ic_stack_tick),
-//    BRIEFING("Briefing", R.drawable.ic_flag_bolt),
+    BRIEF("Brief", R.drawable.ic_flag_bolt),
     FOCUS("Focus", R.drawable.ic_focus),
-//    STATISTICS("Statistics", R.drawable.ic_trending_up),
-    PROFILE("You", R.drawable.ic_user_circle)
+    STATISTICS("Statistics", R.drawable.ic_statistics),
+    PROFILE("MonoTask", R.drawable.ic_user_circle)
 }
 
 @Composable
@@ -81,7 +81,7 @@ fun BottomNavBar(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 tabs.forEach { tab ->

@@ -24,7 +24,6 @@ import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
-import dev.sagi.monotask.ui.theme.LocalProfileTabState
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 
 @Composable
@@ -43,13 +42,21 @@ fun MainScaffold(
     val currentRoute = navBackStackEntry?.destination?.route
     val authState by authVM.uiState.collectAsStateWithLifecycle()
 
-    val mainScreens = listOf(Screen.Focus.route, Screen.Kanban.route, Screen.Profile.route)
+    val mainScreens = listOf(
+        Screen.Focus.route,
+        Screen.Kanban.route,
+        Screen.Profile.route,
+        Screen.Statistics.route,
+        Screen.Brief.route
+    )
     val showBottomBar = currentRoute in mainScreens
 
     val selectedTab = when (currentRoute) {
-        Screen.Kanban.route -> NavTab.BOARD
-        Screen.Profile.route -> NavTab.PROFILE
-        else -> NavTab.FOCUS
+        Screen.Kanban.route     -> NavTab.BOARD
+        Screen.Brief.route      -> NavTab.BRIEF
+        Screen.Statistics.route -> NavTab.STATISTICS
+        Screen.Profile.route    -> NavTab.PROFILE
+        else                    -> NavTab.FOCUS
     }
 
     var lastNavTime by remember { mutableLongStateOf(0L) }
@@ -59,14 +66,12 @@ fun MainScaffold(
     val workspaces by workspaceVM.workspaces.collectAsStateWithLifecycle()
     val selectedWorkspace by workspaceVM.selectedWorkspace.collectAsStateWithLifecycle()
 
-
-    val profileTabState = remember { mutableIntStateOf(0) }
-    val profileTabs     = listOf("Profile", "Statistics", "Social")
+    val statisticsTabState = remember { mutableIntStateOf(0) }
+    val statisticsTabs     = listOf("Weekly", "Monthly", "All Time")
 
     CompositionLocalProvider(
-        LocalHazeState provides hazeState,
+        LocalHazeState         provides hazeState,
         LocalSnackbarHostState provides snackbarHostState,
-        LocalProfileTabState    provides profileTabState
     ) {
         Scaffold(
             containerColor = Color.Transparent,
@@ -79,24 +84,30 @@ fun MainScaffold(
                 when (currentRoute) {
                     Screen.Focus.route, Screen.Kanban.route ->
                         WorkspaceTopBar(
-                            workspaces = workspaces,
-                            selectedWorkspace = selectedWorkspace,
+                            workspaces          = workspaces,
+                            selectedWorkspace   = selectedWorkspace,
                             onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
-                            onAddWorkspace = { showCreateWorkspaceDialog = true },
-                            onAddTaskClick = { showCreateSheet = true }
+                            onAddWorkspace      = { showCreateWorkspaceDialog = true },
+                            onAddTaskClick      = { showCreateSheet = true }
                         )
-                    Screen.Profile.route -> TitleTopBar(
-                        tabs          = profileTabs,
-                        selectedTab   = profileTabState.value,
-                        onTabSelected = { profileTabState.value = it },
-                        trailingIcon  = {
-                            TopBarIconButton(
-                                iconRes            = R.drawable.ic_settings,
-                                contentDescription = "Settings",
-                                onClick            = { navController.navigate(Screen.Settings.route) }
-                            )
-                        }
-                    )
+
+                    Screen.Statistics.route ->
+                        TitleTopBar(title = NavTab.STATISTICS.label)
+
+                    Screen.Profile.route ->
+                        TitleTopBar(
+                            title = NavTab.PROFILE.label,
+                            trailingIcon = {
+                                TopBarIconButton(
+                                    iconRes            = R.drawable.ic_settings,
+                                    contentDescription = "Settings",
+                                    onClick            = { navController.navigate(Screen.Settings.route) }
+                                )
+                            }
+                        )
+
+                    Screen.Brief.route ->
+                        TitleTopBar(title = NavTab.BRIEF.label)
                 }
             },
             bottomBar = {
@@ -108,11 +119,11 @@ fun MainScaffold(
                             if (tab == selectedTab || now - lastNavTime < 300) return@BottomNavBar
                             lastNavTime = now
                             val route = when (tab) {
-                                NavTab.BOARD -> Screen.Kanban.route
-//                                NavTab.STATISTICS -> {}
-                                NavTab.FOCUS -> Screen.Focus.route
-//                                NavTab.SETTINGS -> Screen.Settings.route
-                                NavTab.PROFILE -> Screen.Profile.route
+                                NavTab.BOARD      -> Screen.Kanban.route
+                                NavTab.BRIEF      -> Screen.Brief.route
+                                NavTab.FOCUS      -> Screen.Focus.route
+                                NavTab.STATISTICS -> Screen.Statistics.route
+                                NavTab.PROFILE    -> Screen.Profile.route
                             }
                             navController.navigate(route) {
                                 popUpTo(Screen.Focus.route) { saveState = true }
@@ -128,11 +139,13 @@ fun MainScaffold(
             CompositionLocalProvider(LocalScaffoldPadding provides innerPadding) {
                 Box(modifier = Modifier.fillMaxSize().hazeSource(hazeState)) {
                     NavGraph(
-                        navController = navController,
-                        authVM        = authVM,
-                        settingsVM    = settingsVM,
-                        workspaceVM   = workspaceVM,
-                        userSessionVM = userSessionVM
+                        navController           = navController,
+                        authVM                  = authVM,
+                        settingsVM              = settingsVM,
+                        workspaceVM             = workspaceVM,
+                        userSessionVM           = userSessionVM,
+                        statisticsTabIndex      = statisticsTabState.intValue,
+                        onStatisticsTabSelected = { statisticsTabState.intValue = it }
                     )
                 }
 

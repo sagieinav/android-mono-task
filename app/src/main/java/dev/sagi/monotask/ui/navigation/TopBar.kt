@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
@@ -20,7 +22,11 @@ import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.GlassTabRow
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.googleSans
+import dev.sagi.monotask.ui.theme.lora
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.nationalPark
+import dev.sagi.monotask.ui.theme.plusJakartaSans
 import dev.sagi.monotask.util.Constants
 
 
@@ -87,10 +93,10 @@ fun WorkspaceTopBar(
 
 
 // ==========================================
-// Tab TopBar (Profile)
+// Tab TopBar
 // ==========================================
 @Composable
-fun TitleTopBar(
+fun TabbedTopBar(
     tabs: List<String>,
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
@@ -109,6 +115,32 @@ fun TitleTopBar(
                     .weight(1f)
                     .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
                     .padding(end = 12.dp)
+            )
+        },
+        trailing = { trailingIcon?.invoke() }
+    )
+}
+
+
+// ==========================================
+// Simple title TopBar (Profile)
+// ==========================================
+@Composable
+fun TitleTopBar(
+    title: String,
+    modifier: Modifier = Modifier,
+    trailingIcon: (@Composable () -> Unit)? = null
+) {
+    TopBarScaffold(
+        modifier = modifier,
+        leading = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineLarge,
+//                fontFamily = nationalPark,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
             )
         },
         trailing = { trailingIcon?.invoke() }

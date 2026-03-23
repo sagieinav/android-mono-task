@@ -1,5 +1,7 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.component.display
 
+import android.graphics.BlurMaskFilter
+import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -68,33 +70,35 @@ private const val BarGlowAlpha            = 0.35f
 
 @Composable
 fun BarChart(
-    title: String,
     headlineValue: String,
     points: List<ChartPoint>,
     trendPercent: Int,
+    modifier: Modifier = Modifier,
+    title: String? = null,
     headlineUnit: String? = null,
     barColor: Color = MaterialTheme.colorScheme.primary,
     shape: Shape = MaterialTheme.shapes.large,
-    animate: Boolean = true,
-    modifier: Modifier = Modifier
+    animate: Boolean = true
 ) {
 //    val textColor  = MaterialTheme.colorScheme.onSurface
     val labelColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
 
     StatCard(
         modifier = modifier,
-        title    = title,
+        title = title,
         headlineValue = headlineValue,
         headlineUnit = headlineUnit,
         shape = shape,
-        badge    = if (trendPercent != 0) {{ TrendBadge(trendPercent) }} else null
+        badge = if (trendPercent != 0) {
+            { TrendBadge(trendPercent) }
+        } else null
     ) {
 
         // ========== Bars ==========
         BarChartContent(
-            points   = points,
+            points = points,
             barColor = barColor,
-            animate  = animate,
+            animate = animate,
             modifier = Modifier.fillMaxWidth().height(ChartHeight)
         )
 
@@ -102,11 +106,11 @@ fun BarChart(
         Row(modifier = Modifier.fillMaxWidth()) {
             points.forEach { point ->
                 Text(
-                    text      = point.label,
-                    style     = MaterialTheme.typography.labelSmall,
-                    color     = labelColor,
+                    text = point.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = labelColor,
                     textAlign = TextAlign.Center,
-                    modifier  = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -240,10 +244,10 @@ private fun SingleBar(
                                     canvas.nativeCanvas.drawRoundRect(
                                         0f, 0f, size.width, size.height,
                                         BarCornerRadius.toPx(), BarCornerRadius.toPx(),
-                                        android.graphics.Paint().apply {
+                                        Paint().apply {
                                             color       = barColor.copy(alpha = BarGlowAlpha * selectionAnim).toArgb()
-                                            maskFilter  = android.graphics.BlurMaskFilter(
-                                                BarGlowBlur.toPx(), android.graphics.BlurMaskFilter.Blur.NORMAL
+                                            maskFilter  = BlurMaskFilter(
+                                                BarGlowBlur.toPx(), BlurMaskFilter.Blur.NORMAL
                                             )
                                             isAntiAlias = true
                                         }
@@ -283,9 +287,9 @@ private fun BarChartPreview() {
     MonoTaskTheme {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             BarChart(
-                title        = "Tasks this week",
+                title        = "Tasks Completed",
                 headlineValue     = "23",
-                headlineUnit = "completed",
+                headlineUnit = "tasks",
                 trendPercent = 42,
                 points       = listOf(
                     ChartPoint(3f, "Sat"), ChartPoint(0f, "Sun"),

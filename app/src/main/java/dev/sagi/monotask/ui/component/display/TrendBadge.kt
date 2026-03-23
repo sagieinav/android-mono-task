@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.component.display
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

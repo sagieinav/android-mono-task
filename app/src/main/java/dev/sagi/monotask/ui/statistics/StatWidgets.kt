@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.statistics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,10 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
-import dev.sagi.monotask.ui.component.core.ValueLabel
+import dev.sagi.monotask.ui.component.display.ValueLabel
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -189,7 +185,7 @@ fun StatWidgetSmall(
                 }
             }
 
-            ValueLabel(value = value, unit = unit, accentColor = accentColor)
+            ValueLabel(value = value, unit = unit)
         }
 
         // ========== Circle icon ==========
@@ -200,17 +196,16 @@ fun StatWidgetSmall(
 }
 
 // ========== StatWidgetMedium ==========
-// Full-width card. Has a date label top-right and an optional secondary stat bottom-right
 
 @Composable
 fun StatWidgetMedium(
     title: String,
     subtitle: String,
     value: String,
-    unit: String = "",
     icon: Painter,
     accentColor: Color,
     modifier: Modifier = Modifier,
+    unit: String = "",
     dateLabel: String? = null,
     trailingValue: String? = null,
     trailingUnit: String? = null,
@@ -287,7 +282,7 @@ fun StatWidgetMedium(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.Bottom
             ) {
-                ValueLabel(value = value, unit = unit, accentColor = accentColor)
+                ValueLabel(value = value, unit = unit)
                 // Trailing value and unit (if not null)
                 trailingValue?. let { value ->
                     Column(horizontalAlignment = Alignment.End) {

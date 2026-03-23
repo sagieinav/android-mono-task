@@ -1,13 +1,9 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.component.display
 
+import android.graphics.Paint
 import android.graphics.RectF
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.EaseInBounce
-import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.animation.core.EaseInCubic
-import androidx.compose.animation.core.EaseInElastic
-import androidx.compose.animation.core.EaseInExpo
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -34,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -119,12 +113,12 @@ fun DonutItem(
         val strokePx = with(density) { StrokeWidth.toPx() }
         val glowPx   = with(density) { GlowRadius.toPx() }
         resolvedColors.map { color ->
-            android.graphics.Paint().apply {
+            Paint().apply {
                 isAntiAlias = true
                 this.color  = android.graphics.Color.TRANSPARENT
-                style       = android.graphics.Paint.Style.STROKE
+                style       = Paint.Style.STROKE
                 strokeWidth = strokePx
-                strokeCap   = android.graphics.Paint.Cap.ROUND
+                strokeCap   = Paint.Cap.ROUND
                 setShadowLayer(glowPx, 0f, 0f, color.copy(glowAlpha).toArgb())
             }
         }
@@ -225,9 +219,9 @@ fun DonutRowCard(
 ) {
     StatCard(modifier = modifier, title = title) {
         Row(
-            modifier              = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment     = Alignment.Top
+            verticalAlignment = Alignment.Top
         ) {
             content()
         }

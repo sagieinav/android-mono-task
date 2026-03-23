@@ -18,6 +18,7 @@ import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.auth.AuthScreen
 import dev.sagi.monotask.ui.auth.AuthUiState
 import dev.sagi.monotask.ui.auth.OnboardingScreen
+import dev.sagi.monotask.ui.brief.BriefScreen
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.focus.FocusScreen
 import dev.sagi.monotask.ui.focus.FocusViewModel
@@ -29,10 +30,13 @@ import dev.sagi.monotask.ui.settings.SettingsUiState
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
+import dev.sagi.monotask.ui.statistics.StatisticsScreen
 
 private val TAB_ORDER = listOf(
     Screen.Kanban.route,
+    Screen.Brief.route,
     Screen.Focus.route,
+    Screen.Statistics.route,
     Screen.Profile.route
 )
 
@@ -66,7 +70,9 @@ fun NavGraph(
     authVM: AuthViewModel,
     settingsVM: SettingsViewModel,
     workspaceVM: WorkspaceViewModel,
-    userSessionVM: UserSessionViewModel
+    userSessionVM: UserSessionViewModel,
+    statisticsTabIndex: Int = 0,
+    onStatisticsTabSelected: (Int) -> Unit = {}
 ) {
     val settingsState by settingsVM.uiState.collectAsStateWithLifecycle()
     val authState by authVM.uiState.collectAsStateWithLifecycle()
@@ -74,20 +80,16 @@ fun NavGraph(
     val hardcoreMode = (settingsState as? SettingsUiState.Ready)?.hardcoreModeEnabled ?: false
     val isLoading = authState is AuthUiState.Loading || settingsState is SettingsUiState.Loading
 
-    // Hold the initial destination in a state variable
     var initialStartDestination by remember { mutableStateOf<String?>(null) }
 
-    // Wait for the initial load to finish, then lock in the destination once
     LaunchedEffect(authState, settingsState) {
         if (initialStartDestination == null && !isLoading) {
             initialStartDestination = if (authState is AuthUiState.SignedIn) Screen.Main.route else Screen.Auth.route
         }
     }
 
-    // Capture the locked in start destination in a local, immutable variable
     val startDestination = initialStartDestination
 
-    // Prevent the NavHost from building until we know exactly where to start.
     if (startDestination == null) {
         LoadingSpinner()
         return
@@ -95,7 +97,6 @@ fun NavGraph(
 
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // LaunchedEffect of AuthScreen, to catch first login and logouts
         LaunchedEffect(authState) {
             if (authState is AuthUiState.SignedOut) {
                 navController.navigate(Screen.Auth.route) {
@@ -104,7 +105,6 @@ fun NavGraph(
             }
         }
 
-        // The Navigation Host:
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -149,10 +149,7 @@ fun NavGraph(
                     val focusVM: FocusViewModel = hiltViewModel()
                     focusVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
                     focusVM.setUserSource(userSessionVM.currentUser)
-                    FocusScreen(
-//                        navController = navController,
-                        focusVM       = focusVM,
-                    )
+                    FocusScreen(focusVM = focusVM)
                 }
                 composable(Screen.Kanban.route) {
                     val kanbanVM: KanbanViewModel = hiltViewModel()
@@ -176,9 +173,22 @@ fun NavGraph(
                         profileVM     = profileVM
                     )
                 }
+                composable(Screen.Statistics.route) {
+                    val profileVM: ProfileViewModel = hiltViewModel()
+                    LaunchedEffect(Unit) {
+                        profileVM.startObserving(userSessionVM.currentUser)
+                    }
+                    StatisticsScreen(
+                        profileVM         = profileVM,
+                        selectedSection   = statisticsTabIndex,
+                        onSectionSelected = onStatisticsTabSelected
+                    )
+                }
+                composable(Screen.Brief.route) {
+                    BriefScreen()
+                }
             }
         }
-        // Overlay the spinner for any mid-session loading without destroying the graph
         if (isLoading) {
             LoadingSpinner()
         }

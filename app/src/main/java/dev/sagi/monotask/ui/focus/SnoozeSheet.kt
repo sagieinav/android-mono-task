@@ -37,7 +37,7 @@ import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.core.BottomSheet
 import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.core.InfoCallout
+import dev.sagi.monotask.ui.component.display.InfoCallout
 import dev.sagi.monotask.ui.theme.GlassSurface
 
 @Composable
@@ -78,18 +78,6 @@ fun SnoozeBottomSheet(
                 onClick    = { onSnooze(option) }
             )
         }
-
-
-//        Text(
-//            text = "You can also snooze tasks directly from the Kanban board.",
-//            style = MaterialTheme.typography.bodySmall,
-//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-//            modifier = Modifier
-//                .padding(top = 8.dp)
-//                .fillMaxWidth()
-//            ,
-//            textAlign = TextAlign.Center
-//        )
 
         // Info for manual snooze
         InfoCallout(

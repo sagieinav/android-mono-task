@@ -1,5 +1,7 @@
-package dev.sagi.monotask.ui.component.statistics
+package dev.sagi.monotask.ui.component.display
 
+import android.graphics.BlurMaskFilter
+import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -7,13 +9,17 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +52,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -96,9 +101,9 @@ fun LineChart(
     headlineValue: String,
     points: List<ChartPoint>,
     trendPercent: Int,
-    headlineUnit: String? = null,
     modifier: Modifier = Modifier,
     title: String? = null,
+    headlineUnit: String? = null,
     lineColor: Color = AceGold,
     shape: Shape = MaterialTheme.shapes.large,
     animate: Boolean = true,
@@ -110,29 +115,31 @@ fun LineChart(
 
     StatCard(
         modifier = modifier,
-        title    = title,
+        title = title,
         headlineValue = headlineValue,
         headlineUnit = headlineUnit,
         shape = shape,
-        badge    = if (trendPercent != 0) {{ TrendBadge(trendPercent) }} else null
+        badge = if (trendPercent != 0) {
+            { TrendBadge(trendPercent) }
+        } else null
     ) {
 
         // ========== Chart ==========
 
         Row(
-            modifier              = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (points.isNotEmpty()) {
                 val minV = points.minOf { it.value }
                 val maxV = points.maxOf { it.value }
                 Column(
-                    modifier            = Modifier.height(chartHeight),
+                    modifier = Modifier.height(chartHeight),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     listOf(maxV, (minV + maxV) / 2f, minV).forEach { v ->
                         Text(
-                            text  = "${v.toInt()}",
+                            text = "${v.toInt()}",
                             style = MaterialTheme.typography.labelSmall,
                             color = labelColor
                         )
@@ -142,25 +149,38 @@ fun LineChart(
 
             Column(modifier = Modifier.weight(1f)) {
                 ChartCanvas(
-                    points     = points,
-                    lineColor  = lineColor,
-                    gridColor  = gridColor,
-                    animate    = animate,
+                    points = points,
+                    lineColor = lineColor,
+                    gridColor = gridColor,
+                    animate = animate,
                     drawHeight = chartHeight,
-                    modifier   = Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(chartHeight + TouchBottomBuffer)
                 )
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    points.forEach { point ->
-                        Text(
-                            text      = point.label,
-                            style     = MaterialTheme.typography.labelSmall,
-                            color     = labelColor,
-                            textAlign = TextAlign.Center,
-                            modifier  = Modifier.weight(1f)
-                        )
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val totalWidth = maxWidth
+                    points.forEachIndexed { i, point ->
+                        if (point.label.isNotEmpty()) {
+                            val xFraction =
+                                if (points.size <= 1) 0.5f else i.toFloat() / (points.size - 1)
+                            Box(
+                                modifier = Modifier
+                                    .absoluteOffset(x = totalWidth * xFraction)
+                                    .width(0.dp)
+                                    .wrapContentWidth(
+                                        Alignment.CenterHorizontally,
+                                        unbounded = true
+                                    )
+                            ) {
+                                Text(
+                                    text = point.label,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = labelColor,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -221,7 +241,7 @@ private fun ChartCanvas(
         val idx      = (progress * (points.size - 1)).roundToInt().coerceIn(0, points.size - 1)
         userProgress  = progress
         selectedPoint = SelectedPoint(
-            label          = points[idx].label,
+            label          = points[idx].tooltipLabel,
             value          = interpolateAt(points, progress),
             screenPosition = cache.pm.let { pm ->
                 pm.getPosition(pm.length * progress.coerceIn(0f, 1f))
@@ -366,12 +386,12 @@ private fun DrawScope.drawLineGlow(path: Path, color: Color) {
     drawIntoCanvas { canvas ->
         canvas.nativeCanvas.drawPath(
             path.asAndroidPath(),
-            android.graphics.Paint().apply {
+            Paint().apply {
                 this.color  = color.copy(alpha = GlowAlpha).toArgb()
                 strokeWidth = GlowStrokeWidth.toPx()
-                style       = android.graphics.Paint.Style.STROKE
-                strokeCap   = android.graphics.Paint.Cap.ROUND
-                maskFilter  = android.graphics.BlurMaskFilter(GlowBlurRadius.toPx(), android.graphics.BlurMaskFilter.Blur.NORMAL)
+                style       = Paint.Style.STROKE
+                strokeCap   = Paint.Cap.ROUND
+                maskFilter  = BlurMaskFilter(GlowBlurRadius.toPx(), BlurMaskFilter.Blur.NORMAL)
                 isAntiAlias = true
             }
         )

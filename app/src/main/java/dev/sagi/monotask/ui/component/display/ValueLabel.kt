@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.core
+package dev.sagi.monotask.ui.component.display
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 fun ValueLabel(
     value: String,
     unit: String? = null,
-    accentColor: Color? = null,
+//    accentColor: Color? = null,
 ) {
     val initialFontSize = MaterialTheme.typography.headlineMedium.fontSize
     var fontSize by remember(value) { mutableStateOf(initialFontSize) }

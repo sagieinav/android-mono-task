@@ -9,35 +9,40 @@ object ActivityStats {
 
     // ========== Model ==========
 
-    // Shared point model used by all statistics chart components.
-    data class ChartPoint(val value: Float, val label: String)
+    // Shared point model used by all statistics chart components
+    data class ChartPoint(val value: Float, val label: String, val tooltipLabel: String = label)
 
     // ========== XP helpers ==========
 
-    // Builds a 7-day XP window (oldest → newest, ending today).
-    // Days with no recorded activity default to 0.
+    // Builds a 7-day XP window (ending today)
     fun buildXpPoints(data: List<DailyActivity>): List<ChartPoint> =
         buildWindow(data) { it.xpEarned.toFloat() }
 
-    // Compares average XP of the last 3 complete days vs the 3 before those.
-    // Today excluded — it's almost always lower mid-day.
+    // Builds a 30-day XP window with day-of-month labels every 7 points
+    fun buildXpPointsMonthly(data: List<DailyActivity>): List<ChartPoint> =
+        buildWindow(data, days = 30) { it.xpEarned.toFloat() }
+
+    // Compares average XP of the last 3 complete days vs the 3 before those, today is excluded
     fun computeXpTrend(data: List<DailyActivity>): Int =
         computeTrend(buildXpPoints(data))
 
+    fun computeXpTrendMonthly(data: List<DailyActivity>): Int =
+        computeTrend(buildXpPointsMonthly(data))
+
     // ========== Task helpers ==========
 
-    // Builds a 7-day tasks-completed window (oldest → newest, ending today).
+    // Builds a 7-day tasks-completed window (ending today)
     fun buildTaskPoints(data: List<DailyActivity>): List<ChartPoint> =
         buildWindow(data) { it.tasksCompleted.toFloat() }
 
-    // Compares average tasks completed of the last 3 complete days vs the 3 before those.
+    // Compares average tasks completed of the last 3 complete days vs the 3 before
     fun computeTaskTrend(data: List<DailyActivity>): Int =
         computeTrend(buildTaskPoints(data))
 
     // ========== Streak helpers ==========
 
-    // Current streak = consecutive active days going backwards from today.
-    // Allows today to still count even if not yet active (checks yesterday as fallback start).
+    // Current streak = consecutive active days going backwards from today
+    // Allows today to still count even if not yet active (checks yesterday as fallback start)
     fun computeCurrentStreak(data: List<DailyActivity>): Int {
         if (data.isEmpty()) return 0
         val days = data
@@ -87,10 +92,10 @@ object ActivityStats {
         return best
     }
 
+
     // ========== Date window helpers ==========
 
-
-    // Returns the last 7 DailyActivity entries (null for days with no data), oldest → newest.
+    // Returns the last 7 DailyActivity entries (null for days with no data)
     fun last7Days(data: List<DailyActivity>): List<DailyActivity?> {
         val today = LocalDate.now()
         val map   = data.associateBy { it.dateEpochDay }
@@ -99,7 +104,7 @@ object ActivityStats {
         }
     }
 
-    // Returns day-of-week labels (2-char) for the last 7 days, oldest → newest.
+    // Returns day-of-week labels (2-char) for the last 7 days
     fun last7DayLabels(): List<String> {
         val today = LocalDate.now()
         return (6 downTo 0).map { daysBack ->
@@ -110,7 +115,7 @@ object ActivityStats {
         }
     }
 
-    // Scopes a month-loaded list down to the last 7 days — no extra Firestore call needed
+    // Scopes a month-loaded list down to the last 7 days, no extra Firestore call needed
     fun weekActivity(data: List<DailyActivity>): List<DailyActivity> {
         val cutoff = LocalDate.now().minusDays(6).toEpochDay()
         return data.filter { it.dateEpochDay >= cutoff }
@@ -120,16 +125,18 @@ object ActivityStats {
 
     private fun buildWindow(
         data: List<DailyActivity>,
+        days: Int = 7,
         selector: (DailyActivity) -> Float
     ): List<ChartPoint> {
-        val today = LocalDate.now()
-        val map   = data.associateBy { it.dateEpochDay }
-        return (6 downTo 0).map { daysBack ->
-            val date = today.minusDays(daysBack.toLong())
-            ChartPoint(
-                value = map[date.toEpochDay()]?.let(selector) ?: 0f,
-                label = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()).take(3)
-            )
+        val today  = LocalDate.now()
+        val map    = data.associateBy { it.dateEpochDay }
+        val sparse = days > 7
+        return (days - 1 downTo 0).mapIndexed { index, daysBack ->
+            val date         = today.minusDays(daysBack.toLong())
+            val tooltipLabel = if (sparse) "${date.dayOfMonth}/${date.monthValue}"
+                               else date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()).take(3)
+            val label        = if (!sparse || index % 7 == 0) tooltipLabel else ""
+            ChartPoint(value = map[date.toEpochDay()]?.let(selector) ?: 0f, label = label, tooltipLabel = tooltipLabel)
         }
     }
 

@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.core
+package dev.sagi.monotask.ui.component.display
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

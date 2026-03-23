@@ -1,48 +1,25 @@
 package dev.sagi.monotask.ui.focus
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInQuart
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.domain.util.XpEvents
-import dev.sagi.monotask.ui.component.core.AvatarBox
-import dev.sagi.monotask.ui.component.core.EmptyState
-import dev.sagi.monotask.ui.component.core.StreakChip
+import dev.sagi.monotask.ui.component.display.EmptyState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 import dev.sagi.monotask.util.Constants
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -155,9 +132,12 @@ fun FocusScreenContent(
         when (uiState) {
             is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 EmptyState(
-                    emoji = "🦾",
+                    imgRes = R.drawable.img_empty_focus_no_bg2,
                     title = "You're all caught up!",
-                    subtitle = "No tasks here. Enjoy the moment."
+                    subtitle = "No tasks here. Enjoy the moment.",
+                    isMainContent = true,
+                    modifier = Modifier
+                        .padding(bottom = 40.dp) // optical correction for vertical position
                 )
             }
             is FocusUiState.Active ->
@@ -227,106 +207,4 @@ private fun ActiveFocusCard(
             )
         }
     }
-}
-
-// ========== User Header ==========
-
-@Composable
-fun UserHeader(
-    user          : User?,
-    currentStreak : Int,
-    modifier      : Modifier = Modifier
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.padding(vertical = 8.dp)
-    ) {
-        user?.let {
-            AvatarBox(
-                user = it,
-                modifier = Modifier.size(58.dp)
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text       = user?.displayName ?: "",
-                style      = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color      = MaterialTheme.colorScheme.onSurface,
-                modifier   = Modifier
-                    .padding(start = 1.dp) // optical correction
-            )
-            StreakChip(currentStreak)
-        }
-    }
-}
-
-// ========== Animation State ==========
-
-@Stable
-class FocusAnimationState(
-    private val onFocusEvent: (FocusEvent) -> Unit
-) {
-    // ========== Snooze Exit State ==========
-
-    var isSnoozeExiting by mutableStateOf(false)
-        private set
-
-    var snoozeExitTrigger by mutableStateOf<SwipeExitDirection?>(null)
-        private set
-
-    private var pendingSnoozeAction: (() -> Unit)? = null
-
-    // ========== Entry Animation ==========
-
-    val alpha  = Animatable(0f)
-    val scale  = Animatable(0.22f)
-    val border = Animatable(0f)
-
-    private var needsReset  by mutableStateOf(true)
-    private var lastCardKey : Pair<String, Int>? = null
-
-    val displayAlpha  : Float get() = if (needsReset) 0f    else alpha.value
-    val displayScale  : Float get() = if (needsReset) 0.22f else scale.value
-    val displayBorder : Float get() = if (needsReset) 0f    else border.value
-
-    fun checkIfNeedsReset(taskId: String, restoreVersion: Int) {
-        val key = taskId to restoreVersion
-        if (key != lastCardKey) {
-            lastCardKey = key
-            needsReset  = true
-        }
-    }
-
-    suspend fun resetCard() {
-        alpha.snapTo(0f)
-        scale.snapTo(0.22f)
-        border.snapTo(0f)
-        needsReset = false
-    }
-
-    // ========== Snooze Actions ==========
-
-    fun onSnoozeConfirmed(option: XpEvents.SnoozeOption, scope: CoroutineScope) {
-        scope.launch {
-            onFocusEvent(FocusEvent.DismissSnooze)
-            delay(100)
-            pendingSnoozeAction  = { onFocusEvent(FocusEvent.ExecuteSnooze(option)) }
-            isSnoozeExiting      = true
-            snoozeExitTrigger    = SwipeExitDirection.LEFT
-        }
-    }
-
-    fun onSnoozeCardExited() {
-        pendingSnoozeAction?.invoke()
-        pendingSnoozeAction = null
-        snoozeExitTrigger   = null
-        isSnoozeExiting     = false
-    }
-}
-
-@Composable
-fun rememberFocusAnimationState(onFocusEvent: (FocusEvent) -> Unit): FocusAnimationState {
-    return remember(onFocusEvent) { FocusAnimationState(onFocusEvent) }
 }
