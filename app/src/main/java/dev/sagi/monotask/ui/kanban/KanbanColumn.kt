@@ -51,6 +51,7 @@ import dev.sagi.monotask.ui.theme.harabara
 import dev.sagi.monotask.ui.theme.invincibleBorder
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
 import kotlinx.coroutines.delay
 
 private const val ANIM_DURATION   = 250
@@ -90,7 +91,7 @@ fun KanbanColumn(
                 .width(170.dp)
                 .fillMaxHeight(),
             // Header-Content gap
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(KANBAN_PADDING)
         ) {
             val colShape = MaterialTheme.shapes.medium
             val cardShape = MaterialTheme.shapes.small
@@ -175,9 +176,9 @@ fun KanbanColumn(
                     LazyColumn(
                         modifier            = Modifier
                             .clip(cardShape),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(KANBAN_PADDING),
                         // card padding, handles shadow overflow nicely:
-                        contentPadding = PaddingValues(8.dp),
+                        contentPadding = PaddingValues(KANBAN_PADDING),
                     ) {
                         items(displayedTasks, key = { it.id }) { task ->
                             KanbanCard(

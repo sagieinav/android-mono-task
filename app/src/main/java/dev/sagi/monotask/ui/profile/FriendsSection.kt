@@ -7,8 +7,11 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -45,6 +48,8 @@ import dev.sagi.monotask.ui.component.display.StreakChipSize
 import dev.sagi.monotask.ui.component.display.LineChart
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
+import dev.sagi.monotask.ui.theme.clickableNoRipple
+import dev.sagi.monotask.ui.theme.noMinSize
 
 // ====================
 // Friends section (header + list)
@@ -59,30 +64,35 @@ fun FriendsSection(
     var expandedFriendId by remember { mutableStateOf<String?>(null) }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(0.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SectionTitle("Friends") {
             Row(
                 modifier              = Modifier
+                    .height(IntrinsicSize.Min) // row height = text height
                     .clip(CircleShape)
-                    .clickable(onClick = onShareInvite)
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                    .clickableNoRipple(onClick = onShareInvite)
+                ,
                 verticalAlignment     = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                val color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
                 Icon(
                     painter            = painterResource(R.drawable.ic_add_user),
                     contentDescription = null,
-                    modifier           = Modifier.size(16.dp),
-                    tint               = MaterialTheme.colorScheme.secondary
+                    modifier           = Modifier
+                        .noMinSize()    // allow going below 24.dp minimum
+                        .fillMaxHeight(0.7f), // match text height
+                    tint               = color
                 )
                 Text(
-                    text       = "Invite",
-                    style      = MaterialTheme.typography.labelLarge,
-                    color      = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.SemiBold
+                    text  = "Invite",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Thin,
+                    color = color
                 )
             }
+
         }
 
         when {
@@ -92,7 +102,9 @@ fun FriendsSection(
                 subtitle = "Share your invite link to connect with friends",
                 modifier = Modifier.padding(vertical = 8.dp)
             )
-            else -> Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            else -> Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 friendUsers.forEach { user ->
                     FriendRow(
                         user       = user,
@@ -242,8 +254,8 @@ private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
 
 // ========== Preview ==========
 
-private val previewFriend1 = User(id = "1", displayName = "Alex Kim", level = 12, xp = 4800)
-private val previewFriend2 = User(id = "2", displayName = "Jordan Lee", level = 7, xp = 1950)
+private val previewFriend1 = User(id = "1", displayName = "Roei Zalah", level = 12, xp = 4800)
+private val previewFriend2 = User(id = "2", displayName = "Ofek Fanian", level = 7, xp = 1950)
 private val previewActivities = listOf(
     DailyActivity(dateEpochDay = 20000L, tasksCompleted = 3, xpEarned = 120),
     DailyActivity(dateEpochDay = 20001L, tasksCompleted = 5, xpEarned = 200),

@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -20,14 +21,15 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.GlassTabRow
+import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
+import dev.sagi.monotask.ui.kanban.KanbanEvent
+import dev.sagi.monotask.ui.kanban.KanbanUiState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.googleSans
-import dev.sagi.monotask.ui.theme.lora
+import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
-import dev.sagi.monotask.ui.theme.nationalPark
-import dev.sagi.monotask.ui.theme.plusJakartaSans
 import dev.sagi.monotask.util.Constants
+import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
 
 
 // ==========================================
@@ -46,8 +48,9 @@ private fun TopBarScaffold(
             .padding(
                 start = Constants.Theme.SCREEN_PADDING,
                 end = Constants.Theme.SCREEN_PADDING,
+//                top = 8.dp
             )
-            .heightIn(min = 64.dp, max = 96.dp)
+            .heightIn(min = 54.dp, max = 96.dp)
             .background(Color.Transparent)
         ,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -86,6 +89,37 @@ fun WorkspaceTopBar(
                 iconRes = R.drawable.ic_add,
                 contentDescription = "Create new task",
                 onClick = onAddTaskClick
+            )
+        }
+    )
+}
+
+@Composable
+fun KanbanTopBar(
+    workspaces: List<Workspace>,
+    selectedWorkspace: Workspace?,
+    onWorkspaceSelected: (Workspace) -> Unit,
+    onAddWorkspace: () -> Unit,
+    isArchive: Boolean,
+    onToggleArchive: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TopBarScaffold(
+        modifier = modifier,
+        leading = {
+            WorkspaceDropdownGlass(
+                workspaces = workspaces,
+                selectedWorkspace = selectedWorkspace,
+                onWorkspaceSelected = onWorkspaceSelected,
+                onAddWorkspace = onAddWorkspace
+            )
+        },
+        trailing = {
+            TopBarIconButton(
+                iconRes = R.drawable.ic_archive,
+                contentDescription = "Toggle Archive",
+                isPressed = isArchive,
+                onClick = onToggleArchive
             )
         }
     )
@@ -131,13 +165,22 @@ fun TitleTopBar(
     modifier: Modifier = Modifier,
     trailingIcon: (@Composable () -> Unit)? = null
 ) {
+    val color = MaterialTheme.colorScheme.background
+    val gradient = Brush.verticalGradient(
+        colorStops = arrayOf(
+            0.0f to color,
+            0.86f to color,
+            0.9f to color.copy(alpha = 0.8f),
+            1.0f to Color.Transparent,
+        )
+    )
     TopBarScaffold(
-        modifier = modifier,
+        modifier = modifier
+            .background(brush = gradient),
         leading = {
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
-//                fontFamily = nationalPark,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
@@ -156,16 +199,31 @@ fun TopBarIconButton(
     iconRes: Int,
     contentDescription: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isPressed: Boolean = false
 ) {
+    val bgAccentColor = if (isPressed) MaterialTheme.colorScheme.onSurface
+                        else null
+
     GlassSurface(
         shape = CircleShape,
         modifier = modifier
             .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
-            .monoShadowWorkaround(CircleShape)
+//            .monoShadowWorkaround(CircleShape)
+            // "remove" shadow when button is pressed:
+            .then(
+                if (isPressed) Modifier
+                else Modifier.monoShadowWorkaround(CircleShape)
+            )
+            // add border color if pressed:
+            .then(
+                if (isPressed)
+                    Modifier.glassBorder(CircleShape, MaterialTheme.colorScheme.onSurface)
+                else Modifier
+            )
             .clip(CircleShape)
             .clickable { onClick() },
-        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
+        accentColor = bgAccentColor,
     ) {
         Icon(
             painter = painterResource(iconRes),
@@ -195,5 +253,13 @@ private fun WorkspaceTopBarPreview() {
             selectedWorkspace = Workspace(id = "1", name = "University"),
             onWorkspaceSelected = {}, onAddWorkspace = {}, onAddTaskClick = {}
         )
+    }
+}
+
+@Preview(showBackground = false, name = "Title TopBar")
+@Composable
+private fun TitleTopBarPreview() {
+    MonoTaskTheme {
+        TitleTopBar("MonoTask")
     }
 }

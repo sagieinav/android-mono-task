@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.core.AvatarBox
 import dev.sagi.monotask.ui.component.display.StreakChip
+import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 
 @Composable
 fun UserHeader(
@@ -24,7 +25,7 @@ fun UserHeader(
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.padding(vertical = 8.dp)
+        modifier = modifier.padding(vertical = SCREEN_PADDING)
     ) {
         user?.let {
             AvatarBox(

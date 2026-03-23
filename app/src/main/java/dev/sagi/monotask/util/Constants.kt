@@ -7,6 +7,8 @@ class Constants {
     object Theme {
         // Not putting this on MainScaffold, to allow smooth horizontal scrolling in KanbanScreen
         val SCREEN_PADDING = 16.dp
-        val TOP_BAR_ITEM_HEIGHT = 46.dp
+        val TOP_BAR_ITEM_HEIGHT = 44.dp
+
+        val KANBAN_PADDING = 8.dp
     }
 }

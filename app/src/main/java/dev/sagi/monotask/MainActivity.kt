@@ -24,6 +24,7 @@ import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import dev.sagi.monotask.ui.kanban.KanbanViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -46,11 +47,12 @@ class MainActivity : ComponentActivity() {
 
                 // Activity-scoped ViewModels: shared across multiple screens
                 // Inside setContent {}, LocalViewModelStoreOwner.current points to the Activity itself
-                val owner = LocalViewModelStoreOwner.current!!
-                val authVM: AuthViewModel = hiltViewModel(owner)
-                val settingsVM: SettingsViewModel = hiltViewModel(owner)
-                val workspaceVM: WorkspaceViewModel = hiltViewModel(owner)
-                val userSessionVM: UserSessionViewModel = hiltViewModel(owner)
+                val authVM: AuthViewModel = hiltViewModel()
+                val settingsVM: SettingsViewModel = hiltViewModel()
+                val workspaceVM: WorkspaceViewModel = hiltViewModel()
+                val userSessionVM: UserSessionViewModel = hiltViewModel()
+
+                val kanbanVM: KanbanViewModel = hiltViewModel()
                 // Screen-scoped VMs (focusVM, kanbanVM, profileVM) are created
                 // inside their composable() blocks in NavGraph
 
@@ -64,6 +66,7 @@ class MainActivity : ComponentActivity() {
                         settingsVM         = settingsVM,
                         workspaceVM        = workspaceVM,
                         userSessionVM      = userSessionVM,
+                        kanbanVM           = kanbanVM,
                         pendingInviteUid   = pendingInviteUid,
                         onInviteDismissed  = { pendingInviteUid = null }
                     )

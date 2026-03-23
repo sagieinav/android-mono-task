@@ -23,6 +23,9 @@ import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
+import dev.sagi.monotask.ui.kanban.KanbanEvent
+import dev.sagi.monotask.ui.kanban.KanbanUiState
+import dev.sagi.monotask.ui.kanban.KanbanViewModel
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 
@@ -33,6 +36,7 @@ fun MainScaffold(
     settingsVM: SettingsViewModel,
     workspaceVM: WorkspaceViewModel,
     userSessionVM: UserSessionViewModel,
+    kanbanVM: KanbanViewModel,
     pendingInviteUid: String? = null,
     onInviteDismissed: () -> Unit = {}
 ) {
@@ -66,8 +70,9 @@ fun MainScaffold(
     val workspaces by workspaceVM.workspaces.collectAsStateWithLifecycle()
     val selectedWorkspace by workspaceVM.selectedWorkspace.collectAsStateWithLifecycle()
 
-    val statisticsTabState = remember { mutableIntStateOf(0) }
-    val statisticsTabs     = listOf("Weekly", "Monthly", "All Time")
+    val kanbanUiState by kanbanVM.uiState.collectAsStateWithLifecycle()
+    val isKanbanArchive = (kanbanUiState as? KanbanUiState.Ready)?.isArchive ?: false
+    val onKanbanEvent: (KanbanEvent) -> Unit = remember { { kanbanVM.onEvent(it) } }
 
     CompositionLocalProvider(
         LocalHazeState         provides hazeState,
@@ -82,13 +87,31 @@ fun MainScaffold(
             },
             topBar = {
                 when (currentRoute) {
-                    Screen.Focus.route, Screen.Kanban.route ->
+//                    Screen.Focus.route, Screen.Kanban.route ->
+//                        WorkspaceTopBar(
+//                            workspaces          = workspaces,
+//                            selectedWorkspace   = selectedWorkspace,
+//                            onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
+//                            onAddWorkspace      = { showCreateWorkspaceDialog = true },
+//                            onAddTaskClick      = { showCreateSheet = true }
+//                        )
+                    Screen.Focus.route ->
                         WorkspaceTopBar(
                             workspaces          = workspaces,
                             selectedWorkspace   = selectedWorkspace,
                             onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
                             onAddWorkspace      = { showCreateWorkspaceDialog = true },
                             onAddTaskClick      = { showCreateSheet = true }
+                        )
+
+                    Screen.Kanban.route ->
+                        KanbanTopBar(
+                            workspaces          = workspaces,
+                            selectedWorkspace   = selectedWorkspace,
+                            onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
+                            onAddWorkspace      = { showCreateWorkspaceDialog = true },
+                            isArchive           = isKanbanArchive,
+                            onToggleArchive     = { onKanbanEvent(KanbanEvent.ToggleArchive) }
                         )
 
                     Screen.Statistics.route ->
@@ -139,13 +162,12 @@ fun MainScaffold(
             CompositionLocalProvider(LocalScaffoldPadding provides innerPadding) {
                 Box(modifier = Modifier.fillMaxSize().hazeSource(hazeState)) {
                     NavGraph(
-                        navController           = navController,
-                        authVM                  = authVM,
-                        settingsVM              = settingsVM,
-                        workspaceVM             = workspaceVM,
-                        userSessionVM           = userSessionVM,
-                        statisticsTabIndex      = statisticsTabState.intValue,
-                        onStatisticsTabSelected = { statisticsTabState.intValue = it }
+                        navController = navController,
+                        authVM        = authVM,
+                        settingsVM    = settingsVM,
+                        workspaceVM   = workspaceVM,
+                        userSessionVM = userSessionVM,
+                        kanbanVM      = kanbanVM
                     )
                 }
 

@@ -17,6 +17,8 @@ import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.task.EditTaskSheet
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.util.Constants
+import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
+import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import java.util.Date
 
 private const val COLUMN_STAGGER_MS = 80
@@ -80,20 +82,20 @@ fun KanbanScreenContent(
             .fillMaxSize()
             // No horizontal padding, for smooth horizontal scrolling
             .padding(
-                top    = innerPadding.calculateTopPadding(),
+                top    = innerPadding.calculateTopPadding() + SCREEN_PADDING,
                 bottom = innerPadding.calculateBottomPadding()
     ),
         // gap between toggle and content
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        SegmentedToggle(
-            options          = listOf("Active", "Archive"),
-            selectedIndex    = if (uiState is KanbanUiState.Ready && uiState.isArchive) 1 else 0,
-            onOptionSelected = { onKanbanEvent(KanbanEvent.ToggleArchive) },
-            modifier         = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = Constants.Theme.SCREEN_PADDING / 2)
-        )
+//        SegmentedToggle(
+//            options          = listOf("Active", "Archive"),
+//            selectedIndex    = if (uiState is KanbanUiState.Ready && uiState.isArchive) 1 else 0,
+//            onOptionSelected = { onKanbanEvent(KanbanEvent.ToggleArchive) },
+//            modifier         = Modifier
+//                .align(Alignment.CenterHorizontally)
+//                .padding(top = Constants.Theme.SCREEN_PADDING / 2)
+//        )
 
         Row(
             modifier = Modifier
@@ -101,7 +103,7 @@ fun KanbanScreenContent(
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = Constants.Theme.SCREEN_PADDING)
             ,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(KANBAN_PADDING)
         ) {
             KanbanColumn(
                 title             = "High",

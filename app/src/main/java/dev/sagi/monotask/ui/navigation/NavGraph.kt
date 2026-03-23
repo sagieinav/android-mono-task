@@ -71,8 +71,7 @@ fun NavGraph(
     settingsVM: SettingsViewModel,
     workspaceVM: WorkspaceViewModel,
     userSessionVM: UserSessionViewModel,
-    statisticsTabIndex: Int = 0,
-    onStatisticsTabSelected: (Int) -> Unit = {}
+    kanbanVM: KanbanViewModel
 ) {
     val settingsState by settingsVM.uiState.collectAsStateWithLifecycle()
     val authState by authVM.uiState.collectAsStateWithLifecycle()
@@ -152,7 +151,7 @@ fun NavGraph(
                     FocusScreen(focusVM = focusVM)
                 }
                 composable(Screen.Kanban.route) {
-                    val kanbanVM: KanbanViewModel = hiltViewModel()
+//                    val kanbanVM: KanbanViewModel = hiltViewModel()
                     kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
                     if (hardcoreMode) {
                         LaunchedEffect(Unit) { navController.popBackStack() }
@@ -179,9 +178,7 @@ fun NavGraph(
                         profileVM.startObserving(userSessionVM.currentUser)
                     }
                     StatisticsScreen(
-                        profileVM         = profileVM,
-                        selectedSection   = statisticsTabIndex,
-                        onSectionSelected = onStatisticsTabSelected
+                        profileVM = profileVM
                     )
                 }
                 composable(Screen.Brief.route) {

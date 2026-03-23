@@ -130,52 +130,64 @@ private fun ProfileReadyContent(
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = Constants.Theme.SCREEN_PADDING / 2)
-            .padding(horizontal = Constants.Theme.SCREEN_PADDING)
-    ) {
-        LazyColumn(
-            modifier            = Modifier.fillMaxSize(),
-            contentPadding      = PaddingValues(top = topBarHeight, bottom = bottomPadding),
-            verticalArrangement = Arrangement.spacedBy(36.dp)
+    Box(Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = Constants.Theme.SCREEN_PADDING)
         ) {
-            // Avatar + Name + XP bar
-            item {
-                ProfileHeader(
-                    user          = state.user,
-                    modifier      = Modifier.padding(vertical = 6.dp),
-                    onAvatarClick = { onProfileEvent(ProfileEvent.OpenAvatarPicker) }
-                )
-                XpBar(
-                    level          = state.level,
-                    currentXp      = state.xpIntoLevel,
-                    xpForNextLevel = state.xpForNextLevel,
-                    modifier       = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                )
-            }
+            LazyColumn(
+                modifier            = Modifier.fillMaxSize(),
+                contentPadding      = PaddingValues(
+                    top    = topBarHeight,
+                    bottom = bottomPadding
+                ),
+                verticalArrangement = Arrangement.spacedBy(36.dp)
+            ) {
+                // Avatar + Name + XP bar
+                item {
+                    ProfileHeader(
+                        user          = state.user,
+                        modifier      = Modifier.padding(vertical = 6.dp),
+                        onAvatarClick = { onProfileEvent(ProfileEvent.OpenAvatarPicker) }
+                    )
+                    XpBar(
+                        level          = state.level,
+                        currentXp      = state.xpIntoLevel,
+                        xpForNextLevel = state.xpForNextLevel,
+                        modifier       = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                    )
+                }
 
-            // Achievements
-            item {
-                SectionTitle("Achievements")
-                AchievementSectionRow(
-                    achievements = state.achievements,
-                    modifier     = Modifier.padding(vertical = 16.dp)
-                )
-            }
+                // Achievements
+                item {
+                    SectionTitle("Achievements")
+                    AchievementSectionRow(
+                        achievements = state.achievements,
+                        modifier     = Modifier.padding(vertical = 16.dp)
+                    )
+                }
 
-            // Friends
-            item {
-                FriendsSection(
-                    friendUsers      = friendUsers,
-                    friendActivities = friendActivities,
-                    onShareInvite    = onShareInvite
-                )
+                // Friends
+                item {
+                    FriendsSection(
+                        friendUsers      = friendUsers,
+                        friendActivities = friendActivities,
+                        onShareInvite    = onShareInvite
+                    )
+                }
             }
         }
+
+//        HorizontalDivider(
+//            color    = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+//            modifier = Modifier
+//                .align(Alignment.TopCenter)
+//                .padding(top = topBarHeight)
+//                .graphicsLayer { alpha = dividerAlpha }
+//        )
     }
 }
 

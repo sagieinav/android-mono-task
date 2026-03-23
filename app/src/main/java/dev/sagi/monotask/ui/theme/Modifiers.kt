@@ -1,9 +1,21 @@
 package dev.sagi.monotask.ui.theme
 
+import android.annotation.SuppressLint
 import android.graphics.Path
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -27,9 +39,38 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.time.delay
 import kotlin.math.atan2
+
+
+
+@SuppressLint("SuspiciousModifierThen")
+fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = this.then(
+    clickable(
+        interactionSource = MutableInteractionSource(),
+        indication = null,
+        onClick = onClick
+    )
+)
+
+
+
+
+// Removes min size constraints from any composable
+fun Modifier.noMinSize() = layout { measurable, constraints ->
+    val placeable = measurable.measure(
+        constraints.copy(minWidth = 0, minHeight = 0)
+    )
+    layout(placeable.width, placeable.height) {
+        placeable.placeRelative(0, 0)
+    }
+}
+
+
 
 
 // ========== Fire icon gradient ==========
