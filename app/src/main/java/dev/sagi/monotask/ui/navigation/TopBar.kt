@@ -147,7 +147,7 @@ fun TabbedTopBar(
                 modifier      = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
+                    .height(TOP_BAR_ITEM_HEIGHT)
                     .padding(end = 12.dp)
             )
         },
@@ -224,6 +224,7 @@ fun TopBarIconButton(
             .clip(CircleShape)
             .clickable { onClick() },
         accentColor = bgAccentColor,
+        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
     ) {
         Icon(
             painter = painterResource(iconRes),

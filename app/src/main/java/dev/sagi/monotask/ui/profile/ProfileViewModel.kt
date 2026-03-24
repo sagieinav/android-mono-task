@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -146,41 +147,42 @@ class ProfileViewModel @Inject constructor(
 
     private fun fetchStatistics(uid: String) {
         viewModelScope.launch {
-            launch {
-                val activity = userRepository.getActivityOnce(uid, UserRepository.thisMonthRange)
-                val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
-                _uiState.value = current.copy(activityData = activity)
-            }
-            launch {
-                val topDay  = userRepository.getTopPerformanceDay(uid)
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
-                _uiState.value = current.copy(topPerformanceDay = topDay)
-            }
-            launch {
-                val tasks        = taskRepository.getAllCompletedTasksOnce(uid)
-                val current      = _uiState.value as? ProfileUiState.Ready ?: return@launch
-                val achievements = AchievementEngine.evaluate(tasks, current.level)
-                _uiState.value = current.copy(
-                    completedTasks = tasks,
-                    achievements   = achievements
-                )
-
-                // Patch Firestore if stats are stale (one-time migration for pre-UserStats data).
-                // Only writes when the computed values exceed what's stored.
-                val computedStreak = AchievementEngine.computeLongestStreak(tasks)
-                val storedStats    = current.user.stats
-                val earnedMap      = achievements
-                    .filter { it.earnedTier != null }
-                    .associate { it.category.name to it.earnedTier!!.name }
-                if (computedStreak > storedStats.longestStreak || earnedMap != storedStats.earnedAchievements) {
-                    userRepository.patchEarnedStats(
-                        userId             = uid,
-                        longestStreak      = maxOf(computedStreak, storedStats.longestStreak),
-                        earnedAchievements = storedStats.earnedAchievements + earnedMap
+            coroutineScope {
+                launch {
+                    val activity = userRepository.getActivityOnce(uid, UserRepository.thisMonthRange)
+                    val current  = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                    _uiState.value = current.copy(activityData = activity)
+                }
+                launch {
+                    val topDay  = userRepository.getTopPerformanceDay(uid)
+                    val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                    _uiState.value = current.copy(topPerformanceDay = topDay)
+                }
+                launch {
+                    val tasks        = taskRepository.getAllCompletedTasksOnce(uid)
+                    val current      = _uiState.value as? ProfileUiState.Ready ?: return@launch
+                    val achievements = AchievementEngine.evaluate(tasks, current.level)
+                    _uiState.value = current.copy(
+                        completedTasks = tasks,
+                        achievements   = achievements
                     )
+
+                    // Patch Firestore if stats are stale (one-time migration for pre-UserStats data).
+                    // Only writes when the computed values exceed what's stored.
+                    val computedStreak = AchievementEngine.computeLongestStreak(tasks)
+                    val storedStats    = current.user.stats
+                    val earnedMap      = achievements
+                        .filter { it.earnedTier != null }
+                        .associate { it.category.name to it.earnedTier!!.name }
+                    if (computedStreak > storedStats.longestStreak || earnedMap != storedStats.earnedAchievements) {
+                        userRepository.patchEarnedStats(
+                            userId             = uid,
+                            longestStreak      = maxOf(computedStreak, storedStats.longestStreak),
+                            earnedAchievements = storedStats.earnedAchievements + earnedMap
+                        )
+                    }
                 }
             }
-
             _isRefreshing.value = false
         }
     }

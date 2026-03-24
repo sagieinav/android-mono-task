@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -62,9 +64,9 @@ fun KanbanColumn(
     title: String,
     importance: Importance,
     tasks: List<Task>,
+    modifier: Modifier = Modifier,
     isArchive: Boolean = false,
     onKanbanEvent: (KanbanEvent) -> Unit,
-    modifier: Modifier = Modifier,
     animationDelayMs: Int = 0
 ) {
     // ========== Column entrance animation (first load only) ==========
@@ -89,7 +91,8 @@ fun KanbanColumn(
         Column(
             modifier = modifier
                 .width(170.dp)
-                .fillMaxHeight(),
+//                .fillMaxHeight()
+            ,
             // Header-Content gap
             verticalArrangement = Arrangement.spacedBy(KANBAN_PADDING)
         ) {
@@ -161,6 +164,8 @@ fun KanbanColumn(
                 shape = colShape,
                 modifier = Modifier
                     .fillMaxSize()
+//                    .fillMaxWidth()
+//                    .heightIn(min = 60.dp)
                     .monoShadowWorkaround(colShape)
             ) {
                 val archiveKey = isArchive

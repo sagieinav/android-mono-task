@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -16,8 +17,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -26,9 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dev.sagi.monotask.data.model.DailyActivity
@@ -97,7 +104,7 @@ private fun StatisticsReadyContent(
     val bottomPadding    = scaffoldPadding.calculateBottomPadding()
     val density          = LocalDensity.current
     val refreshState     = rememberPullToRefreshState()
-    val refreshThreshold = 40.dp
+    val refreshThreshold = 30.dp
 
     var toggleHeightPx by remember { mutableIntStateOf(0) }
     val toggleHeight = with(density) { toggleHeightPx.toDp() }
@@ -107,6 +114,23 @@ private fun StatisticsReadyContent(
     val toggleBottomGap = 12.dp
     val refreshBoxTopPadding = topBarHeight + toggleTopGap + toggleHeight
     val contentTopPadding = refreshBoxTopPadding + toggleBottomGap
+
+    var animationKey       by remember { mutableIntStateOf(0) }
+    var lastRefreshedAt    by remember { mutableStateOf<Long?>(null) }
+    var prevRefreshingRef  by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isRefreshing) {
+        val wasRefreshing = prevRefreshingRef
+        prevRefreshingRef = isRefreshing
+        if (wasRefreshing && !isRefreshing) {
+            animationKey++
+            lastRefreshedAt = System.currentTimeMillis()
+        }
+    }
+
+    val timeLabel = lastRefreshedAt?.let { ts ->
+        remember(ts) { "Last updated " + SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(ts)) }
+    }
 
     val localHazeState = rememberHazeState()
 
@@ -128,7 +152,9 @@ private fun StatisticsReadyContent(
                         .padding(top = refreshBoxTopPadding)
                 )
             },
-            modifier = Modifier.fillMaxSize().hazeSource(localHazeState)
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(localHazeState)
         ) {
             LazyColumn(
                 modifier            = Modifier
@@ -143,10 +169,23 @@ private fun StatisticsReadyContent(
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                timeLabel?. let {
+                    item {
+                        Text(
+                            text      = timeLabel,
+                            style     = MaterialTheme.typography.labelSmall,
+                            color     = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            textAlign = TextAlign.Center,
+                            modifier  = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 2.dp) // optical correction
+                        )
+                    }
+                }
                 when (selectedSection) {
-                    0 -> weeklyItems(state)
-                    1 -> monthlyItems(state)
-                    2 -> allTimeItems(state)
+                    0 -> weeklyItems(state, animationKey)
+                    1 -> monthlyItems(state, animationKey)
+                    2 -> allTimeItems(state, animationKey)
                 }
             }
         }

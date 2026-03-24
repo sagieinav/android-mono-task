@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -121,6 +123,7 @@ private fun ProfileReadyContent(
     val scaffoldPadding = LocalScaffoldPadding.current
     val topBarHeight    = scaffoldPadding.calculateTopPadding()
     val bottomPadding   = scaffoldPadding.calculateBottomPadding()
+    val listState       = rememberLazyListState()
 
     if (state.showAvatarPicker) {
         AvatarPicker(
@@ -137,6 +140,7 @@ private fun ProfileReadyContent(
                 .padding(horizontal = Constants.Theme.SCREEN_PADDING)
         ) {
             LazyColumn(
+                state               = listState,
                 modifier            = Modifier.fillMaxSize(),
                 contentPadding      = PaddingValues(
                     top    = topBarHeight,
@@ -175,7 +179,8 @@ private fun ProfileReadyContent(
                     FriendsSection(
                         friendUsers      = friendUsers,
                         friendActivities = friendActivities,
-                        onShareInvite    = onShareInvite
+                        onShareInvite    = onShareInvite,
+                        lazyListState    = listState
                     )
                 }
             }
