@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
@@ -43,6 +44,9 @@ class KanbanViewModel @Inject constructor(
     // Holds the workspace flow. Set once via [setWorkspaceSource], observation starts automatically.
     private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
 
+    private var _userSource: StateFlow<User?>? = null
+    private val _currentUser = MutableStateFlow<User?>(null)
+
     init {
         viewModelScope.launch {
             userId = AuthUtils.awaitUid()
@@ -64,12 +68,19 @@ class KanbanViewModel @Inject constructor(
         }
     }
 
-    // ========== Workspace Wiring ==========
+    // ========== Workspace & User Wiring ==========
 
     // Connects this ViewModel to the shared workspace selection.
     // Call once right after creation (in NavGraph).
     fun setWorkspaceSource(workspaceFlow: StateFlow<Workspace?>) {
         _workspaceSource.compareAndSet(null, workspaceFlow)
+    }
+
+    fun setUserSource(userFlow: StateFlow<User?>) {
+        if (_userSource == null) {
+            _userSource = userFlow
+            viewModelScope.launch { userFlow.collect { _currentUser.value = it } }
+        }
     }
 
     // ========== Task Observation ==========
@@ -101,7 +112,9 @@ class KanbanViewModel @Inject constructor(
     }
 
     private fun updateUiState(tasks: List<Task>, workspace: Workspace?) {
-        val sorted  = if (workspace != null) TaskSelector.getSortedTasks(tasks, workspace) else tasks
+        val dueDateWeight    = _currentUser.value?.dueDateWeight    ?: 0.5f
+        val importanceWeight = _currentUser.value?.importanceWeight ?: 0.5f
+        val sorted  = if (workspace != null) TaskSelector.getSortedTasks(tasks, dueDateWeight, importanceWeight) else tasks
         val grouped = sorted.groupBy { it.importance }
         _uiState.value = KanbanUiState.Ready(
             highTasks   = grouped[Importance.HIGH]   ?: emptyList(),

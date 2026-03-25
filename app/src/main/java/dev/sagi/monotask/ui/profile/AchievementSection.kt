@@ -36,7 +36,9 @@ import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.AchievementCategory
 import dev.sagi.monotask.data.model.AchievementMilestone
 import dev.sagi.monotask.data.model.AchievementTier
+import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.GlassTooltip
+import dev.sagi.monotask.ui.theme.GlassSurface
 import dev.sagi.monotask.ui.theme.HexagonShape
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
@@ -77,7 +79,7 @@ fun AchievementSectionRow(
                 achievement     = achievement,
                 badgeStyle      = badgeStyle,
                 modifier        = Modifier.weight(1f)
-                    // padding decreases the badges' size
+                // padding decreases the badges' size
 //                    .padding(horizontal = 2.dp)
             )
         }

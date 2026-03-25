@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,22 +18,39 @@ import dev.sagi.monotask.ui.theme.gloock
 import java.util.Locale
 import java.util.Locale.getDefault
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun SectionTitle(
     text           : String,
+    modifier       : Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null
 ) {
     Row(
-        modifier              = Modifier.fillMaxWidth(),
+        modifier              = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+        ,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment     = Alignment.CenterVertically
     ) {
         Text(
             text  = text,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
+
+//    Row(
+//        modifier              = modifier.fillMaxWidth(),
+//        horizontalArrangement = Arrangement.SpaceBetween,
+//        verticalAlignment     = Alignment.CenterVertically
+//    ) {
+//        Text(
+//            text  = text,
+//            style = MaterialTheme.typography.titleMedium,
+////            fontWeight = FontWeight.Normal,
+//            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+//        )
 
         // Optional button
         trailingContent?.invoke(this)

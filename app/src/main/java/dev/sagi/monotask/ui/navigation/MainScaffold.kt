@@ -1,5 +1,10 @@
 package dev.sagi.monotask.ui.navigation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -86,7 +91,17 @@ fun MainScaffold(
                 }
             },
             topBar = {
-                when (currentRoute) {
+                AnimatedContent(
+                    targetState = currentRoute,
+                    transitionSpec = {
+                        if (initialState == Screen.Settings.route || targetState == Screen.Settings.route)
+                            fadeIn(tween(navAnimationDuration)) togetherWith fadeOut(tween(navAnimationDuration))
+                        else
+                            tabSlideIn(initialState, targetState) togetherWith tabSlideOut(initialState, targetState)
+                    },
+                    label = "TopBarTransition"
+                ) { route ->
+                when (route) {
 //                    Screen.Focus.route, Screen.Kanban.route ->
 //                        WorkspaceTopBar(
 //                            workspaces          = workspaces,
@@ -131,6 +146,10 @@ fun MainScaffold(
 
                     Screen.Brief.route ->
                         TitleTopBar(title = NavTab.BRIEF.label)
+
+                    Screen.Settings.route ->
+                        TitleTopBar(title = "Settings")
+                }
                 }
             },
             bottomBar = {

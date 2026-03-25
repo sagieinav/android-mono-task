@@ -33,12 +33,10 @@ fun InfoCallout(
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     bodyColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
     iconSize: Dp = 16.dp,
-    horizontalPadding: Dp = 20.dp
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = horizontalPadding),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Row(

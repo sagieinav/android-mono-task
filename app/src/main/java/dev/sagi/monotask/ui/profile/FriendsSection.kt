@@ -72,7 +72,7 @@ fun FriendsSection(
     var expandedFriendId by remember { mutableStateOf<String?>(null) }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SectionTitle("Friends") {
             Row(

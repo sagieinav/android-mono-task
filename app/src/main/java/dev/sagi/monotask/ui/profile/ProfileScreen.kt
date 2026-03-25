@@ -32,6 +32,7 @@ import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.core.AvatarBox
 import dev.sagi.monotask.ui.component.core.AvatarPicker
+import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.component.display.SectionTitle
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
@@ -167,10 +168,10 @@ private fun ProfileReadyContent(
 
                 // Achievements
                 item {
-                    SectionTitle("Achievements")
+//                    SectionTitle("Achievements", Modifier.padding(bottom = 6.dp))
                     AchievementSectionRow(
                         achievements = state.achievements,
-                        modifier     = Modifier.padding(vertical = 16.dp)
+                        modifier     = Modifier
                     )
                 }
 

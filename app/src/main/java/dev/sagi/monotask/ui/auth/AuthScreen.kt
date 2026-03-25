@@ -64,7 +64,7 @@ fun AuthScreen(
             Image(
                 painter            = painterResource(id = R.drawable.logo_monotask_raw),
                 contentDescription = "App Logo",
-                modifier           = Modifier.width(180.dp)
+                modifier           = Modifier.size(180.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

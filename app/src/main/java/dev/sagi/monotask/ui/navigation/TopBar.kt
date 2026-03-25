@@ -163,6 +163,7 @@ fun TabbedTopBar(
 fun TitleTopBar(
     title: String,
     modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null
 ) {
     val color = MaterialTheme.colorScheme.background
@@ -178,6 +179,10 @@ fun TitleTopBar(
         modifier = modifier
             .background(brush = gradient),
         leading = {
+            leadingIcon?. let {
+                it()
+                Spacer(Modifier.width(12.dp))
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,

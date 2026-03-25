@@ -83,7 +83,9 @@ fun SnoozeBottomSheet(
         InfoCallout(
             title    = "MANUAL SNOOZE",
             body     = "Want to pick a specific next task? Tap it on the Kanban board and hit 'Focus Now'!",
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .padding(horizontal = 20.dp)
         )
     }
 }

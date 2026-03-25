@@ -162,6 +162,13 @@ class UserRepository(private val db: FirebaseFirestore) {
         if (updates.isNotEmpty()) userDoc(userId).update(updates).await()
     }
 
+    suspend fun updatePriorityWeights(userId: String, dueDateWeight: Float, importanceWeight: Float) {
+        userDoc(userId).update(mapOf(
+            "dueDateWeight"   to dueDateWeight,
+            "importanceWeight" to importanceWeight
+        )).await()
+    }
+
     // ========== Social ==========
 
     // One-time fetch by ID. Clear alias used by friend-loading flows
@@ -248,9 +255,4 @@ class UserRepository(private val db: FirebaseFirestore) {
         )).await()
     }
 
-    // ========== Admin ==========
-
-    suspend fun updateHardcoreMode(userId: String, enabled: Boolean) {
-        userDoc(userId).update("hardcoreModeEnabled", enabled).await()
-    }
 }

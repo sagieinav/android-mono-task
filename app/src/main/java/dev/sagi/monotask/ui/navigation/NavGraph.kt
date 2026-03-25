@@ -4,8 +4,12 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -26,13 +30,14 @@ import dev.sagi.monotask.ui.kanban.KanbanScreen
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
 import dev.sagi.monotask.ui.profile.ProfileScreen
 import dev.sagi.monotask.ui.profile.ProfileViewModel
+import dev.sagi.monotask.ui.settings.SettingsScreen
 import dev.sagi.monotask.ui.settings.SettingsUiState
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.statistics.StatisticsScreen
 
-private val TAB_ORDER = listOf(
+val TAB_ORDER = listOf(
     Screen.Kanban.route,
     Screen.Brief.route,
     Screen.Focus.route,
@@ -40,10 +45,10 @@ private val TAB_ORDER = listOf(
     Screen.Profile.route
 )
 
-private const val navAnimationDuration = 300
+const val navAnimationDuration = 300
 
 // ========== Animation Helpers ==========
-private fun isForward(from: String?, to: String?): Boolean {
+fun isForward(from: String?, to: String?): Boolean {
     val fromIndex = TAB_ORDER.indexOf(from)
     val toIndex = TAB_ORDER.indexOf(to)
     if (fromIndex == -1 || toIndex == -1) return true
@@ -105,12 +110,32 @@ fun NavGraph(
         }
 
         NavHost(
-            navController = navController,
+            navController    = navController,
             startDestination = startDestination,
-            enterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
-            exitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) },
-            popEnterTransition = { tabSlideIn(initialState.destination.route, targetState.destination.route) },
-            popExitTransition = { tabSlideOut(initialState.destination.route, targetState.destination.route) }
+            enterTransition  = {
+                if (targetState.destination.route == Screen.Settings.route)
+                    slideInVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it }
+                else
+                    tabSlideIn(initialState.destination.route, targetState.destination.route)
+            },
+            exitTransition   = {
+                if (targetState.destination.route == Screen.Settings.route)
+                    fadeOut(tween(navAnimationDuration))
+                else
+                    tabSlideOut(initialState.destination.route, targetState.destination.route)
+            },
+            popEnterTransition = {
+                if (initialState.destination.route == Screen.Settings.route)
+                    fadeIn(tween(navAnimationDuration))
+                else
+                    tabSlideIn(initialState.destination.route, targetState.destination.route)
+            },
+            popExitTransition  = {
+                if (initialState.destination.route == Screen.Settings.route)
+                    slideOutVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it }
+                else
+                    tabSlideOut(initialState.destination.route, targetState.destination.route)
+            }
         ) {
             navigation(
                 startDestination = Screen.Login.route,
@@ -153,6 +178,7 @@ fun NavGraph(
                 composable(Screen.Kanban.route) {
 //                    val kanbanVM: KanbanViewModel = hiltViewModel()
                     kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
+                    kanbanVM.setUserSource(userSessionVM.currentUser)
                     if (hardcoreMode) {
                         LaunchedEffect(Unit) { navController.popBackStack() }
                     } else {
@@ -183,6 +209,15 @@ fun NavGraph(
                 }
                 composable(Screen.Brief.route) {
                     BriefScreen()
+                }
+                composable(
+                    route              = Screen.Settings.route,
+                    enterTransition    = { slideInVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it } },
+                    exitTransition     = { fadeOut(tween(navAnimationDuration)) },
+                    popEnterTransition = { fadeIn(tween(navAnimationDuration)) },
+                    popExitTransition  = { slideOutVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it } }
+                ) {
+                    SettingsScreen(settingsVM = settingsVM)
                 }
             }
         }

@@ -2,20 +2,23 @@ package dev.sagi.monotask.domain.util
 
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.data.model.Workspace
 import com.google.firebase.Timestamp
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.exp
-import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Instant
 
 object TaskSelector {
     // Returns the single highest-priority task from a list (the task displayed on the Focus Hub)
-    fun getTopTask(tasks: List<Task>, workspace: Workspace, excludeId: String? = null): Task? {
+    fun getTopTask(
+        tasks: List<Task>,
+        dueDateWeight: Float,
+        importanceWeight: Float,
+        excludeId: String? = null
+    ): Task? {
         if (tasks.isEmpty()) return null
         val now = now()
 
@@ -24,12 +27,13 @@ object TaskSelector {
 
         val nonSnoozed = pool.filter { it.snoozeCount == 0 }
         return (nonSnoozed.ifEmpty { pool })
-            .maxByOrNull { priorityScore(it, workspace, now) }
+            .maxByOrNull { priorityScore(it, dueDateWeight, importanceWeight, now) }
     }
 
     fun getTopTaskByDueDate(
         tasks: List<Task>,
-        workspace: Workspace,
+        dueDateWeight: Float,
+        importanceWeight: Float,
         excludeId: String? = null
     ): Task? {
         val candidates = tasks.filter { it.id != excludeId }
@@ -40,19 +44,23 @@ object TaskSelector {
 
         return if (withDueDate.isNotEmpty()) {
             withDueDate.sortedWith(
-                compareBy<Task> { it.dueDate!!.toDate() }              // 1. soonest due date
-                    .thenBy { priorityScore(it, workspace, now) }           // 2. tiebreaker: normal priority
+                compareBy<Task> { it.dueDate!!.toDate() }                              // 1. soonest due date
+                    .thenBy { priorityScore(it, dueDateWeight, importanceWeight, now) } // 2. tiebreaker: normal priority
             ).first()
         } else {
             // Fallback: no tasks have a due date → normal priority
-            getTopTask(candidates, workspace, excludeId = null)
+            getTopTask(candidates, dueDateWeight, importanceWeight, excludeId = null)
         }
     }
 
     // Returns all tasks sorted by priority score descending
-    fun getSortedTasks(tasks: List<Task>, workspace: Workspace): List<Task> {
+    fun getSortedTasks(
+        tasks: List<Task>,
+        dueDateWeight: Float,
+        importanceWeight: Float
+    ): List<Task> {
         val now = now()
-        return tasks.sortedByDescending { priorityScore(it, workspace, now) }
+        return tasks.sortedByDescending { priorityScore(it, dueDateWeight, importanceWeight, now) }
     }
 
     // Computed once per scoring pass and threaded through to avoid repeated system calls
@@ -63,8 +71,7 @@ object TaskSelector {
     }
 
     /**
-     * Core scoring function.
-     * Deterministic except for the small randomness term.
+     * Core scoring function. Fully deterministic.
      *
      * Due Date Score:
      *   Uses a sigmoid-style urgency curve so that tasks due very soon
@@ -75,18 +82,14 @@ object TaskSelector {
      *   LOW = 0.33, MEDIUM = 0.66, HIGH = 1.0
      *   Simple linear scale - straightforward to explain and defend.
      */
-    private fun priorityScore(task: Task, workspace: Workspace, now: Now): Double {
-        val dueDateScore = dueDateUrgency(task.dueDate, now)
-        val importanceScore = importanceScore(task.importance)
-        val noise = Random.nextDouble(
-            -workspace.randomnessFactor.toDouble(),
-            workspace.randomnessFactor.toDouble()
-        )
-
-        // This is the importance calculation:
-        val rawScore = (workspace.dueDateWeight   * dueDateScore) +
-                (workspace.importanceWeight * importanceScore) +
-                noise
+    private fun priorityScore(
+        task: Task,
+        dueDateWeight: Float,
+        importanceWeight: Float,
+        now: Now
+    ): Double {
+        val rawScore = dueDateWeight   * dueDateUrgency(task.dueDate, now) +
+                       importanceWeight * importanceScore(task.importance)
 
         // Apply snooze penalty: each snooze reduces priority by ~33%
         val snoozePenalty = 1.0 / (1.0 + task.snoozeCount * 0.5)

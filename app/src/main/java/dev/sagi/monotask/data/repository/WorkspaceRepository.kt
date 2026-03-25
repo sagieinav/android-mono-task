@@ -36,25 +36,6 @@ class WorkspaceRepository(private val db: FirebaseFirestore) {
         }
     }
 
-    // Updates the priority weights for a workspace
-    // Called from the Settings screen sliders
-    suspend fun updateWeights(
-        userId: String,
-        workspaceId: String,
-        dueDateWeight: Float? = null,
-        importanceWeight: Float? = null
-    ) {
-        val updates = mutableMapOf<String, Any>()
-
-        // Only add to the map if the value is NOT null (only selected parameters)
-        dueDateWeight?.let { updates["dueDateWeight"] = it }
-        importanceWeight?.let { updates["importanceWeight"] = it }
-
-        if (updates.isNotEmpty()) {
-            workspacesCollection(userId).document(workspaceId).update(updates).await()
-        }
-    }
-
     // Adds a new custom workspace
     suspend fun createWorkspace(userId: String, name: String) {
         val workspace = Workspace(name = name, ownerId = userId)
@@ -63,6 +44,10 @@ class WorkspaceRepository(private val db: FirebaseFirestore) {
 
     suspend fun deleteWorkspace(userId: String, workspaceId: String) {
         workspacesCollection(userId).document(workspaceId).delete().await()
+    }
+
+    suspend fun renameWorkspace(userId: String, workspaceId: String, newName: String) {
+        workspacesCollection(userId).document(workspaceId).update("name", newName).await()
     }
 
     suspend fun setFocusTask(userId: String, workspaceId: String, taskId: String?) {
