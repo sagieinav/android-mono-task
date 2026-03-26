@@ -162,7 +162,7 @@ private fun ProfileReadyContent(
                         xpForNextLevel = state.xpForNextLevel,
                         modifier       = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = 16.dp)
                     )
                 }
 
@@ -172,6 +172,8 @@ private fun ProfileReadyContent(
                     AchievementSectionRow(
                         achievements = state.achievements,
                         modifier     = Modifier
+                            .padding(horizontal = 16.dp)
+
                     )
                 }
 
@@ -186,14 +188,6 @@ private fun ProfileReadyContent(
                 }
             }
         }
-
-//        HorizontalDivider(
-//            color    = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
-//            modifier = Modifier
-//                .align(Alignment.TopCenter)
-//                .padding(top = topBarHeight)
-//                .graphicsLayer { alpha = dividerAlpha }
-//        )
     }
 }
 

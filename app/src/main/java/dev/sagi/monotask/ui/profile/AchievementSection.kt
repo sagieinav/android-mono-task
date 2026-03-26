@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -72,7 +74,7 @@ fun AchievementSectionRow(
 ) {
     Row(
         modifier              = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         achievements.forEach { achievement ->
             HexagonAchievementBadge(
@@ -111,13 +113,13 @@ fun HexagonAchievementBadge(
     Column(
         modifier            = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         BoxWithConstraints(
             contentAlignment = Alignment.Center,
             modifier         = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f)
+                .aspectRatio(20f / 21.3f)
                 .monoShadow(HexagonShape, 8.dp)
                 .clip(HexagonShape)
                 .clickable { showTooltip = !showTooltip }
@@ -165,7 +167,7 @@ fun HexagonAchievementBadge(
                 maxLines   = 2,
                 overflow   = TextOverflow.Ellipsis,
                 color      = MaterialTheme.colorScheme.onSurface.copy(alpha),
-                modifier   = Modifier.fillMaxWidth(0.8f)
+                modifier   = Modifier.fillMaxWidth()
             )
         }
     }

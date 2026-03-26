@@ -65,7 +65,7 @@ fun WorkspaceDropdownGlass(
             )
 
             GlassDropdownActionItem(
-                label = "New Workspace",
+                label = "New workspace",
                 iconRes = R.drawable.ic_add_m3,
                 onClick = { onAddWorkspace(); expanded = false }
             )

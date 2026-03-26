@@ -18,8 +18,12 @@ val HexagonShape: Shape = GenericShape { size, _ ->
             "a1.074,1.074 0,0 0,-0.181 -0.133l-6.776,-3.995a3.33,3.33 0,0 0,-3.216 0z"
         )
         .toPath()
-    val scale = size.width / 24f
-    parsed.transform(Matrix().apply { scale(scale, scale) })
+    // Path actual bounds within the 24×24 SVG grid
+    val scale = size.width / 20f
+    parsed.transform(Matrix().apply {
+        scale(scale, scale)
+        translate(-2f, -1.414f)
+    })
     addPath(parsed)
 }
 

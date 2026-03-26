@@ -204,24 +204,24 @@ fun KanbanCardDropdown(
     ) {
         if (!isArchive) {
             GlassDropdownActionItem(
-                label   = "Edit Task",
+                label   = "Edit task",
                 iconRes = R.drawable.ic_edit_alt,
                 onClick = { onEditClick(); onDismiss() }
             )
             GlassDropdownActionItem(
-                label   = "Focus Now",
+                label   = "Focus now",
                 iconRes = R.drawable.ic_focus,
                 onClick = { onFocusNowClick(); onDismiss() }
             )
         } else {
             GlassDropdownActionItem(
-                label   = "Restore Task",
+                label   = "Restore task",
                 iconRes = R.drawable.ic_restore,
                 onClick = { onRestoreClick(); onDismiss() }
             )
         }
         GlassDropdownActionItem(
-            label   = "Delete Task",
+            label   = "Delete task",
             iconRes = R.drawable.ic_delete,
             color = MaterialTheme.colorScheme.error,
             onClick = { onDeleteClick(); onDismiss() }

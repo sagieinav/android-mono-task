@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -57,6 +59,8 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.clickableNoRipple
 import dev.sagi.monotask.ui.theme.noMinSize
+import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
+import dev.sagi.monotask.util.Constants.Theme.TRAILING_BUTTON_SIZE
 
 // ====================
 // Friends section (header + list)
@@ -71,9 +75,7 @@ fun FriendsSection(
 ) {
     var expandedFriendId by remember { mutableStateOf<String?>(null) }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
+    Column {
         SectionTitle("Friends") {
             Row(
                 modifier              = Modifier
@@ -135,18 +137,22 @@ fun FriendsSection(
 
 @Composable
 private fun FriendRow(
-    user          : User,
-    activities    : List<DailyActivity>,
-    expanded      : Boolean,
-    onToggle      : () -> Unit,
-    lazyListState : LazyListState? = null
+    user: User,
+    activities: List<DailyActivity>,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    lazyListState: LazyListState? = null
 ) {
     val chevronRotation by animateFloatAsState(
         targetValue = if (expanded) 90f else 0f,
-        label       = "chevron"
+        label = "chevronRotation"
     )
-    val shape = MaterialTheme.shapes.large
 
+    val liveStreak = remember(activities) {
+        ActivityStats.computeCurrentStreak(activities)
+    }
+
+    val shape = MaterialTheme.shapes.large
     var expandedContentHeightPx by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(expanded) {
@@ -162,66 +168,64 @@ private fun FriendRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape),
-        shape   = shape,
+        shape = shape,
         blurred = false
     ) {
         Column {
             Row(
-                modifier              = Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape)
                     .clickable { onToggle() }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment     = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    verticalAlignment     = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                AvatarBox(
+                    user = user,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    AvatarBox(
-                        user     = user,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                    )
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Row(
-                            verticalAlignment     = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text       = user.displayName,
-                                style      = MaterialTheme.typography.titleMedium,
-                                fontSize   = 18.sp,
-                                fontWeight = FontWeight.Normal,
-                                modifier   = Modifier.padding(start = 2.dp)
-                            )
-                            LevelChip(user.level)
-                        }
-                        val liveStreak = remember(activities) {
-                            ActivityStats.computeCurrentStreak(activities)
-                        }
-                        StreakChip(
-                            currentStreak = liveStreak,
-                            size          = StreakChipSize.SMALL
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = user.displayName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Normal,
+                            modifier = Modifier.padding(start = 2.dp)
                         )
+                        LevelChip(user.level)
                     }
+
+                    StreakChip(
+                        currentStreak = liveStreak,
+                        size = StreakChipSize.SMALL
+                    )
                 }
+
                 Icon(
-                    painter            = painterResource(R.drawable.ic_chevron),
+                    painter = painterResource(R.drawable.ic_chevron),
                     contentDescription = null,
-                    tint               = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier           = Modifier
-                        .size(20.dp)
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(TRAILING_BUTTON_SIZE)
                         .rotate(chevronRotation)
                 )
             }
 
             AnimatedVisibility(
                 visible = expanded,
-                enter   = expandVertically(),
-                exit    = shrinkVertically()
+                enter = expandVertically(),
+                exit = shrinkVertically()
             ) {
                 Box(modifier = Modifier.onSizeChanged { expandedContentHeightPx = it.height }) {
                     FriendExpandedContent(user = user, activities = activities)
@@ -244,34 +248,38 @@ private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
     val xpTrend      = remember(weekActivity) { ActivityStats.computeXpTrend(weekActivity) }
     val totalWeekXp  = remember(weekActivity) { weekActivity.sumOf { it.xpEarned } }
 
+    val topPadding   = SCREEN_PADDING / 2
+    val bottomPadding = SCREEN_PADDING
+    val horizPadding = SCREEN_PADDING
+    val contentPadding = SCREEN_PADDING * 1.25f
+
     Column(
         modifier            = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = horizPadding)
+            .padding(bottom = bottomPadding, top = topPadding),
+        verticalArrangement = Arrangement.spacedBy(contentPadding)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionTitle("Achievements")
-            AchievementSectionRow(
-                achievements = badges,
-                badgeStyle   = AchievementBadgeStyle.CONCISE
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionTitle("Weekly Activity")
-            LineChart(
-                headlineValue = "$totalWeekXp",
-                headlineUnit  = "xp",
-                points        = xpPoints,
-                trendPercent  = xpTrend,
-                lineColor     = MaterialTheme.customColors.xp,
-                animate       = false,
-                chartHeight   = 80.dp,
-                shape         = MaterialTheme.shapes.medium,
-                modifier      = Modifier.fillMaxWidth()
-            )
-        }
+        // Achievements:
+        AchievementSectionRow(
+            achievements = badges,
+            badgeStyle   = AchievementBadgeStyle.CONCISE,
+            modifier = Modifier.padding(horizontal = 4.dp) // optical correction
+        )
+
+        // Weekly Activity:
+        LineChart(
+            title = "Weekly Activity",
+            headlineValue = "$totalWeekXp",
+            headlineUnit  = "xp",
+            points        = xpPoints,
+            trendPercent  = xpTrend,
+            lineColor     = MaterialTheme.customColors.xp,
+            animate       = false,
+            chartHeight   = 80.dp,
+            shape         = MaterialTheme.shapes.medium,
+            modifier      = Modifier.fillMaxWidth()
+        )
     }
 }
 

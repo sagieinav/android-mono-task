@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.lerp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
+import dev.sagi.monotask.ui.theme.glassBorder
 
 
 @Composable
@@ -82,6 +83,8 @@ fun XpBar(
             )
         }
 
+
+        // Track
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,6 +92,8 @@ fun XpBar(
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
+
+            // Filled
             Box(
                 modifier = Modifier
                     .fillMaxWidth(animatable.value)

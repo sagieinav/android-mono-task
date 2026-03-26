@@ -37,20 +37,9 @@ fun SectionTitle(
         Text(
             text  = text,
             style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Normal,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
-
-//    Row(
-//        modifier              = modifier.fillMaxWidth(),
-//        horizontalArrangement = Arrangement.SpaceBetween,
-//        verticalAlignment     = Alignment.CenterVertically
-//    ) {
-//        Text(
-//            text  = text,
-//            style = MaterialTheme.typography.titleMedium,
-////            fontWeight = FontWeight.Normal,
-//            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-//        )
 
         // Optional button
         trailingContent?.invoke(this)

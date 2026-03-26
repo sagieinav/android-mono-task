@@ -63,9 +63,8 @@ fun SnoozeBottomSheet(
         // Define the metadata of each snooze option button
         val snoozeOptions = remember {
             listOf(
-                Triple(XpEvents.SnoozeOption.BY_DUE_DATE,       R.drawable.ic_due_soon,         "Due Soon"),
-                Triple(XpEvents.SnoozeOption.NEXT_IN_QUEUE,     R.drawable.ic_skip,             "Next in Queue"),
-//                Triple(XpEvents.SnoozeOption.MANUAL,            R.drawable.ic_view_kanban,      "Choose Manually")
+                Triple(XpEvents.SnoozeOption.BY_DUE_DATE,       R.drawable.ic_due_soon,         "Due soon"),
+                Triple(XpEvents.SnoozeOption.NEXT_IN_QUEUE,     R.drawable.ic_skip,             "Next in queue"),
             )
         }
 
@@ -82,7 +81,7 @@ fun SnoozeBottomSheet(
         // Info for manual snooze
         InfoCallout(
             title    = "MANUAL SNOOZE",
-            body     = "Want to pick a specific next task? Tap it on the Kanban board and hit 'Focus Now'!",
+            body     = "Want to pick a specific next task? Tap it on the Kanban board and hit 'Focus now'!",
             modifier = Modifier
                 .padding(top = 8.dp)
                 .padding(horizontal = 20.dp)
@@ -155,12 +154,12 @@ private fun ChooseSnoozeButtonPreview() {
         ) {
             ChooseSnoozeButton(
                 icon      = painterResource(R.drawable.ic_due_soon),
-                label     = "Due Soon",
+                label     = "Due soon",
                 xpPenalty = XpEvents.SnoozeOption.BY_DUE_DATE.penalty
             )
             ChooseSnoozeButton(
                 icon      = painterResource(R.drawable.ic_skip),
-                label     = "Next in Queue",
+                label     = "Next in queue",
                 xpPenalty = XpEvents.SnoozeOption.NEXT_IN_QUEUE.penalty
             )
         }

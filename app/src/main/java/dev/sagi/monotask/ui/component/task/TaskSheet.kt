@@ -128,7 +128,7 @@ fun CreateTaskSheet(
 ) {
     TaskSheet(
         sheetTitle = "Create New Task",
-        submitLabel = "Add Task",
+        submitLabel = "Add task",
         onDismiss = onDismiss,
         onSubmit = onAddTask
     )
@@ -144,7 +144,7 @@ fun EditTaskSheet(
 ) {
     TaskSheet(
         sheetTitle = "Edit Task",
-        submitLabel = "Save Changes",
+        submitLabel = "Save changes",
         initialTitle = task.title,
         initialDescription = task.description,
         initialImportance = task.importance,

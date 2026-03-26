@@ -69,7 +69,8 @@ fun DropdownTriggerPill(
                 .padding(start = 16.dp, end = 10.dp)
                 .align(Alignment.Center)
                 ,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val color = MaterialTheme.colorScheme.onSurfaceVariant
             Text(
@@ -81,12 +82,13 @@ fun DropdownTriggerPill(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.widthIn(max = 120.dp)
             )
-            Spacer(Modifier.width(2.dp))
             Icon(
                 painter = painterResource(R.drawable.ic_chevron),
                 contentDescription = null,
-                modifier = Modifier.rotate(chevronRotation),
-                tint = color
+                tint = color,
+                modifier = Modifier
+                    .size(20.dp)
+                    .rotate(chevronRotation)
             )
         }
     }
