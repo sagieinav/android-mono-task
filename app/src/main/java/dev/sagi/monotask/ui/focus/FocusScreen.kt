@@ -39,6 +39,7 @@ fun FocusScreen(
 
     val stableOnFocusEvent = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
     val animState          = rememberFocusAnimationState(onFocusEvent = stableOnFocusEvent)
+    var levelUpEvent       by remember { mutableStateOf<FocusUiEffect.ShowLevelUp?>(null) }
 
     // Hold off UI updates while a completion animation is playing,
     // so Firestore snapshots don't interrupt the card animation mid-way
@@ -89,6 +90,9 @@ fun FocusScreen(
                         duration = SnackbarDuration.Short
                     )
                 }
+                is FocusUiEffect.ShowLevelUp -> {
+                    levelUpEvent = effect
+                }
             }
         }
     }
@@ -98,7 +102,9 @@ fun FocusScreen(
         currentStreak = currentStreak,
         currentUser   = currentUser,
         animState     = animState,
-        onFocusEvent  = stableOnFocusEvent
+        onFocusEvent  = stableOnFocusEvent,
+        levelUpEvent  = levelUpEvent,
+        onLevelUpDone = { levelUpEvent = null }
     )
 }
 
@@ -110,7 +116,9 @@ fun FocusScreenContent(
     currentStreak : Int,
     currentUser   : User?,
     animState     : FocusAnimationState,
-    onFocusEvent  : (FocusEvent) -> Unit
+    onFocusEvent  : (FocusEvent) -> Unit,
+    levelUpEvent  : FocusUiEffect.ShowLevelUp? = null,
+    onLevelUpDone : () -> Unit = {}
 ) {
     val innerPadding = LocalScaffoldPadding.current
     val scope        = rememberCoroutineScope()
@@ -127,7 +135,12 @@ fun FocusScreenContent(
                 end    = Constants.Theme.SCREEN_PADDING
             )
     ) {
-        UserHeader(user = currentUser, currentStreak = currentStreak)
+        UserHeader(
+            user          = currentUser,
+            currentStreak = currentStreak,
+            levelUpEvent  = levelUpEvent,
+            onLevelUpDone = onLevelUpDone
+        )
 
         when (uiState) {
             is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {

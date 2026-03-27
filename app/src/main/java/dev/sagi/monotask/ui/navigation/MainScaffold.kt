@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,6 +28,7 @@ import dev.sagi.monotask.ui.shared.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
+import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
 import dev.sagi.monotask.ui.kanban.KanbanEvent
 import dev.sagi.monotask.ui.kanban.KanbanUiState
@@ -72,6 +74,11 @@ fun MainScaffold(
 
     var showCreateSheet by remember { mutableStateOf(false) }
     var showCreateWorkspaceDialog by remember { mutableStateOf(false) }
+    var draftTitle by rememberSaveable { mutableStateOf("") }
+    var draftDescription by rememberSaveable { mutableStateOf("") }
+    var draftImportanceOrdinal by rememberSaveable { mutableIntStateOf(Importance.MEDIUM.ordinal) }
+    var draftTagsCsv by rememberSaveable { mutableStateOf("") }
+    var draftDueDate by rememberSaveable { mutableLongStateOf(-1L) }
     val workspaces by workspaceVM.workspaces.collectAsStateWithLifecycle()
     val selectedWorkspace by workspaceVM.selectedWorkspace.collectAsStateWithLifecycle()
 
@@ -192,10 +199,25 @@ fun MainScaffold(
 
                 if (showCreateSheet) {
                     CreateTaskSheet(
+                        initialTitle = draftTitle,
+                        initialDescription = draftDescription,
+                        initialImportance = Importance.entries[draftImportanceOrdinal],
+                        initialTags = if (draftTagsCsv.isEmpty()) emptyList() else draftTagsCsv.split(","),
+                        initialDueDateMillis = if (draftDueDate == -1L) null else draftDueDate,
                         onDismiss = { showCreateSheet = false },
                         onAddTask = { title, desc, importance, tags, dueDate ->
                             workspaceVM.createTask(title, desc, importance, tags, dueDate)
+                            draftTitle = ""; draftDescription = ""
+                            draftImportanceOrdinal = Importance.MEDIUM.ordinal
+                            draftTagsCsv = ""; draftDueDate = -1L
                             showCreateSheet = false
+                        },
+                        onDraftSaved = { title, desc, importance, tags, dueDate ->
+                            draftTitle = title
+                            draftDescription = desc
+                            draftImportanceOrdinal = importance.ordinal
+                            draftTagsCsv = tags.joinToString(",")
+                            draftDueDate = dueDate ?: -1L
                         }
                     )
                 }

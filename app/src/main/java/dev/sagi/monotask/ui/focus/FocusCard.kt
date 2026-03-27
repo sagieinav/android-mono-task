@@ -78,7 +78,6 @@ fun FocusCard(
 //                .matchParentSize()
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(40.dp)
-//            verticalArrangement = Arrangement.SpaceBetween
         ) {
             FocusCardHeader(task = task, hideXpLabel = hideXpLabel)
             FocusCardBody(task)
@@ -109,7 +108,9 @@ private fun FocusCardHeader(task: Task, hideXpLabel: Boolean = false) {
 
 @Composable
 private fun FocusCardBody(task: Task) {
-    Column(verticalArrangement = Arrangement.Center) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
         val titleWrapped = task.title
             .replace("-", "-\u200B")
             .replace("—", "—\u200B")
@@ -124,7 +125,6 @@ private fun FocusCardBody(task: Task) {
         )
 
         if (task.description.isNotBlank()) {
-            Spacer(Modifier.height(10.dp))
             Text(
                 text = task.description,
                 style = MaterialTheme.typography.bodyMedium,

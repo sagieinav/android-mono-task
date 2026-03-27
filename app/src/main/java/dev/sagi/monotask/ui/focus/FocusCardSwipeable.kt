@@ -6,7 +6,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +31,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -43,6 +41,7 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.task.XpLabelCompletion
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.circleGlow
+import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import kotlin.math.roundToInt
 
@@ -65,9 +64,9 @@ fun SwipePill(
     iconTint: Color,
     progress: Float,
     offsetX: Float,
+    modifier: Modifier = Modifier,
     baseScale: Float = 1f,
-    maxScale: Float = 1.6f,
-    modifier: Modifier = Modifier
+    maxScale: Float = 1.8f
 ) {
     val isTriggered = progress >= 1f
     val burstScale  = remember { Animatable(1f) }
@@ -87,7 +86,7 @@ fun SwipePill(
         }
     }
 
-    val currentColor = lerp(
+    val dynamicColor = lerp(
         start    = MaterialTheme.colorScheme.outlineVariant,
         stop     = iconTint,
         fraction = (progress * progress * 1.2f).coerceIn(0f, 1f)
@@ -105,7 +104,7 @@ fun SwipePill(
                 translationX = offsetX
             }
             .circleGlow(
-                color        = currentColor.copy(alpha = 0.25f),
+                color        = dynamicColor.copy(alpha = 0.25f),
                 radius       = 20.dp,                      // glow blur radius
                 circleRadius = PILL_SIZE * maxScale / 2,   // shadow drawn at actual pill radius, not the enlarged box
                 offsetY      = 0.dp
@@ -117,15 +116,22 @@ fun SwipePill(
             modifier = Modifier
                 .size(PILL_SIZE * maxScale)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f + progress / 2f))
-                .glassBorder(CircleShape),
+//                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f + progress / 2f))
+                .glassBackground(
+                    accentColor = dynamicColor,
+                    baseColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.8f)
+                )
+
+                .glassBorder(CircleShape, dynamicColor, width = 4.dp)
+            ,
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter            = painterResource(iconRes),
                 contentDescription = null,
-                tint               = currentColor,
-                modifier           = Modifier.fillMaxSize().scale(1.43f)
+                tint               = dynamicColor,
+                modifier           = Modifier
+                    .fillMaxSize()
             )
         }
     }
@@ -140,7 +146,7 @@ fun CompletePill(
 ) {
     val progress = (syncedOffset / COMPLETE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
-        iconRes  = R.drawable.ic_check_circle,
+        iconRes  = R.drawable.ic_check_alt,
         iconTint = COMPLETE_COLOR,
         progress = progress,
         offsetX  = screenWidthPx * (1f - progress),
@@ -157,7 +163,7 @@ fun SnoozePill(
 ) {
     val progress = (-syncedOffset / SNOOZE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
-        iconRes  = R.drawable.ic_next_plan,
+        iconRes  = R.drawable.ic_next_task_alt,
         iconTint = SNOOZE_COLOR,
         progress = progress,
         offsetX  = -screenWidthPx * (1f - progress),
@@ -327,13 +333,13 @@ private fun SwipePillPreview() {
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             SwipePill(
-                iconRes  = R.drawable.ic_check_circle,
+                iconRes  = R.drawable.ic_check,
                 iconTint = Color(0xFF4BB24F),
                 progress = 0.3f,
                 offsetX  = 0f
             )
             SwipePill(
-                iconRes  = R.drawable.ic_next_plan,
+                iconRes  = R.drawable.ic_next_task_alt,
                 iconTint = Color(0xFFFF511C),
                 progress = 1.0f,
                 offsetX  = 0f

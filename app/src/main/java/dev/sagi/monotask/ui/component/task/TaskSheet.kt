@@ -57,6 +57,7 @@ private fun TaskSheet(
     initialDueDateMillis: Long? = null,
     onDismiss: () -> Unit,
     onSubmit: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit,
+    onDraftSave: ((title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit)? = null,
     extraContent: @Composable (() -> Unit)? = null   // Slot for delete button in edit mode
 ) {
     var title by remember { mutableStateOf(initialTitle) }
@@ -67,7 +68,13 @@ private fun TaskSheet(
     var dueDateMillis by remember { mutableStateOf(initialDueDateMillis) }
     var showDateTimePicker by remember { mutableStateOf(false) }
 
-    BottomSheet(title = sheetTitle, onDismissRequest = onDismiss) {
+    BottomSheet(
+        title = sheetTitle,
+        onDismissRequest = {
+            onDraftSave?.invoke(title, description, importance, tags, dueDateMillis)
+            onDismiss()
+        }
+    ) {
         // Column to override vertical gap for the 3 text fields
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             TaskTitleAndDescriptionInput(
@@ -124,13 +131,25 @@ private fun TaskSheet(
 @Composable
 fun CreateTaskSheet(
     onDismiss: () -> Unit,
-    onAddTask: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit
+    onAddTask: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit,
+    initialTitle: String = "",
+    initialDescription: String = "",
+    initialImportance: Importance = Importance.MEDIUM,
+    initialTags: List<String> = emptyList(),
+    initialDueDateMillis: Long? = null,
+    onDraftSaved: ((title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit)? = null
 ) {
     TaskSheet(
         sheetTitle = "Create New Task",
         submitLabel = "Add task",
+        initialTitle = initialTitle,
+        initialDescription = initialDescription,
+        initialImportance = initialImportance,
+        initialTags = initialTags,
+        initialDueDateMillis = initialDueDateMillis,
         onDismiss = onDismiss,
-        onSubmit = onAddTask
+        onSubmit = onAddTask,
+        onDraftSave = onDraftSaved
     )
 }
 

@@ -184,6 +184,9 @@ class FocusViewModel @Inject constructor(
                 // Evaluate AFTER by appending the just-completed task in memory
                 // avoids a second Firestore fetch.
                 val levelAfter        = XpEvents.levelForXp(user.xp + xpGained)
+                if (levelAfter > user.level) {
+                    _uiEffect.emit(FocusUiEffect.ShowLevelUp(previousLevel = user.level, newLevel = levelAfter))
+                }
                 val tasksAfter        = tasksBefore + state.focusTask
                 val achievementsAfter = AchievementEngine.evaluate(tasksAfter, levelAfter)
 

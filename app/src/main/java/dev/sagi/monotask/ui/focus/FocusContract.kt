@@ -38,4 +38,5 @@ sealed interface FocusUiEffect {
         val name : String,
         val tier : AchievementTier
     ) : FocusUiEffect
+    data class ShowLevelUp(val previousLevel: Int, val newLevel: Int) : FocusUiEffect
 }

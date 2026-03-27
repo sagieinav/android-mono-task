@@ -80,7 +80,7 @@ fun DropdownTriggerPill(
                 color = color,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.widthIn(max = 120.dp)
+                modifier = Modifier.widthIn(max = 140.dp)
             )
             Icon(
                 painter = painterResource(R.drawable.ic_chevron),

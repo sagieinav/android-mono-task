@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -115,15 +118,26 @@ class ProfileViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        // Reactively fetch full User objects whenever the friends ID list changes
+        // Stream full User objects in real-time whenever the friends ID list changes
+        userFlow
+            .map { it?.friends ?: emptyList() }
+            .distinctUntilChanged()
+            .flatMapLatest { friendIds ->
+                if (friendIds.isEmpty()) flowOf(emptyList())
+                else combine(friendIds.map { id -> userRepository.getUserStream(id) }) { users ->
+                    users.filterNotNull().toList()
+                }
+            }
+            .onEach { users -> _friendUsers.value = users }
+            .launchIn(viewModelScope)
+
+        // One-shot activity fetch whenever the friends ID list changes
         userFlow
             .map { it?.friends ?: emptyList() }
             .distinctUntilChanged()
             .onEach { friendIds ->
-                val users = friendIds.mapNotNull { userRepository.getUserById(it) }
-                _friendUsers.value = users
-                _friendActivities.value = users.associate { user ->
-                    user.id to userRepository.getActivityOnce(user.id, UserRepository.thisMonthRange)
+                _friendActivities.value = friendIds.associateWith { id ->
+                    userRepository.getActivityOnce(id, UserRepository.thisMonthRange)
                 }
             }
             .launchIn(viewModelScope)
