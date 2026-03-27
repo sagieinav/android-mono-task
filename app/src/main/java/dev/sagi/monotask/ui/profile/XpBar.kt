@@ -1,7 +1,5 @@
 package dev.sagi.monotask.ui.profile
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,8 +13,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -27,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.lerp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
-import dev.sagi.monotask.ui.theme.glassBorder
 
 
 @Composable
@@ -35,17 +30,9 @@ fun XpBar(
     level: Int,
     currentXp: Int,
     xpForNextLevel: Int,
+    animatedProgress: Float,
     modifier: Modifier = Modifier
 ) {
-    val progress = currentXp.toFloat() / xpForNextLevel.toFloat()
-
-    val animatable = remember { Animatable(0f) }
-    LaunchedEffect(progress) {
-        animatable.animateTo(
-            targetValue = progress,
-            animationSpec = tween(durationMillis = 800)
-        )
-    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -96,7 +83,7 @@ fun XpBar(
             // Filled
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(animatable.value)
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .clip(CircleShape)
                     .background(run {
@@ -122,6 +109,7 @@ fun XpBarPreview() {
                 level = 12,
                 currentXp = 300,
                 xpForNextLevel = 500,
+                animatedProgress = 300f / 500f,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)

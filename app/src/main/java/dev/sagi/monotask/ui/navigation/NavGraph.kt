@@ -81,7 +81,7 @@ fun NavGraph(
     val settingsState by settingsVM.uiState.collectAsStateWithLifecycle()
     val authState by authVM.uiState.collectAsStateWithLifecycle()
 
-    val hardcoreMode = (settingsState as? SettingsUiState.Ready)?.hardcoreModeEnabled ?: false
+    val hyperfocusMode = (settingsState as? SettingsUiState.Ready)?.hyperfocusModeEnabled ?: false
     val isLoading = authState is AuthUiState.Loading || settingsState is SettingsUiState.Loading
 
     var initialStartDestination by remember { mutableStateOf<String?>(null) }
@@ -176,17 +176,13 @@ fun NavGraph(
                     FocusScreen(focusVM = focusVM)
                 }
                 composable(Screen.Kanban.route) {
-//                    val kanbanVM: KanbanViewModel = hiltViewModel()
                     kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
                     kanbanVM.setUserSource(userSessionVM.currentUser)
-                    if (hardcoreMode) {
-                        LaunchedEffect(Unit) { navController.popBackStack() }
-                    } else {
-                        KanbanScreen(
-                            navController = navController,
-                            kanbanVM      = kanbanVM
-                        )
-                    }
+                    kanbanVM.setLocked(hyperfocusMode)
+                    KanbanScreen(
+                        navController = navController,
+                        kanbanVM      = kanbanVM
+                    )
                 }
                 composable(Screen.Profile.route) {
                     val profileVM: ProfileViewModel = hiltViewModel()

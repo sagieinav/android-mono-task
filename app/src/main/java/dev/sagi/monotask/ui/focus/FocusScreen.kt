@@ -13,9 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.firebase.Timestamp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.ui.component.task.EditTaskSheet
+import java.util.Date
 import dev.sagi.monotask.ui.component.display.EmptyState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
@@ -35,6 +38,7 @@ fun FocusScreen(
     val frozenForAnimation by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
     val currentStreak      by focusVM.currentStreak.collectAsStateWithLifecycle()
     val currentUser        by focusVM.currentUser.collectAsStateWithLifecycle()
+    val editingTask        by focusVM.editingTask.collectAsStateWithLifecycle()
     val snackbarHostState  = LocalSnackbarHostState.current
 
     val stableOnFocusEvent = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
@@ -106,6 +110,23 @@ fun FocusScreen(
         levelUpEvent  = levelUpEvent,
         onLevelUpDone = { levelUpEvent = null }
     )
+
+    editingTask?.let { task ->
+        EditTaskSheet(
+            task      = task,
+            onDismiss = { focusVM.onEvent(FocusEvent.DismissEditSheet) },
+            onSave    = { title, desc, importance, tags, dueDate ->
+                focusVM.onEvent(FocusEvent.UpdateTask(task.copy(
+                    title       = title,
+                    description = desc,
+                    importance  = importance,
+                    tags        = tags,
+                    dueDate     = dueDate?.let { Timestamp(Date(it)) }
+                )))
+                focusVM.onEvent(FocusEvent.DismissEditSheet)
+            }
+        )
+    }
 }
 
 // ========== Content ==========
@@ -145,12 +166,11 @@ fun FocusScreenContent(
         when (uiState) {
             is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 EmptyState(
-                    imgRes = R.drawable.img_empty_focus_no_bg2,
-                    title = "You're all caught up!",
-                    subtitle = "No tasks here. Enjoy the moment.",
+                    imgRes = R.drawable.img_empty_focus_yellow,
+                    title = "Where are the tasks?",
+                    subtitle = "Oh... you cleared 'em all. Well played.",
                     isMainContent = true,
-                    modifier = Modifier
-                        .padding(bottom = 40.dp) // optical correction for vertical position
+                    modifier = Modifier.padding(bottom = 40.dp) // optical correction for vertical position
                 )
             }
             is FocusUiState.Active ->
@@ -216,6 +236,7 @@ private fun ActiveFocusCard(
                 onSwipeRight       = { onFocusEvent(FocusEvent.CompleteTask) },
                 onSwipeLeft        = { onFocusEvent(FocusEvent.OpenSnooze) },
                 onSnoozeCardExited = { animState.onSnoozeCardExited() },
+                onLongPress        = { onFocusEvent(FocusEvent.OpenEditSheet) },
                 modifier           = Modifier.fillMaxWidth()
             )
         }

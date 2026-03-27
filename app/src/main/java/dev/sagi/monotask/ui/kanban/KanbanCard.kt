@@ -118,7 +118,7 @@ fun KanbanCard(
                 if (task.tags.isNotEmpty()) {
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalArrangement   = Arrangement.spacedBy(2.dp),
+                        verticalArrangement   = Arrangement.spacedBy(3.dp),
                         maxLines = 2
                     ) {
                         task.tags.forEach { tag ->

@@ -26,6 +26,9 @@ sealed interface FocusEvent {
     data class ExecuteSnooze(val option: XpEvents.SnoozeOption) : FocusEvent
     object UndoCompleteTask : FocusEvent
     object UndoSnoozeTask : FocusEvent
+    object OpenEditSheet : FocusEvent
+    object DismissEditSheet : FocusEvent
+    data class UpdateTask(val task: Task) : FocusEvent
 }
 
 // ========== One-Shot UI Effects ==========

@@ -6,7 +6,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,11 +27,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -43,7 +47,12 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
+import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // ========== Swipe Constants ==========
 private val PILL_SIZE          = 44.dp
@@ -180,7 +189,8 @@ fun FocusCardSwipeable(
     onSwipeRight: () -> Unit,
     onSwipeLeft: () -> Unit,
     onSnoozeCardExited: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLongPress: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
     val density       = LocalDensity.current
@@ -230,6 +240,20 @@ fun FocusCardSwipeable(
 
     val haptic = LocalHapticFeedback.current
 
+    var isLongPressPending by remember { mutableStateOf(false) }
+    val lpScale by animateFloatAsState(
+        if (isLongPressPending) 0.975f
+                    else 1f,
+        tween(150),
+        label = "lp_scale"
+    )
+    val lpAlpha by animateFloatAsState(
+        if (isLongPressPending) 0.88f
+                    else 1f,
+        tween(150),
+        label = "lp_alpha"
+    )
+
     var wasCompleteReady by remember { mutableStateOf(false) }
     var wasSnoozeReady   by remember { mutableStateOf(false) }
     val completeReady = offsetX > COMPLETE_THRESHOLD
@@ -258,29 +282,81 @@ fun FocusCardSwipeable(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                .graphicsLayer { rotationZ = (animatedOffset / screenWidthPx) * MAX_ROTATION_DEG }
+                .graphicsLayer {
+                    rotationZ = (animatedOffset / screenWidthPx) * MAX_ROTATION_DEG
+                    scaleX = lpScale
+                    scaleY = lpScale
+                    alpha  = lpAlpha
+                    compositingStrategy = CompositingStrategy.ModulateAlpha
+                }
                 .pointerInput(isExiting) {
                     if (isExiting) return@pointerInput
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            when {
-                                offsetX > COMPLETE_THRESHOLD -> {
-                                    badgeOffsetX = offsetX
-                                    exitDirection = SwipeExitDirection.RIGHT
-                                }
+                    val longPressTimeout = viewConfiguration.longPressTimeoutMillis
+                    val touchSlop = viewConfiguration.touchSlop
 
-                                offsetX < -SNOOZE_THRESHOLD -> {
-                                    offsetX = 0f; onSwipeLeft()
-                                }
+                    coroutineScope {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            var isDragging = false
+                            var accumulatedDrag = 0f
+                            isLongPressPending = true
 
-                                else -> offsetX = 0f
+                            val longPressJob = launch {
+                                delay(longPressTimeout)
+                                isLongPressPending = false
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onLongPress()
                             }
-                        },
-                        onDragCancel = { offsetX = 0f },
-                        onHorizontalDrag = { _, dragAmount ->
-                            offsetX = (offsetX + dragAmount).coerceIn(-MAX_DRAG_DISTANCE, MAX_DRAG_DISTANCE)
+
+                            try {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+
+                                    if (!change.pressed) {
+                                        longPressJob.cancel()
+                                        isLongPressPending = false
+                                        change.consume()
+                                        if (isDragging) {
+                                            when {
+                                                offsetX > COMPLETE_THRESHOLD -> {
+                                                    badgeOffsetX = offsetX
+                                                    exitDirection = SwipeExitDirection.RIGHT
+                                                }
+                                                offsetX < -SNOOZE_THRESHOLD -> {
+                                                    offsetX = 0f; onSwipeLeft()
+                                                }
+                                                else -> offsetX = 0f
+                                            }
+                                        }
+                                        break
+                                    }
+
+                                    if (change.positionChanged()) {
+                                        val dx = change.positionChange().x
+                                        accumulatedDrag += dx
+
+                                        if (!isDragging && !longPressJob.isCompleted) {
+                                            if (abs(accumulatedDrag) > touchSlop) {
+                                                isDragging = true
+                                                longPressJob.cancel()
+                                                isLongPressPending = false
+                                            }
+                                        }
+
+                                        if (isDragging) {
+                                            change.consume()
+                                            offsetX = (offsetX + dx).coerceIn(-MAX_DRAG_DISTANCE, MAX_DRAG_DISTANCE)
+                                        }
+                                    }
+                                }
+                            } catch (_: CancellationException) {
+                                longPressJob.cancel()
+                                isLongPressPending = false
+                                if (isDragging) offsetX = 0f
+                            }
                         }
-                    )
+                    }
                 }
         )
 

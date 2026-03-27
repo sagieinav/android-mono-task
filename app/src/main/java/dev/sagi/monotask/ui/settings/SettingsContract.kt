@@ -7,7 +7,7 @@ import dev.sagi.monotask.data.model.Workspace
 sealed class SettingsUiState {
     object Loading : SettingsUiState()
     data class Ready(
-        val hardcoreModeEnabled: Boolean = false,
+        val hyperfocusModeEnabled: Boolean = false,
         val dueDateWeight      : Float   = 0.5f,
         val displayName        : String  = "",
         val email              : String  = ""
@@ -18,7 +18,7 @@ sealed class SettingsUiState {
 // ========== Event Callbacks ==========
 
 sealed interface SettingsEvent {
-    data class UpdateHardcoreMode(val enabled: Boolean)                         : SettingsEvent
+    data class UpdateHyperfocusMode(val enabled: Boolean)                        : SettingsEvent
     data class UpdatePriorityWeights(val dueDateWeight: Float) : SettingsEvent
     data class UpdateDisplayName(val name: String)                              : SettingsEvent
     data class CreateWorkspace(val name: String)                                : SettingsEvent

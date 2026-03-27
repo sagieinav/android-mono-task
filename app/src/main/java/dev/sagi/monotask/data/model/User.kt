@@ -29,7 +29,7 @@ data class User(
 
     // Persistent user settings
     val onboarded: Boolean = false,               // For first-launch onboarding
-    val hardcoreModeEnabled: Boolean = false,     // Critical for NavGuard
+    val hyperfocusModeEnabled: Boolean = false,   // Critical for NavGuard
     val dueDateWeight: Float = 0.5f
 ) {
 

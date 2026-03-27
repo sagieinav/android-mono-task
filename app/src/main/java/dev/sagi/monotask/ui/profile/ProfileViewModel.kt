@@ -183,9 +183,11 @@ class ProfileViewModel @Inject constructor(
 
                     // Patch Firestore if stats are stale (one-time migration for pre-UserStats data).
                     // Only writes when the computed values exceed what's stored.
-                    val computedStreak = AchievementEngine.computeLongestStreak(tasks)
-                    val storedStats    = current.user.stats
-                    val earnedMap      = achievements
+                    val computedStreak   = AchievementEngine.computeLongestStreak(tasks)
+                    val computedTotal    = tasks.size
+                    val computedAceCount = tasks.count { it.isAce }
+                    val storedStats      = current.user.stats
+                    val earnedMap        = achievements
                         .filter { it.earnedTier != null }
                         .associate { it.category.name to it.earnedTier!!.name }
                     if (computedStreak > storedStats.longestStreak || earnedMap != storedStats.earnedAchievements) {
@@ -193,6 +195,16 @@ class ProfileViewModel @Inject constructor(
                             userId             = uid,
                             longestStreak      = maxOf(computedStreak, storedStats.longestStreak),
                             earnedAchievements = storedStats.earnedAchievements + earnedMap
+                        )
+                    }
+                    // Heal inflated/deflated task counts. Bidirectional check (!=) handles both
+                    // over-counts (missed undos) and under-counts (deleted completed tasks)
+                    if (computedTotal != storedStats.totalTasksCompleted ||
+                        computedAceCount != storedStats.aceCount) {
+                        userRepository.patchStatsCount(
+                            userId          = uid,
+                            correctTotal    = computedTotal,
+                            correctAceCount = computedAceCount
                         )
                     }
                 }

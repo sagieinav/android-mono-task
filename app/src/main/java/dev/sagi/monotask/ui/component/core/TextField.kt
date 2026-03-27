@@ -19,10 +19,13 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
@@ -35,15 +38,17 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoBorder
+import kotlinx.coroutines.delay
 
 @Composable
 fun MonoTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    modifier: Modifier = Modifier,
     supportingText: String? = null,
     required: Boolean = false,
-    modifier: Modifier = Modifier,
+    autoFocus: Boolean = false,
     singleLine: Boolean = true,
     minLines: Int = 1,
     maxLines: Int = if (singleLine) 1 else 3,
@@ -53,6 +58,15 @@ fun MonoTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    if (autoFocus) {
+        LaunchedEffect(Unit) {
+            delay(200L)
+            focusRequester.requestFocus()
+        }
+    }
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -77,7 +91,7 @@ fun MonoTextField(
                 fontSize = 10.sp,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)) }
         },
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().focusRequester(focusRequester),
         shape = shape,
         singleLine = singleLine,
         minLines = minLines,
@@ -88,7 +102,9 @@ fun MonoTextField(
             unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             focusedLabelColor = MaterialTheme.colorScheme.scrim,
             unfocusedLabelColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-            cursorColor = MaterialTheme.colorScheme.scrim
+            cursorColor = MaterialTheme.colorScheme.scrim,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.scrim,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
         ),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,

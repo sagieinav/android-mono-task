@@ -7,6 +7,7 @@ import dev.sagi.monotask.data.model.Task
 
 sealed class KanbanUiState {
     object Loading : KanbanUiState()
+    object Locked  : KanbanUiState()
     data class Ready(
         val highTasks: List<Task>,
         val mediumTasks: List<Task>,

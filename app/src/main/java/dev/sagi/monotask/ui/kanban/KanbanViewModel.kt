@@ -17,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
 
 @HiltViewModel
 class KanbanViewModel @Inject constructor(
@@ -25,8 +26,12 @@ class KanbanViewModel @Inject constructor(
     private val workspaceRepository: WorkspaceRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<KanbanUiState>(KanbanUiState.Loading)
-    val uiState: StateFlow<KanbanUiState> = _uiState.asStateFlow()
+    private val _internalUiState = MutableStateFlow<KanbanUiState>(KanbanUiState.Loading)
+    private val _isLocked = MutableStateFlow(false)
+
+    val uiState: StateFlow<KanbanUiState> = combine(_internalUiState, _isLocked) { state, locked ->
+        if (locked) KanbanUiState.Locked else state
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), KanbanUiState.Loading)
 
     private val _editingTask = MutableStateFlow<Task?>(null)
     val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
@@ -70,6 +75,8 @@ class KanbanViewModel @Inject constructor(
 
     // ========== Workspace & User Wiring ==========
 
+    fun setLocked(locked: Boolean) { _isLocked.value = locked }
+
     // Connects this ViewModel to the shared workspace selection.
     // Call once right after creation (in NavGraph).
     fun setWorkspaceSource(workspaceFlow: StateFlow<Workspace?>) {
@@ -107,7 +114,7 @@ class KanbanViewModel @Inject constructor(
     }
 
     private fun toggleArchive() {
-        _uiState.value = KanbanUiState.Loading
+        _internalUiState.value = KanbanUiState.Loading
         _showCompleted.value = !_showCompleted.value
     }
 
@@ -115,7 +122,7 @@ class KanbanViewModel @Inject constructor(
         val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
         val sorted  = if (workspace != null) TaskSelector.getSortedTasks(tasks, dueDateWeight) else tasks
         val grouped = sorted.groupBy { it.importance }
-        _uiState.value = KanbanUiState.Ready(
+        _internalUiState.value = KanbanUiState.Ready(
             highTasks   = grouped[Importance.HIGH]   ?: emptyList(),
             mediumTasks = grouped[Importance.MEDIUM] ?: emptyList(),
             lowTasks    = grouped[Importance.LOW]    ?: emptyList(),
@@ -184,6 +191,7 @@ class KanbanViewModel @Inject constructor(
                 }
                 userRepository.removeDailyActivity(userId, xpToRemove, dateEpochDay = completionEpoch)
                 userRepository.removeXp(userId, xpToRemove)
+                userRepository.undoUserStats(userId, task.isAce)
             } catch (e: Exception) {
                 _uiEffect.emit(KanbanUiEffect.ShowError("Failed to restore task: ${e.message}"))
             }

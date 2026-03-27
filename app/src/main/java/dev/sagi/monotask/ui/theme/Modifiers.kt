@@ -71,26 +71,6 @@ fun Modifier.noMinSize() = layout { measurable, constraints ->
 }
 
 
-
-
-// ========== Fire icon gradient ==========
-// Applies a bottom-to-top fire gradient tint over any icon via BlendMode.SrcIn.
-// Uses the icon's alpha channel as a mask, so icon color/tint is irrelevant.
-fun Modifier.fireIconGradient(): Modifier = this
-    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-    .drawWithCache {
-        val gradient = Brush.linearGradient(
-            colors = listOf(FireGradientDeep, FireGradientMid, FireGradientTip),
-            start  = Offset(0f, size.height),
-            end    = Offset(0f, 0f)
-        )
-        onDrawWithContent {
-            drawContent()
-            drawRect(gradient, blendMode = BlendMode.SrcIn)
-        }
-    }
-
-
 // ========== WRAPPER: MonoTask's basic elevated, bordered design ==========
 fun Modifier.basicMonoTask(
     shape: Shape,

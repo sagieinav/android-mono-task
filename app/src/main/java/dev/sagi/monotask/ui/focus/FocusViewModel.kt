@@ -42,6 +42,9 @@ class FocusViewModel @Inject constructor(
     private val _uiEffect = MutableSharedFlow<FocusUiEffect>()
     val uiEffect: SharedFlow<FocusUiEffect> = _uiEffect.asSharedFlow()
 
+    private val _editingTask = MutableStateFlow<Task?>(null)
+    val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
+
     // ========== Internal State ==========
     // All mutable vars below are only accessed on Main (viewModelScope default)
 
@@ -58,9 +61,10 @@ class FocusViewModel @Inject constructor(
     val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
 
     // Cached for undo operations
-    private var lastCompletedTask : Task? = null
-    private var lastSnoozedTask   : Task? = null
-    private var lastXpAwarded     : Int   = 0
+    private var lastCompletedTask       : Task?    = null
+    private var lastSnoozedTask         : Task?    = null
+    private var lastXpAwarded           : Int      = 0
+    private var lastCompletedTaskWasAce : Boolean  = false
 
     // Workspace flow injected once from NavGraph via setWorkspaceSource
     private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
@@ -99,6 +103,9 @@ class FocusViewModel @Inject constructor(
             is FocusEvent.ExecuteSnooze    -> snoozeTask(event.option)
             is FocusEvent.UndoCompleteTask -> undoCompleteTask()
             is FocusEvent.UndoSnoozeTask   -> undoSnoozeTask()
+            is FocusEvent.OpenEditSheet    -> openEditSheet()
+            is FocusEvent.DismissEditSheet -> _editingTask.value = null
+            is FocusEvent.UpdateTask       -> updateTask(event.task)
         }
     }
 
@@ -133,13 +140,22 @@ class FocusViewModel @Inject constructor(
 
                 val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
 
-                val topTask = workspace.currentFocusTaskId
+                val pinnedTask = workspace.currentFocusTaskId
                     ?.let { id -> tasks.find { it.id == id } }
-                    ?: TaskSelector.getTopTask(tasks, dueDateWeight)
+                val topTask = pinnedTask ?: TaskSelector.getTopTask(tasks, dueDateWeight)
+
+                // Pin the selected task so priority edits don't swap the card mid-session
+                // Only write when nothing was pinned yet. snooze/complete manage updates themselves
+                if (pinnedTask == null && topTask != null) {
+                    viewModelScope.launch {
+                        workspaceRepository.setFocusTask(userId, workspace.id, topTask.id)
+                    }
+                }
 
                 val queue    = TaskSelector.getSortedTasks(tasks, dueDateWeight)
+                    .filter { it.id != topTask?.id }
                 val newState = if (topTask == null) FocusUiState.Empty
-                else FocusUiState.Active(topTask, queue.drop(1), workspace)
+                else FocusUiState.Active(topTask, queue, workspace)
 
                 if (newState is FocusUiState.Active) lastActiveState = newState
                 _uiState.value = newState
@@ -153,9 +169,10 @@ class FocusViewModel @Inject constructor(
         val state    = _uiState.value as? FocusUiState.Active ?: return
         val xpGained = state.focusTask.currentXp
 
-        lastCompletedTask         = state.focusTask
-        lastXpAwarded             = xpGained
-        _frozenForAnimation.value = true
+        lastCompletedTask           = state.focusTask
+        lastXpAwarded               = xpGained
+        lastCompletedTaskWasAce     = state.focusTask.isAce
+        _frozenForAnimation.value   = true
 
         viewModelScope.launch {
             try {
@@ -170,13 +187,15 @@ class FocusViewModel @Inject constructor(
                 // Snapshot achievements BEFORE this task is counted so we can diff after
                 // getAllCompletedTasksOnce covers all workspaces, achievements are cross-workspace
                 val tasksBefore        = taskRepository.getAllCompletedTasksOnce(userId)
-                val achievementsBefore = AchievementEngine.evaluateFromStats(user.stats, user.level)
+                val achievementsBefore = AchievementEngine.evaluate(tasksBefore, user.level)
 
-                // Persist completion + XP
+                // Persist completion + XP, and clear the pinned task so observeTasks
+                // selects and pins the next one when the Firestore snapshot arrives.
                 taskRepository.markTaskCompleted(userId, state.focusTask.id)
+                workspaceRepository.setFocusTask(userId, state.workspace.id, null)
                 userRepository.addXp(userId, xpGained, user.xp, user.level)
 
-                delay(300)
+//                delay(300)
                 _frozenForAnimation.value = false
 
                 userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
@@ -261,7 +280,9 @@ class FocusViewModel @Inject constructor(
                 taskRepository.restoreTask(userId, taskToRestore.id)
                 userRepository.removeXp(userId, lastXpAwarded)
                 userRepository.removeDailyActivity(userId, lastXpAwarded)
-                lastCompletedTask = null
+                userRepository.undoUserStats(userId, lastCompletedTaskWasAce)
+                lastCompletedTask           = null
+                lastCompletedTaskWasAce     = false
             } catch (e: Exception) {
                 _uiEffect.emit(FocusUiEffect.ShowError("Undo failed"))
             }
@@ -278,6 +299,22 @@ class FocusViewModel @Inject constructor(
                 lastSnoozedTask = null
             } catch (e: Exception) {
                 _uiEffect.emit(FocusUiEffect.ShowError("Failed to undo snooze: ${e.message}"))
+            }
+        }
+    }
+
+    // ========== Edit Sheet Controls ==========
+
+    private fun openEditSheet() {
+        _editingTask.value = (_uiState.value as? FocusUiState.Active)?.focusTask
+    }
+
+    private fun updateTask(task: Task) {
+        viewModelScope.launch {
+            try {
+                taskRepository.overwriteExistingTask(userId, task)
+            } catch (e: Exception) {
+                _uiEffect.emit(FocusUiEffect.ShowError("Failed to update task: ${e.message}"))
             }
         }
     }

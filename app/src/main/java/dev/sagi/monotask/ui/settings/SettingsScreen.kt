@@ -109,9 +109,9 @@ private fun SettingsContent(
         // Focus Preferences Section:
         item {
             SettingsFocusPrefsSection(
-                hardcoreModeEnabled  = state.hardcoreModeEnabled,
-                dueDateWeight        = state.dueDateWeight,
-                onUpdateHardcoreMode = { onEvent(SettingsEvent.UpdateHardcoreMode(it)) },
+                hyperfocusModeEnabled  = state.hyperfocusModeEnabled,
+                dueDateWeight          = state.dueDateWeight,
+                onUpdateHyperfocusMode = { onEvent(SettingsEvent.UpdateHyperfocusMode(it)) },
                 onUpdateWeights      = { onEvent(SettingsEvent.UpdatePriorityWeights(it)) }
             )
         }

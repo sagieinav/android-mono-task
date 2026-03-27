@@ -21,15 +21,16 @@ class WorkspaceRepository(private val db: FirebaseFirestore) {
                 snapshot.documents.mapNotNull {
                     it.toObject(Workspace::class.java)?.copy(id = it.id)
                         ?: run { Log.w("WorkspaceRepository", "Failed to deserialize workspace doc ${it.id}"); null }
-                }
+                }.sortedBy { it.createdAt }
             }
 
     // Creates a default workspace set on first login
     // Called alongside createUserIfNotExists in AuthViewModel
     suspend fun createDefaultWorkspaces(userId: String) {
+        val now = System.currentTimeMillis()
         val defaults = listOf(
-            Workspace(name = "Personal",   ownerId = userId),
-            Workspace(name = "Education",  ownerId = userId)
+            Workspace(name = "Personal",  ownerId = userId, createdAt = now),
+            Workspace(name = "Education", ownerId = userId, createdAt = now + 1)
         )
         defaults.forEach { workspace ->
             workspacesCollection(userId).add(workspace).await()
@@ -38,7 +39,7 @@ class WorkspaceRepository(private val db: FirebaseFirestore) {
 
     // Adds a new custom workspace
     suspend fun createWorkspace(userId: String, name: String) {
-        val workspace = Workspace(name = name, ownerId = userId)
+        val workspace = Workspace(name = name, ownerId = userId, createdAt = System.currentTimeMillis())
         workspacesCollection(userId).add(workspace).await()
     }
 
@@ -53,6 +54,7 @@ class WorkspaceRepository(private val db: FirebaseFirestore) {
     suspend fun setFocusTask(userId: String, workspaceId: String, taskId: String?) {
         workspacesCollection(userId)
             .document(workspaceId)
-            .update("currentFocusTaskId", taskId).await()
+            .update("currentFocusTaskId", taskId)
+            .await()
     }
 }

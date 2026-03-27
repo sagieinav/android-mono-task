@@ -29,16 +29,15 @@ fun SectionTitle(
     Row(
         modifier              = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-        ,
+            .padding(start = 16.dp, bottom = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment     = Alignment.CenterVertically
     ) {
         Text(
             text  = text,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier.alignByBaseline()
         )
 
         // Optional button

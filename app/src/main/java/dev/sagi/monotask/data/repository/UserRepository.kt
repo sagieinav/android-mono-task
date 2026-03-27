@@ -149,8 +149,8 @@ class UserRepository(private val db: FirebaseFirestore) {
 
     // ========== Settings ==========
 
-    suspend fun updateHardcoreMode(userId: String, enabled: Boolean) {
-        userDoc(userId).update("hardcoreModeEnabled", enabled).await()
+    suspend fun updateHyperfocusMode(userId: String, enabled: Boolean) {
+        userDoc(userId).update("hyperfocusModeEnabled", enabled).await()
     }
 
     suspend fun updatePriorityWeights(userId: String, dueDateWeight: Float) {
@@ -214,6 +214,29 @@ class UserRepository(private val db: FirebaseFirestore) {
             )
             tx.update(userDoc(userId), "stats", updated)
         }.await()
+    }
+
+    // Reverses the stat increments from a single task completion (called on undo)
+    suspend fun undoUserStats(userId: String, wasAce: Boolean) {
+        db.runTransaction { tx ->
+            val current = tx.get(userDoc(userId)).toObject(User::class.java)?.stats ?: UserStats()
+            val updated = current.copy(
+                totalTasksCompleted = (current.totalTasksCompleted - 1).coerceAtLeast(0),
+                aceCount            = if (wasAce) (current.aceCount - 1).coerceAtLeast(0) else current.aceCount
+                // Streak is NOT decremented: the user was genuinely active on the completion day.
+            )
+            tx.update(userDoc(userId), "stats", updated)
+        }.await()
+    }
+
+    // Overwrites only the task-count fields (totalTasksCompleted, aceCount)
+    // Called by ProfileViewModel to heal historically inflated counts
+    suspend fun patchStatsCount(userId: String, correctTotal: Int, correctAceCount: Int) {
+        userDoc(userId).update(mapOf(
+            "stats.totalTasksCompleted" to correctTotal,
+            "stats.aceCount"            to correctAceCount
+        ))
+            .await()
     }
 
     suspend fun searchUsers(query: String): List<User> {

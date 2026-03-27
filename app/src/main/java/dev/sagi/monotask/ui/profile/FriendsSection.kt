@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -77,27 +78,27 @@ fun FriendsSection(
 
     Column {
         SectionTitle("Friends") {
+            // Invite Button:
             Row(
                 modifier              = Modifier
-                    .height(IntrinsicSize.Min) // row height = text height
                     .clip(CircleShape)
                     .clickableNoRipple(onClick = onShareInvite)
-                ,
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp) // increase touch area
+                    .alignByBaseline(),
                 verticalAlignment     = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                val color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+                val color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                 Icon(
                     painter            = painterResource(R.drawable.ic_add_user),
                     contentDescription = null,
-                    modifier           = Modifier
-                        .noMinSize()    // allow going below 24.dp minimum
-                        .fillMaxHeight(0.7f), // match text height
+                    modifier           = Modifier.size(13.dp),
                     tint               = color
                 )
                 Text(
                     text  = "Invite",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.labelMedium,
+
                     fontWeight = FontWeight.Thin,
                     color = color
                 )

@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.fireIconGradient
 import dev.sagi.monotask.ui.theme.googleSans
 
 enum class StreakChipSize { NORMAL, SMALL }
@@ -25,8 +25,8 @@ enum class StreakChipSize { NORMAL, SMALL }
 @Composable
 fun StreakChip(
     currentStreak : Int,
-    size          : StreakChipSize = StreakChipSize.NORMAL,
-    modifier      : Modifier = Modifier
+    modifier      : Modifier = Modifier,
+    size          : StreakChipSize = StreakChipSize.NORMAL
 ) {
     val streakLabel = if (currentStreak == 1) "day streak" else "days streak"
     val iconSize    = if (size == StreakChipSize.NORMAL) 18.dp else 15.dp
@@ -42,9 +42,9 @@ fun StreakChip(
         Icon(
             painter            = painterResource(R.drawable.ic_fire),
             contentDescription = null,
+            tint = Color(0xFFDE7D00),
             modifier           = Modifier
                 .size(iconSize)
-                .fireIconGradient()
                 .padding(bottom = 1.5.dp) // optical correction
         )
         Spacer(Modifier.padding(horizontal = if (size == StreakChipSize.NORMAL) 1.dp else 1.dp))
@@ -60,7 +60,7 @@ fun StreakChip(
             fontWeight = FontWeight.Thin,
             fontFamily = googleSans,
             style      = textStyle,
-            color      = MaterialTheme.colorScheme.outlineVariant
+            color      = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
         )
     }
 }

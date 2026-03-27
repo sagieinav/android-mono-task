@@ -25,9 +25,9 @@ import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 
 @Composable
 internal fun SettingsFocusPrefsSection(
-    hardcoreModeEnabled : Boolean,
-    dueDateWeight       : Float,
-    onUpdateHardcoreMode: (Boolean) -> Unit,
+    hyperfocusModeEnabled : Boolean,
+    dueDateWeight         : Float,
+    onUpdateHyperfocusMode: (Boolean) -> Unit,
     onUpdateWeights     : (dueDateWeight: Float) -> Unit
 ) {
     var localDueDateWeight by remember(dueDateWeight) { mutableFloatStateOf(dueDateWeight) }
@@ -43,8 +43,8 @@ internal fun SettingsFocusPrefsSection(
             },
             trailingContent = {
                 GlassSwitch(
-                    checked         = hardcoreModeEnabled,
-                    onCheckedChange = onUpdateHardcoreMode
+                    checked         = hyperfocusModeEnabled,
+                    onCheckedChange = onUpdateHyperfocusMode
                 )
             }
         )
@@ -98,9 +98,9 @@ private fun SettingsFocusPrefsSectionPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.padding(SCREEN_PADDING)) {
                 SettingsFocusPrefsSection(
-                    hardcoreModeEnabled  = false,
-                    dueDateWeight        = 0.6f,
-                    onUpdateHardcoreMode = {},
+                    hyperfocusModeEnabled  = false,
+                    dueDateWeight          = 0.6f,
+                    onUpdateHyperfocusMode = {},
                     onUpdateWeights      = { _ -> }
                 )
             }

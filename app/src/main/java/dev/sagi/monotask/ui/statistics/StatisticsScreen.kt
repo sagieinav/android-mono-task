@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -116,7 +119,7 @@ private fun StatisticsReadyContent(
     val contentTopPadding = refreshBoxTopPadding + toggleBottomGap
 
     var animationKey       by remember { mutableIntStateOf(0) }
-    var lastRefreshedAt    by remember { mutableStateOf<Long?>(null) }
+    var lastRefreshedAt    by rememberSaveable { mutableStateOf<Long?>(System.currentTimeMillis()) }
     var prevRefreshingRef  by remember { mutableStateOf(false) }
 
     LaunchedEffect(isRefreshing) {
@@ -133,6 +136,21 @@ private fun StatisticsReadyContent(
     }
 
     val localHazeState = rememberHazeState()
+    val pagerState = rememberPagerState(
+        initialPage = selectedSection,
+        pageCount   = { statisticsTabs.size }
+    )
+
+    // Swipe → update toggle
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { onSectionSelected(it) }
+    }
+    // Toggle tap → animate pager
+    LaunchedEffect(selectedSection) {
+        if (pagerState.currentPage != selectedSection) {
+            pagerState.animateScrollToPage(selectedSection)
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
         PullToRefreshBox(
@@ -156,36 +174,41 @@ private fun StatisticsReadyContent(
                 .fillMaxSize()
                 .hazeSource(localHazeState)
         ) {
-            LazyColumn(
-                modifier            = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .graphicsLayer {
-                        translationY = refreshState.distanceFraction * refreshThreshold.toPx()
-                    },
-                contentPadding      = PaddingValues(
-                    top    = contentTopPadding,
-                    bottom = bottomPadding
-                ),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                timeLabel?. let {
-                    item {
-                        Text(
-                            text      = timeLabel,
-                            style     = MaterialTheme.typography.labelSmall,
-                            color     = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            textAlign = TextAlign.Center,
-                            modifier  = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 2.dp) // optical correction
-                        )
+            HorizontalPager(
+                state    = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                LazyColumn(
+                    modifier            = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
+                        .graphicsLayer {
+                            translationY = refreshState.distanceFraction * refreshThreshold.toPx()
+                        },
+                    contentPadding      = PaddingValues(
+                        top    = contentTopPadding,
+                        bottom = bottomPadding
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    timeLabel?.let {
+                        item {
+                            Text(
+                                text      = timeLabel,
+                                style     = MaterialTheme.typography.labelSmall,
+                                color     = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center,
+                                modifier  = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 2.dp) // optical correction
+                            )
+                        }
                     }
-                }
-                when (selectedSection) {
-                    0 -> weeklyItems(state, animationKey)
-                    1 -> monthlyItems(state, animationKey)
-                    2 -> allTimeItems(state, animationKey)
+                    when (page) {
+                        0 -> weeklyItems(state, animationKey)
+                        1 -> monthlyItems(state, animationKey)
+                        2 -> allTimeItems(state, animationKey)
+                    }
                 }
             }
         }

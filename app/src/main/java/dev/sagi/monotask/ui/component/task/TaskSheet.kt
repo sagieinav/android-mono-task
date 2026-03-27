@@ -159,7 +159,6 @@ fun EditTaskSheet(
     task: Task,
     onDismiss: () -> Unit,
     onSave: (title: String, description: String, importance: Importance, tags: List<String>, dueDateMillis: Long?) -> Unit,
-    onDelete: () -> Unit
 ) {
     TaskSheet(
         sheetTitle = "Edit Task",
@@ -189,13 +188,15 @@ private fun TaskTitleAndDescriptionInput(
         onValueChange = onTitleChange,
         label = "Title",
         required = true,
+        autoFocus = true,
         leadingIcon = {
             Icon(
-                painter = painterResource(R.drawable.ic_title),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                painter = painterResource(R.drawable.ic_title_pencil),
+                contentDescription = null
             )
         },
+        singleLine = false,
+        maxLines = 2,
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences
         )
@@ -208,9 +209,8 @@ private fun TaskTitleAndDescriptionInput(
         label = "Description",
         leadingIcon = {
             Icon(
-                painter = painterResource(R.drawable.ic_bubble_text),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                painter = painterResource(R.drawable.ic_description_alt),
+                contentDescription = null
             )
         },
         singleLine = false,
@@ -254,8 +254,7 @@ private fun TaskSmartTagsInput(
             leadingIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_tag),
-                    contentDescription = "Tags",
-                    tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                    contentDescription = "Tags"
                 )
             },
             modifier = Modifier.fillMaxWidth(),

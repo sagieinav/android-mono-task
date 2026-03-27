@@ -1,5 +1,8 @@
 package dev.sagi.monotask.ui.navigation
 
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,6 +52,7 @@ fun MainScaffold(
 ) {
     val hazeState = rememberHazeState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val authState by authVM.uiState.collectAsStateWithLifecycle()
@@ -72,7 +76,7 @@ fun MainScaffold(
 
     var lastNavTime by remember { mutableLongStateOf(0L) }
 
-    var showCreateSheet by remember { mutableStateOf(false) }
+    var showCreateSheet by rememberSaveable { mutableStateOf(false) }
     var showCreateWorkspaceDialog by remember { mutableStateOf(false) }
     var draftTitle by rememberSaveable { mutableStateOf("") }
     var draftDescription by rememberSaveable { mutableStateOf("") }
@@ -211,6 +215,12 @@ fun MainScaffold(
                             draftImportanceOrdinal = Importance.MEDIUM.ordinal
                             draftTagsCsv = ""; draftDueDate = -1L
                             showCreateSheet = false
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message  = "Task created",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
                         },
                         onDraftSaved = { title, desc, importance, tags, dueDate ->
                             draftTitle = title

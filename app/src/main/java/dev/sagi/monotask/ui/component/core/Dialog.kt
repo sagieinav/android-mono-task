@@ -151,6 +151,7 @@ fun TextInputDialog(
                 onValueChange = { input = it },
                 label = placeholder,
                 modifier = Modifier.fillMaxWidth(),
+                autoFocus = true,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     capitalization = capitalization,

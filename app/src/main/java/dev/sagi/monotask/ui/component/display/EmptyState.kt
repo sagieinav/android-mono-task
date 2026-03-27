@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -124,7 +125,8 @@ private fun MainEmptyStateContent(
                 contentDescription = "EmptyState Image",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .size(dynamicImageSize)
+                    .width(dynamicImageSize)
+                    .padding(bottom = 32.dp)
                     .graphicsLayer { this.alpha = alpha.value; scaleX = scale.value; scaleY = scale.value }
             )
         }

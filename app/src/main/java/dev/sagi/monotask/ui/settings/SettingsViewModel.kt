@@ -46,7 +46,7 @@ class SettingsViewModel @Inject constructor(
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
-            is SettingsEvent.UpdateHardcoreMode    -> updateHardcoreMode(event.enabled)
+            is SettingsEvent.UpdateHyperfocusMode  -> updateHyperfocusMode(event.enabled)
             is SettingsEvent.UpdatePriorityWeights -> updatePriorityWeights(event.dueDateWeight)
             is SettingsEvent.UpdateDisplayName     -> updateDisplayName(event.name)
             is SettingsEvent.CreateWorkspace       -> createWorkspace(event.name)
@@ -86,7 +86,7 @@ class SettingsViewModel @Inject constructor(
                 return
             }
             _uiState.value = SettingsUiState.Ready(
-                hardcoreModeEnabled = user.hardcoreModeEnabled,
+                hyperfocusModeEnabled = user.hyperfocusModeEnabled,
                 dueDateWeight       = user.dueDateWeight,
                 displayName         = user.displayName,
                 email               = user.email
@@ -100,13 +100,13 @@ class SettingsViewModel @Inject constructor(
 
     // ========== Settings Operations ==========
 
-    private fun updateHardcoreMode(enabled: Boolean) {
+    private fun updateHyperfocusMode(enabled: Boolean) {
         val current = _uiState.value as? SettingsUiState.Ready ?: return
         val uid     = auth.currentUser?.uid ?: return
-        _uiState.value = current.copy(hardcoreModeEnabled = enabled)
+        _uiState.value = current.copy(hyperfocusModeEnabled = enabled)
         viewModelScope.launch {
             try {
-                userRepository.updateHardcoreMode(uid, enabled)
+                userRepository.updateHyperfocusMode(uid, enabled)
             } catch (e: Exception) {
                 _uiState.value = current
                 _uiEffect.emit(SettingsUiEffect.ShowError("Failed to save settings: ${e.message}"))

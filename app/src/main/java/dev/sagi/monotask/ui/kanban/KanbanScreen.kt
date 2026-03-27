@@ -7,6 +7,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.component.display.EmptyState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.google.firebase.Timestamp
@@ -61,8 +63,7 @@ fun KanbanScreen(
                     dueDate     = dueDate?.let { Timestamp(Date(it)) }
                 )))
                 onKanbanEvent(KanbanEvent.DismissEditSheet)
-            },
-            onDelete = { onKanbanEvent(KanbanEvent.DeleteTask(task.id)) }
+            }
         )
     }
 }
@@ -74,20 +75,64 @@ fun KanbanScreenContent(
 ) {
     val innerPadding = LocalScaffoldPadding.current
 
+    // Cache last Ready so Loading doesn't flash empty content
     var lastReady by remember { mutableStateOf<KanbanUiState.Ready?>(null) }
-    val displayState = (uiState as? KanbanUiState.Ready)?.also { lastReady = it } ?: lastReady
+    if (uiState is KanbanUiState.Ready) lastReady = uiState
+    val ready = lastReady
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            // No horizontal padding, for smooth horizontal scrolling
-            .padding(
-                top    = innerPadding.calculateTopPadding() + SCREEN_PADDING,
-                bottom = innerPadding.calculateBottomPadding()
-    ),
-        // gap between toggle and content
-        verticalArrangement = Arrangement.spacedBy(18.dp)
-    ) {
+    when {
+        uiState is KanbanUiState.Locked -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        top    = innerPadding.calculateTopPadding(),
+                        bottom = innerPadding.calculateBottomPadding()
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                EmptyState(
+                    imgRes        = R.drawable.img_empty_hyperfocus_yellow,
+                    title         = "Hyperfocusing.",
+                    subtitle      = "Kanban's locked. Stay in the zone.",
+                    isMainContent = true,
+                )
+            }
+        }
+
+        ready == null -> { /* Initial load: nothing to show yet */ }
+
+        ready.highTasks.isEmpty() && ready.mediumTasks.isEmpty() && ready.lowTasks.isEmpty() -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        top    = innerPadding.calculateTopPadding() + SCREEN_PADDING,
+                        bottom = innerPadding.calculateBottomPadding()
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                EmptyState(
+                    imgRes        = R.drawable.img_empty_kanban_yellow,
+                    title         = "Nothing here yet.",
+                    subtitle      = "Add a task and get the ball rolling.",
+                    isMainContent = true,
+                )
+            }
+        }
+
+        else -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    // No horizontal padding, for smooth horizontal scrolling
+                    .padding(
+                        top    = innerPadding.calculateTopPadding() + SCREEN_PADDING,
+                        bottom = innerPadding.calculateBottomPadding()
+                    ),
+                // gap between toggle and content
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
 //        SegmentedToggle(
 //            options          = listOf("Active", "Archive"),
 //            selectedIndex    = if (uiState is KanbanUiState.Ready && uiState.isArchive) 1 else 0,
@@ -97,38 +142,39 @@ fun KanbanScreenContent(
 //                .padding(top = Constants.Theme.SCREEN_PADDING / 2)
 //        )
 
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = Constants.Theme.SCREEN_PADDING)
-            ,
-            horizontalArrangement = Arrangement.spacedBy(KANBAN_PADDING)
-        ) {
-            KanbanColumn(
-                title             = "High",
-                importance        = Importance.HIGH,
-                tasks             = displayState?.highTasks   ?: emptyList(),
-                isArchive         = displayState?.isArchive   ?: false,
-                onKanbanEvent     = onKanbanEvent,
-                animationDelayMs  = 0 * COLUMN_STAGGER_MS
-            )
-            KanbanColumn(
-                title             = "Medium",
-                importance        = Importance.MEDIUM,
-                tasks             = displayState?.mediumTasks ?: emptyList(),
-                isArchive         = displayState?.isArchive   ?: false,
-                onKanbanEvent     = onKanbanEvent,
-                animationDelayMs  = 1 * COLUMN_STAGGER_MS
-            )
-            KanbanColumn(
-                title             = "Low",
-                importance        = Importance.LOW,
-                tasks             = displayState?.lowTasks    ?: emptyList(),
-                isArchive         = displayState?.isArchive   ?: false,
-                onKanbanEvent     = onKanbanEvent,
-                animationDelayMs  = 2 * COLUMN_STAGGER_MS
-            )
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = Constants.Theme.SCREEN_PADDING),
+                    horizontalArrangement = Arrangement.spacedBy(KANBAN_PADDING)
+                ) {
+                    KanbanColumn(
+                        title            = "High",
+                        importance       = Importance.HIGH,
+                        tasks            = ready.highTasks,
+                        isArchive        = ready.isArchive,
+                        onKanbanEvent    = onKanbanEvent,
+                        animationDelayMs = 0 * COLUMN_STAGGER_MS
+                    )
+                    KanbanColumn(
+                        title            = "Medium",
+                        importance       = Importance.MEDIUM,
+                        tasks            = ready.mediumTasks,
+                        isArchive        = ready.isArchive,
+                        onKanbanEvent    = onKanbanEvent,
+                        animationDelayMs = 1 * COLUMN_STAGGER_MS
+                    )
+                    KanbanColumn(
+                        title            = "Low",
+                        importance       = Importance.LOW,
+                        tasks            = ready.lowTasks,
+                        isArchive        = ready.isArchive,
+                        onKanbanEvent    = onKanbanEvent,
+                        animationDelayMs = 2 * COLUMN_STAGGER_MS
+                    )
+                }
+            }
         }
     }
 }
