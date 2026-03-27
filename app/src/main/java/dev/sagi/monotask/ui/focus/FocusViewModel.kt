@@ -131,14 +131,13 @@ class FocusViewModel @Inject constructor(
                     return@onEach
                 }
 
-                val dueDateWeight    = _currentUser.value?.dueDateWeight    ?: 0.5f
-                val importanceWeight = _currentUser.value?.importanceWeight ?: 0.5f
+                val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
 
                 val topTask = workspace.currentFocusTaskId
                     ?.let { id -> tasks.find { it.id == id } }
-                    ?: TaskSelector.getTopTask(tasks, dueDateWeight, importanceWeight)
+                    ?: TaskSelector.getTopTask(tasks, dueDateWeight)
 
-                val queue    = TaskSelector.getSortedTasks(tasks, dueDateWeight, importanceWeight)
+                val queue    = TaskSelector.getSortedTasks(tasks, dueDateWeight)
                 val newState = if (topTask == null) FocusUiState.Empty
                 else FocusUiState.Active(topTask, queue.drop(1), workspace)
 
@@ -223,14 +222,13 @@ class FocusViewModel @Inject constructor(
                 taskRepository.updateSnoozeFields(userId, state.focusTask, option)
 
                 val allTasks         = taskRepository.getActiveTasksOnce(userId, state.workspace.id)
-                val dueDateWeight    = _currentUser.value?.dueDateWeight    ?: 0.5f
-                val importanceWeight = _currentUser.value?.importanceWeight ?: 0.5f
+                val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
                 val nextTask = when (option) {
                     XpEvents.SnoozeOption.BY_DUE_DATE -> TaskSelector.getTopTaskByDueDate(
-                        allTasks, dueDateWeight, importanceWeight, excludeId = state.focusTask.id
+                        allTasks, dueDateWeight, excludeId = state.focusTask.id
                     )
                     else -> TaskSelector.getTopTask(
-                        allTasks, dueDateWeight, importanceWeight, excludeId = state.focusTask.id
+                        allTasks, dueDateWeight, excludeId = state.focusTask.id
                     )
                 }
                 workspaceRepository.setFocusTask(userId, state.workspace.id, nextTask?.id)

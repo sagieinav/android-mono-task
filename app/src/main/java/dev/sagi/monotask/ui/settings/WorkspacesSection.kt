@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -95,9 +96,11 @@ internal fun WorkspacesSection(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     SettingsDivider(startPadding = SCREEN_PADDING)
 
+                    Spacer(Modifier.height(8.dp))
+
                     workspaces.forEach { workspace ->
                         SettingsRow(
-                            verticalPadding = 6.dp,
+                            verticalPadding = 8.dp,
                             trailingContent = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     SettingsActionIconButton(
@@ -127,6 +130,8 @@ internal fun WorkspacesSection(
                         }
                     }
 
+                    Spacer(Modifier.height(8.dp))
+
                     SettingsDivider(startPadding = SCREEN_PADDING)
 
                     // "New workspace" button
@@ -134,7 +139,7 @@ internal fun WorkspacesSection(
                         modifier              = Modifier
                             .fillMaxWidth()
                             .clickable { showCreateDialog = true }
-                            .padding(horizontal = 16.dp, vertical = 23.dp),
+                            .padding(horizontal = 16.dp, vertical = 22.dp),
                         verticalAlignment     = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
@@ -145,7 +150,7 @@ internal fun WorkspacesSection(
                             tint               = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text       = "New Workspace",
+                            text       = "New workspace",
                             style      = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color      = MaterialTheme.colorScheme.onSurface

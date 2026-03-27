@@ -30,10 +30,7 @@ data class User(
     // Persistent user settings
     val onboarded: Boolean = false,               // For first-launch onboarding
     val hardcoreModeEnabled: Boolean = false,     // Critical for NavGuard
-    val notificationsEnabled: Boolean = true,
-    val dueSoonDays: Int = 3,                       // User-defined urgency threshold
-    val dueDateWeight: Float = 0.5f,
-    val importanceWeight: Float = 0.5f
+    val dueDateWeight: Float = 0.5f
 ) {
 
     val isAutoAvatar: Boolean get() = avatarPreset == 0

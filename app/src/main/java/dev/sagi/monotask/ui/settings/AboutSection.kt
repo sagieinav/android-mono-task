@@ -14,27 +14,21 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
-import androidx.core.net.toUri
 
-// ==========================================
-// Trailing icon defaults
-// ==========================================
+private const val GIT_URL         = "https://github.com/sagieinav/android-mono-task"
+private const val FEEDBACK_EMAIL   = "mailto:sagi.einav@icloud.com?subject=MonoTask%20Feedback"
+private val       TRAILING_ICON_SIZE = 20.dp
 
-private val ICON_SIZE = 20.dp
-
-@Composable
-private fun iconTint() = MaterialTheme.colorScheme.onSurfaceVariant
 
 @Composable
 internal fun SettingsAboutSection() {
     val uriHandler = LocalUriHandler.current
-    val gitUrl = "https://github.com/sagieinav/android-mono-task"
-
-    val context = LocalContext.current
+    val context    = LocalContext.current
 
     SettingsSection("About") {
 
@@ -43,7 +37,7 @@ internal fun SettingsAboutSection() {
             label           = "Frequently asked questions",
             leadingIcon     = { SettingsRowIcon(R.drawable.ic_help_circle, color = MaterialTheme.colorScheme.primary) },
             trailingIconRes = R.drawable.ic_arrow_right_alt,
-            // TODO OnClick: BottomSheet with FAQ
+            // TODO: onClick: BottomSheet with FAQ
         )
         SettingsDivider()
 
@@ -54,19 +48,11 @@ internal fun SettingsAboutSection() {
             trailingIconRes = R.drawable.ic_external_link,
             onClick = {
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = "mailto:sagi.einav@icloud.com?subject=MonoTask%20Feedback".toUri()
+                    data = FEEDBACK_EMAIL.toUri()
                 }
                 context.startActivity(intent)
             }
         )
-
-        // Rate the app is disabled for now
-//        SettingsDivider()
-//        SettingsAboutRow(
-//            label           = "Rate the app",
-//            leadingIcon     = { SettingsRowIcon(R.drawable.ic_star, color = MaterialTheme.colorScheme.secondary) },
-//            trailingIconRes = R.drawable.ic_external_link
-//        )
 
         // GitHub Repo:
         SettingsDivider()
@@ -74,9 +60,7 @@ internal fun SettingsAboutSection() {
             label           = "GitHub",
             leadingIcon     = { SettingsRowIcon(R.drawable.ic_github, color = SettingsIconColors.github) },
             trailingIconRes = R.drawable.ic_external_link,
-            onClick = {
-                uriHandler.openUri(gitUrl)
-            }
+            onClick         = { uriHandler.openUri(GIT_URL) }
         )
     }
 }
@@ -91,7 +75,7 @@ private fun SettingsAboutRow(
     label          : String,
     trailingIconRes: Int? = null,
     leadingIcon    : (@Composable () -> Unit)? = null,
-    onClick        : () -> Unit = {}
+    onClick        : (() -> Unit)? = null
 ) {
     SettingsRow(
         label           = label,
@@ -102,8 +86,8 @@ private fun SettingsAboutRow(
             Icon(
                 painter            = painterResource(iconRes),
                 contentDescription = null,
-                modifier           = Modifier.size(ICON_SIZE),
-                tint               = iconTint()
+                modifier           = Modifier.size(TRAILING_ICON_SIZE),
+                tint               = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }}
     )

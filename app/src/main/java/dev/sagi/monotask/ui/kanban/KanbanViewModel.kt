@@ -112,9 +112,8 @@ class KanbanViewModel @Inject constructor(
     }
 
     private fun updateUiState(tasks: List<Task>, workspace: Workspace?) {
-        val dueDateWeight    = _currentUser.value?.dueDateWeight    ?: 0.5f
-        val importanceWeight = _currentUser.value?.importanceWeight ?: 0.5f
-        val sorted  = if (workspace != null) TaskSelector.getSortedTasks(tasks, dueDateWeight, importanceWeight) else tasks
+        val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
+        val sorted  = if (workspace != null) TaskSelector.getSortedTasks(tasks, dueDateWeight) else tasks
         val grouped = sorted.groupBy { it.importance }
         _uiState.value = KanbanUiState.Ready(
             highTasks   = grouped[Importance.HIGH]   ?: emptyList(),

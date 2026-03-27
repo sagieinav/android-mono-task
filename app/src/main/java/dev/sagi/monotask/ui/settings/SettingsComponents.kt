@@ -41,12 +41,12 @@ import dev.sagi.monotask.util.Constants.Theme.TRAILING_BUTTON_SIZE
 // ==========================================
 
 object SettingsIconColors {
-    val hyperfocus     = Color(0xFFA21F39)  // Hyperfocus
-    val priority  = Color(0xFFDC4F07)  // Task priority calculation
-    val workspace = Color(0xFF008F72)  // Manage workspaces
-    val accountName   = Color(0xFF3949AB)  // Account name
-    val email     = Color(0xFF00B3C7)  // Email
-    val github    = Color(0xFF2AA843)  // GitHub
+    val hyperfocus  = Color(0xFFA21F39)
+    val priority    = Color(0xFFDC4F07)
+    val workspace   = Color(0xFF008F72)
+    val accountName = Color(0xFF3949AB)
+    val email       = Color(0xFF00B3C7)
+    val github      = Color(0xFF2AA843)
 }
 
 // ==========================================
@@ -55,20 +55,21 @@ object SettingsIconColors {
 
 @Composable
 fun SettingsRowIcon(
-    iconRes : Int,
-    modifier: Modifier = Modifier,
-    color   : Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
+    iconRes      : Int,
+    modifier     : Modifier = Modifier,
+    iconModifier : Modifier = Modifier,
+    color        : Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
 ) {
     GlassSurface(
         shape       = MaterialTheme.shapes.extraSmall,
         accentColor = color,
-        modifier    = Modifier.size(34.dp)
+        modifier    = modifier.size(34.dp)
     ) {
         Icon(
             painter            = painterResource(iconRes),
             contentDescription = null,
             tint               = color.copy(alpha = 0.9f),
-            modifier           = modifier
+            modifier           = iconModifier
                 .size(26.dp)
                 .align(Alignment.Center)
         )
@@ -93,8 +94,7 @@ internal fun SettingsSection(
         baseColor = MaterialTheme.colorScheme.surfaceContainer
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 0.dp),
-            content  = content
+            content = content
         )
     }
 }

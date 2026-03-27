@@ -149,24 +149,12 @@ class UserRepository(private val db: FirebaseFirestore) {
 
     // ========== Settings ==========
 
-    suspend fun updatePreferences(
-        userId: String,
-        hardcoreModeEnabled: Boolean? = null,
-        notificationsEnabled: Boolean? = null,
-        dueSoonDays: Int? = null
-    ) {
-        val updates = mutableMapOf<String, Any>()
-        hardcoreModeEnabled?.let  { updates["hardcoreModeEnabled"]  = it }
-        notificationsEnabled?.let { updates["notificationsEnabled"] = it }
-        dueSoonDays?.let          { updates["dueSoonDays"]          = it }
-        if (updates.isNotEmpty()) userDoc(userId).update(updates).await()
+    suspend fun updateHardcoreMode(userId: String, enabled: Boolean) {
+        userDoc(userId).update("hardcoreModeEnabled", enabled).await()
     }
 
-    suspend fun updatePriorityWeights(userId: String, dueDateWeight: Float, importanceWeight: Float) {
-        userDoc(userId).update(mapOf(
-            "dueDateWeight"   to dueDateWeight,
-            "importanceWeight" to importanceWeight
-        )).await()
+    suspend fun updatePriorityWeights(userId: String, dueDateWeight: Float) {
+        userDoc(userId).update("dueDateWeight", dueDateWeight).await()
     }
 
     // ========== Social ==========

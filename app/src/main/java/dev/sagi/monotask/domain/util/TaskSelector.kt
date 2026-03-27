@@ -16,7 +16,6 @@ object TaskSelector {
     fun getTopTask(
         tasks: List<Task>,
         dueDateWeight: Float,
-        importanceWeight: Float,
         excludeId: String? = null
     ): Task? {
         if (tasks.isEmpty()) return null
@@ -27,13 +26,12 @@ object TaskSelector {
 
         val nonSnoozed = pool.filter { it.snoozeCount == 0 }
         return (nonSnoozed.ifEmpty { pool })
-            .maxByOrNull { priorityScore(it, dueDateWeight, importanceWeight, now) }
+            .maxByOrNull { priorityScore(it, dueDateWeight, now) }
     }
 
     fun getTopTaskByDueDate(
         tasks: List<Task>,
         dueDateWeight: Float,
-        importanceWeight: Float,
         excludeId: String? = null
     ): Task? {
         val candidates = tasks.filter { it.id != excludeId }
@@ -44,23 +42,22 @@ object TaskSelector {
 
         return if (withDueDate.isNotEmpty()) {
             withDueDate.sortedWith(
-                compareBy<Task> { it.dueDate!!.toDate() }                              // 1. soonest due date
-                    .thenBy { priorityScore(it, dueDateWeight, importanceWeight, now) } // 2. tiebreaker: normal priority
+                compareBy<Task> { it.dueDate!!.toDate() }                  // 1. soonest due date
+                    .thenBy { priorityScore(it, dueDateWeight, now) }       // 2. tiebreaker: normal priority
             ).first()
         } else {
             // Fallback: no tasks have a due date → normal priority
-            getTopTask(candidates, dueDateWeight, importanceWeight, excludeId = null)
+            getTopTask(candidates, dueDateWeight, excludeId = null)
         }
     }
 
     // Returns all tasks sorted by priority score descending
     fun getSortedTasks(
         tasks: List<Task>,
-        dueDateWeight: Float,
-        importanceWeight: Float
+        dueDateWeight: Float
     ): List<Task> {
         val now = now()
-        return tasks.sortedByDescending { priorityScore(it, dueDateWeight, importanceWeight, now) }
+        return tasks.sortedByDescending { priorityScore(it, dueDateWeight, now) }
     }
 
     // Computed once per scoring pass and threaded through to avoid repeated system calls
@@ -85,9 +82,9 @@ object TaskSelector {
     private fun priorityScore(
         task: Task,
         dueDateWeight: Float,
-        importanceWeight: Float,
         now: Now
     ): Double {
+        val importanceWeight = 1f - dueDateWeight
         val rawScore = dueDateWeight   * dueDateUrgency(task.dueDate, now) +
                        importanceWeight * importanceScore(task.importance)
 

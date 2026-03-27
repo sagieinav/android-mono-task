@@ -25,10 +25,10 @@ import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 
 @Composable
 internal fun SettingsFocusPrefsSection(
-    hardcoreModeEnabled: Boolean,
-    dueDateWeight      : Float,
-    onUpdatePreferences: (hardcoreMode: Boolean?, notifications: Boolean?, dueSoon: Int?) -> Unit,
-    onUpdateWeights    : (dueDateWeight: Float, importanceWeight: Float) -> Unit
+    hardcoreModeEnabled : Boolean,
+    dueDateWeight       : Float,
+    onUpdateHardcoreMode: (Boolean) -> Unit,
+    onUpdateWeights     : (dueDateWeight: Float) -> Unit
 ) {
     var localDueDateWeight by remember(dueDateWeight) { mutableFloatStateOf(dueDateWeight) }
 
@@ -40,11 +40,11 @@ internal fun SettingsFocusPrefsSection(
             verticalPadding = 16.dp,
             leadingIcon     = {
                 SettingsRowIcon(R.drawable.ic_cognition, color = SettingsIconColors.hyperfocus)
-                              },
+            },
             trailingContent = {
                 GlassSwitch(
-                    checked = hardcoreModeEnabled,
-                    onCheckedChange = { onUpdatePreferences(it, null, null) }
+                    checked         = hardcoreModeEnabled,
+                    onCheckedChange = onUpdateHardcoreMode
                 )
             }
         )
@@ -61,7 +61,7 @@ internal fun SettingsFocusPrefsSection(
                 MonoSlider(
                     value                 = localDueDateWeight,
                     onValueChange         = { localDueDateWeight = it },
-                    onValueChangeFinished = { onUpdateWeights(it, 1f - it) },
+                    onValueChangeFinished = { onUpdateWeights(it) },
                     modifier              = Modifier.fillMaxWidth()
                 )
                 Row(
@@ -87,7 +87,6 @@ internal fun SettingsFocusPrefsSection(
 }
 
 
-
 // ==========================================
 // Preview
 // ==========================================
@@ -99,10 +98,10 @@ private fun SettingsFocusPrefsSectionPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.padding(SCREEN_PADDING)) {
                 SettingsFocusPrefsSection(
-                    hardcoreModeEnabled = false,
-                    dueDateWeight       = 0.6f,
-                    onUpdatePreferences = { _, _, _ -> },
-                    onUpdateWeights     = { _, _ -> }
+                    hardcoreModeEnabled  = false,
+                    dueDateWeight        = 0.6f,
+                    onUpdateHardcoreMode = {},
+                    onUpdateWeights      = { _ -> }
                 )
             }
         }

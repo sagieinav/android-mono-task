@@ -29,7 +29,7 @@ import dev.sagi.monotask.ui.kanban.KanbanViewModel
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // Compose state — recomposition is triggered automatically when set
+    // Compose state for invite sheet. Recomposition is triggered automatically when set
     var pendingInviteUid by mutableStateOf<String?>(null)
         private set
 

@@ -70,23 +70,22 @@ private fun SettingsAccountRow(
     SettingsRow(
         leadingIcon     = leadingIcon,
         verticalPadding = 16.dp,
-        trailingContent = if (onEdit != null) {{
-            SettingsActionIconButton(
-                iconRes            = R.drawable.ic_edit,
-                contentDescription = "Edit $label",
-                onClick            = onEdit
-            )
-        }} else null
+        trailingContent = if (onEdit != null) {
+            {
+                SettingsActionIconButton(
+                    iconRes            = R.drawable.ic_edit,
+                    contentDescription = "Edit $label",
+                    onClick            = onEdit
+                )
+            }
+        } else null
     ) {
         Column {
-            // Display name
             Text(
                 text  = label,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
             )
-
-            // Email
             Text(
                 text  = value,
                 style = MaterialTheme.typography.titleSmall

@@ -210,13 +210,7 @@ fun NavGraph(
                 composable(Screen.Brief.route) {
                     BriefScreen()
                 }
-                composable(
-                    route              = Screen.Settings.route,
-                    enterTransition    = { slideInVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it } },
-                    exitTransition     = { fadeOut(tween(navAnimationDuration)) },
-                    popEnterTransition = { fadeIn(tween(navAnimationDuration)) },
-                    popExitTransition  = { slideOutVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it } }
-                ) {
+                composable(Screen.Settings.route) {
                     SettingsScreen(settingsVM = settingsVM)
                 }
             }

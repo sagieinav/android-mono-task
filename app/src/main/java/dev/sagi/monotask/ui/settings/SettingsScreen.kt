@@ -16,15 +16,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,11 +40,12 @@ import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.ui.theme.glassBackground
-import dev.sagi.monotask.ui.theme.glassBorderPremium
+import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.gloock
 import dev.sagi.monotask.ui.theme.penaltyRed
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
@@ -51,6 +54,19 @@ fun SettingsScreen(
 ) {
     val uiState    by settingsVM.uiState.collectAsStateWithLifecycle()
     val workspaces by settingsVM.workspaces.collectAsStateWithLifecycle()
+    val snackbarHostState = LocalSnackbarHostState.current
+
+    LaunchedEffect(Unit) {
+        settingsVM.uiEffect.collectLatest { effect ->
+            when (effect) {
+                is SettingsUiEffect.ShowError -> snackbarHostState.showSnackbar(
+                    message          = effect.message,
+                    withDismissAction = true,
+                    duration          = SnackbarDuration.Short
+                )
+            }
+        }
+    }
 
     when (val state = uiState) {
         is SettingsUiState.Loading -> LoadingSpinner()
@@ -60,19 +76,9 @@ fun SettingsScreen(
             }
         }
         is SettingsUiState.Ready   -> SettingsContent(
-            state               = state,
-            workspaces          = workspaces,
-            onUpdatePreferences = { hardcoreMode, notifications, dueSoon ->
-                settingsVM.updateUserPreferences(hardcoreMode, notifications, dueSoon)
-            },
-            onUpdateWeights     = { due, importance ->
-                settingsVM.updatePriorityWeights(due, importance)
-            },
-            onUpdateDisplayName = { settingsVM.updateDisplayName(it) },
-            onCreateWorkspace   = { settingsVM.createWorkspace(it) },
-            onRenameWorkspace   = { workspace, name -> settingsVM.renameWorkspace(workspace, name) },
-            onDeleteWorkspace   = { settingsVM.deleteWorkspace(it) },
-            onSignOut           = { settingsVM.signOut() }
+            state      = state,
+            workspaces = workspaces,
+            onEvent    = settingsVM::onEvent
         )
     }
 }
@@ -84,15 +90,9 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsContent(
-    state              : SettingsUiState.Ready,
-    workspaces         : List<Workspace>,
-    onUpdatePreferences: (hardcoreMode: Boolean?, notifications: Boolean?, dueSoon: Int?) -> Unit,
-    onUpdateWeights    : (dueDateWeight: Float, importanceWeight: Float) -> Unit,
-    onUpdateDisplayName: (String) -> Unit,
-    onCreateWorkspace  : (String) -> Unit,
-    onRenameWorkspace  : (Workspace, String) -> Unit,
-    onDeleteWorkspace  : (Workspace) -> Unit,
-    onSignOut          : () -> Unit
+    state     : SettingsUiState.Ready,
+    workspaces: List<Workspace>,
+    onEvent   : (SettingsEvent) -> Unit
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
 
@@ -109,10 +109,10 @@ private fun SettingsContent(
         // Focus Preferences Section:
         item {
             SettingsFocusPrefsSection(
-                hardcoreModeEnabled = state.hardcoreModeEnabled,
-                dueDateWeight       = state.dueDateWeight,
-                onUpdatePreferences = onUpdatePreferences,
-                onUpdateWeights     = onUpdateWeights
+                hardcoreModeEnabled  = state.hardcoreModeEnabled,
+                dueDateWeight        = state.dueDateWeight,
+                onUpdateHardcoreMode = { onEvent(SettingsEvent.UpdateHardcoreMode(it)) },
+                onUpdateWeights      = { onEvent(SettingsEvent.UpdatePriorityWeights(it)) }
             )
         }
 
@@ -120,9 +120,9 @@ private fun SettingsContent(
         item {
             WorkspacesSection(
                 workspaces        = workspaces,
-                onCreateWorkspace = onCreateWorkspace,
-                onRenameWorkspace = onRenameWorkspace,
-                onDeleteWorkspace = onDeleteWorkspace
+                onCreateWorkspace = { onEvent(SettingsEvent.CreateWorkspace(it)) },
+                onRenameWorkspace = { ws, name -> onEvent(SettingsEvent.RenameWorkspace(ws, name)) },
+                onDeleteWorkspace = { onEvent(SettingsEvent.DeleteWorkspace(it)) }
             )
         }
 
@@ -131,7 +131,7 @@ private fun SettingsContent(
             SettingsAccountSection(
                 displayName         = state.displayName,
                 email               = state.email,
-                onUpdateDisplayName = onUpdateDisplayName
+                onUpdateDisplayName = { onEvent(SettingsEvent.UpdateDisplayName(it)) }
             )
         }
 
@@ -142,7 +142,7 @@ private fun SettingsContent(
 
         // Sign Out Button:
         item {
-            SignOutButton(onSignOut = onSignOut)
+            SignOutButton(onSignOut = { onEvent(SettingsEvent.SignOut) })
         }
 
         // App Branding:
@@ -156,6 +156,7 @@ private fun SettingsContent(
 // ==================================
 // Sign Out
 // ==================================
+
 @Composable
 private fun SignOutButton(onSignOut: () -> Unit) {
     var showConfirm by remember { mutableStateOf(false) }
@@ -164,16 +165,16 @@ private fun SignOutButton(onSignOut: () -> Unit) {
     ActionButton(
         onClick  = { showConfirm = true },
         color    = color,
-        shape = MaterialTheme.shapes.large,
+        shape    = MaterialTheme.shapes.large,
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_sign_out_alt),
+            painter            = painterResource(R.drawable.ic_sign_out_alt),
             contentDescription = "Sign Out Button",
-            tint = color,
-            modifier = Modifier
+            tint               = color,
+            modifier           = Modifier
                 .padding(end = 4.dp)
                 .size(18.dp)
         )
@@ -197,7 +198,11 @@ private fun SignOutButton(onSignOut: () -> Unit) {
     }
 }
 
-@Preview
+
+// ==================================
+// App Branding
+// ==================================
+
 @Composable
 private fun AppBranding() {
     val context = LocalContext.current
@@ -219,9 +224,7 @@ private fun AppBranding() {
             fontWeight = FontWeight.Bold,
             color      = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign  = TextAlign.Center,
-            modifier   = Modifier
-                .fillMaxWidth()
-//                .padding(top = 6.dp)
+            modifier   = Modifier.fillMaxWidth()
         )
         Text(
             text      = "Version $versionName",
@@ -234,15 +237,28 @@ private fun AppBranding() {
 }
 
 
-@Preview
+// ==================================
+// Previews
+// ==================================
+
+@Preview(name = "App Branding")
+@Composable
+private fun AppBrandingPreview() {
+    MonoTaskTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AppBranding()
+        }
+    }
+}
+
+@Preview(name = "Sign Out Button")
 @Composable
 private fun SignOutButtonPreview() {
-    Box(
-        Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-    ) {
-        SignOutButton({})
-
+    MonoTaskTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Box(Modifier.padding(16.dp)) {
+                SignOutButton({})
+            }
+        }
     }
 }
