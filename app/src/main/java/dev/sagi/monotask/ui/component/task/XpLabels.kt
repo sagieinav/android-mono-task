@@ -33,11 +33,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.sagi.monotask.ui.component.core.GlassLabel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+@Composable
+fun XpChip(xp: Int, modifier: Modifier = Modifier) {
+    val color = MaterialTheme.customColors.xp
+    GlassLabel(
+        label    = "$xp XP",
+        color    = color,
+        modifier = modifier,
+        leadingContent = {
+            Icon(
+                painter            = painterResource(R.drawable.ic_xp),
+                contentDescription = null,
+                tint               = color,
+                modifier           = Modifier.size(14.dp)
+            )
+        }
+    )
+}
+
 
 @Composable
 fun XpLabelCurrent(xp: Int, modifier: Modifier = Modifier) {
@@ -191,7 +211,7 @@ fun XpLabelCompletionPreview() {
 
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(32.dp)
+            modifier = Modifier.padding(64.dp)
         ) {
             Button(onClick = { visible = true }) {
                 Text("Complete Task")

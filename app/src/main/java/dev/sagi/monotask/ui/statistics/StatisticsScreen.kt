@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -196,6 +197,7 @@ private fun StatisticsReadyContent(
                             Text(
                                 text      = timeLabel,
                                 style     = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Thin,
                                 color     = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                 textAlign = TextAlign.Center,
                                 modifier  = Modifier

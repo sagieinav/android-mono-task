@@ -13,17 +13,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,21 +43,8 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
-import dev.sagi.monotask.ui.theme.glassBackground
-import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.googleSans
-import dev.sagi.monotask.ui.theme.harabara
-import dev.sagi.monotask.ui.theme.invincibleBorder
-import dev.sagi.monotask.ui.theme.lora
-import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
-import dev.sagi.monotask.ui.theme.mplusRounded
-import dev.sagi.monotask.ui.theme.nationalPark
-import dev.sagi.monotask.ui.theme.plantagenet
-import dev.sagi.monotask.ui.theme.playfairDisplay
-import dev.sagi.monotask.ui.theme.plusJakartaSans
-import dev.sagi.monotask.ui.theme.ptSerif
 import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
 import kotlinx.coroutines.delay
 
@@ -131,14 +114,15 @@ fun KanbanColumn(
                         ),
                         fontFamily  = gloock,
                         fontWeight  = FontWeight.Bold,
-                        color       = contentColor,
+//                        color       = contentColor,
                     )
 
                     // Push to the right
                     Spacer(Modifier.weight(1f))
 
                     // Task count badge (fades in/out on change):
-                    val countBadgeBorderColor = lerp(Color.Black, contentColor, 0.85f).copy(alpha = 0.08f)
+                    val badgeBorderColor = lerp(Color.Black, contentColor, 0.6f).copy(alpha = 0.08f)
+                    val badgeContentColor = lerp(Color.Black, contentColor, 0.9f).copy(alpha = 0.7f)
                     Surface(
                         shape = CircleShape,
                         color = containerColor.copy(alpha = 0.35f),
@@ -148,7 +132,7 @@ fun KanbanColumn(
                             .border(
                                 shape = CircleShape,
                                 width = 0.5.dp,
-                                color = countBadgeBorderColor
+                                color = badgeBorderColor
                             )
                     ) {
                         AnimatedContent(
@@ -159,7 +143,7 @@ fun KanbanColumn(
                             Text(
                                 text     = count.toString(),
                                 style    = MaterialTheme.typography.labelMedium,
-                                color    = contentColor.copy(alpha = 0.7f),
+                                color    = badgeContentColor,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                             )
                         }
@@ -210,7 +194,7 @@ fun KanbanColumn(
 }
 
 
-@Preview(heightDp = 600)
+@Preview(heightDp = 600, showBackground = true, backgroundColor = 0xEAEAEAFF)
 @Composable
 fun KanbanColumnPreview() {
     MonoTaskTheme {

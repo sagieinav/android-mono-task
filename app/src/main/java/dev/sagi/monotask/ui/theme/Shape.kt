@@ -29,7 +29,7 @@ val HexagonShape: Shape = GenericShape { size, _ ->
 
 // Map/override the 5 default shapes of M3
 val MonoTaskShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),   // Chips, small badges
+    extraSmall = RoundedCornerShape(10.dp),   // Chips, small badges
     small      = RoundedCornerShape(12.dp),  // Input fields, snackbars
     medium     = RoundedCornerShape(16.dp),  // Kanban task cards
     large      = RoundedCornerShape(24.dp),  // FocusCard, bottom sheets

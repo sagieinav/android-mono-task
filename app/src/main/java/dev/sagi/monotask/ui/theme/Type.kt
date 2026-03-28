@@ -89,8 +89,8 @@ val nationalPark = FontFamily(
 // ─────────────────────────────────────────────────────
 val plusJakartaSans = FontFamily(
     Font(R.font.plus_jakarta_sans,        FontWeight.Normal),
-    Font(R.font.plus_jakarta_sans,        FontWeight.Medium),
-    Font(R.font.plus_jakarta_sans,        FontWeight.SemiBold),
+    Font(R.font.plus_jakarta_sans_medium,        FontWeight.Medium),
+    Font(R.font.plus_jakarta_sans_semi_bold,        FontWeight.SemiBold),
     Font(R.font.plus_jakarta_sans_bold,        FontWeight.Bold),
     Font(R.font.plus_jakarta_sans_italic, FontWeight.Normal, FontStyle.Italic),
 )

@@ -27,8 +27,8 @@ import dev.sagi.monotask.util.ext.toRelativeDate
 @Composable
 fun DueDateLabel(
     timestamp: Timestamp,
-    small: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    small: Boolean = false
 ) {
     val relativeDate = timestamp.toRelativeDate()
     val dateColor = if (relativeDate.isOverdue)
@@ -44,7 +44,7 @@ fun DueDateLabel(
             )
         )
 
-    val fontSize = if (small) 9.sp else 14.sp
+    val fontSize = if (small) 9.sp else 12.sp
 
     Row(
         modifier = modifier,

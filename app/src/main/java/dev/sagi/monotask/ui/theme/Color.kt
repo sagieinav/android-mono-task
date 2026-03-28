@@ -285,10 +285,10 @@ val GlassSurfaceDark   = Color(0xCC1A1A2E) // 80% dark: frosted card overlay (da
 
 // ── Importance Tag Colors ────────────────────────────────────────
 val ImportanceHighBackground   = Color(0xFFFFDDDD) // was 0xFFFFEDED
-val ImportanceHighContent      = Color(0xFFB00020)
+val ImportanceHighContent      = Color(0xFFC40726)
 
 val ImportanceMediumBackground = Color(0xFFFFF0CC) // was 0xFFFFF8E1
-val ImportanceMediumContent    = Color(0xFFF9A825)
+val ImportanceMediumContent    = Color(0xFFE7AF22)
 
 val ImportanceLowBackground    = Color(0xFFD9EED9) // was 0xFFE8F5E9
 val ImportanceLowContent       = Color(0xFF30A435)
