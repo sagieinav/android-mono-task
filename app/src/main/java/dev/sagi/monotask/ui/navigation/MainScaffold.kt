@@ -13,7 +13,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +32,7 @@ import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
+import dev.sagi.monotask.ui.shared.CreateSheetDraft
 import dev.sagi.monotask.ui.kanban.KanbanEvent
 import dev.sagi.monotask.ui.kanban.KanbanUiState
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
@@ -76,18 +76,17 @@ fun MainScaffold(
 
     var lastNavTime by remember { mutableLongStateOf(0L) }
 
-    var showCreateSheet by rememberSaveable { mutableStateOf(false) }
     var showCreateWorkspaceDialog by remember { mutableStateOf(false) }
-    var draftTitle by rememberSaveable { mutableStateOf("") }
-    var draftDescription by rememberSaveable { mutableStateOf("") }
-    var draftImportanceOrdinal by rememberSaveable { mutableIntStateOf(Importance.MEDIUM.ordinal) }
-    var draftTagsCsv by rememberSaveable { mutableStateOf("") }
-    var draftDueDate by rememberSaveable { mutableLongStateOf(-1L) }
+    val showCreateSheet  by workspaceVM.createSheetVisible.collectAsStateWithLifecycle()
+    val createDraft      by workspaceVM.createDraft.collectAsStateWithLifecycle()
     val workspaces by workspaceVM.workspaces.collectAsStateWithLifecycle()
     val selectedWorkspace by workspaceVM.selectedWorkspace.collectAsStateWithLifecycle()
 
     val kanbanUiState by kanbanVM.uiState.collectAsStateWithLifecycle()
     val isKanbanArchive = (kanbanUiState as? KanbanUiState.Ready)?.isArchive ?: false
+    val isKanbanEmpty = (kanbanUiState as? KanbanUiState.Ready)?.let {
+        !it.isArchive && it.highTasks.isEmpty() && it.mediumTasks.isEmpty() && it.lowTasks.isEmpty()
+    } ?: false
     val onKanbanEvent: (KanbanEvent) -> Unit = remember { { kanbanVM.onEvent(it) } }
 
     CompositionLocalProvider(
@@ -113,21 +112,13 @@ fun MainScaffold(
                     label = "TopBarTransition"
                 ) { route ->
                 when (route) {
-//                    Screen.Focus.route, Screen.Kanban.route ->
-//                        WorkspaceTopBar(
-//                            workspaces          = workspaces,
-//                            selectedWorkspace   = selectedWorkspace,
-//                            onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
-//                            onAddWorkspace      = { showCreateWorkspaceDialog = true },
-//                            onAddTaskClick      = { showCreateSheet = true }
-//                        )
                     Screen.Focus.route ->
                         WorkspaceTopBar(
                             workspaces          = workspaces,
                             selectedWorkspace   = selectedWorkspace,
                             onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
                             onAddWorkspace      = { showCreateWorkspaceDialog = true },
-                            onAddTaskClick      = { showCreateSheet = true }
+                            onAddTaskClick      = { workspaceVM.openCreateSheet() }
                         )
 
                     Screen.Kanban.route ->
@@ -203,31 +194,36 @@ fun MainScaffold(
 
                 if (showCreateSheet) {
                     CreateTaskSheet(
-                        initialTitle = draftTitle,
-                        initialDescription = draftDescription,
-                        initialImportance = Importance.entries[draftImportanceOrdinal],
-                        initialTags = if (draftTagsCsv.isEmpty()) emptyList() else draftTagsCsv.split(","),
-                        initialDueDateMillis = if (draftDueDate == -1L) null else draftDueDate,
-                        onDismiss = { showCreateSheet = false },
+                        initialTitle         = createDraft.title,
+                        initialDescription   = createDraft.description,
+                        initialImportance    = createDraft.importance,
+                        initialTags          = createDraft.tags,
+                        initialDueDateMillis = createDraft.dueDateMillis,
+                        onDismiss = { workspaceVM.closeCreateSheet() },
                         onAddTask = { title, desc, importance, tags, dueDate ->
+                            val hadTasks = (kanbanUiState as? KanbanUiState.Ready)?.let {
+                                it.highTasks.isNotEmpty() || it.mediumTasks.isNotEmpty() || it.lowTasks.isNotEmpty()
+                            } ?: false
                             workspaceVM.createTask(title, desc, importance, tags, dueDate)
-                            draftTitle = ""; draftDescription = ""
-                            draftImportanceOrdinal = Importance.MEDIUM.ordinal
-                            draftTagsCsv = ""; draftDueDate = -1L
-                            showCreateSheet = false
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message  = "Task created",
-                                    duration = SnackbarDuration.Short
-                                )
+                            workspaceVM.clearCreateDraft()
+                            workspaceVM.closeCreateSheet()
+                            if (hadTasks) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message  = "Task created",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         },
                         onDraftSaved = { title, desc, importance, tags, dueDate ->
-                            draftTitle = title
-                            draftDescription = desc
-                            draftImportanceOrdinal = importance.ordinal
-                            draftTagsCsv = tags.joinToString(",")
-                            draftDueDate = dueDate ?: -1L
+                            workspaceVM.saveCreateDraft(CreateSheetDraft(
+                                title        = title,
+                                description  = desc,
+                                importance   = importance,
+                                tags         = tags,
+                                dueDateMillis = dueDate
+                            ))
                         }
                     )
                 }

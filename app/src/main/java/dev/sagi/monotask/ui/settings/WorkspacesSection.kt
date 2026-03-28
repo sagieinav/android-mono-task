@@ -152,7 +152,7 @@ internal fun WorkspacesSection(
                         Text(
                             text       = "New workspace",
                             style      = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             color      = MaterialTheme.colorScheme.onSurface
                         )
                     }

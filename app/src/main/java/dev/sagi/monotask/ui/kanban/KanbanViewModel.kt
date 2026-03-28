@@ -64,6 +64,7 @@ class KanbanViewModel @Inject constructor(
     fun onEvent(event: KanbanEvent) {
         when (event) {
             is KanbanEvent.ToggleArchive   -> toggleArchive()
+            is KanbanEvent.ResetArchive    -> resetArchive()
             is KanbanEvent.OpenEditSheet   -> openEditSheet(event.task)
             is KanbanEvent.DismissEditSheet -> dismissEditSheet()
             is KanbanEvent.UpdateTask      -> updateTask(event.task)
@@ -116,6 +117,13 @@ class KanbanViewModel @Inject constructor(
     private fun toggleArchive() {
         _internalUiState.value = KanbanUiState.Loading
         _showCompleted.value = !_showCompleted.value
+    }
+
+    private fun resetArchive() {
+        if (_showCompleted.value) {
+            _internalUiState.value = KanbanUiState.Loading
+            _showCompleted.value = false
+        }
     }
 
     private fun updateUiState(tasks: List<Task>, workspace: Workspace?) {
@@ -185,10 +193,6 @@ class KanbanViewModel @Inject constructor(
                     ?.toEpochDay()
                     ?: java.time.LocalDate.now().toEpochDay()
                 taskRepository.restoreTask(userId, task.id)
-                val user = userRepository.getUserOnce(userId) ?: run {
-                    _uiEffect.emit(KanbanUiEffect.ShowError("Failed to load user profile for XP rollback"))
-                    return@launch
-                }
                 userRepository.removeDailyActivity(userId, xpToRemove, dateEpochDay = completionEpoch)
                 userRepository.removeXp(userId, xpToRemove)
                 userRepository.undoUserStats(userId, task.isAce)

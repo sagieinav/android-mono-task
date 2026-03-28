@@ -40,6 +40,19 @@ class WorkspaceViewModel @Inject constructor(
     private val _errorEvent = MutableSharedFlow<String>()
     val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
 
+    // ========== Create Task Sheet State ==========
+
+    private val _createSheetVisible = MutableStateFlow(false)
+    val createSheetVisible: StateFlow<Boolean> = _createSheetVisible.asStateFlow()
+
+    private val _createDraft = MutableStateFlow(CreateSheetDraft())
+    val createDraft: StateFlow<CreateSheetDraft> = _createDraft.asStateFlow()
+
+    fun openCreateSheet()  { _createSheetVisible.value = true }
+    fun closeCreateSheet() { _createSheetVisible.value = false }
+    fun saveCreateDraft(draft: CreateSheetDraft) { _createDraft.value = draft }
+    fun clearCreateDraft() { _createDraft.value = CreateSheetDraft() }
+
     // Safe default. Only used after awaitUid() completes in init
     private var userId: String = ""
 
@@ -133,3 +146,11 @@ class WorkspaceViewModel @Inject constructor(
         // launched via launchIn(viewModelScope) in observeWorkspaces()
     }
 }
+
+data class CreateSheetDraft(
+    val title       : String     = "",
+    val description : String     = "",
+    val importance  : Importance = Importance.MEDIUM,
+    val tags        : List<String> = emptyList(),
+    val dueDateMillis: Long?     = null
+)

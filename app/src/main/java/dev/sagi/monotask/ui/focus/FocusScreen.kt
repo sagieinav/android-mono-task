@@ -30,15 +30,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun FocusScreen(
-//    navController: NavHostController,
     focusVM: FocusViewModel,
-//    userSessionVM: UserSessionViewModel
 ) {
     val uiState            by focusVM.uiState.collectAsStateWithLifecycle()
     val frozenForAnimation by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
     val currentStreak      by focusVM.currentStreak.collectAsStateWithLifecycle()
     val currentUser        by focusVM.currentUser.collectAsStateWithLifecycle()
     val editingTask        by focusVM.editingTask.collectAsStateWithLifecycle()
+    val snoozeSheetVisible by focusVM.snoozeSheetVisible.collectAsStateWithLifecycle()
     val snackbarHostState  = LocalSnackbarHostState.current
 
     val stableOnFocusEvent = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
@@ -52,7 +51,40 @@ fun FocusScreen(
         if (!frozenForAnimation) displayedUiState = uiState
     }
 
-    // Collect one-shot UI effects (snackbars)
+    // Undo-complete snackbar. Uses `collect` (NOT collectLatest) so that subsequent
+    // effects (level-up, achievements) can never cancel it mid-display.
+    // Long duration gives a comfortable window to press Undo.
+    LaunchedEffect(Unit) {
+        focusVM.uiEffect.collect { effect ->
+            if (effect !is FocusUiEffect.ShowUndoComplete) return@collect
+            val result = snackbarHostState.showSnackbar(
+                message     = effect.message,
+                actionLabel = "Undo",
+                duration    = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                focusVM.onEvent(FocusEvent.UndoCompleteTask)
+            }
+        }
+    }
+
+    // Undo-snooze snackbar. Same reasoning as above.
+    LaunchedEffect(Unit) {
+        focusVM.uiEffect.collect { effect ->
+            if (effect !is FocusUiEffect.ShowUndoSnooze) return@collect
+            val result = snackbarHostState.showSnackbar(
+                message     = effect.message,
+                actionLabel = "Undo",
+                duration    = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                focusVM.onEvent(FocusEvent.UndoSnoozeTask)
+            }
+        }
+    }
+
+    // All other one-shot effects (errors, level-up, achievements).
+    // collectLatest is fine here since none of these are undo snackbars.
     LaunchedEffect(Unit) {
         focusVM.uiEffect.collectLatest { effect ->
             when (effect) {
@@ -62,26 +94,6 @@ fun FocusScreen(
                         withDismissAction = true,
                         duration          = SnackbarDuration.Short
                     )
-                }
-                is FocusUiEffect.ShowUndoComplete -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message     = effect.message,
-                        actionLabel = "Undo",
-                        duration    = SnackbarDuration.Short
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        focusVM.onEvent(FocusEvent.UndoCompleteTask)
-                    }
-                }
-                is FocusUiEffect.ShowUndoSnooze -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message     = effect.message,
-                        actionLabel = "Undo",
-                        duration    = SnackbarDuration.Short
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        focusVM.onEvent(FocusEvent.UndoSnoozeTask)
-                    }
                 }
                 is FocusUiEffect.ShowAchievementUnlocked -> {
                     val tierLabel = when (effect.tier) {
@@ -97,18 +109,20 @@ fun FocusScreen(
                 is FocusUiEffect.ShowLevelUp -> {
                     levelUpEvent = effect
                 }
+                else -> { /* handled by the dedicated collectors above */ }
             }
         }
     }
 
     FocusScreenContent(
-        uiState       = displayedUiState,
-        currentStreak = currentStreak,
-        currentUser   = currentUser,
-        animState     = animState,
-        onFocusEvent  = stableOnFocusEvent,
-        levelUpEvent  = levelUpEvent,
-        onLevelUpDone = { levelUpEvent = null }
+        uiState            = displayedUiState,
+        currentStreak      = currentStreak,
+        currentUser        = currentUser,
+        animState          = animState,
+        onFocusEvent       = stableOnFocusEvent,
+        snoozeSheetVisible = snoozeSheetVisible,
+        levelUpEvent       = levelUpEvent,
+        onLevelUpDone      = { levelUpEvent = null }
     )
 
     editingTask?.let { task ->
@@ -133,13 +147,14 @@ fun FocusScreen(
 
 @Composable
 fun FocusScreenContent(
-    uiState       : FocusUiState,
-    currentStreak : Int,
-    currentUser   : User?,
-    animState     : FocusAnimationState,
-    onFocusEvent  : (FocusEvent) -> Unit,
-    levelUpEvent  : FocusUiEffect.ShowLevelUp? = null,
-    onLevelUpDone : () -> Unit = {}
+    uiState            : FocusUiState,
+    currentStreak      : Int,
+    currentUser        : User?,
+    animState          : FocusAnimationState,
+    onFocusEvent       : (FocusEvent) -> Unit,
+    snoozeSheetVisible : Boolean = false,
+    levelUpEvent       : FocusUiEffect.ShowLevelUp? = null,
+    onLevelUpDone      : () -> Unit = {}
 ) {
     val innerPadding = LocalScaffoldPadding.current
     val scope        = rememberCoroutineScope()
@@ -168,7 +183,7 @@ fun FocusScreenContent(
                 EmptyState(
                     imgRes = R.drawable.img_empty_focus_yellow,
                     title = "Where are the tasks?",
-                    subtitle = "Oh... you cleared 'em all. Well played.",
+                    subtitle = "Oh... you cleared 'em all. Well played!",
                     isMainContent = true,
                     modifier = Modifier.padding(bottom = 40.dp) // optical correction for vertical position
                 )
@@ -183,7 +198,7 @@ fun FocusScreenContent(
         }
     }
 
-    if (uiState is FocusUiState.Active && uiState.showSnoozeSheet) {
+    if (snoozeSheetVisible) {
         SnoozeBottomSheet(
             onDismissRequest = { onFocusEvent(FocusEvent.DismissSnooze) },
             onSnooze         = { option -> animState.onSnoozeConfirmed(option, scope) }
@@ -230,14 +245,13 @@ private fun ActiveFocusCard(
     ) {
         key(uiState.focusTask.id, uiState.restoreVersion) {
             FocusCardSwipeable(
-                task               = uiState.focusTask,
-                exitTrigger        = animState.snoozeExitTrigger,
-                borderFraction     = animState.displayBorder,
-                onSwipeRight       = { onFocusEvent(FocusEvent.CompleteTask) },
-                onSwipeLeft        = { onFocusEvent(FocusEvent.OpenSnooze) },
-                onSnoozeCardExited = { animState.onSnoozeCardExited() },
-                onLongPress        = { onFocusEvent(FocusEvent.OpenEditSheet) },
-                modifier           = Modifier.fillMaxWidth()
+                task           = uiState.focusTask,
+                exitTrigger    = animState.snoozeExitTrigger,
+                borderFraction = animState.displayBorder,
+                onSwipeRight   = { onFocusEvent(FocusEvent.CompleteTask) },
+                onSwipeLeft    = { onFocusEvent(FocusEvent.OpenSnooze) },
+                onLongPress    = { onFocusEvent(FocusEvent.OpenEditSheet) },
+                modifier       = Modifier.fillMaxWidth()
             )
         }
     }

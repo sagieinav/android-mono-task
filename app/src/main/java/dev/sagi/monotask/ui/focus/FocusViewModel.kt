@@ -15,7 +15,6 @@ import dev.sagi.monotask.domain.util.TaskSelector
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,12 +37,17 @@ class FocusViewModel @Inject constructor(
     private val _frozenForAnimation = MutableStateFlow(false)
     val frozenForAnimation: StateFlow<Boolean> = _frozenForAnimation.asStateFlow()
 
-    // One-shot UI effects collected by FocusScreen (snackbars)
-    private val _uiEffect = MutableSharedFlow<FocusUiEffect>()
+    // One-shot UI effects collected by FocusScreen (snackbars).
+    // extraBufferCapacity prevents the VM coroutine from suspending on emit while
+    // the undo snackbar collector is blocked in showSnackbar (up to ~10 s).
+    private val _uiEffect = MutableSharedFlow<FocusUiEffect>(extraBufferCapacity = 8)
     val uiEffect: SharedFlow<FocusUiEffect> = _uiEffect.asSharedFlow()
 
     private val _editingTask = MutableStateFlow<Task?>(null)
     val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
+
+    private val _snoozeSheetVisible = MutableStateFlow(false)
+    val snoozeSheetVisible: StateFlow<Boolean> = _snoozeSheetVisible.asStateFlow()
 
     // ========== Internal State ==========
     // All mutable vars below are only accessed on Main (viewModelScope default)
@@ -66,9 +70,17 @@ class FocusViewModel @Inject constructor(
     private var lastXpAwarded           : Int      = 0
     private var lastCompletedTaskWasAce : Boolean  = false
 
+    // True while undoCompleteTask() is writing to Firestore.
+    // Prevents observeTasks snapshots from overwriting the manually-restored local state.
+    private var undoInProgress          : Boolean  = false
+
     // Workspace flow injected once from NavGraph via setWorkspaceSource
-    private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
-    private var lastActiveState  : FocusUiState.Active? = null
+    private val _workspaceSource  = MutableStateFlow<StateFlow<Workspace?>?>(null)
+    private var lastActiveState   : FocusUiState.Active? = null
+    // Explicit snapshot taken at the moment completeTask() fires, isolated from the
+    // continuous lastActiveState updates that arrive while Firestore observes the next task.
+    // Ensures undoCompleteTask() always gets the pre-completion queue/workspace, not Task B's.
+    private var savedStateForUndo : FocusUiState.Active? = null
 
     // ========== Init ==========
 
@@ -133,6 +145,10 @@ class FocusViewModel @Inject constructor(
                 }
             }
             .onEach { (workspace, tasks) ->
+                // Undo is mid-flight: ignore Firestore snapshots so they don't
+                // overwrite the locally-restored task state before our writes settle.
+                if (undoInProgress) return@onEach
+
                 if (workspace == null) {
                     _uiState.value = FocusUiState.Empty
                     return@onEach
@@ -172,6 +188,7 @@ class FocusViewModel @Inject constructor(
         lastCompletedTask           = state.focusTask
         lastXpAwarded               = xpGained
         lastCompletedTaskWasAce     = state.focusTask.isAce
+        savedStateForUndo           = state         // snapshot before Firestore overwrites lastActiveState
         _frozenForAnimation.value   = true
 
         viewModelScope.launch {
@@ -195,7 +212,6 @@ class FocusViewModel @Inject constructor(
                 workspaceRepository.setFocusTask(userId, state.workspace.id, null)
                 userRepository.addXp(userId, xpGained, user.xp, user.level)
 
-//                delay(300)
                 _frozenForAnimation.value = false
 
                 userRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
@@ -262,29 +278,39 @@ class FocusViewModel @Inject constructor(
     }
 
     private fun undoCompleteTask() {
-        // Open the animation gate first so the restored card appears immediately
-        _frozenForAnimation.value = false
-
         val taskToRestore = lastCompletedTask ?: return
-        val cachedState   = lastActiveState   ?: return
+        val cachedState   = savedStateForUndo ?: return  // use pre-completion snapshot, not stale lastActiveState
 
+        // Set local state BEFORE unfreezing: the LaunchedEffect in FocusScreen reads
+        // uiState and frozenForAnimation together, so the restored card must be ready
+        // before the gate opens — otherwise the brief Firestore state (Task B) flashes.
         _uiState.value = FocusUiState.Active(
             focusTask      = taskToRestore,
             queue          = cachedState.queue,
             workspace      = cachedState.workspace,
             restoreVersion = cachedState.restoreVersion + 1
         )
+        _frozenForAnimation.value = false
 
+        undoInProgress = true
         viewModelScope.launch {
             try {
+                // Re-pin Task A before restoring it: if restoreTask fires a Firestore
+                // snapshot while currentFocusTaskId is still Task B, observeTasks would
+                // overwrite _uiState back to Task B. undoInProgress blocks that, but
+                // setting the pin first also ensures the first post-undo snapshot is clean.
+                workspaceRepository.setFocusTask(userId, cachedState.workspace.id, taskToRestore.id)
                 taskRepository.restoreTask(userId, taskToRestore.id)
                 userRepository.removeXp(userId, lastXpAwarded)
                 userRepository.removeDailyActivity(userId, lastXpAwarded)
                 userRepository.undoUserStats(userId, lastCompletedTaskWasAce)
-                lastCompletedTask           = null
-                lastCompletedTaskWasAce     = false
+                lastCompletedTask       = null
+                lastCompletedTaskWasAce = false
+                savedStateForUndo       = null
             } catch (e: Exception) {
                 _uiEffect.emit(FocusUiEffect.ShowError("Undo failed"))
+            } finally {
+                undoInProgress = false
             }
         }
     }
@@ -330,13 +356,12 @@ class FocusViewModel @Inject constructor(
                 ))
             }
         } else {
-            _uiState.value = state.copy(showSnoozeSheet = true)
+            _snoozeSheetVisible.value = true
         }
     }
 
     private fun dismissSnoozeSheet() {
-        val state = _uiState.value as? FocusUiState.Active ?: return
-        _uiState.value = state.copy(showSnoozeSheet = false)
+        _snoozeSheetVisible.value = false
     }
 
     // ========== Lifecycle ==========

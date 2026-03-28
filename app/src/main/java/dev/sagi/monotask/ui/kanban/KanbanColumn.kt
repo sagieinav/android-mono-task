@@ -49,10 +49,19 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.googleSans
 import dev.sagi.monotask.ui.theme.harabara
 import dev.sagi.monotask.ui.theme.invincibleBorder
+import dev.sagi.monotask.ui.theme.lora
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.mplusRounded
+import dev.sagi.monotask.ui.theme.nationalPark
+import dev.sagi.monotask.ui.theme.plantagenet
+import dev.sagi.monotask.ui.theme.playfairDisplay
+import dev.sagi.monotask.ui.theme.plusJakartaSans
+import dev.sagi.monotask.ui.theme.ptSerif
 import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
 import kotlinx.coroutines.delay
 
@@ -114,13 +123,13 @@ fun KanbanColumn(
                 ) {
                     Text(
                         text        = title,
-                        style       = MaterialTheme.typography.headlineSmall.copy(
+                        style       = MaterialTheme.typography.titleLarge.copy(
                             lineHeightStyle = LineHeightStyle(
                                 alignment = LineHeightStyle.Alignment.Proportional,
                                 trim      = LineHeightStyle.Trim.Both
                             )
                         ),
-                        fontFamily  = harabara,
+                        fontFamily  = gloock,
                         fontWeight  = FontWeight.Bold,
                         color       = contentColor,
                     )

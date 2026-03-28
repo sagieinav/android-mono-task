@@ -13,7 +13,6 @@ sealed class FocusUiState {
         val focusTask: Task,
         val queue: List<Task>,
         val workspace: Workspace,
-        val showSnoozeSheet: Boolean = false,
         val restoreVersion: Int = 0
     ) : FocusUiState()
 }

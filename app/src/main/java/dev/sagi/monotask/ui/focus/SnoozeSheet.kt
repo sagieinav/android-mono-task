@@ -54,7 +54,7 @@ fun SnoozeBottomSheet(
             "CHOOSE YOUR NEXT TASK",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
+//            fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f),
 
             modifier = Modifier.fillMaxWidth()

@@ -15,12 +15,13 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.ui.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.task.EditTaskSheet
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
+import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 import dev.sagi.monotask.util.Constants
 import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
+import androidx.compose.material3.SnackbarDuration
 import java.util.Date
 
 private const val COLUMN_STAGGER_MS = 80
@@ -30,17 +31,25 @@ fun KanbanScreen(
     navController: NavHostController,
     kanbanVM: KanbanViewModel
 ) {
-    val uiState     by kanbanVM.uiState.collectAsStateWithLifecycle()
-    val editingTask by kanbanVM.editingTask.collectAsStateWithLifecycle()
+    val uiState           by kanbanVM.uiState.collectAsStateWithLifecycle()
+    val editingTask       by kanbanVM.editingTask.collectAsStateWithLifecycle()
+    val snackbarHostState = LocalSnackbarHostState.current
 
     val onKanbanEvent: (KanbanEvent) -> Unit = remember { { kanbanVM.onEvent(it) } }
+
+    LaunchedEffect(Unit) { onKanbanEvent(KanbanEvent.ResetArchive) }
 
     LaunchedEffect(Unit) {
         kanbanVM.uiEffect.collectLatest { effect ->
             when (effect) {
                 is KanbanUiEffect.NavigateToFocus ->
                     navController.navigate(Screen.Focus.route)
-                is KanbanUiEffect.ShowError -> { /* handled elsewhere if needed */ }
+                is KanbanUiEffect.ShowError ->
+                    snackbarHostState.showSnackbar(
+                        message           = effect.message,
+                        withDismissAction = true,
+                        duration          = SnackbarDuration.Short
+                    )
             }
         }
     }
@@ -133,15 +142,6 @@ fun KanbanScreenContent(
                 // gap between toggle and content
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-//        SegmentedToggle(
-//            options          = listOf("Active", "Archive"),
-//            selectedIndex    = if (uiState is KanbanUiState.Ready && uiState.isArchive) 1 else 0,
-//            onOptionSelected = { onKanbanEvent(KanbanEvent.ToggleArchive) },
-//            modifier         = Modifier
-//                .align(Alignment.CenterHorizontally)
-//                .padding(top = Constants.Theme.SCREEN_PADDING / 2)
-//        )
-
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
@@ -155,7 +155,7 @@ fun KanbanScreenContent(
                         tasks            = ready.highTasks,
                         isArchive        = ready.isArchive,
                         onKanbanEvent    = onKanbanEvent,
-                        animationDelayMs = 0 * COLUMN_STAGGER_MS
+                        animationDelayMs = 0
                     )
                     KanbanColumn(
                         title            = "Medium",

@@ -78,7 +78,9 @@ val mplusRounded = FontFamily(
 )
 
 val nationalPark = FontFamily(
-    Font(R.font.national_park)
+    Font(R.font.national_park),
+    Font(R.font.national_park_semi_bold, FontWeight.SemiBold),
+    Font(R.font.national_park_bold, FontWeight.Bold)
 )
 
 
@@ -95,7 +97,9 @@ val plusJakartaSans = FontFamily(
 
 val googleSans = FontFamily(
     Font(R.font.google_sans,        FontWeight.Normal),
-    Font(R.font.google_sans,        FontWeight.Medium),
+    Font(R.font.google_sans_medium,        FontWeight.Medium),
+    Font(R.font.google_sans_semi_bold,        FontWeight.SemiBold),
+    Font(R.font.google_sans_bold,        FontWeight.Bold),
     Font(R.font.google_sans_italic, FontWeight.Normal, FontStyle.Italic),
 )
 val harabara = FontFamily(

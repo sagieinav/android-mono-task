@@ -43,6 +43,7 @@ import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.nationalPark
 import dev.sagi.monotask.ui.theme.penaltyRed
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import kotlinx.coroutines.flow.collectLatest
@@ -142,11 +143,13 @@ private fun SettingsContent(
 
         // Sign Out Button:
         item {
+            Spacer(Modifier.height(30.dp)) // compensate for lack of section title
             SignOutButton(onSignOut = { onEvent(SettingsEvent.SignOut) })
         }
 
         // App Branding:
         item {
+            Spacer(Modifier.height(16.dp)) // compensate for lack of section title
             AppBranding()
         }
     }
@@ -212,14 +215,14 @@ private fun AppBranding() {
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(
-            painter            = painterResource(id = R.drawable.logo_monotask_raw),
-            contentDescription = "App Logo",
-            modifier           = Modifier.width(70.dp)
-        )
+//        Image(
+//            painter            = painterResource(id = R.drawable.logo_monotask_raw),
+//            contentDescription = "App Logo",
+//            modifier           = Modifier.width(70.dp)
+//        )
         Text(
             text       = "MonoTask",
-            style      = MaterialTheme.typography.labelMedium,
+            style      = MaterialTheme.typography.labelLarge,
             fontFamily = gloock,
             fontWeight = FontWeight.Bold,
             color      = MaterialTheme.colorScheme.onSurfaceVariant,

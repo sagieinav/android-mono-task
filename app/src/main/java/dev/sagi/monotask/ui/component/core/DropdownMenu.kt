@@ -227,7 +227,7 @@ fun GlassDropdownItem(
         Text(
             text = label,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             color = if (selected) selectedColor else unselectedColor
         )
 
@@ -278,7 +278,7 @@ fun GlassDropdownActionItem(
             text = label,
             style = MaterialTheme.typography.titleSmall,
 //            fontFamily = googleSans,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             color = color,
             modifier = Modifier
         )

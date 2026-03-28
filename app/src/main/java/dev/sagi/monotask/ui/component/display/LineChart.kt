@@ -324,7 +324,7 @@ private fun ChartCanvas(
                     Text(text = point.label, style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${point.value.toInt()}", style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold, color = lineColor)
+                        fontWeight = FontWeight.SemiBold, color = lineColor)
                 }
             }
         }

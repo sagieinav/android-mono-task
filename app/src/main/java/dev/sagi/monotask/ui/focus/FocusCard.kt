@@ -53,7 +53,7 @@ fun FocusCard(
                 )
                 else Modifier.defaultTaskBorder(
                     shape = shape,
-                    drawFraction = borderFraction,
+                    drawFraction = 2f,
                     borderWidth = borderWidth
                 )
             )

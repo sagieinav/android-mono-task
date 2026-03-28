@@ -26,10 +26,10 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 @Composable
 fun GlassChip(
     label: String,
-    selected: Boolean = false,
     onClick: () -> Unit,
-    selectedColor: Color = MaterialTheme.colorScheme.onSurface,
     modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    selectedColor: Color = MaterialTheme.colorScheme.onSurface,
     shape: Shape = MaterialTheme.shapes.small,
     leadingIcon: @Composable (() -> Unit)? = null // for using it as "AssistChip"
 ) {
@@ -55,7 +55,7 @@ fun GlassChip(
                 text = label,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                 color = if (selected) selectedColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
             )
         }

@@ -20,6 +20,7 @@ sealed class KanbanUiState {
 
 sealed interface KanbanEvent {
     object ToggleArchive : KanbanEvent
+    object ResetArchive  : KanbanEvent
     data class OpenEditSheet(val task: Task? = null) : KanbanEvent
     object DismissEditSheet : KanbanEvent
     data class UpdateTask(val task: Task) : KanbanEvent

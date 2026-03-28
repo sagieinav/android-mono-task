@@ -211,7 +211,6 @@ private fun SideStat(
             Text(
                 text       = value,
                 style      = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
                 color      = MaterialTheme.colorScheme.onSurface,
                 modifier   = Modifier.alignByBaseline()
             )

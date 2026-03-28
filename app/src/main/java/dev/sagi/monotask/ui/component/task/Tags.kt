@@ -30,7 +30,10 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.googleSans
 import dev.sagi.monotask.ui.theme.harabara
+import dev.sagi.monotask.ui.theme.nationalPark
+import dev.sagi.monotask.ui.theme.plusJakartaSans
 
 enum class TagSize { DEFAULT, SMALL }
 
@@ -39,8 +42,8 @@ fun TaskTag(
     label: String,
     containerColor: Color,
     contentColor: Color,
-    size: TagSize = TagSize.DEFAULT,
     modifier: Modifier = Modifier,
+    size: TagSize = TagSize.DEFAULT,
     trailingContent: @Composable (() -> Unit)? = null // Potentially "close" icon
 ) {
     // General properties
@@ -77,7 +80,7 @@ fun TaskTag(
             Text(
                 text = label.lowercase(),
                 style = textStyle,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 fontSize = fontSize,
                 fontFamily = harabara,
                 color = contentColor,
@@ -94,8 +97,8 @@ fun TaskTag(
 @Composable
 fun ImportanceTag(
     importance: Importance,
-    size: TagSize = TagSize.DEFAULT,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    size: TagSize = TagSize.DEFAULT
 ) {
     val colors = MaterialTheme.customColors
     val (label, containerColor, contentColor) = when (importance) {

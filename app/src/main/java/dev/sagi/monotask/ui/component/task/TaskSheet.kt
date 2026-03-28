@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
@@ -30,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import java.util.Date
-import java.util.Locale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -88,7 +88,7 @@ private fun TaskSheet(
         }
 
         // Spacer before chips
-        Spacer(Modifier.padding(1.dp))
+        Spacer(Modifier.height(2.dp))
 
         TaskImportanceSelector(
             selectedImportance = importance,
@@ -109,7 +109,7 @@ private fun TaskSheet(
         extraContent?.invoke()
 
         // Spacer before buttons
-        Spacer(Modifier.padding(4.dp))
+        Spacer(Modifier.height(8.dp))
 
         // Save Changes / Add Task
         ActionButton(
@@ -302,7 +302,7 @@ private fun TaskImportanceSelector(
     ) {
         Importance.entries.forEach { imp ->
             GlassChip(
-                label = imp.name.lowercase().capitalize(Locale.ROOT),
+                label = imp.name.lowercase().replaceFirstChar { it.uppercase() },
                 selected = selectedImportance == imp,
                 selectedColor = importanceColor(imp),
                 onClick = { onImportanceSelected(imp) }

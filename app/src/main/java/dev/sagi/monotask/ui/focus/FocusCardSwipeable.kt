@@ -188,7 +188,6 @@ fun FocusCardSwipeable(
     borderFraction: Float,
     onSwipeRight: () -> Unit,
     onSwipeLeft: () -> Unit,
-    onSnoozeCardExited: () -> Unit,
     modifier: Modifier = Modifier,
     onLongPress: () -> Unit = {}
 ) {
@@ -230,11 +229,7 @@ fun FocusCardSwipeable(
             spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "swipe_offset",
         finishedListener = {
-            when (exitDirection) {
-                SwipeExitDirection.RIGHT -> onSwipeRight()
-                SwipeExitDirection.LEFT  -> onSnoozeCardExited()
-                null                     -> {}
-            }
+            if (exitDirection == SwipeExitDirection.RIGHT) onSwipeRight()
         }
     )
 

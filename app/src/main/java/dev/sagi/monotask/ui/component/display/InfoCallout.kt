@@ -56,7 +56,7 @@ fun InfoCallout(
                 text       = title,
                 style      = MaterialTheme.typography.bodySmall,
                 fontFamily = nationalPark,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color      = titleColor,
                 modifier   = Modifier
             )

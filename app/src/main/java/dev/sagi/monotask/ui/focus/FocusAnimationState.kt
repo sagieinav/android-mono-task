@@ -20,13 +20,8 @@ class FocusAnimationState(
 ) {
     // ========== Snooze Exit State ==========
 
-    var isSnoozeExiting by mutableStateOf(false)
-        private set
-
     var snoozeExitTrigger by mutableStateOf<SwipeExitDirection?>(null)
         private set
-
-    private var pendingSnoozeAction: (() -> Unit)? = null
 
     // ========== Entry Animation ==========
 
@@ -62,17 +57,11 @@ class FocusAnimationState(
         scope.launch {
             onFocusEvent(FocusEvent.DismissSnooze)
             delay(100)
-            pendingSnoozeAction  = { onFocusEvent(FocusEvent.ExecuteSnooze(option)) }
-            isSnoozeExiting      = true
-            snoozeExitTrigger    = SwipeExitDirection.LEFT
+            snoozeExitTrigger = SwipeExitDirection.LEFT
+            delay(300L) // EXIT_ANIM_DURATION (280ms) + small buffer
+            snoozeExitTrigger = null
+            onFocusEvent(FocusEvent.ExecuteSnooze(option))
         }
-    }
-
-    fun onSnoozeCardExited() {
-        pendingSnoozeAction?.invoke()
-        pendingSnoozeAction = null
-        snoozeExitTrigger   = null
-        isSnoozeExiting     = false
     }
 }
 
