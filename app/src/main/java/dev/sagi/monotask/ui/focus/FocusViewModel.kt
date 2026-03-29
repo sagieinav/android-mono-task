@@ -15,6 +15,7 @@ import dev.sagi.monotask.domain.util.TaskSelector
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -252,14 +253,19 @@ class FocusViewModel @Inject constructor(
     private fun snoozeTask(option: XpEvents.SnoozeOption) {
         val state = _uiState.value as? FocusUiState.Active ?: return
         lastSnoozedTask = state.focusTask
+        _frozenForAnimation.value = true
 
         viewModelScope.launch {
             try {
                 _uiEffect.emit(FocusUiEffect.ShowUndoSnooze("Task snoozed"))
 
+                // Ensure the exit animation (starts at ~80ms, runs for 280ms = done at ~360ms)
+                // finishes before the new card appears. Firestore may respond faster than that.
+                val minVisualTime = launch { delay(380L) }
+
                 taskRepository.updateSnoozeFields(userId, state.focusTask, option)
 
-                val allTasks         = taskRepository.getActiveTasksOnce(userId, state.workspace.id)
+                val allTasks      = taskRepository.getActiveTasksOnce(userId, state.workspace.id)
                 val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
                 val nextTask = when (option) {
                     XpEvents.SnoozeOption.BY_DUE_DATE -> TaskSelector.getTopTaskByDueDate(
@@ -271,8 +277,12 @@ class FocusViewModel @Inject constructor(
                 }
                 workspaceRepository.setFocusTask(userId, state.workspace.id, nextTask?.id)
 
+                minVisualTime.join()
+
             } catch (e: Exception) {
                 _uiEffect.emit(FocusUiEffect.ShowError("Failed to snooze task: ${e.message}"))
+            } finally {
+                _frozenForAnimation.value = false
             }
         }
     }

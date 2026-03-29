@@ -295,17 +295,33 @@ private fun TaskImportanceSelector(
             Importance.HIGH   -> customColors.importanceHighContent
         }
     }
+    val importanceIcon: (Importance) -> Int = { imp ->
+        when (imp) {
+            Importance.LOW    -> R.drawable.ic_importance_low_alt
+            Importance.MEDIUM -> R.drawable.ic_importance_medium_alt
+            Importance.HIGH   -> R.drawable.ic_importance_high_alt
+        }
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Importance.entries.forEach { imp ->
+            val isSelected = selectedImportance == imp
             GlassChip(
-                label = imp.name.lowercase().replaceFirstChar { it.uppercase() },
-                selected = selectedImportance == imp,
+                label         = imp.name.lowercase().replaceFirstChar { it.uppercase() },
+                selected      = isSelected,
                 selectedColor = importanceColor(imp),
-                onClick = { onImportanceSelected(imp) }
+                onClick       = { onImportanceSelected(imp) },
+                leadingIcon   = if (isSelected) ({
+                    Icon(
+                        painter            = painterResource(importanceIcon(imp)),
+                        contentDescription = null,
+                        modifier           = Modifier.height(16.dp),
+                        tint               = importanceColor(imp)
+                    )
+                }) else null
             )
         }
     }

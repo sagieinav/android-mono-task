@@ -8,6 +8,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -29,6 +33,11 @@ private val       TRAILING_ICON_SIZE = 20.dp
 internal fun SettingsAboutSection() {
     val uriHandler = LocalUriHandler.current
     val context    = LocalContext.current
+    var showFaq by remember { mutableStateOf(false) }
+
+    if (showFaq) {
+        FaqBottomSheet(onDismiss = { showFaq = false })
+    }
 
     SettingsSection("About") {
 
@@ -37,7 +46,7 @@ internal fun SettingsAboutSection() {
             label           = "Frequently asked questions",
             leadingIcon     = { SettingsRowIcon(R.drawable.ic_help_circle, color = MaterialTheme.colorScheme.primary) },
             trailingIconRes = R.drawable.ic_arrow_right_alt,
-            // TODO: onClick: BottomSheet with FAQ
+            onClick         = { showFaq = true }
         )
         SettingsDivider()
 

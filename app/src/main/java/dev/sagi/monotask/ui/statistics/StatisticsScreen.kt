@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -132,7 +131,7 @@ private fun StatisticsReadyContent(
         }
     }
 
-    val timeLabel = lastRefreshedAt?.let { ts ->
+    val timestampLabel = lastRefreshedAt?.let { ts ->
         remember(ts) { "Last updated " + SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(ts)) }
     }
 
@@ -192,12 +191,11 @@ private fun StatisticsReadyContent(
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    timeLabel?.let {
+                    timestampLabel?.let {
                         item {
                             Text(
-                                text      = timeLabel,
+                                text      = timestampLabel,
                                 style     = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Thin,
                                 color     = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                 textAlign = TextAlign.Center,
                                 modifier  = Modifier

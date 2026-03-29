@@ -227,10 +227,7 @@ fun FocusCardSwipeable(
             tween(EXIT_ANIM_DURATION, easing = FastOutLinearInEasing)
         else
             spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "swipe_offset",
-        finishedListener = {
-            if (exitDirection == SwipeExitDirection.RIGHT) onSwipeRight()
-        }
+        label = "swipe_offset"
     )
 
     val haptic = LocalHapticFeedback.current
@@ -317,6 +314,7 @@ fun FocusCardSwipeable(
                                                 offsetX > COMPLETE_THRESHOLD -> {
                                                     badgeOffsetX = offsetX
                                                     exitDirection = SwipeExitDirection.RIGHT
+                                                    onSwipeRight() // fire immediately so freeze is set before any Firestore snapshot
                                                 }
                                                 offsetX < -SNOOZE_THRESHOLD -> {
                                                     offsetX = 0f; onSwipeLeft()

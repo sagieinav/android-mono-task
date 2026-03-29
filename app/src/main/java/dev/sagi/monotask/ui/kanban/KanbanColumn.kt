@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.core.GlassSurface
@@ -112,6 +113,7 @@ fun KanbanColumn(
                                 trim      = LineHeightStyle.Trim.Both
                             )
                         ),
+                        fontSize = 20.sp,
                         fontFamily  = gloock,
                         fontWeight  = FontWeight.Bold,
 //                        color       = contentColor,

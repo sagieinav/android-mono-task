@@ -131,8 +131,7 @@ fun LineChart(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (points.isNotEmpty()) {
-                val minV = points.minOf { it.value }
-                val maxV = points.maxOf { it.value }
+                val (minV, maxV) = remember(points) { points.minOf { it.value } to points.maxOf { it.value } }
                 Column(
                     modifier = Modifier.height(chartHeight),
                     verticalArrangement = Arrangement.SpaceBetween

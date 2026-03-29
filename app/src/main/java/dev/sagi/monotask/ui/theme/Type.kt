@@ -163,7 +163,7 @@ val AppTypography = Typography(
     labelMedium = baseline.labelMedium.copy(
         fontFamily = dataFont, fontWeight = FontWeight.Bold).withNoPadding(),
     labelSmall  = baseline.labelSmall.copy(
-        fontFamily = dataFont, fontSize = 10.sp).withNoPadding(),
+        fontFamily = dataFont, fontSize = 10.sp, fontWeight = FontWeight.Thin).withNoPadding(),
 
     // ========== BODY / CONTENT ==========
     bodyLarge  = baseline.bodyLarge.copy(fontFamily = contentFont).withNoPadding(),
