@@ -34,6 +34,7 @@ sealed interface ProfileEvent {
     object ResetAvatar            : ProfileEvent
     object OpenAvatarPicker       : ProfileEvent
     object DismissAvatarPicker    : ProfileEvent
+    data class RemoveFriend(val friendId: String) : ProfileEvent
 }
 
 // ========== One-Shot UI Effects ==========

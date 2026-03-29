@@ -174,6 +174,16 @@ class UserRepository(private val db: FirebaseFirestore) {
         }.commit().await()
     }
 
+    // Atomic batch: remove both sides of friendship simultaneously
+    suspend fun removeFriendBatch(userId: String, friendId: String) {
+        db.batch().apply {
+            update(userDoc(userId),   "friends", FieldValue.arrayRemove(friendId))
+            update(userDoc(friendId), "friends", FieldValue.arrayRemove(userId))
+        }
+            .commit()
+            .await()
+    }
+
     suspend fun updateUserStats(
         userId         : String,
         xpGained       : Int,

@@ -192,6 +192,7 @@ private fun ProfileReadyContent(
                         friendUsers      = friendUsers,
                         friendActivities = friendActivities,
                         onShareInvite    = onShareInvite,
+                        onDeleteFriend   = { id -> onProfileEvent(ProfileEvent.RemoveFriend(id)) },
                         lazyListState    = listState
                     )
                 }

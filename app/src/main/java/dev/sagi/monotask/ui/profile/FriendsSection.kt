@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +50,11 @@ import dev.sagi.monotask.domain.util.AchievementEngine
 import dev.sagi.monotask.domain.util.ActivityStats
 import dev.sagi.monotask.ui.component.core.AvatarBox
 import dev.sagi.monotask.ui.component.display.EmptyState
+import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.core.SwipeRevealAction
+import dev.sagi.monotask.ui.component.core.SwipeRevealRow
+import dev.sagi.monotask.ui.theme.penaltyRed
 import dev.sagi.monotask.ui.component.display.LevelChip
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.component.display.SectionTitle
@@ -72,18 +77,21 @@ fun FriendsSection(
     friendUsers      : List<User>?,
     friendActivities : Map<String, List<DailyActivity>>,
     onShareInvite    : () -> Unit,
+    onDeleteFriend   : (String) -> Unit = {},
     lazyListState    : LazyListState? = null
 ) {
-    var expandedFriendId by remember { mutableStateOf<String?>(null) }
+    var expandedFriendId    by remember { mutableStateOf<String?>(null) }
+    var deleteTargetFriend  by remember { mutableStateOf<User?>(null) }
+    val friendRowShape = MaterialTheme.shapes.large
 
     Column {
         SectionTitle("Friends") {
-            // Invite Button:
+            // Invite Button
             Row(
                 modifier              = Modifier
                     .clip(CircleShape)
                     .clickableNoRipple(onClick = onShareInvite)
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp) // increase touch area
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp)
                     .alignByBaseline(),
                 verticalAlignment     = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -98,12 +106,10 @@ fun FriendsSection(
                 Text(
                     text  = "Invite",
                     style = MaterialTheme.typography.labelMedium,
-
                     fontWeight = FontWeight.Thin,
                     color = color
                 )
             }
-
         }
 
         when {
@@ -119,16 +125,31 @@ fun FriendsSection(
                 friendUsers.forEach { user ->
                     FriendRow(
                         user          = user,
+                        shape         = friendRowShape,
                         activities    = friendActivities[user.id] ?: emptyList(),
                         expanded      = expandedFriendId == user.id,
-                        onToggle      = {
-                            expandedFriendId = if (expandedFriendId == user.id) null else user.id
-                        },
+                        onToggle      = { expandedFriendId = if (expandedFriendId == user.id) null else user.id },
+                        onDelete      = { deleteTargetFriend = user },
                         lazyListState = lazyListState
                     )
                 }
             }
         }
+    }
+
+    deleteTargetFriend?.let { friend ->
+        GlassConfirmDialog(
+            onDismissRequest = { deleteTargetFriend = null },
+            title            = "Remove '${friend.displayName}'?",
+            message          = "They will be removed from your friends list.",
+            confirmLabel     = "Remove",
+            dismissLabel     = "Cancel",
+            confirmColor     = penaltyRed,
+            onConfirm        = {
+                onDeleteFriend(friend.id)
+                deleteTargetFriend = null
+            }
+        )
     }
 }
 
@@ -141,7 +162,9 @@ private fun FriendRow(
     user: User,
     activities: List<DailyActivity>,
     expanded: Boolean,
+    shape: Shape = MaterialTheme.shapes.large,
     onToggle: () -> Unit,
+    onDelete: () -> Unit,
     lazyListState: LazyListState? = null
 ) {
     val chevronRotation by animateFloatAsState(
@@ -149,11 +172,7 @@ private fun FriendRow(
         label = "chevronRotation"
     )
 
-    val liveStreak = remember(activities) {
-        ActivityStats.computeCurrentStreak(activities)
-    }
-
-    val shape = MaterialTheme.shapes.large
+    val liveStreak = remember(activities) { ActivityStats.computeCurrentStreak(activities) }
     var expandedContentHeightPx by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(expanded) {
@@ -165,71 +184,82 @@ private fun FriendRow(
         }
     }
 
-    GlassSurface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape),
+    SwipeRevealRow(
         shape = shape,
-        blurred = false
+        modifier = Modifier.fillMaxWidth(),
+        endAction = SwipeRevealAction(
+            color = penaltyRed,
+            icon = R.drawable.ic_delete,
+            label = "Remove",
+            onTriggered = onDelete
+        )
     ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape)
-                    .clickable { onToggle() }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                AvatarBox(
-                    user = user,
+        GlassSurface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape),
+            shape = shape,
+            blurred = false
+        ) {
+            Column {
+                Row(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                )
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                        .fillMaxWidth()
+                        .clip(shape)
+                        .clickable { onToggle() }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    AvatarBox(
+                        user = user,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                    )
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text(
-                            text = user.displayName,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Normal,
-                            modifier = Modifier.padding(start = 2.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = user.displayName,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Normal,
+                                modifier = Modifier.padding(start = 2.dp)
+                            )
+                            LevelChip(user.level)
+                        }
+
+                        StreakChip(
+                            currentStreak = liveStreak,
+                            size = StreakChipSize.SMALL
                         )
-                        LevelChip(user.level)
                     }
 
-                    StreakChip(
-                        currentStreak = liveStreak,
-                        size = StreakChipSize.SMALL
+                    Icon(
+                        painter = painterResource(R.drawable.ic_chevron),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .size(TRAILING_BUTTON_SIZE)
+                            .rotate(chevronRotation)
                     )
                 }
 
-                Icon(
-                    painter = painterResource(R.drawable.ic_chevron),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .size(TRAILING_BUTTON_SIZE)
-                        .rotate(chevronRotation)
-                )
-            }
-
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Box(modifier = Modifier.onSizeChanged { expandedContentHeightPx = it.height }) {
-                    FriendExpandedContent(user = user, activities = activities)
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    Box(modifier = Modifier.onSizeChanged { expandedContentHeightPx = it.height }) {
+                        FriendExpandedContent(user = user, activities = activities)
+                    }
                 }
             }
         }
@@ -249,9 +279,9 @@ private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
     val xpTrend      = remember(weekActivity) { ActivityStats.computeXpTrend(weekActivity) }
     val totalWeekXp  = remember(weekActivity) { weekActivity.sumOf { it.xpEarned } }
 
-    val topPadding   = SCREEN_PADDING / 2
+    val topPadding    = SCREEN_PADDING / 2
     val bottomPadding = SCREEN_PADDING
-    val horizPadding = SCREEN_PADDING
+    val horizPadding  = SCREEN_PADDING
     val contentPadding = SCREEN_PADDING * 1.25f
 
     Column(
@@ -261,16 +291,14 @@ private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
             .padding(bottom = bottomPadding, top = topPadding),
         verticalArrangement = Arrangement.spacedBy(contentPadding)
     ) {
-        // Achievements:
         AchievementSectionRow(
             achievements = badges,
             badgeStyle   = AchievementBadgeStyle.CONCISE,
-            modifier = Modifier.padding(horizontal = 4.dp) // optical correction
+            modifier     = Modifier.padding(horizontal = 4.dp) // optical correction
         )
 
-        // Weekly Activity:
         LineChart(
-            title = "Weekly Activity",
+            title         = "Weekly Activity",
             headlineValue = "$totalWeekXp",
             headlineUnit  = "xp",
             points        = xpPoints,

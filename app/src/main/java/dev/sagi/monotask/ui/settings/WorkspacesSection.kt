@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -34,6 +33,8 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.core.SwipeRevealAction
+import dev.sagi.monotask.ui.component.core.SwipeRevealRow
 import dev.sagi.monotask.ui.component.core.TextInputDialog
 import dev.sagi.monotask.ui.component.display.SectionTitle
 import dev.sagi.monotask.ui.component.workspace.CreateWorkspaceDialog
@@ -41,7 +42,6 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.penaltyRed
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import dev.sagi.monotask.util.Constants.Theme.TRAILING_BUTTON_SIZE
-
 
 @Composable
 internal fun WorkspacesSection(
@@ -70,9 +70,8 @@ internal fun WorkspacesSection(
         shape    = shape
     ) {
         Column {
-            // Header row (always visible)
+            // Header row
             SettingsRow(
-                label           = "Manage workspaces",
                 leadingIcon     = { SettingsRowIcon(R.drawable.ic_workspace, color = SettingsIconColors.workspace) },
                 onClick         = { expanded = !expanded },
                 trailingContent = {
@@ -85,7 +84,28 @@ internal fun WorkspacesSection(
                             .rotate(chevronRotation)
                     )
                 }
-            )
+            ) {
+                // Header text content with expandable subtitle
+                Column(verticalArrangement = Arrangement.Center) {
+                    Text(
+                        text       = "Manage workspaces",
+                        style      = MaterialTheme.typography.titleSmall,
+                        color      = MaterialTheme.colorScheme.onSurface
+                    )
+                    AnimatedVisibility(
+                        visible = expanded,
+                        enter   = expandVertically(),
+                        exit    = shrinkVertically()
+                    ) {
+                        Text(
+                            text     = "Swipe right to edit, left to delete",
+                            style    = MaterialTheme.typography.labelSmall,
+                            color    = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                }
+            }
 
             // Expanded content
             AnimatedVisibility(
@@ -99,34 +119,28 @@ internal fun WorkspacesSection(
                     Spacer(Modifier.height(8.dp))
 
                     workspaces.forEach { workspace ->
-                        SettingsRow(
-                            verticalPadding = 8.dp,
-                            trailingContent = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    SettingsActionIconButton(
-                                        iconRes            = R.drawable.ic_edit,
-                                        contentDescription = "Rename ${workspace.name}",
-                                        onClick            = { renameTarget = workspace }
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    SettingsActionIconButton(
-                                        iconRes            = R.drawable.ic_delete,
-                                        contentDescription = "Delete ${workspace.name}",
-                                        onClick            = { deleteTarget = workspace },
-                                        enabled            = workspaces.size > 1,
-                                        tint               = if (workspaces.size > 1)
-                                            penaltyRed.copy(alpha = 0.8f)
-                                        else
-                                            MaterialTheme.colorScheme.outlineVariant
-                                    )
-                                }
-                            }
+                        SwipeRevealRow(
+                            modifier = Modifier.padding(horizontal = SCREEN_PADDING),
+                            startAction = SwipeRevealAction(
+                                color       = MaterialTheme.colorScheme.primary,
+                                icon        = R.drawable.ic_edit,
+                                label       = "Edit",
+                                onTriggered = { renameTarget = workspace }
+                            ),
+                            endAction = if (workspaces.size > 1) SwipeRevealAction(
+                                color       = penaltyRed,
+                                icon        = R.drawable.ic_delete,
+                                label       = "Delete",
+                                onTriggered = { deleteTarget = workspace }
+                            ) else null
                         ) {
-                            Text(
-                                text       = workspace.name,
-                                style      = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Normal
-                            )
+                            SettingsRow(verticalPadding = 8.dp) {
+                                Text(
+                                    text       = workspace.name,
+                                    style      = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            }
                         }
                     }
 
@@ -191,7 +205,6 @@ internal fun WorkspacesSection(
         )
     }
 }
-
 
 // ==========================================
 // Preview

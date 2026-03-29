@@ -72,6 +72,7 @@ class ProfileViewModel @Inject constructor(
             is ProfileEvent.OpenAvatarPicker    -> setAvatarPicker(true)
             is ProfileEvent.DismissAvatarPicker -> setAvatarPicker(false)
             is ProfileEvent.ResetAvatar         -> selectAvatar(0)
+            is ProfileEvent.RemoveFriend        -> removeFriend(event.friendId)
         }
     }
 
@@ -246,6 +247,16 @@ class ProfileViewModel @Inject constructor(
     // ==========================================================================
     // Friends & Invite
     // ==========================================================================
+
+    private fun removeFriend(friendId: String) {
+        viewModelScope.launch {
+            try {
+                userRepository.removeFriendBatch(userId, friendId)
+            } catch (e: Exception) {
+                _uiEffect.emit(ProfileUiEffect.ShowError("Failed to remove friend: ${e.message}"))
+            }
+        }
+    }
 
     fun generateInviteLink(): String = "monotask://invite?uid=$userId"
 

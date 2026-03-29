@@ -53,10 +53,10 @@ private enum class PendingAction { FOCUS_NOW, RESTORE, DELETE }
 @Composable
 fun KanbanCard(
     task: Task,
+    modifier: Modifier = Modifier,
     isArchive: Boolean = false,
     shape: Shape = MaterialTheme.shapes.small,
-    onKanbanEvent: (KanbanEvent) -> Unit = {},
-    modifier: Modifier = Modifier
+    onKanbanEvent: (KanbanEvent) -> Unit = {}
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var pendingAction    by remember { mutableStateOf<PendingAction?>(null) }
@@ -204,14 +204,14 @@ fun KanbanCardDropdown(
     ) {
         if (!isArchive) {
             GlassDropdownActionItem(
-                label   = "Edit task",
-                iconRes = R.drawable.ic_edit_alt,
-                onClick = { onEditClick(); onDismiss() }
-            )
-            GlassDropdownActionItem(
                 label   = "Focus now",
                 iconRes = R.drawable.ic_focus,
                 onClick = { onFocusNowClick(); onDismiss() }
+            )
+            GlassDropdownActionItem(
+                label   = "Edit task",
+                iconRes = R.drawable.ic_edit_alt,
+                onClick = { onEditClick(); onDismiss() }
             )
         } else {
             GlassDropdownActionItem(
