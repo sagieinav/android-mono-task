@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.GlassSwitch
+import dev.sagi.monotask.ui.component.core.MonoSwitch
 import dev.sagi.monotask.ui.component.core.MonoSlider
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
@@ -42,7 +42,7 @@ internal fun SettingsFocusPrefsSection(
                 SettingsRowIcon(R.drawable.ic_cognition, color = SettingsIconColors.hyperfocus)
             },
             trailingContent = {
-                GlassSwitch(
+                MonoSwitch(
                     checked         = hyperfocusModeEnabled,
                     onCheckedChange = onUpdateHyperfocusMode
                 )

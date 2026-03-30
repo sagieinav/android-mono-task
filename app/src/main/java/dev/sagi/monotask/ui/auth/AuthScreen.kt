@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
 import dev.sagi.monotask.ui.theme.basicMonoTask
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
@@ -42,7 +42,7 @@ fun AuthScreen(
     }
 
     if (uiState is AuthUiState.Loading) {
-        LoadingSpinner()
+        MonoLoadingIndicator()
         return
     }
 

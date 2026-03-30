@@ -1,7 +1,7 @@
 package dev.sagi.monotask.data.model
 
 import androidx.annotation.Keep
-import dev.sagi.monotask.domain.util.DiceBearHelper
+import dev.sagi.monotask.util.DiceBearHelper
 
 @Keep
 data class UserStats(

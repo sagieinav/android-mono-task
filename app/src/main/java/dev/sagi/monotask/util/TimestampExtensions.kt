@@ -1,4 +1,4 @@
-package dev.sagi.monotask.util.ext
+package dev.sagi.monotask.util
 
 import com.google.firebase.Timestamp
 import kotlinx.datetime.TimeZone

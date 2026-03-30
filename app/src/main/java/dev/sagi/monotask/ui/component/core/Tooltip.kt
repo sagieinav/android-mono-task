@@ -34,14 +34,13 @@ import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.nationalPark
 import kotlinx.coroutines.delay
 
-
 @Composable
-fun GlassTooltip(
-    expanded  : Boolean,
-    onDismiss : () -> Unit,
-    modifier  : Modifier = Modifier,
-    icon      : @Composable (() -> Unit)? = null,
-    content   : @Composable ColumnScope.() -> Unit
+fun MonoTooltip(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: @Composable (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
     var mounted by remember { mutableStateOf(false) }
@@ -62,16 +61,16 @@ fun GlassTooltip(
     val positionProvider = remember {
         object : PopupPositionProvider {
             override fun calculatePosition(
-                anchorBounds    : IntRect,
-                windowSize      : IntSize,
-                layoutDirection : LayoutDirection,
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
                 popupContentSize: IntSize
             ): IntOffset {
-                val gap    = 8
-                val x      = (anchorBounds.center.x - popupContentSize.width / 2)
-                                 .coerceIn(0, windowSize.width - popupContentSize.width)
+                val gap = 8
+                val x = (anchorBounds.center.x - popupContentSize.width / 2)
+                    .coerceIn(0, windowSize.width - popupContentSize.width)
                 val yAbove = anchorBounds.top - popupContentSize.height - gap
-                val y      = if (yAbove >= 0) yAbove else anchorBounds.bottom + gap
+                val y = if (yAbove >= 0) yAbove else anchorBounds.bottom + gap
                 return IntOffset(x, y)
             }
         }
@@ -79,50 +78,46 @@ fun GlassTooltip(
 
     Popup(
         popupPositionProvider = positionProvider,
-        onDismissRequest      = onDismiss,
-        properties            = PopupProperties(focusable = true)
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true)
     ) {
         val alpha = remember { Animatable(0f) }
-
         LaunchedEffect(visible) {
             alpha.animateTo(
-                targetValue   = if (visible) 1f else 0f,
+                targetValue = if (visible) 1f else 0f,
                 animationSpec = tween(if (visible) 200 else 150)
             )
         }
-
-
-        GlassTooltipShell(
+        MonoTooltipShell(
             modifier = modifier.graphicsLayer { this.alpha = alpha.value },
-            icon     = icon,
-            content  = content
+            icon = icon,
+            content = content
         )
     }
 }
 
-// Extracted shell (for allowing Preview)
+/** Visual shell of [MonoTooltip], extracted to allow @Preview without a Popup host */
 @Composable
-private fun GlassTooltipShell(
+private fun MonoTooltipShell(
     modifier: Modifier = Modifier,
-    icon    : @Composable (() -> Unit)? = null,
-    content : @Composable ColumnScope.() -> Unit
+    icon: @Composable (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
 ) {
     GlassSurface(
-        shape    = MaterialTheme.shapes.small,
+        shape = MaterialTheme.shapes.small,
         modifier = modifier.widthIn(max = 280.dp)
     ) {
         ProvideTextStyle(
             MaterialTheme.typography.labelSmall.copy(fontFamily = nationalPark)
         ) {
             Row(
-                modifier              = Modifier
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                icon?. let { it() }
+                icon?.invoke()
                 Column(
                     verticalArrangement = Arrangement.spacedBy(3.dp),
-                    content             = content
+                    content = content
                 )
             }
         }
@@ -131,30 +126,25 @@ private fun GlassTooltipShell(
 
 @Preview(showBackground = true)
 @Composable
-private fun GlassTooltipPreview() {
+private fun MonoTooltipPreview() {
     MonoTaskTheme {
-        GlassTooltipShell {
-            // Line 1: current earned tier
+        MonoTooltipShell {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text       = "CURRENT",
+                    text = "CURRENT",
                     fontWeight = FontWeight.Bold,
-                    color      = MaterialTheme.customColors.achievementBronze
+                    color = MaterialTheme.customColors.achievementBronze
                 )
-                Text(
-                    text  = "Complete 5 tasks",
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Text(text = "Complete 5 tasks", color = MaterialTheme.colorScheme.onSurface)
             }
-            // Line 2: next tier
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text       = "NEXT",
+                    text = "NEXT",
                     fontWeight = FontWeight.Bold,
-                    color      = MaterialTheme.customColors.achievementSilver
+                    color = MaterialTheme.customColors.achievementSilver
                 )
                 Text(
-                    text  = "Complete 100 tasks",
+                    text = "Complete 100 tasks",
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
                 )
             }

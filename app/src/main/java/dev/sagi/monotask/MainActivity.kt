@@ -19,11 +19,10 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
-import dev.sagi.monotask.ui.shared.UserSessionViewModel
-import dev.sagi.monotask.ui.shared.WorkspaceViewModel
+import dev.sagi.monotask.ui.common.UserSessionViewModel
+import dev.sagi.monotask.ui.common.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
 
 @AndroidEntryPoint

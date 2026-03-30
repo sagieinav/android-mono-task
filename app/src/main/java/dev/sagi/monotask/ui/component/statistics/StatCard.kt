@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.display
+package dev.sagi.monotask.ui.component.statistics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.display.ValueLabel
 
 // Usage: StatCard(title = "XP Earned") { ...content... }
 @Composable
@@ -36,7 +37,6 @@ fun StatCard(
             modifier            = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Header & Headline (if any)
             if (title != null || headlineValue != null) {
                 Row(
                     modifier              = Modifier.fillMaxWidth().padding(bottom = 6.dp),
@@ -44,15 +44,15 @@ fun StatCard(
                     verticalAlignment     = Alignment.Top
                 ) {
                     Column {
-                        title?. let {
+                        title?.let {
                             Text(
-                                text  = title,
+                                text  = it,
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
                             )
                         }
-                        headlineValue?. let {
-                            ValueLabel(headlineValue, headlineUnit)
+                        headlineValue?.let {
+                            ValueLabel(value = it, unit = headlineUnit)
                         }
                     }
                     badge?.invoke()

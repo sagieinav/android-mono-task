@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -50,8 +49,8 @@ import kotlin.math.roundToInt
 fun MonoSlider(
     value                 : Float,
     onValueChange         : (Float) -> Unit,
-    onValueChangeFinished : (Float) -> Unit = {},
     modifier              : Modifier = Modifier,
+    onValueChangeFinished : (Float) -> Unit = {},
     stepCount             : Int = 11,
     showTicks             : Boolean = true,
     hapticEnabled         : Boolean = true,
@@ -59,7 +58,6 @@ fun MonoSlider(
     thumbWidth            : Dp = 6.dp,
     thumbHeight           : Dp = 24.dp,
 ) {
-    val pillShape = CircleShape
     val density   = LocalDensity.current
     val haptic    = LocalHapticFeedback.current
 
@@ -74,7 +72,7 @@ fun MonoSlider(
     var rawOffsetPx by remember { mutableFloatStateOf(0f) }
     var isDragging  by remember { mutableStateOf(false) }
 
-    // Keep rawOffsetPx in sync with external value changes when not dragging
+    // Sync thumb position with external value changes when not dragging
     LaunchedEffect(snappedValue, usableWidthPxRef.floatValue) {
         if (!isDragging) rawOffsetPx = snappedValue * usableWidthPxRef.floatValue
     }
@@ -120,8 +118,8 @@ fun MonoSlider(
                 .height(thumbHeight)
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
-                        onDragStart  = { isDragging = true },
-                        onDragEnd    = {
+                        onDragStart = { isDragging = true },
+                        onDragEnd = {
                             isDragging = false
                             val finalStep  = (rawOffsetPx / usableWidthPxRef.floatValue * (stepCount - 1))
                                 .roundToInt().coerceIn(0, stepCount - 1)
@@ -154,8 +152,8 @@ fun MonoSlider(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(pillShape)
-                        .glassBorder(pillShape, width = 1.dp)
+                        .clip(CircleShape)
+                        .glassBorder(CircleShape, width = 1.dp)
                         .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceVariant)
                 )
 
@@ -165,8 +163,8 @@ fun MonoSlider(
                     modifier = Modifier
                         .width(activeWidthDp)
                         .fillMaxHeight()
-                        .clip(pillShape)
-                        .glassBorder(pillShape, width = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
+                        .clip(CircleShape)
+                        .glassBorder(CircleShape, width = 1.dp, color = MaterialTheme.colorScheme.primaryContainer)
                         .glassBackground(baseColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
                 )
 
@@ -182,7 +180,7 @@ fun MonoSlider(
                             val x     = i * spacing
                             val color = if (x < thumbCenterPx - 4f) tickFilled else tickUnfilled
                             drawCircle(
-                                color  = color,
+                                color = color,
                                 radius = dotRadius,
                                 center = Offset(x, size.height / 2f)
                             )
@@ -198,13 +196,13 @@ fun MonoSlider(
                     .width(thumbWidth)
                     .height(thumbHeight)
                     .shadow(
-                        elevation    = 8.dp,
-                        shape        = pillShape,
+                        elevation = 8.dp,
+                        shape = CircleShape,
                         ambientColor = Color.Black.copy(alpha = 0.3f),
-                        spotColor    = Color.Black.copy(alpha = 0.6f)
+                        spotColor = Color.Black.copy(alpha = 0.6f)
                     )
-                    .clip(pillShape)
-                    .glassBorder(pillShape)
+                    .clip(CircleShape)
+                    .glassBorder(CircleShape)
                     .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerLow)
             )
         }
@@ -253,13 +251,14 @@ private fun MonoSliderMiddlePreview() {
 private fun MonoSliderEndPreview() {
     MonoTaskTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                MonoSlider(
-                    value         = 1f,
-                    onValueChange = {},
-                    modifier      = Modifier.fillMaxWidth()
-                )
-            }
+            MonoSlider(
+                value = 1f,
+                onValueChange = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+            )
         }
     }
 }
+

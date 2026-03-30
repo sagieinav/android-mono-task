@@ -12,36 +12,59 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
+
+private val MinValueLabelSize = 18.sp
 
 @Composable
 fun ValueLabel(
     value: String,
-    unit: String? = null,
-//    accentColor: Color? = null,
+    modifier: Modifier = Modifier,
+    unit: String? = null
 ) {
     val initialFontSize = MaterialTheme.typography.headlineMedium.fontSize
     var fontSize by remember(value) { mutableStateOf(initialFontSize) }
 
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         Text(
-            text     = value,
-            style    = MaterialTheme.typography.headlineMedium.copy(fontSize = fontSize),
-            color    = MaterialTheme.colorScheme.onSurface,
+            text = value,
+            style = MaterialTheme.typography.headlineMedium.copy(fontSize = fontSize),
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.alignByBaseline(),
             onTextLayout = { result ->
-                if (result.hasVisualOverflow && fontSize > 18.sp) fontSize *= 0.9f
+                if (result.hasVisualOverflow && fontSize > MinValueLabelSize) fontSize *= 0.9f
             }
         )
-        unit?. let {
+        unit?.let {
             Text(
-                text       = unit,
-                style      = MaterialTheme.typography.labelLarge,
+                text = it,
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Thin,
-                color      = MaterialTheme.colorScheme.outlineVariant,
-                modifier   = Modifier.alignByBaseline()
+                color = MaterialTheme.colorScheme.outlineVariant,
+                modifier = Modifier.alignByBaseline()
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "ValueLabel — with unit")
+@Composable
+private fun ValueLabelPreview() {
+    MonoTaskTheme {
+        ValueLabel(value = "72,340", unit = "xp")
+    }
+}
+
+@Preview(showBackground = true, name = "ValueLabel — long value")
+@Composable
+private fun ValueLabelLongPreview() {
+    MonoTaskTheme {
+        ValueLabel(value = "1,000,000", unit = "tasks")
     }
 }

@@ -48,17 +48,19 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 // Dynamic layout constants
-private val MAX_PILL_WIDTH         = 84.dp
-private val PILL_GAP               = 8.dp
 private const val PILL_WIDTH_RATIO = 1.25f // Pill width will be 1.25x the row's height
 private const val REVEAL_THRESHOLD = 0.7f  // Must swipe 70% of the pill's width to trigger
+private val MaxPillWidth = 84.dp
+private val PillGap = 8.dp
+
 
 data class SwipeRevealAction(
-    val color      : Color,
-    @DrawableRes val icon : Int,
-    val label      : String,
+    val color: Color,
+    @DrawableRes val icon: Int,
+    val label: String,
     val onTriggered: () -> Unit
 )
+
 
 @Composable
 fun SwipeRevealRow(
@@ -71,9 +73,9 @@ fun SwipeRevealRow(
     val density = LocalDensity.current
     val haptic  = LocalHapticFeedback.current
 
-    var pillWidthDp by remember { mutableStateOf(MAX_PILL_WIDTH) }
+    var pillWidthDp by remember { mutableStateOf(MaxPillWidth) }
     val pillPx      = with(density) { pillWidthDp.toPx() }
-    val maxDragPx   = with(density) { (pillWidthDp + PILL_GAP).toPx() }
+    val maxDragPx   = with(density) { (pillWidthDp + PillGap).toPx() }
     val threshPx    = pillPx * REVEAL_THRESHOLD
 
     val offsetX = remember { Animatable(0f) }
@@ -124,7 +126,7 @@ fun SwipeRevealRow(
             .onSizeChanged { size ->
                 val heightDp = with(density) { size.height.toDp() }
                 val calculatedWidth = heightDp * PILL_WIDTH_RATIO
-                pillWidthDp = minOf(MAX_PILL_WIDTH, calculatedWidth)
+                pillWidthDp = minOf(MaxPillWidth, calculatedWidth)
             }
             .then(gestureModifier)
     ) {
@@ -198,31 +200,43 @@ private fun SwipePill(
 
 // ========== Preview ==========
 
-@Preview(showBackground = true, name = "SwipeRevealRow – end action (delete)")
+@Preview(showBackground = true, name = "SwipeRevealRow — end action")
 @Composable
 private fun SwipeRevealRowEndPreview() {
     MonoTaskTheme {
-        Column(
-            modifier            = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        val shape = RoundedCornerShape(16.dp)
+        SwipeRevealRow(
+            shape = shape,
+            endAction = SwipeRevealAction(
+                color = penaltyRed,
+                icon = R.drawable.ic_delete,
+                label = "Delete",
+                onTriggered = {}
+            )
         ) {
-            val defaultShape = RoundedCornerShape(16.dp)
+            GlassSurface(modifier = Modifier.fillMaxWidth(), shape = shape) {
+                Text("Swipe left to delete", modifier = Modifier.padding(16.dp))
+            }
+        }
+    }
+}
 
-            SwipeRevealRow(
-                shape = defaultShape,
-                endAction = SwipeRevealAction(
-                    color       = penaltyRed,
-                    icon        = R.drawable.ic_delete,
-                    label       = "Delete",
-                    onTriggered = {}
-                )
-            ) {
-                GlassSurface(modifier = Modifier.fillMaxWidth(), shape = defaultShape) {
-                    Text(
-                        text     = "Swipe left to delete",
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+@Preview(showBackground = true, name = "SwipeRevealRow — start action")
+@Composable
+private fun SwipeRevealRowStartPreview() {
+    MonoTaskTheme {
+        val shape = RoundedCornerShape(16.dp)
+        SwipeRevealRow(
+            shape = shape,
+            startAction = SwipeRevealAction(
+                color = Color(0xFF4CAF50),
+                icon = R.drawable.ic_check,
+                label = "Complete",
+                onTriggered = {}
+            )
+        ) {
+            GlassSurface(modifier = Modifier.fillMaxWidth(), shape = shape) {
+                Text("Swipe right to complete", modifier = Modifier.padding(16.dp))
             }
         }
     }

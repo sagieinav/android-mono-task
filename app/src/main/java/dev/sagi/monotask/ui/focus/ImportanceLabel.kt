@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.task
+package dev.sagi.monotask.ui.focus
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.ui.component.core.GlassLabel
+import dev.sagi.monotask.ui.component.core.MonoLabel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 
@@ -23,30 +23,39 @@ fun ImportanceLabel(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.customColors
-    val (label, contentColor) = when (importance) {
-        Importance.HIGH   -> "High"   to colors.importanceHighContent
-        Importance.MEDIUM -> "Medium" to colors.importanceMediumContent
-        Importance.LOW    -> "Low"    to colors.importanceLowContent
+    val (label, color, iconRes) = when (importance) {
+        Importance.HIGH   -> Triple(
+            "High",
+            colors.importanceHighContent,
+            R.drawable.ic_importance_high_alt
+        )
+        Importance.MEDIUM -> Triple(
+            "Medium",
+            colors.importanceMediumContent,
+            R.drawable.ic_importance_medium_alt
+        )
+        Importance.LOW    -> Triple(
+            "Low",
+            colors.importanceLowContent,
+            R.drawable.ic_importance_low_alt
+        )
     }
-    val iconRes = when (importance) {
-        Importance.HIGH   -> R.drawable.ic_importance_high_alt
-        Importance.MEDIUM -> R.drawable.ic_importance_medium_alt
-        Importance.LOW    -> R.drawable.ic_importance_low_alt
-    }
-    GlassLabel(
-        label    = label,
-        color    = contentColor,
+
+    MonoLabel(
+        label = label,
+        color = color,
         modifier = modifier,
         leadingContent = {
             Icon(
-                painter            = painterResource(iconRes),
-                contentDescription = "Importance Icon",
-                tint               = contentColor,
-                modifier           = Modifier.height(14.dp)
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.height(14.dp)
             )
         }
     )
 }
+
 
 
 // ========== Previews ==========

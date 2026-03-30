@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -26,18 +25,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.ui.component.core.AvatarBox
-import dev.sagi.monotask.ui.component.core.AvatarPicker
-import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
-import dev.sagi.monotask.ui.component.display.SectionTitle
+import dev.sagi.monotask.ui.component.display.AvatarBox
+import dev.sagi.monotask.ui.component.display.AvatarPicker
+import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.Constants
@@ -88,7 +84,7 @@ fun ProfileScreenContent(
                     .fillMaxSize()
                     .padding(top = scaffoldPadding.calculateTopPadding()),
                 contentAlignment = Alignment.Center
-            ) { LoadingSpinner() }
+            ) { MonoLoadingIndicator() }
         }
 
         is ProfileUiState.Error -> {

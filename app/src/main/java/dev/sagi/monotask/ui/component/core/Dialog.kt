@@ -34,7 +34,7 @@ import androidx.compose.ui.window.DialogProperties
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 @Composable
-fun GlassDialog(
+fun MonoDialog(
     onDismissRequest: () -> Unit,
     title: String,
     modifier: Modifier = Modifier,
@@ -43,14 +43,13 @@ fun GlassDialog(
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false // for consistent horizontal padding from screen edges
-        )    ) {
+        properties = DialogProperties(usePlatformDefaultWidth = false) // for consistent horizontal padding from screen edges
+        ) {
         GlassSurface(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
-                .widthIn(min = 280.dp, max = 560.dp) // M3 dialog spec bounds
+                .widthIn(min = 280.dp, max = 560.dp)
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,
             blurred = false,
@@ -62,18 +61,22 @@ fun GlassDialog(
                     .padding(top = 24.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Title
+                // Title:
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
-                // Content slot
+
+                // Content slot:
                 content()
-                // Buttons
+
+                // Buttons:
                 Row(
                     // SpaceBetween + horizontal padding, for nicely sided buttons
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom,
                     content = buttons
@@ -84,7 +87,7 @@ fun GlassDialog(
 }
 
 @Composable
-fun GlassConfirmDialog(
+fun MonoConfirmDialog(
     onDismissRequest: () -> Unit,
     title: String,
     message: String,
@@ -93,7 +96,7 @@ fun GlassConfirmDialog(
     confirmColor: Color = MaterialTheme.colorScheme.primary,
     onConfirm: () -> Unit
 ) {
-    GlassDialog(
+    MonoDialog(
         onDismissRequest = onDismissRequest,
         title = title,
         content = {
@@ -105,6 +108,7 @@ fun GlassConfirmDialog(
             )
         },
         buttons = {
+            // Dismiss Button:
             TextButton(onClick = onDismissRequest) {
                 Text(
                     dismissLabel,
@@ -113,7 +117,8 @@ fun GlassConfirmDialog(
                     fontWeight = FontWeight.Normal
                 )
             }
-            Spacer(Modifier.width(8.dp))
+
+            // Confirm Button:
             TextButton(onClick = {
                 onConfirm()
                 onDismissRequest()
@@ -122,7 +127,6 @@ fun GlassConfirmDialog(
                     confirmLabel,
                     color = confirmColor,
                     style = MaterialTheme.typography.titleMedium,
-//                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -130,7 +134,7 @@ fun GlassConfirmDialog(
 }
 
 @Composable
-fun TextInputDialog(
+fun MonoTextInputDialog(
     title: String,
     placeholder: String,
     confirmLabel: String = "Confirm",
@@ -142,7 +146,7 @@ fun TextInputDialog(
     var input by remember { mutableStateOf("") }
     val canConfirm = input.isNotBlank()
 
-    GlassDialog(
+    MonoDialog(
         onDismissRequest = onDismiss,
         title = title,
         content = {
@@ -171,7 +175,6 @@ fun TextInputDialog(
                     fontWeight = FontWeight.Normal
                 )
             }
-            Spacer(Modifier.width(8.dp))
             TextButton(
                 onClick = { onConfirm(input) },
                 enabled = canConfirm
@@ -179,9 +182,8 @@ fun TextInputDialog(
                 Text(
                     confirmLabel,
                     color = if (canConfirm) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                     style = MaterialTheme.typography.titleMedium,
-//                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -193,9 +195,9 @@ fun TextInputDialog(
 
 @Preview(showBackground = true, name = "GlassConfirmDialog")
 @Composable
-private fun GlassConfirmDialogPreview() {
+private fun MonoConfirmDialogPreview() {
     MonoTaskTheme {
-        GlassConfirmDialog(
+        MonoConfirmDialog(
             onDismissRequest = {},
             title            = "Delete Task",
             message          = "Are you sure you want to delete this task? This action cannot be undone.",
@@ -207,9 +209,9 @@ private fun GlassConfirmDialogPreview() {
 
 @Preview(showBackground = true, name = "TextInputDialog")
 @Composable
-private fun TextInputDialogPreview() {
+private fun MonoTextInputDialogPreview() {
     MonoTaskTheme {
-        TextInputDialog(
+        MonoTextInputDialog(
             title        = "New Workspace",
             placeholder  = "Workspace name",
             confirmLabel = "Create",

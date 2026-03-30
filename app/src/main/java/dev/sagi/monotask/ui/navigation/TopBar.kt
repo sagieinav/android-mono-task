@@ -20,8 +20,7 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.core.GlassTabRow
-import dev.sagi.monotask.ui.component.core.SegmentedToggle
+import dev.sagi.monotask.ui.component.core.MonoTabRow
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBorder
@@ -107,7 +106,7 @@ fun TabbedTopBar(
     TopBarScaffold(
         modifier = modifier,
         leading = {
-            GlassTabRow(
+            MonoTabRow(
                 tabs          = tabs,
                 selectedIndex = selectedTab,
                 onTabSelected = onTabSelected,

@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.display
+package dev.sagi.monotask.ui.component.statistics
 
 import android.graphics.BlurMaskFilter
 import android.graphics.Paint
@@ -53,18 +53,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ========== Design constants ==========
-
-private val BarWidth                      = 32.dp
-private val BarCornerRadius               = 10.dp
-private val ChartHeight                   = 140.dp
-private val TooltipClearance              = 30.dp
-
-private const val MaxSelectedFraction     = 0.82f
-private const val BarActiveAlpha          = 1.0f
-private const val BarTodayAlpha           = 0.6f
-private const val StripeLineAlpha         = 0.22f
-private val BarGlowBlur                   = 12.dp
-private const val BarGlowAlpha            = 0.35f
+private const val MAX_SELECTED_FRACTION = 0.82f
+private const val BAR_ACTIVE_ALPHA = 1.0f
+private const val BAR_TODAY_ALPHA = 0.6f
+private const val STRIPE_LINE_ALPHA = 0.22f
+private const val BAR_GLOW_ALPHA = 0.35f
+private const val BAR_STAGGER_DELAY_MS = 60L
+private val BarWidth = 32.dp
+private val BarCornerRadius = 10.dp
+private val ChartHeight = 140.dp
+private val TooltipClearance = 30.dp
+private val BarGlowBlur = 12.dp
 
 // ========== BarChart ==========
 
@@ -80,7 +79,6 @@ fun BarChart(
     shape: Shape = MaterialTheme.shapes.large,
     animate: Boolean = true
 ) {
-//    val textColor  = MaterialTheme.colorScheme.onSurface
     val labelColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
 
     StatCard(
@@ -90,7 +88,9 @@ fun BarChart(
         headlineUnit = headlineUnit,
         shape = shape,
         badge = if (trendPercent != 0) {
-            { TrendBadge(trendPercent) }
+            {
+                TrendBadge(trendPercent)
+            }
         } else null
     ) {
 
@@ -129,8 +129,8 @@ private fun BarChartContent(
 ) {
     if (points.isEmpty()) return
 
-    val todayIndex    = points.size - 1
-    val maxV          = points.maxOf { it.value }.takeIf { it > 0f } ?: 1f
+    val todayIndex = points.size - 1
+    val maxV = points.maxOf { it.value }.takeIf { it > 0f } ?: 1f
     var selectedIndex by remember { mutableIntStateOf(-1) }
 
     val animProgress = remember(points) {
@@ -142,7 +142,7 @@ private fun BarChartContent(
             animProgress.forEach { it.snapTo(0f) }
             points.indices.forEach { i ->
                 launch {
-                    delay(i * 60L)
+                    delay(i * BAR_STAGGER_DELAY_MS)
                     animProgress[i].animateTo(1f, tween(700, easing = FastOutSlowInEasing))
                 }
             }
@@ -152,36 +152,36 @@ private fun BarChartContent(
     }
 
     Row(
-        modifier              = modifier,
+        modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment     = Alignment.Bottom
+        verticalAlignment = Alignment.Bottom
     ) {
         points.forEachIndexed { index, point ->
-            val isSelected  = index == selectedIndex
-            val isToday     = index == todayIndex
+            val isSelected = index == selectedIndex
+            val isToday = index == todayIndex
             val rawFraction = (point.value / maxV) * animProgress[index].value
             val barFraction = when {
-                isSelected -> rawFraction.coerceAtMost(MaxSelectedFraction)
+                isSelected -> rawFraction.coerceAtMost(MAX_SELECTED_FRACTION)
                 else       -> rawFraction
             }.coerceAtLeast(if (point.value > 0f) 0.03f else 0f)
-            val barHeight   = ChartHeight * barFraction
+            val barHeight = ChartHeight * barFraction
 
             val selectionAnim by animateFloatAsState(
-                targetValue   = if (isSelected) 1f else 0f,
+                targetValue = if (isSelected) 1f else 0f,
                 animationSpec = tween(250, easing = FastOutSlowInEasing),
-                label         = "barSelect_$index"
+                label = "barSelect_$index"
             )
 
             Box(
-                modifier         = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 SingleBar(
                     selectionAnim = selectionAnim,
-                    isToday       = isToday,
-                    barHeight     = barHeight,
-                    barColor      = barColor,
-                    onClick       = { selectedIndex = if (selectedIndex == index) -1 else index }
+                    isToday = isToday,
+                    barHeight = barHeight,
+                    barColor = barColor,
+                    onClick = { selectedIndex = if (selectedIndex == index) -1 else index }
                 )
 
                 if (point.value > 0f && selectionAnim > 0f) {
@@ -217,9 +217,9 @@ private fun SingleBar(
             .drawBehind {
                 when {
                     isToday -> {
-                        drawRect(barColor.copy(alpha = BarTodayAlpha))
+                        drawRect(barColor.copy(alpha = BAR_TODAY_ALPHA))
                         if (selectionAnim > 0f)
-                            drawRect(barColor.copy(alpha = BarActiveAlpha * selectionAnim))
+                            drawRect(barColor.copy(alpha = BAR_ACTIVE_ALPHA * selectionAnim))
                     }
                     else -> {
                         clipRect(0f, 0f, size.width, size.height) {
@@ -229,7 +229,7 @@ private fun SingleBar(
                                 val endX = size.width + size.height
                                 while (x < endX) {
                                     drawLine(
-                                        color       = barColor.copy(alpha = StripeLineAlpha),
+                                        color       = barColor.copy(alpha = STRIPE_LINE_ALPHA),
                                         start       = Offset(x, -size.height),
                                         end         = Offset(x, size.height * 2),
                                         strokeWidth = gap
@@ -245,7 +245,7 @@ private fun SingleBar(
                                         0f, 0f, size.width, size.height,
                                         BarCornerRadius.toPx(), BarCornerRadius.toPx(),
                                         Paint().apply {
-                                            color       = barColor.copy(alpha = BarGlowAlpha * selectionAnim).toArgb()
+                                            color       = barColor.copy(alpha = BAR_GLOW_ALPHA * selectionAnim).toArgb()
                                             maskFilter  = BlurMaskFilter(
                                                 BarGlowBlur.toPx(), BlurMaskFilter.Blur.NORMAL
                                             )
@@ -254,7 +254,7 @@ private fun SingleBar(
                                     )
                                 }
                             }
-                            drawRect(barColor.copy(alpha = BarActiveAlpha * selectionAnim))
+                            drawRect(barColor.copy(alpha = BAR_ACTIVE_ALPHA * selectionAnim))
                         }
                     }
                 }
@@ -272,7 +272,7 @@ private fun SingleBar(
 @Composable
 private fun BarTooltip(point: ChartPoint, barColor: Color) {
     Text(
-        text       = "${point.value.toInt()}",
+        text       = point.value.toInt().toString(),
         style      = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.Bold,
         color      = barColor

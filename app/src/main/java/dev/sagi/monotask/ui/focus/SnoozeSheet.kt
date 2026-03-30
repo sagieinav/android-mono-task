@@ -29,7 +29,7 @@ import dev.sagi.monotask.ui.theme.penaltyRed
 import androidx.compose.ui.text.style.TextAlign
 import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.ui.component.core.ActionButton
-import dev.sagi.monotask.ui.component.core.BottomSheet
+import dev.sagi.monotask.ui.component.core.MonoBottomSheet
 import dev.sagi.monotask.ui.component.display.InfoCallout
 
 @Composable
@@ -37,7 +37,7 @@ fun SnoozeBottomSheet(
     onDismissRequest: () -> Unit,
     onSnooze: (XpEngine.SnoozeOption) -> Unit
 ) {
-    BottomSheet(
+    MonoBottomSheet(
         title = "Snooze Task",
         onDismissRequest = onDismissRequest
     ) {

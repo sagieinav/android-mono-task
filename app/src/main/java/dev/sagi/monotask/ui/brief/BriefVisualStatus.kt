@@ -2,15 +2,13 @@ package dev.sagi.monotask.ui.brief
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.display.IllustrationMessage
+import dev.sagi.monotask.ui.component.display.StateMessage
 import dev.sagi.monotask.ui.component.display.IllustrationSize
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -41,7 +39,7 @@ fun BriefStatus(
         )
     }
 
-    IllustrationMessage(
+    StateMessage(
         imgRes   = imgRes,
         title    = title,
         subtitle = subtitle,

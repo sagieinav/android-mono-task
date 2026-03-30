@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.shared
+package dev.sagi.monotask.ui.common
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

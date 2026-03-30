@@ -31,11 +31,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
+import dev.sagi.monotask.ui.component.core.MonoConfirmDialog
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.SwipeRevealAction
 import dev.sagi.monotask.ui.component.core.SwipeRevealRow
-import dev.sagi.monotask.ui.component.core.TextInputDialog
+import dev.sagi.monotask.ui.component.core.MonoTextInputDialog
 import dev.sagi.monotask.ui.component.display.SectionTitle
 import dev.sagi.monotask.ui.component.workspace.CreateWorkspaceDialog
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -177,7 +177,7 @@ internal fun WorkspacesSection(
 
     // Dialogs
     renameTarget?.let { workspace ->
-        TextInputDialog(
+        MonoTextInputDialog(
             title        = "Rename Workspace",
             placeholder  = workspace.name,
             confirmLabel = "Save",
@@ -187,7 +187,7 @@ internal fun WorkspacesSection(
     }
 
     deleteTarget?.let { workspace ->
-        GlassConfirmDialog(
+        MonoConfirmDialog(
             onDismissRequest = { deleteTarget = null },
             title            = "Delete '${workspace.name}'?",
             message          = "This will permanently delete the workspace and all its tasks.",

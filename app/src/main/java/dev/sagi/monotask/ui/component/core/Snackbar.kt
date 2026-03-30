@@ -9,10 +9,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.nationalPark
+
+private val SnackbarIconSize = 26.dp
 
 data class MonoSnackbarVisuals(
     override val message: String,
@@ -23,7 +27,7 @@ data class MonoSnackbarVisuals(
 ) : SnackbarVisuals
 
 @Composable
-fun GlassSnackbarDismissable(
+fun MonoSnackbarDismissible(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier
 ) {
@@ -43,16 +47,18 @@ fun GlassSnackbarDismissable(
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = { Spacer(modifier = Modifier.fillMaxSize()) },
-        content = { GlassSnackbar(snackbarData, modifier) }
+        content = { MonoSnackbar(snackbarData, modifier) }
     )
 }
 
 
 @Composable
-fun GlassSnackbar(
+fun MonoSnackbar(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier
 ) {
+    val monoVisuals = snackbarData.visuals as? MonoSnackbarVisuals
+
     GlassSurface(
         modifier = modifier
             .padding(10.dp) // external padding
@@ -61,22 +67,19 @@ fun GlassSnackbar(
         shape = CircleShape,
         blurred = true
     ) {
-        val snackbarVisuals = snackbarData.visuals as? MonoSnackbarVisuals
-
         Row(
-            modifier = Modifier
-                .padding(vertical = 8.dp), // internal padding
+            modifier = Modifier.padding(vertical = 8.dp), // internal padding
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // (Optional) Leading Icon
-            snackbarVisuals?.leadingIcon?. let {
+            monoVisuals?.leadingIcon?. let {
                 Icon(
-                    painter = painterResource(snackbarVisuals.leadingIcon),
+                    painter = painterResource(it),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(start = 16.dp)
-                        .size(26.dp)
+                        .size(SnackbarIconSize)
                 )
             }
 
@@ -93,26 +96,41 @@ fun GlassSnackbar(
             )
 
             // (Optional) Action Icon
-            if (snackbarData.visuals.actionLabel != null) {
+            snackbarData.visuals.actionLabel?. let {
                 // If an action is provided, SHOW ACTION
-                val iconSize = 26.dp
                 IconButton(
                     onClick = { snackbarData.performAction() },
-                    colors = IconButtonDefaults.iconButtonColors().copy(
-                        contentColor = MaterialTheme.colorScheme.primary,
-                        disabledContentColor = MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .padding(end = 6.dp)
-                        .heightIn(max = iconSize)
+                        .heightIn(max = SnackbarIconSize)
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_undo),
                         tint = MaterialTheme.colorScheme.primary,
                         contentDescription = "Undo",
-                        modifier = Modifier.size(iconSize)
+                        modifier = Modifier.size(SnackbarIconSize)
                     )
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MonoSnackbarPreview() {
+    MonoTaskTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            MonoSnackbar(
+                snackbarData = object : SnackbarData {
+                    override val visuals = MonoSnackbarVisuals(
+                        message = "Task completed",
+                        actionLabel = "Undo"
+                    )
+                    override fun dismiss() {}
+                    override fun performAction() {}
+                }
+            )
         }
     }
 }

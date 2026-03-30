@@ -3,7 +3,6 @@ package dev.sagi.monotask.ui.brief
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,10 +47,9 @@ import dev.sagi.monotask.ui.component.display.CountBadge
 import dev.sagi.monotask.ui.focus.UserHeader
 import dev.sagi.monotask.ui.theme.LocalCustomColors
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.util.ext.toRelativeDate
+import dev.sagi.monotask.util.toRelativeDate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview

@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.task
+package dev.sagi.monotask.ui.focus
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOutCubic
@@ -6,9 +6,7 @@ import androidx.compose.animation.core.EaseInOutQuart
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,58 +31,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.ui.component.core.GlassLabel
+import dev.sagi.monotask.R
+import dev.sagi.monotask.ui.component.core.MonoLabel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
-import dev.sagi.monotask.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun XpChip(xp: Int, modifier: Modifier = Modifier) {
+fun XpLabel(xp: Int, modifier: Modifier = Modifier) {
     val color = MaterialTheme.customColors.xp
-    GlassLabel(
-        label    = "$xp XP",
-        color    = color,
+    MonoLabel(
+        label = "$xp XP",
+        color = color,
         modifier = modifier,
         leadingContent = {
             Icon(
-                painter            = painterResource(R.drawable.ic_xp),
+                painter = painterResource(R.drawable.ic_xp),
                 contentDescription = null,
-                tint               = color,
-                modifier           = Modifier.size(14.dp)
+                tint = color,
+                modifier = Modifier.size(14.dp)
             )
         }
     )
 }
-
-
-@Composable
-fun XpLabelCurrent(xp: Int, modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_xp),
-            contentDescription = null,
-            modifier = modifier.size(17.dp),
-            tint = MaterialTheme.customColors.xp
-        )
-        Text(
-            text = "$xp XP",
-            style = MaterialTheme.typography.labelLarge
-                .copy(
-                    lineHeightStyle = LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Proportional,
-                        trim = LineHeightStyle.Trim.Both
-                    )),
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.customColors.xp
-        )
-    }
-}
-
 
 
 // ========== XpLabelCompletion ==========
@@ -114,30 +84,21 @@ fun XpLabelCompletion(
             alpha.snapTo(1f)
             shimmer.snapTo(0f)
 
-            // 1. Pop animation
+            // 1. Pop
             scale.animateTo(
                 XP_POP_SCALE,
                 spring(
                     dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness    = Spring.StiffnessMedium // stiffer than MediumLow
+                    stiffness = Spring.StiffnessMedium
                 )
             )
 
-            // 2. Shimmer (highlight) animation
-            shimmer.animateTo(
-                1f,
-                tween(
-                    durationMillis = 400,
-                    easing         = EaseInOutQuart
-                )
-            )
+            // 2. Shimmer
+            shimmer.animateTo(1f, tween(durationMillis = 400, easing = EaseInOutQuart))
 
             // 3. Float up & fade out
             launch {
-                offsetY.animateTo(
-                    XP_EXIT_OFFSET_Y,
-                    tween(400, easing = EaseInOutCubic)
-                )
+                offsetY.animateTo(XP_EXIT_OFFSET_Y, tween(400, easing = EaseInOutCubic))
             }
             alpha.animateTo(0f, tween(300))
         } else {
@@ -155,58 +116,39 @@ fun XpLabelCompletion(
             (shimmerCenter - SHIMMER_HALF_WIDTH).coerceIn(0f, 1f) to color,
             shimmerCenter.coerceIn(0f, 1f)                        to Color.White,
             (shimmerCenter + SHIMMER_HALF_WIDTH).coerceIn(0f, 1f) to color,
-            1f                                                    to color
+            1f                                                     to color
         )
     } else null
 
-    Row(
+    Text(
+        text = "+$xpDelta XP",
+        style = MaterialTheme.typography.labelLarge.copy(
+            brush = textBrush,
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Proportional,
+                trim = LineHeightStyle.Trim.Both
+            )
+        ),
+        color = if (textBrush == null) color else Color.Unspecified,
+        fontWeight = FontWeight.Bold,
         modifier = modifier.graphicsLayer {
-            scaleX          = scale.value
-            scaleY          = scale.value
-            translationY    = offsetY.value
-            this.alpha      = alpha.value
+            scaleX = scale.value
+            scaleY = scale.value
+            translationY = offsetY.value
+            this.alpha = alpha.value
             transformOrigin = TransformOrigin(1f, 1f)
-            rotationZ       = 7f
-        },
-        verticalAlignment     = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Text(
-            text       = "+$xpDelta XP",
-            style      = MaterialTheme.typography.labelLarge.copy(
-                brush = textBrush,
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Proportional,
-                    trim      = LineHeightStyle.Trim.Both
-                )
-            ),
-            color      = if (textBrush == null) color else Color.Unspecified,
-            fontWeight = FontWeight.Bold
-        )
-    }
+            rotationZ = 7f
+        }
+    )
 }
 
 
-
-
-
-
-
+// ========== Previews ==========
 
 @Preview(showBackground = true)
 @Composable
-fun XpLabelCompletionPreview() {
+private fun XpLabelCompletionPreview() {
     MonoTaskTheme {
-        // Static preview
-//        Column(
-//            modifier = Modifier.padding(24.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            XpDeltaBadge(xpDelta = 100, visible = true)
-//            XpDeltaBadge(xpDelta = -50, visible = true)
-//        }
-
-        // Dynamic preview
         var visible by remember { mutableStateOf(false) }
 
         Box(
@@ -216,7 +158,6 @@ fun XpLabelCompletionPreview() {
             Button(onClick = { visible = true }) {
                 Text("Complete Task")
             }
-
             XpLabelCompletion(
                 xpDelta = 100,
                 visible = visible,
@@ -232,6 +173,5 @@ fun XpLabelCompletionPreview() {
                 visible = false
             }
         }
-
     }
 }

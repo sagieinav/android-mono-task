@@ -26,21 +26,19 @@ import dev.sagi.monotask.ui.component.task.CreateTaskSheet
 import dev.sagi.monotask.ui.component.workspace.CreateWorkspaceDialog
 import dev.sagi.monotask.ui.profile.InviteSheet
 import dev.sagi.monotask.ui.settings.SettingsViewModel
-import dev.sagi.monotask.ui.shared.WorkspaceViewModel
+import dev.sagi.monotask.ui.common.WorkspaceViewModel
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
-import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
+import dev.sagi.monotask.ui.component.core.MonoSnackbarDismissible
 import dev.sagi.monotask.ui.component.core.MonoSnackbarVisuals
-import dev.sagi.monotask.ui.shared.CreateSheetDraft
+import dev.sagi.monotask.ui.common.CreateSheetDraft
 import dev.sagi.monotask.ui.kanban.KanbanUiState
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
-import dev.sagi.monotask.ui.shared.UserSessionViewModel
+import dev.sagi.monotask.ui.common.UserSessionViewModel
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import androidx.compose.ui.platform.LocalLocale
 
 @Composable
@@ -103,7 +101,7 @@ fun MainScaffold(
             containerColor = Color.Transparent,
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState) { snackbarData ->
-                    GlassSnackbarDismissable(snackbarData)
+                    MonoSnackbarDismissible(snackbarData)
                 }
             },
             topBar = {

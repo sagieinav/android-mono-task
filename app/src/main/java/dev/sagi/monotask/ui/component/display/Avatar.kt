@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.core
+package dev.sagi.monotask.ui.component.display
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -30,47 +30,54 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.domain.util.DiceBearHelper
+import dev.sagi.monotask.util.DiceBearHelper
+import dev.sagi.monotask.ui.component.core.MonoBottomSheet
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.glassBorderPremium
 import dev.sagi.monotask.util.Constants
 
-// Raw avatar image: handles auto (DiceBear) vs preset drawable
-// Apply sizing and clipping from the outside via modifier
+/**
+ * Raw avatar image — handles auto (DiceBear URL) vs preset drawable.
+ * Apply sizing and clipping from outside via [modifier].
+ */
 @Composable
-fun AvatarImage(user: User, modifier: Modifier = Modifier) {
+fun AvatarImage(
+    user: User,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null
+) {
     val scaledModifier = modifier.graphicsLayer {
-        scaleX       = 0.95f
-        scaleY       = 0.95f
+        scaleX = 0.95f
+        scaleY = 0.95f
         translationY = size.height * 0.05f
     }
     if (user.isAutoAvatar) {
         AsyncImage(
-            model              = user.resolvedAvatarUrl,
-            contentDescription = "Avatar",
-            contentScale       = ContentScale.Fit,
-            modifier           = scaledModifier
+            model = user.resolvedAvatarUrl,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Fit,
+            modifier = scaledModifier
         )
     } else {
         Image(
-            painter            = painterResource(user.avatarPreset),
-            contentDescription = "Avatar",
-            contentScale       = ContentScale.Fit,
-            modifier           = scaledModifier
+            painter = painterResource(user.avatarPreset),
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Fit,
+            modifier = scaledModifier
         )
     }
 }
 
-// Avatar with the standard glass treatment (clip + background + border)
+/** Avatar with standard glass treatment: clipped circle with glass background and premium border */
 @Composable
 fun AvatarBox(
-    user     : User,
-    modifier : Modifier = Modifier
+    user: User,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier         = modifier
+        modifier = modifier
             .clip(CircleShape)
             .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
             .glassBorderPremium(CircleShape),
@@ -81,45 +88,45 @@ fun AvatarBox(
 }
 
 
-// Avatar Picker (bottom sheet)
+/**
+ * Bottom sheet avatar picker — auto (DiceBear) listed first, followed by preset drawables.
+ */
 @Composable
 fun AvatarPicker(
     user: User,
     onSelect: (Int) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val options: List<DiceBearHelper.AvatarPreset?> = listOf(null) + DiceBearHelper.PRESETS
+    val options: List<Int?> = listOf(null) + DiceBearHelper.PRESETS
 
-    BottomSheet(
-        title            = "Choose Your Avatar",
-        onDismissRequest = onDismiss
+    MonoBottomSheet(
+        title = "Choose Your Avatar",
+        onDismissRequest = onDismiss,
+        modifier = modifier
     ) {
         LazyVerticalGrid(
-            columns               = GridCells.Fixed(3),
-            contentPadding        = PaddingValues(Constants.Theme.SCREEN_PADDING),
+            columns = GridCells.Fixed(3),
+            contentPadding = PaddingValues(Constants.Theme.SCREEN_PADDING),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement   = Arrangement.spacedBy(16.dp),
-            modifier              = Modifier.wrapContentHeight().heightIn(max = 360.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.wrapContentHeight().heightIn(max = 360.dp)
         ) {
             items(options) { preset ->
                 val displayUser = if (preset == null) user.copy(avatarPreset = 0)
-                else user.copy(avatarPreset = preset.drawable)
-                val isSelected  = (preset == null && user.isAutoAvatar) ||
-                        preset?.drawable == user.avatarPreset
+                else user.copy(avatarPreset = preset)
+                val isSelected = (preset == null && user.isAutoAvatar) ||
+                        preset == user.avatarPreset
                 Box(
                     modifier = Modifier
                         .aspectRatio(1f)
                         .clip(CircleShape)
                         .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
                         .then(
-                            if (isSelected) Modifier.border(
-                                shape = CircleShape,
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                             else Modifier.glassBorder(shape = CircleShape, width = 3.dp)
                         )
-                        .clickable { onSelect(preset?.drawable ?: 0) }
+                        .clickable { onSelect(preset ?: 0) }
                 ) {
                     AvatarImage(user = displayUser, modifier = Modifier.fillMaxSize())
                 }
@@ -144,5 +151,14 @@ private fun AvatarPreview() {
             AvatarBox(user = user, modifier = Modifier.size(56.dp))
             AvatarBox(user = user, modifier = Modifier.size(80.dp))
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AvatarPickerPreview() {
+    MonoTaskTheme {
+        val user = User(avatarPreset = R.drawable.avatar_micah01)
+        AvatarPicker(user = user, onSelect = {}, onDismiss = {})
     }
 }

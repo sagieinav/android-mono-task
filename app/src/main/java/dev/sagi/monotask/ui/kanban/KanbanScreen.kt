@@ -18,8 +18,8 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.ui.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.ui.component.core.GlassDropdownItem
-import dev.sagi.monotask.ui.component.core.GlassDropdownMenu
+import dev.sagi.monotask.ui.component.core.MonoDropdownItem
+import dev.sagi.monotask.ui.component.core.MonoDropdownMenu
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.task.EditTaskSheet
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.display.IllustrationSize
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import java.util.Date
 
@@ -122,10 +123,10 @@ fun KanbanScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 EmptyState(
-                    imgRes        = R.drawable.img_empty_hyperfocus,
-                    title         = "Hyperfocusing",
-                    subtitle      = "Kanban's locked. Stay in the zone.",
-                    isMainContent = true,
+                    imgRes = R.drawable.img_empty_hyperfocus,
+                    title = "Hyperfocusing",
+                    subtitle = "Kanban's locked. Stay in the zone.",
+                    size = IllustrationSize.Large,
                 )
             }
         }
@@ -153,6 +154,7 @@ fun KanbanScreenContent(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment     = Alignment.CenterVertically
                 ) {
+                    // Active/Archive Toggle:
                     SegmentedToggle(
                         options          = listOf("Active", "Archive"),
                         selectedIndex    = if (ready.isArchive) 1 else 0,
@@ -162,50 +164,26 @@ fun KanbanScreenContent(
                         modifier = Modifier.height(controlRowHeight)
                     )
 
+                    // "Sorted By" DD-Menu
                     Box {
-                        GlassSurface(
-                            blurred = false,
-                            shape = CircleShape,
-                            modifier = Modifier
-                                .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
-                                .monoShadowWorkaround(CircleShape)
-                                .clickable(onClick = { showSortDropdown = true }),
-                            baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .align(Alignment.Center)
-                                ,
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                val color = MaterialTheme.colorScheme.onSurfaceVariant
-                                Text(
-                                    text = sortLabel(ready.sortOrder),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = color,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-//                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .widthIn(max = 140.dp)
-                                )
-                            }
-                        }
-                        GlassDropdownMenu(
+                        SortPill(
+                            sortOrder = ready.sortOrder,
+                            onClick = { showSortDropdown = true }
+                        )
+                        MonoDropdownMenu(
                             expanded  = showSortDropdown,
                             onDismiss = { showSortDropdown = false }
                         ) {
                             SortOrder.entries.forEach { order ->
-                                GlassDropdownItem(
+                                MonoDropdownItem(
                                     label    = sortLabel(order),
-                                    selected = ready.sortOrder == order,
+                                    isSelected = ready.sortOrder == order,
                                     onClick  = {
                                         onSortOrderChanged(order)
                                         showSortDropdown = false
-                                    }
+                                    },
+                                    textStyle = MaterialTheme.typography.titleSmall,
+                                    showSelectedIcon = false
                                 )
                             }
                         }
@@ -219,10 +197,10 @@ fun KanbanScreenContent(
                         contentAlignment = Alignment.Center
                     ) {
                         EmptyState(
-                            imgRes        = R.drawable.img_empty_kanban,
-                            title         = "Nothing here yet",
-                            subtitle      = "Add a task and get the ball rolling.",
-                            isMainContent = true,
+                            imgRes = R.drawable.img_empty_kanban,
+                            title = "Nothing here yet",
+                            subtitle = "Add a task and get the ball rolling.",
+                            size = IllustrationSize.Large,
                         )
                     }
                 } else {
@@ -263,3 +241,34 @@ fun KanbanScreenContent(
         }
     }
 }
+
+@Composable
+private fun SortPill(
+    sortOrder: SortOrder,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    GlassSurface(
+        blurred = false,
+        shape = CircleShape,
+        modifier = modifier
+            .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
+            .monoShadowWorkaround(CircleShape)
+            .clickable(onClick = onClick),
+        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
+    ) {
+        Text(
+            text = sortLabel(sortOrder),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 16.dp)
+                .widthIn(max = 140.dp)
+        )
+    }
+}
+

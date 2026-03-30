@@ -35,7 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.ui.component.core.AvatarBox
+import dev.sagi.monotask.ui.component.display.AvatarBox
 import dev.sagi.monotask.ui.component.display.StreakChip
 import dev.sagi.monotask.ui.theme.LocalCustomColors
 import dev.sagi.monotask.ui.theme.glassBorder

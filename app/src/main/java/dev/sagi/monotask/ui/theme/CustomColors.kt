@@ -55,11 +55,11 @@ data class CustomColors(
 }
 
 val lightCustomColors = CustomColors(
-    xp              = XpViolet,
-    streak          = StreakFire,
-    ace             = AceGold,
-    aceDim          = AceGoldDim,
-    achievementGold   = Color(0xFFEFB73D),
+    xp = XpViolet,
+    streak = StreakOrange,
+    ace = AceGold,
+    aceDim = AceGoldDim,
+    achievementGold = Color(0xFFEFB73D),
     achievementSilver = Color(0xFFB6B6BB),
     achievementBronze = Color(0xFFB78457),
     achievementLocked = Color(0xFFE1E1E1),

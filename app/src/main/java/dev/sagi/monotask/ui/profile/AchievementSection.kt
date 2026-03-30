@@ -36,7 +36,7 @@ import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.AchievementCategory
 import dev.sagi.monotask.data.model.AchievementMilestone
 import dev.sagi.monotask.data.model.AchievementTier
-import dev.sagi.monotask.ui.component.core.GlassTooltip
+import dev.sagi.monotask.ui.component.core.MonoTooltip
 import dev.sagi.monotask.ui.theme.HexagonShape
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
@@ -136,7 +136,7 @@ fun HexagonAchievementBadge(
             )
 
             // Tooltip anchored to the hexagon's bounds
-            GlassTooltip(
+            MonoTooltip(
                 expanded  = showTooltip,
                 onDismiss = { showTooltip = false }
             ) {

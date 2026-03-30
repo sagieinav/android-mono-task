@@ -260,38 +260,26 @@ val onDarkBlueContainerDarkHighContrast = Color(0xFF000A22)
 // These are NOT part of the M3 system
 // brand-specific overlays used in custom composables only
 
-val AceGold            = Color(0xFFDEBC00) // Raw brand gold
-val AceGoldGlow        = Color(0x40FFD700) // 25% alpha
-val AceGoldDim         = Color(0xFFC9A500) // Darker gold
-
-val StreakFire         = Color(0xFFDC4F07) // Active streak icon & accent color
-val XpViolet           = Color(0xFF7643F1) // XP accent color
-
-// Fire gradient, used for the streak fire icon
-val FireGradientDeep   = Color(0xFFB45309) // base: deep amber-brown
-val FireGradientMid    = Color(0xFFD97706) // mid:  amber
-val FireGradientTip    = Color(0xFFF59E0B) // tip:  warm yellow
-
-val PenaltyRedGlow     = Color(0x33E63946) // 20% alpha: error container tint
-val SuccessGreen       = Color(0xFF06D6A0) // Raw success color
-val bonusGreen         = Color(0xCC39D540)
-val penaltyRed         = Color(0xDDDE0F38)
-
-val GlassSurface       = Color(0xCCFFFFFF) // 80% white: frosted card overlay (light)
-val GlassSurfaceDark   = Color(0xCC1A1A2E) // 80% dark: frosted card overlay (dark)
+val AceGold = Color(0xFFDEBC00) // Raw brand gold
+val AceGoldGlow = Color(0x40FFD700) // 25% alpha
+val AceGoldDim = Color(0xFFC9A500) // Darker gold
+val StreakOrange = Color(0xFFDE7D00)
+val XpViolet = Color(0xFF7643F1) // XP accent color
+val bonusGreen = Color(0xCC39D540)
+val penaltyRed = Color(0xDDDE0F38)
 
 
 
 
 // ── Importance Tag Colors ────────────────────────────────────────
-val ImportanceHighBackground   = Color(0xFFFFDDDD) // was 0xFFFFEDED
-val ImportanceHighContent      = Color(0xFFC40726)
+val ImportanceHighBackground = Color(0xFFFFDDDD) // was 0xFFFFEDED
+val ImportanceHighContent = Color(0xFFC40726)
 
 val ImportanceMediumBackground = Color(0xFFFFF0CC) // was 0xFFFFF8E1
-val ImportanceMediumContent    = Color(0xFFE7AF22)
+val ImportanceMediumContent = Color(0xFFE7AF22)
 
-val ImportanceLowBackground    = Color(0xFFD9EED9) // was 0xFFE8F5E9
-val ImportanceLowContent       = Color(0xFF30A435)
+val ImportanceLowBackground = Color(0xFFD9EED9) // was 0xFFE8F5E9
+val ImportanceLowContent = Color(0xFF30A435)
 
 
 // ── Custom Tag Colors ─────────────────────────────────────────────

@@ -28,13 +28,13 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.task.CustomTag
 import dev.sagi.monotask.ui.component.task.DueDateLabel
-import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
+import dev.sagi.monotask.ui.component.core.MonoConfirmDialog
 import dev.sagi.monotask.ui.component.task.TagSize
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.GlassDropdownActionItem
-import dev.sagi.monotask.ui.component.core.GlassDropdownMenu
+import dev.sagi.monotask.ui.component.core.MonoDropdownActionItem
+import dev.sagi.monotask.ui.component.core.MonoDropdownMenu
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -148,7 +148,7 @@ fun KanbanCard(
 
     // ========== Confirm dialogs ==========
     when (pendingAction) {
-        PendingAction.FOCUS_NOW -> GlassConfirmDialog(
+        PendingAction.FOCUS_NOW -> MonoConfirmDialog(
             onDismissRequest = { pendingAction = null },
             title            = "Focus on this Task?",
             message          = "Your current focus task will be snoozed, " +
@@ -157,7 +157,7 @@ fun KanbanCard(
             confirmColor     = MaterialTheme.customColors.aceDim,
             onConfirm        = { onKanbanEvent(KanbanEvent.FocusNow(task)) }
         )
-        PendingAction.RESTORE -> GlassConfirmDialog(
+        PendingAction.RESTORE -> MonoConfirmDialog(
             onDismissRequest = { pendingAction = null },
             title            = "Restore Task?",
             message          = "This will move the task back to active.\n" +
@@ -165,7 +165,7 @@ fun KanbanCard(
             confirmLabel     = "Restore",
             onConfirm        = { onKanbanEvent(KanbanEvent.RestoreTask(task)) }
         )
-        PendingAction.DELETE -> GlassConfirmDialog(
+        PendingAction.DELETE -> MonoConfirmDialog(
             onDismissRequest = { pendingAction = null },
             title            = "Delete Task?",
             message          = "This operation cannot be undone.",
@@ -195,31 +195,31 @@ fun KanbanCardDropdown(
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    GlassDropdownMenu(
+    MonoDropdownMenu(
         expanded  = expanded,
         onDismiss = onDismiss,
         tapOffset    = tapOffset,
         modifier  = modifier
     ) {
         if (!isArchive) {
-            GlassDropdownActionItem(
+            MonoDropdownActionItem(
                 label   = "Focus now",
                 iconRes = R.drawable.ic_focus,
                 onClick = { onFocusNowClick(); onDismiss() }
             )
-            GlassDropdownActionItem(
+            MonoDropdownActionItem(
                 label   = "Edit task",
                 iconRes = R.drawable.ic_edit_alt,
                 onClick = { onEditClick(); onDismiss() }
             )
         } else {
-            GlassDropdownActionItem(
+            MonoDropdownActionItem(
                 label   = "Restore task",
                 iconRes = R.drawable.ic_restore,
                 onClick = { onRestoreClick(); onDismiss() }
             )
         }
-        GlassDropdownActionItem(
+        MonoDropdownActionItem(
             label   = "Delete task",
             iconRes = R.drawable.ic_delete,
             color = MaterialTheme.colorScheme.error,

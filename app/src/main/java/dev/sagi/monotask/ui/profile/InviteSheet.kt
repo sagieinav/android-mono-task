@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,8 +27,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.ui.component.core.ActionButton
-import dev.sagi.monotask.ui.component.core.AvatarBox
-import dev.sagi.monotask.ui.component.core.BottomSheet
+import dev.sagi.monotask.ui.component.display.AvatarBox
+import dev.sagi.monotask.ui.component.core.MonoBottomSheet
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,7 +100,7 @@ fun InviteSheet(
 
     val state by vm.senderState.collectAsStateWithLifecycle()
 
-    BottomSheet(
+    MonoBottomSheet(
         title            = "Friend Request",
         onDismissRequest = onDismiss
     ) {

@@ -8,9 +8,9 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.domain.service.ActivityStats
-import dev.sagi.monotask.ui.component.display.ActivityHeatmap
-import dev.sagi.monotask.ui.component.display.BarChart
-import dev.sagi.monotask.ui.component.display.LineChart
+import dev.sagi.monotask.ui.component.statistics.ActivityHeatmap
+import dev.sagi.monotask.ui.component.statistics.BarChart
+import dev.sagi.monotask.ui.component.statistics.LineChart
 import dev.sagi.monotask.ui.profile.ProfileUiState
 import dev.sagi.monotask.ui.theme.customColors
 

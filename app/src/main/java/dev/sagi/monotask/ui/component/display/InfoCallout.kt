@@ -29,45 +29,43 @@ fun InfoCallout(
     title: String,
     body: String,
     modifier: Modifier = Modifier,
-    icon: Painter? = painterResource(R.drawable.ic_info_circle),
+    icon: Painter? = null,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     bodyColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
     iconSize: Dp = 16.dp,
 ) {
+    val resolvedIcon = icon ?: painterResource(R.drawable.ic_info_circle)
+
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            icon?.let {
-                Icon(
-                    painter           = it,
-                    contentDescription = null,
-                    tint              = titleColor,
-                    modifier          = Modifier
-                        .size(iconSize)
-                )
-            }
+            Icon(
+                painter = resolvedIcon,
+                contentDescription = null,
+                tint = titleColor,
+                modifier = Modifier.size(iconSize)
+            )
             Text(
-                text       = title,
-                style      = MaterialTheme.typography.bodySmall,
+                text = title,
+                style = MaterialTheme.typography.bodySmall,
                 fontFamily = nationalPark,
                 fontWeight = FontWeight.SemiBold,
-                color      = titleColor,
-                modifier   = Modifier
+                color = titleColor
             )
         }
         Text(
-            text  = body,
+            text = body,
             style = MaterialTheme.typography.bodySmall,
             color = bodyColor
         )
     }
 }
+
 
 
 // ========== Previews ==========

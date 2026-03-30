@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.display
+package dev.sagi.monotask.ui.component.statistics
 
 import android.graphics.BlurMaskFilter
 import android.graphics.Paint
@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,21 +62,21 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import kotlin.math.roundToInt
 
 // ========== Design constants ==========
+private const val GLOW_ALPHA = 0.25f
+private const val GRADIENT_TOP_ALPHA = 0.4f
+private const val GRADIENT_MIDDLE_ALPHA = 0.15f
+private const val GRADIENT_BOTTOM_ALPHA = 0.02f
+private const val DOT_HALO_ALPHA = 0.35f
+private const val FILL_SAMPLE_COUNT = 50
 
-private val LineWidth             = 3.dp
-private val GuidLineWidth         = 2.dp
-private val GlowStrokeWidth       = 10.dp
-private val GlowBlurRadius        = 8.dp
-private const val GlowAlpha       = 0.25f
-private const val GradientTopAlpha    = 0.4f
-private const val GradientMiddleAlpha = 0.15f
-
-private const val GradientBottomAlpha = 0.02f
-private val DotHaloRadius         = 12.dp
-private val DotFillRadius         = 7.dp
-private val DotCenterRadius       = 3.5.dp
-private const val DotHaloAlpha    = 0.35f
-private val TouchBottomBuffer     = 28.dp
+private val LineWidth = 3.dp
+private val GuideLineWidth = 2.dp
+private val GlowStrokeWidth = 10.dp
+private val GlowBlurRadius = 8.dp
+private val DotHaloRadius = 12.dp
+private val DotFillRadius = 7.dp
+private val DotCenterRadius = 3.5.dp
+private val TouchBottomBuffer = 28.dp
 
 // ========== Models ==========
 
@@ -110,7 +109,6 @@ fun LineChart(
     chartHeight: Dp = 140.dp,
 ) {
     val gridColor  = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-//    val textColor  = MaterialTheme.colorScheme.onSurface
     val labelColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
 
     StatCard(
@@ -138,7 +136,7 @@ fun LineChart(
                 ) {
                     listOf(maxV, (minV + maxV) / 2f, minV).forEach { v ->
                         Text(
-                            text = "${v.toInt()}",
+                            text = v.toInt().toString(),
                             style = MaterialTheme.typography.labelSmall,
                             color = labelColor
                         )
@@ -186,8 +184,8 @@ fun LineChart(
         }
     }
 }
-// ========== ChartCanvas ==========
 
+// ========== ChartCanvas ==========
 @Composable
 private fun ChartCanvas(
     points: List<ChartPoint>,
@@ -198,7 +196,7 @@ private fun ChartCanvas(
     modifier: Modifier = Modifier,
 ) {
     val animProgress = remember { Animatable(if (animate) 0f else 1f) }
-    var userProgress by remember { mutableFloatStateOf(-1f) }
+    var userProgress by remember { mutableStateOf<Float?>(null) }
     var selectedPoint by remember { mutableStateOf<SelectedPoint?>(null) }
     val density = LocalDensity.current
     val drawHeightPx = with(density) { drawHeight.toPx() }
@@ -215,7 +213,7 @@ private fun ChartCanvas(
         }
     }
 
-    val currentProgress = if (userProgress >= 0f) userProgress else animProgress.value
+    val currentProgress = userProgress ?: animProgress.value
 
     fun resolveCache(w: Float): CachedChartData? {
         cachedRef.value?.let { if (it.width == w) return it }
@@ -267,8 +265,8 @@ private fun ChartCanvas(
                             change.consume()
                             updateSelection(change.position.x, size.width.toFloat())
                         },
-                        onDragEnd    = {},
-                        onDragCancel = {}
+                        onDragEnd = { },
+                        onDragCancel = { }
                     )
                 }
                 .drawWithContent {
@@ -289,7 +287,7 @@ private fun ChartCanvas(
                     val cache = resolveCache(w)
                     if (cache == null) { drawContent(); return@drawWithContent }
 
-                    drawPath(cache.fullPath, gridColor, style = Stroke(GuidLineWidth.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+                    drawPath(cache.fullPath, gridColor, style = Stroke(GuideLineWidth.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
 
                     if (currentProgress <= 0f) { drawContent(); return@drawWithContent }
 
@@ -322,7 +320,7 @@ private fun ChartCanvas(
                 ) {
                     Text(text = point.label, style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "${point.value.toInt()}", style = MaterialTheme.typography.labelMedium,
+                    Text(text = point.value.toInt().toString(), style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold, color = lineColor)
                 }
             }
@@ -359,8 +357,8 @@ private fun DrawScope.drawFillGradient(
     val target = pm.length * progress
     val path   = Path().apply {
         var started = false
-        for (i in 0..50) {
-            val pos = pm.getPosition((target * i / 50f).coerceAtMost(target))
+        for (i in 0..FILL_SAMPLE_COUNT) {
+            val pos = pm.getPosition((target * i / FILL_SAMPLE_COUNT).coerceAtMost(target))
             if (!started) { moveTo(pos.x, pos.y); started = true } else lineTo(pos.x, pos.y)
         }
         lineTo(pm.getPosition(target).x, height)
@@ -371,9 +369,9 @@ private fun DrawScope.drawFillGradient(
         path  = path,
         brush = Brush.verticalGradient(
             listOf(
-                color.copy(alpha = GradientTopAlpha),
-                color.copy(alpha = GradientMiddleAlpha),
-                color.copy(alpha = GradientBottomAlpha),
+                color.copy(alpha = GRADIENT_TOP_ALPHA),
+                color.copy(alpha = GRADIENT_MIDDLE_ALPHA),
+                color.copy(alpha = GRADIENT_BOTTOM_ALPHA),
                 Color.Transparent
             )
         ),
@@ -386,7 +384,7 @@ private fun DrawScope.drawLineGlow(path: Path, color: Color) {
         canvas.nativeCanvas.drawPath(
             path.asAndroidPath(),
             Paint().apply {
-                this.color  = color.copy(alpha = GlowAlpha).toArgb()
+                this.color  = color.copy(alpha = GLOW_ALPHA).toArgb()
                 strokeWidth = GlowStrokeWidth.toPx()
                 style       = Paint.Style.STROKE
                 strokeCap   = Paint.Cap.ROUND
@@ -398,7 +396,7 @@ private fun DrawScope.drawLineGlow(path: Path, color: Color) {
 }
 
 private fun DrawScope.drawEndpointIndicator(center: Offset, color: Color) {
-    drawCircle(color.copy(alpha = DotHaloAlpha), DotHaloRadius.toPx(),   center)
+    drawCircle(color.copy(alpha = DOT_HALO_ALPHA), DotHaloRadius.toPx(),   center)
     drawCircle(color,                            DotFillRadius.toPx(),   center)
     drawCircle(Color.White,                      DotCenterRadius.toPx(), center)
 }

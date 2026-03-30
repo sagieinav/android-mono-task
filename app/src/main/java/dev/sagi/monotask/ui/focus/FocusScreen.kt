@@ -23,6 +23,7 @@ import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.task.EditTaskSheet
 import java.util.Date
 import dev.sagi.monotask.ui.component.display.EmptyState
+import dev.sagi.monotask.ui.component.display.IllustrationSize
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 import dev.sagi.monotask.util.Constants
@@ -194,7 +195,7 @@ fun FocusScreenContent(
                     imgRes = R.drawable.img_empty_focus,
                     title = "Where are the tasks?",
                     subtitle = "Oh... you cleared 'em all. Well played!",
-                    isMainContent = true,
+                    size = IllustrationSize.Large,
                     modifier = Modifier.padding(bottom = 40.dp) // optical correction for vertical position
                 )
             }

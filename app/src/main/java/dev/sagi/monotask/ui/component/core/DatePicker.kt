@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import dev.darkokoa.datetimewheelpicker.WheelDatePicker
 import dev.darkokoa.datetimewheelpicker.core.WheelPickerDefaults
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
@@ -27,32 +26,36 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Composable
-fun TaskDatePicker(
-    initialDateMillis: Long? = null,
+fun MonoDatePicker(
     onDateSelected: (Long) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    initialDateMillis: Long? = null
 ) {
-    val timeZone = TimeZone.currentSystemDefault()
-    val today: LocalDate = Clock.System.now().toLocalDateTime(timeZone).date
+    val timeZone = remember { TimeZone.currentSystemDefault() }
+    val today = remember { Clock.System.now().toLocalDateTime(timeZone).date }
+    val initialDate = remember(initialDateMillis) {
+        initialDateMillis
+            ?.let { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
+            ?: today
+    }
 
-    val initialDate: LocalDate = initialDateMillis
-        ?.let { Instant.fromEpochMilliseconds(it).toLocalDateTime(timeZone).date }
-        ?: today
+    val glassBorder = remember {
+        Brush.linearGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.7f),
+                Color.White.copy(alpha = 0.15f),
+                Color.White.copy(alpha = 0.4f)
+            )
+        )
+    }
 
     var selectedDate by remember { mutableStateOf(initialDate) }
 
-    val glassBorder = Brush.linearGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.7f),
-            Color.White.copy(alpha = 0.15f),
-            Color.White.copy(alpha = 0.4f)
-        )
-    )
-
-
-    GlassDialog(
+    MonoDialog(
         onDismissRequest = onDismiss,
         title = "Due Date",
+        modifier = modifier,
         content = {
             WheelDatePicker(
                 modifier = Modifier.fillMaxWidth(),
@@ -91,7 +94,7 @@ fun TaskDatePicker(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun TaskDatePickerPreview() {
+private fun MonoDatePickerPreview() {
     MonoTaskTheme {
         Box(
             modifier = Modifier
@@ -99,7 +102,7 @@ private fun TaskDatePickerPreview() {
                 .background(MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.Center
         ) {
-            TaskDatePicker(
+            MonoDatePicker(
                 initialDateMillis = System.currentTimeMillis(),
                 onDateSelected = {},
                 onDismiss = {}

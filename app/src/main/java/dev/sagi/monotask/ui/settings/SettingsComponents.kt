@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.core.GlassTooltip
+import dev.sagi.monotask.ui.component.core.MonoTooltip
 import dev.sagi.monotask.ui.component.display.SectionTitle
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import dev.sagi.monotask.util.Constants.Theme.TRAILING_BUTTON_SIZE
@@ -216,7 +216,7 @@ internal fun InfoIconButton(text: String, size: Dp = 20.dp) {
                 tint               = MaterialTheme.colorScheme.outlineVariant
             )
         }
-        GlassTooltip(
+        MonoTooltip(
             expanded  = showTooltip,
             onDismiss = { showTooltip = false }
         ) {

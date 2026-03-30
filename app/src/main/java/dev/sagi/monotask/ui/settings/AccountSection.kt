@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.TextInputDialog
+import dev.sagi.monotask.ui.component.core.MonoTextInputDialog
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 
@@ -45,7 +45,7 @@ internal fun SettingsAccountSection(
     }
 
     if (showEditNameDialog) {
-        TextInputDialog(
+        MonoTextInputDialog(
             title        = "Change Name",
             placeholder  = "Display name",
             confirmLabel = "Save",

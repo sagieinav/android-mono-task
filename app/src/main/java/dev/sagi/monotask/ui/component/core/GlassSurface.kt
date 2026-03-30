@@ -22,10 +22,7 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
-import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.component.task.CustomTag
-import dev.sagi.monotask.ui.component.task.CustomTagPreview
-import dev.sagi.monotask.ui.component.task.ImportanceTag
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
@@ -44,39 +41,31 @@ fun GlassSurface(
 
     Box(
         modifier = modifier
-            // Clip FIRST so the blur cannot bleed outside the shape
             .clip(shape)
-            // Apply the blur effect inside the clipped bounds
             .then(
                 if (!blurred) Modifier
                 else Modifier.hazeEffect(hazeState, HazeMaterials.ultraThin())
             )
-            // Glass Border (my custom double border modifier)
             .glassBorder(shape, accentColor)
-            .glassBackground(
-                accentColor = accentColor,
-                baseColor = baseColor
-            )
+            .glassBackground(accentColor = accentColor, baseColor = baseColor)
     ) {
         content()
     }
 }
 
-
-
 @Preview(showBackground = true)
 @Composable
-fun GlassSurfacePreview() {
+private fun GlassSurfacePreview() {
     MonoTaskTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = Brush.linearGradient(
+                    Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFB3C8F0), // soft blue
-                            Color(0xFFE8D5F5), // soft purple
-                            Color(0xFFF5E6D0)  // warm peach
+                            Color(0xFFB3C8F0),
+                            Color(0xFFE8D5F5),
+                            Color(0xFFF5E6D0)
                         )
                     )
                 )
@@ -84,27 +73,46 @@ fun GlassSurfacePreview() {
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Elevated
-                GlassSurface(content = { CustomTagPreview() })
-                // Not Elevated
-                GlassSurface(content = { CustomTagPreview() })
-
-                // One more without a lambda (manual):
-                GlassSurface() {
+                GlassSurface(blurred = true) {
                     FlowRow(
                         modifier = Modifier.padding(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        ImportanceTag(Importance.HIGH)
                         CustomTag("leetcode")
-                        CustomTag("ds", onRemove = {})
+                        CustomTag("work")
+                        CustomTag("android")
+                    }
+                }
+                GlassSurface(blurred = false) {
+                    FlowRow(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        CustomTag("leetcode")
+                        CustomTag("work")
+                        CustomTag("android")
+                    }
+                }
+                GlassSurface(
+                    blurred = false,
+                    accentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    FlowRow(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        CustomTag("leetcode")
+                        CustomTag("work")
+                        CustomTag("android")
+                        CustomTag("with accent")
                     }
                 }
             }
         }
-
     }
 }

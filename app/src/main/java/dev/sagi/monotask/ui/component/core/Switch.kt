@@ -22,9 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -38,12 +41,13 @@ private val ThumbPad     = (TrackHeight - ThumbSize) / 2
 private val ThumbTravel  = TrackWidth - ThumbSize - ThumbPad * 2
 
 @Composable
-fun GlassSwitch(
-    checked         : Boolean,
-    onCheckedChange : (Boolean) -> Unit,
-    modifier        : Modifier = Modifier,
-    accentColor     : Color?   = null,
-    enabled         : Boolean  = true
+fun MonoSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    accentColor: Color? = null,
+    enabled: Boolean = true
 ) {
     val haptic      = LocalHapticFeedback.current
     val activeColor = accentColor ?: MaterialTheme.colorScheme.primary
@@ -74,11 +78,12 @@ fun GlassSwitch(
             .width(TrackWidth)
             .height(TrackHeight)
             .clip(CircleShape)
+            .graphicsLayer { alpha = if (enabled) 1f else 0.38f }
             .toggleable(
-                value             = checked,
-                enabled           = enabled,
-                role              = Role.Switch,
-                onValueChange     = {
+                value = checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onCheckedChange(it)
                 }
@@ -87,7 +92,10 @@ fun GlassSwitch(
             .glassBackground(
                 accentColor = if (checked) activeColor else null,
                 baseColor   = trackBase
-            ),
+            )
+            .semantics {
+                contentDescription?.let { this.contentDescription = it }
+            },
         contentAlignment = Alignment.CenterStart
     ) {
         // Thumb
@@ -115,11 +123,11 @@ fun GlassSwitch(
 
 @Preview(showBackground = true, name = "GlassSwitch - off")
 @Composable
-private fun GlassSwitchOffPreview() {
+private fun MonoSwitchOffPreview() {
     MonoTaskTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             Box(modifier = Modifier.padding(24.dp)) {
-                GlassSwitch(checked = false, onCheckedChange = {})
+                MonoSwitch(checked = false, onCheckedChange = {})
             }
         }
     }
@@ -127,11 +135,11 @@ private fun GlassSwitchOffPreview() {
 
 @Preview(showBackground = true, name = "GlassSwitch - on (primary)")
 @Composable
-private fun GlassSwitchOnPreview() {
+private fun MonoSwitchOnPreview() {
     MonoTaskTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             Box(modifier = Modifier.padding(24.dp)) {
-                GlassSwitch(checked = true, onCheckedChange = {})
+                MonoSwitch(checked = true, onCheckedChange = {})
             }
         }
     }
@@ -139,11 +147,11 @@ private fun GlassSwitchOnPreview() {
 
 @Preview(showBackground = true, name = "GlassSwitch - on (accent)")
 @Composable
-private fun GlassSwitchAccentPreview() {
+private fun MonoSwitchAccentPreview() {
     MonoTaskTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             Box(modifier = Modifier.padding(24.dp)) {
-                GlassSwitch(
+                MonoSwitch(
                     checked     = true,
                     onCheckedChange = {},
                     accentColor = Color(0xFF7C5CBF) // xp violet
@@ -152,3 +160,16 @@ private fun GlassSwitchAccentPreview() {
         }
     }
 }
+
+@Preview(showBackground = true, name = "MonoSwitch — disabled")
+@Composable
+private fun MonoSwitchDisabledPreview() {
+    MonoTaskTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Box(modifier = Modifier.padding(24.dp)) {
+                MonoSwitch(checked = true, onCheckedChange = {}, enabled = false)
+            }
+        }
+    }
+}
+

@@ -32,6 +32,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.TextStyle
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
@@ -42,11 +43,12 @@ import kotlinx.coroutines.delay
 // Trigger Pill
 // ========================================
 @Composable
-fun DropdownTriggerPill(
+fun MonoDropdownTriggerPill(
     text: String,
     expanded: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium
 ) {
     val chevronRotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
@@ -57,7 +59,6 @@ fun DropdownTriggerPill(
     GlassSurface(
         blurred = false,
         shape = CircleShape,
-//        baseColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         modifier = modifier
             .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
             .monoShadowWorkaround(CircleShape)
@@ -67,15 +68,14 @@ fun DropdownTriggerPill(
         Row(
             modifier = Modifier
                 .padding(start = 16.dp, end = 10.dp)
-                .align(Alignment.Center)
-                ,
+                .align(Alignment.Center),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val color = MaterialTheme.colorScheme.onSurfaceVariant
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleMedium,
+                style = textStyle,
                 fontWeight = FontWeight.SemiBold,
                 color = color,
                 maxLines = 1,
@@ -99,7 +99,7 @@ fun DropdownTriggerPill(
 // Glass Style Container
 // ========================================
 @Composable
-fun GlassDropdownMenu(
+fun MonoDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
@@ -168,7 +168,7 @@ fun GlassDropdownMenu(
 }
 
 @Composable
-fun GlassDropdownMenu(
+fun MonoDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     tapOffset: IntOffset,
@@ -183,13 +183,12 @@ fun GlassDropdownMenu(
                 layoutDirection: LayoutDirection,
                 popupContentSize: IntSize
             ): IntOffset = IntOffset(
-//                x = tapOffset.x.coerceIn(0, windowSize.width  - popupContentSize.width), // anchored to left
                 x = (tapOffset.x - popupContentSize.width / 2).coerceIn(0, windowSize.width - popupContentSize.width), // centered
                 y = tapOffset.y.coerceIn(0, windowSize.height - popupContentSize.height)
             )
         }
     }
-    GlassDropdownMenu(
+    MonoDropdownMenu(
         expanded             = expanded,
         onDismiss            = onDismiss,
         popupPositionProvider = positionProvider,
@@ -199,44 +198,45 @@ fun GlassDropdownMenu(
 }
 
 @Composable
-fun GlassDropdownItem(
+fun MonoDropdownItem(
     label: String,
-    selected: Boolean = false,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    showSelectedIcon: Boolean = true,
 ) {
     val selectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
     val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
             .then(
-                if (!selected) Modifier
-                else Modifier
-                    .glassBorder(MaterialTheme.shapes.small)
-                    .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-//                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                if (!isSelected) Modifier
+                        else Modifier
+                            .glassBorder(MaterialTheme.shapes.small)
+                            .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerHigh)
             )
-            .padding(horizontal = 12.dp, vertical = 9.dp)
-        ,
+            .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) selectedColor else unselectedColor
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isSelected) selectedColor else unselectedColor
         )
 
         // 'selected' icon inside a box, to ensure padding on long titles:
-        if (selected) {
+        if (showSelectedIcon && isSelected) {
             Box(Modifier.padding(start = 8.dp)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check_circle),
-                    contentDescription = null,
+                    contentDescription = "Dropdown item selected",
                     tint = selectedColor,
                     modifier = Modifier.size(18.dp)
                 )
@@ -251,14 +251,15 @@ fun GlassDropdownItem(
 // Generic Action/Footer Item
 // ========================================
 @Composable
-fun GlassDropdownActionItem(
+fun MonoDropdownActionItem(
     label: String,
     iconRes: Int,
-    color: Color = MaterialTheme.colorScheme.onSurface,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick)
@@ -269,7 +270,7 @@ fun GlassDropdownActionItem(
     ) {
         Icon(
             painter = painterResource(iconRes),
-            contentDescription = null,
+            contentDescription = "Dropdown action item",
             tint = color,
             modifier = Modifier
                 .size(20.dp)
@@ -277,7 +278,6 @@ fun GlassDropdownActionItem(
         Text(
             text = label,
             style = MaterialTheme.typography.titleSmall,
-//            fontFamily = googleSans,
             fontWeight = FontWeight.SemiBold,
             color = color,
             modifier = Modifier
@@ -291,20 +291,20 @@ fun GlassDropdownActionItem(
 // ========================================
 @Preview(showBackground = true, name = "Trigger Pill — Closed")
 @Composable
-private fun TriggerPillClosedPreview() {
+private fun TriggerPillClosedPreviewMono() {
     MonoTaskTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            DropdownTriggerPill(text = "My Workspace", expanded = false, onClick = {})
+            MonoDropdownTriggerPill(text = "My Workspace", expanded = false, onClick = {})
         }
     }
 }
 
 @Preview(showBackground = true, name = "Trigger Pill — Open")
 @Composable
-private fun TriggerPillOpenPreview() {
+private fun TriggerPillOpenPreviewMono() {
     MonoTaskTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            DropdownTriggerPill(text = "My Workspace", expanded = true, onClick = {})
+            MonoDropdownTriggerPill(text = "My Workspace", expanded = true, onClick = {})
         }
     }
 }
@@ -314,7 +314,7 @@ private fun TriggerPillOpenPreview() {
 private fun DropdownItemPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
-            GlassDropdownItem(label = "Education", selected = false, onClick = {})
+            MonoDropdownItem(label = "Education", isSelected = false, onClick = {})
         }
     }
 }
@@ -324,9 +324,9 @@ private fun DropdownItemPreview() {
 private fun DropdownItemSelectedPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
-            GlassDropdownItem(
+            MonoDropdownItem(
                 label = "Education",
-                selected = true,
+                isSelected = true,
                 onClick = {}
             )
         }
@@ -338,7 +338,7 @@ private fun DropdownItemSelectedPreview() {
 private fun DropdownActionItemPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.width(240.dp).padding(8.dp)) {
-            GlassDropdownActionItem(label = "New Workspace", iconRes = R.drawable.ic_add, onClick = {})
+            MonoDropdownActionItem(label = "New Workspace", iconRes = R.drawable.ic_add, onClick = {})
         }
     }
 }

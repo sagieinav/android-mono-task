@@ -10,45 +10,43 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 
 // Wrap SegmentedToggle with full width, add blur, increase font size
 @Composable
-fun GlassTabRow(
+fun MonoTabRow(
     tabs: List<String>,
     selectedIndex: Int,
     onTabSelected: (index: Int) -> Unit,
     modifier: Modifier = Modifier
 ) = SegmentedToggle(
-    options          = tabs,
-    selectedIndex    = selectedIndex,
+    options = tabs,
+    selectedIndex = selectedIndex,
     onOptionSelected = onTabSelected,
-    modifier         = modifier.fillMaxWidth(),
-    fullWidth        = true,
-    blurred          = true,
-    textStyle        = MaterialTheme.typography.titleMedium
+    modifier = modifier.fillMaxWidth(),
+    fullWidth = true,
+    blurred = true,
+    textStyle = MaterialTheme.typography.titleMedium
 )
 
 
 // Previews
 @Preview(showBackground = true, name = "Profile tabs — first")
 @Composable
-private fun GlassTabRowFirstPreview() {
+private fun MonoTabRowFirstPreview() {
     MonoTaskTheme {
-        GlassTabRow(
+        MonoTabRow(
             tabs          = listOf("Profile", "Statistics", "Social"),
             selectedIndex = 0,
             onTabSelected = {},
-            modifier      = Modifier.fillMaxWidth()
         )
     }
 }
 
 @Preview(showBackground = true, name = "Profile tabs — middle")
 @Composable
-private fun GlassTabRowMiddlePreview() {
+private fun MonoTabRowMiddlePreview() {
     MonoTaskTheme {
-        GlassTabRow(
+        MonoTabRow(
             tabs          = listOf("Profile", "Statistics", "Social"),
             selectedIndex = 1,
             onTabSelected = {},
-            modifier      = Modifier.fillMaxWidth()
         )
     }
 }

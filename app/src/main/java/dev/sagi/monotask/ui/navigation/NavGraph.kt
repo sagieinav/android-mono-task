@@ -24,7 +24,7 @@ import dev.sagi.monotask.ui.auth.AuthUiState
 import dev.sagi.monotask.ui.auth.OnboardingScreen
 import dev.sagi.monotask.ui.brief.BriefScreen
 import dev.sagi.monotask.ui.brief.BriefViewModel
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
 import dev.sagi.monotask.ui.focus.FocusScreen
 import dev.sagi.monotask.ui.focus.FocusViewModel
 import dev.sagi.monotask.ui.kanban.KanbanScreen
@@ -34,8 +34,8 @@ import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.settings.SettingsScreen
 import dev.sagi.monotask.ui.settings.SettingsUiState
 import dev.sagi.monotask.ui.settings.SettingsViewModel
-import dev.sagi.monotask.ui.shared.UserSessionViewModel
-import dev.sagi.monotask.ui.shared.WorkspaceViewModel
+import dev.sagi.monotask.ui.common.UserSessionViewModel
+import dev.sagi.monotask.ui.common.WorkspaceViewModel
 import dev.sagi.monotask.ui.statistics.StatisticsScreen
 
 val TAB_ORDER = listOf(
@@ -96,7 +96,7 @@ fun NavGraph(
     val startDestination = initialStartDestination
 
     if (startDestination == null) {
-        LoadingSpinner()
+        MonoLoadingIndicator()
         return
     }
 
@@ -215,7 +215,7 @@ fun NavGraph(
             }
         }
         if (isLoading) {
-            LoadingSpinner()
+            MonoLoadingIndicator()
         }
     }
 }

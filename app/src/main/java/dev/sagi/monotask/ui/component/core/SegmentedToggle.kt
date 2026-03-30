@@ -38,6 +38,12 @@ import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 
+private val TogglePillSpring = spring<Dp>(
+    stiffness = Spring.StiffnessMediumLow,
+    dampingRatio = Spring.DampingRatioLowBouncy
+)
+
+
 @Composable
 fun SegmentedToggle(
     options: List<String>,
@@ -88,26 +94,13 @@ private fun BoxScope.FullWidthToggleContent(
         val tabWidth = maxWidth / options.size
         val pillOffset by animateDpAsState(
             targetValue   = tabWidth * selectedIndex,
-            animationSpec = spring(
-                stiffness    = Spring.StiffnessMediumLow,
-                dampingRatio = Spring.DampingRatioLowBouncy
-            ),
+            animationSpec = TogglePillSpring,
             label = "segmented_toggle_pill_offset"
         )
-        Box(
+        TogglePill(
             modifier = Modifier
                 .offset(x = pillOffset)
                 .width(tabWidth)
-                .fillMaxHeight()
-                .shadow(
-                    elevation    = 8.dp,
-                    shape        = CircleShape,
-                    ambientColor = Color.Black.copy(alpha = 0.3f),
-                    spotColor    = Color.Black.copy(alpha = 0.6f)
-                )
-                .clip(CircleShape)
-                .glassBorder(CircleShape)
-                .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerLow)
         )
     }
 
@@ -128,15 +121,16 @@ private fun BoxScope.FullWidthToggleContent(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text       = label,
-                    style      = textStyle,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    color      = if (isSelected)
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+                ToggleLabel(label, isSelected, textStyle)
+//                Text(
+//                    text       = label,
+//                    style      = textStyle,
+//                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+//                    color      = if (isSelected)
+//                        MaterialTheme.colorScheme.onSurfaceVariant
+//                    else
+//                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+//                )
             }
         }
     }
@@ -159,40 +153,24 @@ private fun BoxScope.ContentSizedToggleContent(
 
     val pillOffset by animateDpAsState(
         targetValue   = selectedOffset,
-        animationSpec = spring(
-            stiffness    = Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioLowBouncy
-        ),
+        animationSpec = TogglePillSpring,
         label = "segmented_toggle_pill_offset"
     )
     val pillWidth by animateDpAsState(
         targetValue   = selectedWidth,
-        animationSpec = spring(
-            stiffness    = Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioLowBouncy
-        ),
+        animationSpec = TogglePillSpring,
         label = "segmented_toggle_pill_width"
     )
 
     // Pill layer
     Box(
         modifier = Modifier
-        .matchParentSize()
+            .matchParentSize()
     ) {
-        Box(
+        TogglePill(
             modifier = Modifier
                 .offset(x = pillOffset)
                 .width(pillWidth)
-                .fillMaxHeight()
-                .shadow(
-                    elevation    = 8.dp,
-                    shape        = CircleShape,
-                    ambientColor = Color.Black.copy(alpha = 0.3f),
-                    spotColor    = Color.Black.copy(alpha = 0.6f)
-                )
-                .clip(CircleShape)
-                .glassBorder(CircleShape)
-                .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerLow)
         )
     }
 
@@ -215,23 +193,45 @@ private fun BoxScope.ContentSizedToggleContent(
                     .padding(horizontal = 10.dp, vertical = 6.dp)
                     .then(
                         if (fillHeight) Modifier.fillMaxHeight()
-                        else Modifier
-                    )
-                ,
+                                else Modifier
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text       = label,
-                    style      = textStyle,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    color      = if (isSelected)
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+                ToggleLabel(label, isSelected, textStyle)
             }
         }
     }
+}
+
+
+@Composable
+private fun TogglePill(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .shadow(
+                elevation = 8.dp,
+                shape = CircleShape,
+                ambientColor = Color.Black.copy(alpha = 0.3f),
+                spotColor = Color.Black.copy(alpha = 0.6f)
+            )
+            .clip(CircleShape)
+            .glassBorder(CircleShape)
+            .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerLow)
+    )
+}
+
+@Composable
+private fun ToggleLabel(label: String, isSelected: Boolean, textStyle: TextStyle) {
+    Text(
+        text = label,
+        style = textStyle,
+        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+        color = if (isSelected)
+            MaterialTheme.colorScheme.onSurfaceVariant
+        else
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    )
 }
 
 

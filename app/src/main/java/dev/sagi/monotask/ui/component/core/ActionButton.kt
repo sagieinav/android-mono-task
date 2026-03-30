@@ -37,6 +37,8 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import dev.sagi.monotask.ui.theme.penaltyRed
 
+private val ButtonHeight = 56.dp
+
 @Composable
 fun ActionButton(
     onClick: () -> Unit,
@@ -58,7 +60,7 @@ fun ActionButton(
                 else Modifier
             )
             .fillMaxWidth()
-            .height(56.dp)
+            .height(ButtonHeight)
             .clip(shape)
             .clickable(
                 enabled = enabled,

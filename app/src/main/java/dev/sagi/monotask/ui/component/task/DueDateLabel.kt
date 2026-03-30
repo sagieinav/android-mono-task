@@ -3,26 +3,25 @@ package dev.sagi.monotask.ui.component.task
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.Timestamp
-import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.util.ext.toRelativeDate
+import dev.sagi.monotask.util.toRelativeDate
+
+private val DueDateFontSizeNormal = 12.sp
+private val DueDateFontSizeSmall  = 9.sp
+private const val DueDateAlpha    = 0.45f
 
 @Composable
 fun DueDateLabel(
@@ -32,42 +31,29 @@ fun DueDateLabel(
 ) {
     val relativeDate = timestamp.toRelativeDate()
     val dateColor = if (relativeDate.isOverdue)
-        MaterialTheme.colorScheme.error.copy(alpha = 0.75f)
-    else
-        MaterialTheme.colorScheme.onSurface.copy(alpha = if (small) 0.4f else 0.45f)
+                        MaterialTheme.colorScheme.error.copy(alpha = 0.75f)
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = DueDateAlpha)
 
-    val textStyle =
-        MaterialTheme.typography.labelLarge.copy(
-            lineHeightStyle = LineHeightStyle(
-                alignment = LineHeightStyle.Alignment.Proportional,
-                trim = LineHeightStyle.Trim.Both
-            )
+    val textStyle = MaterialTheme.typography.labelLarge.copy(
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Proportional,
+            trim = LineHeightStyle.Trim.Both
         )
+    )
 
-    val fontSize = if (small) 9.sp else 12.sp
-
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-
-
-        Text(
-            text = relativeDate.text,
-            style = textStyle,
-            fontSize = fontSize,
-            fontWeight = FontWeight.Normal,
-            color = dateColor,
-            textAlign = TextAlign.Center,
-        )
-    }
+    Text(
+        text = relativeDate.text,
+        style = textStyle,
+        fontSize = if (small) DueDateFontSizeSmall else DueDateFontSizeNormal,
+        fontWeight = FontWeight.Normal,
+        color = dateColor,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+    )
 }
 
-
-// ========== Previews ==========
-
-@Preview(showBackground = true, name = "DueDateLabel, Upcoming")
+@Preview(showBackground = true, name = "DueDateLabel — upcoming")
 @Composable
 private fun DueDateLabelUpcomingPreview() {
     MonoTaskTheme {
@@ -78,7 +64,7 @@ private fun DueDateLabelUpcomingPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "DueDateLabel, Overdue")
+@Preview(showBackground = true, name = "DueDateLabel — overdue")
 @Composable
 private fun DueDateLabelOverduePreview() {
     MonoTaskTheme {

@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.ui.component.task.XpLabelCompletion
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.circleGlow
 import dev.sagi.monotask.ui.theme.glassBackground

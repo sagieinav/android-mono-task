@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -28,38 +29,36 @@ fun CountBadge(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    val labelColor   = lerp(Color.Black, color, 0.9f).copy(alpha = 0.7f)
+    val labelColor = remember(color) { lerp(Color.Black, color, 0.9f).copy(alpha = 0.7f) }
 
     GlassSurface(
-        shape    = CircleShape,
+        shape = CircleShape,
         baseColor = color.copy(alpha = 0.08f),
         modifier = modifier
     ) {
         AnimatedContent(
-            targetState    = count,
+            targetState = count,
             transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
-            label          = "count-badge"
+            label = "count-badge"
         ) { c ->
             Text(
-                text     = c.toString(),
-                style    = MaterialTheme.typography.labelMedium,
-                color    = labelColor,
+                text = c.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = labelColor,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun CountBadgePreview() {
     MonoTaskTheme {
         GlassSurface(baseColor = MaterialTheme.colorScheme.surfaceContainer) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
+                modifier = Modifier.fillMaxWidth().padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val colors = MaterialTheme.customColors
                 CountBadge(2, colors.importanceLowBackground)

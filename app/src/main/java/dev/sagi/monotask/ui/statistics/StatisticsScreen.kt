@@ -43,7 +43,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.profile.ProfileEvent
 import dev.sagi.monotask.ui.profile.ProfileUiState
@@ -70,7 +70,7 @@ fun StatisticsScreen(
                     .fillMaxSize()
                     .padding(top = scaffoldPadding.calculateTopPadding()),
                 contentAlignment = Alignment.Center
-            ) { LoadingSpinner() }
+            ) { MonoLoadingIndicator() }
         }
 
         is ProfileUiState.Error -> {

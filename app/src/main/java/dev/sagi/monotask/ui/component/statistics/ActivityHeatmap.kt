@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.component.display
+package dev.sagi.monotask.ui.component.statistics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,7 +53,9 @@ private val DayLabels = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
 
 // ========== Cell state ==========
 
-private enum class CellState { ACTIVE, INACTIVE_PAST, FUTURE, EMPTY }
+private enum class CellState {
+    ACTIVE, INACTIVE_PAST, FUTURE, EMPTY
+}
 
 // ========== ActivityHeatmap ==========
 
@@ -63,10 +65,10 @@ fun ActivityHeatmap(
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.large
 ) {
-    val today      = remember { LocalDate.now() }
+    val today = remember { LocalDate.now() }
     val monthStart = today.withDayOfMonth(1)
-    val monthEnd   = today
-    val monthName  = remember { today.month.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
+    val monthEnd = today
+    val monthName = remember { today.month.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
 
     val activeDays = remember(activityData) {
         activityData.filter { it.tasksCompleted > 0 }.map { it.dateEpochDay }.toSet()
@@ -75,7 +77,7 @@ fun ActivityHeatmap(
     val firstDayOffset = remember { monthStart.dayOfWeek.value % 7 }
     val daysInMonth    = remember { today.month.length(today.isLeapYear) }
 
-    val cells: List<LocalDate?> = remember(firstDayOffset, daysInMonth) {
+    val cells: List<LocalDate?> = remember(today) {
         val list = MutableList<LocalDate?>(firstDayOffset) { null }
         for (day in 1..daysInMonth) list.add(monthStart.withDayOfMonth(day))
         while (list.size % 7 != 0) list.add(null)
@@ -86,16 +88,16 @@ fun ActivityHeatmap(
 
     // Side panel stats
     val totalTasksThisMonth = remember(activityData) { activityData.sumOf { it.tasksCompleted } }
-    val bestStreak       = remember(activityData) {
+    val bestStreak = remember(activityData) {
         ActivityStats.computeRecordStreak(
             activityData, monthStart.toEpochDay()..monthEnd.toEpochDay()
         )
     }
 
-    val labelColor       = MaterialTheme.colorScheme.outlineVariant
-    val dividerColor     = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-    val inactiveColor    = MaterialTheme.colorScheme.surfaceContainerHigh
-    val activeColor      = lerp(bonusGreen, Color.Black, 0.15f)
+    val labelColor = MaterialTheme.colorScheme.outlineVariant
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    val inactiveColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val activeColor = remember { lerp(bonusGreen, Color.Black, 0.15f) }
 
     StatCard(
         modifier = modifier,
@@ -214,7 +216,7 @@ private fun SideStat(
                 color      = MaterialTheme.colorScheme.onSurface,
                 modifier   = Modifier.alignByBaseline()
             )
-            unit?. let {
+            unit?.let {
                 Text(
                     text       = it,
                     style      = MaterialTheme.typography.labelMedium,

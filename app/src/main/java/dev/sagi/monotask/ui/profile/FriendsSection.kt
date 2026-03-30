@@ -42,19 +42,19 @@ import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.service.AchievementEngine
 import dev.sagi.monotask.domain.service.ActivityStats
-import dev.sagi.monotask.ui.component.core.AvatarBox
+import dev.sagi.monotask.ui.component.display.AvatarBox
 import dev.sagi.monotask.ui.component.display.EmptyState
-import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
+import dev.sagi.monotask.ui.component.core.MonoConfirmDialog
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.component.core.MonoLabel
 import dev.sagi.monotask.ui.component.core.SwipeRevealAction
 import dev.sagi.monotask.ui.component.core.SwipeRevealRow
 import dev.sagi.monotask.ui.theme.penaltyRed
-import dev.sagi.monotask.ui.component.display.LevelChip
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
 import dev.sagi.monotask.ui.component.display.SectionTitle
 import dev.sagi.monotask.ui.component.display.StreakChip
 import dev.sagi.monotask.ui.component.display.StreakChipSize
-import dev.sagi.monotask.ui.component.display.LineChart
+import dev.sagi.monotask.ui.component.statistics.LineChart
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.clickableNoRipple
@@ -106,7 +106,7 @@ fun FriendsSection(
         }
 
         when {
-            friendUsers == null -> LoadingSpinner()
+            friendUsers == null -> MonoLoadingIndicator()
             friendUsers.isEmpty() -> EmptyState(
                 title    = "No friends yet",
                 subtitle = "Share your invite link to connect with friends",
@@ -131,7 +131,7 @@ fun FriendsSection(
     }
 
     deleteTargetFriend?.let { friend ->
-        GlassConfirmDialog(
+        MonoConfirmDialog(
             onDismissRequest = { deleteTargetFriend = null },
             title            = "Remove '${friend.displayName}'?",
             message          = "They will be removed from your friends list.",
@@ -222,6 +222,7 @@ private fun FriendRow(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            // Friend's Name:
                             Text(
                                 text = user.displayName,
                                 style = MaterialTheme.typography.titleMedium,
@@ -229,12 +230,21 @@ private fun FriendRow(
                                 fontWeight = FontWeight.Normal,
                                 modifier = Modifier.padding(start = 2.dp)
                             )
-                            LevelChip(user.level)
+
+                            // Level Chip:
+                            MonoLabel(
+                                label = "Lv. ${user.level}",
+                                textStyle = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = CircleShape,
+                                verticalPadding = 2.dp,
+                                horizontalPadding = 8.dp
+                            )
                         }
 
                         StreakChip(
                             currentStreak = liveStreak,
-                            size = StreakChipSize.SMALL
+                            size = StreakChipSize.Small
                         )
                     }
 

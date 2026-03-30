@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.theme
+package dev.sagi.monotask.ui.focus
 
 import android.graphics.Matrix
 import android.graphics.Path
@@ -197,9 +197,9 @@ fun Modifier.aceTaskBorder(
                 size.width / 2f, size.height / 2f,
                 intArrayOf(
                     Color.White.copy(alpha = 0.9f).toArgb(),
-                    AceGold.toArgb(),
-                    AceGoldDim.toArgb(),
-                    AceGold.toArgb(),
+                    _root_ide_package_.dev.sagi.monotask.ui.theme.AceGold.toArgb(),
+                    _root_ide_package_.dev.sagi.monotask.ui.theme.AceGoldDim.toArgb(),
+                    _root_ide_package_.dev.sagi.monotask.ui.theme.AceGold.toArgb(),
                     Color.White.copy(alpha = 0.9f).toArgb(),
                 ),
                 null
@@ -256,7 +256,7 @@ fun Modifier.defaultTaskBorder(
 @Preview(showBackground = true)
 @Composable
 private fun AceTaskBorderPreview() {
-    MonoTaskTheme {
+    _root_ide_package_.dev.sagi.monotask.ui.theme.MonoTaskTheme {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,

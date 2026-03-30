@@ -1,22 +1,14 @@
 package dev.sagi.monotask.ui.component.core
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.LaunchedEffect
@@ -25,12 +17,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
@@ -40,9 +29,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.monoBorder
 import kotlinx.coroutines.delay
+
+private const val AUTO_FOCUS_DELAY_MS = 200L
+private val SupportingTextSize = 10.sp
 
 @Composable
 fun MonoTextField(
@@ -65,16 +55,13 @@ fun MonoTextField(
     val focusRequester = remember { FocusRequester() }
     var tfValue by remember { mutableStateOf(TextFieldValue(value)) }
 
-    // Sync external value changes while preserving cursor/selection
     LaunchedEffect(value) {
-        if (value != tfValue.text) {
-            tfValue = tfValue.copy(text = value)
-        }
+        if (value != tfValue.text) tfValue = tfValue.copy(text = value)
     }
 
     if (autoFocus) {
         LaunchedEffect(Unit) {
-            delay(200L)
+            delay(AUTO_FOCUS_DELAY_MS)
             tfValue = tfValue.copy(selection = TextRange(tfValue.text.length))
             focusRequester.requestFocus()
         }
@@ -88,25 +75,25 @@ fun MonoTextField(
         },
         label = {
             if (required) {
-                val text = buildAnnotatedString {
+                Text(buildAnnotatedString {
                     append(label)
                     append(" ")
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f))) {
                         append("*")
                     }
-                }
-                Text(text)
+                })
             } else {
                 Text(label)
             }
         },
-        supportingText = supportingText?.let {
-            { Text(
-                it,
+        supportingText = supportingText?.let { {
+            Text(
+                text = it,
                 style = MaterialTheme.typography.titleSmall,
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)) }
-        },
+                fontSize = SupportingTextSize,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+            )
+        }},
         modifier = modifier.fillMaxWidth().focusRequester(focusRequester),
         shape = shape,
         singleLine = singleLine,

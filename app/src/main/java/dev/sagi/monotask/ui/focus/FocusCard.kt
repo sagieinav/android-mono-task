@@ -20,11 +20,7 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.task.CustomTag
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.task.DueDateLabel
-import dev.sagi.monotask.ui.component.task.ImportanceLabel
-import dev.sagi.monotask.ui.component.task.XpChip
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.aceTaskBorder
-import dev.sagi.monotask.ui.theme.defaultTaskBorder
 
 // ========== FocusCard ==========
 @Composable
@@ -85,7 +81,7 @@ private fun FocusCardHeader(task: Task, hideXpLabel: Boolean = false) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment     = Alignment.CenterVertically
     ) {
-        if (!hideXpLabel) XpChip(xp = task.currentXp)
+        if (!hideXpLabel) XpLabel(xp = task.currentXp)
         ImportanceLabel(importance = task.importance)
         Spacer(Modifier.weight(1f))
         task.dueDate?.let { DueDateLabel(it) } ?: Spacer(Modifier)

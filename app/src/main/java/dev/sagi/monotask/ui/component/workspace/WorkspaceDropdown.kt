@@ -18,7 +18,7 @@ fun CreateWorkspaceDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    TextInputDialog(
+    MonoTextInputDialog(
         title = "New Workspace",
         placeholder = "Workspace name",
         confirmLabel = "Create",
@@ -40,21 +40,21 @@ fun WorkspaceDropdownGlass(
     var expanded by remember { mutableStateOf(previewExpanded) }
 
     Box(modifier = modifier) {
-        DropdownTriggerPill(
+        MonoDropdownTriggerPill(
             text = selectedWorkspace?.name ?: "Workspace",
             expanded = expanded,
             onClick = { expanded = !expanded }
         )
 
-        GlassDropdownMenu(
+        MonoDropdownMenu(
             expanded = expanded,
             onDismiss = { expanded = false }
         ) {
             workspaces.forEach { workspace ->
                 val isSelected = workspace.id == selectedWorkspace?.id
-                GlassDropdownItem(
+                MonoDropdownItem(
                     label = workspace.name,
-                    selected = isSelected,
+                    isSelected = isSelected,
                     onClick = { onWorkspaceSelected(workspace); expanded = false },
                 )
             }
@@ -64,7 +64,7 @@ fun WorkspaceDropdownGlass(
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
             )
 
-            GlassDropdownActionItem(
+            MonoDropdownActionItem(
                 label = "New workspace",
                 iconRes = R.drawable.ic_add_m3,
                 onClick = { onAddWorkspace(); expanded = false }
@@ -74,8 +74,8 @@ fun WorkspaceDropdownGlass(
 }
 
 
-// ========== Previews ==========
 
+// ========== Previews ==========
 private val previewWorkspaces = listOf(
     Workspace(id = "1", name = "Personal"),
     Workspace(id = "2", name = "Work"),

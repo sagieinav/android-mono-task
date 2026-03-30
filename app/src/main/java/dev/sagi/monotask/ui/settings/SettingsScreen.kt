@@ -1,7 +1,5 @@
 package dev.sagi.monotask.ui.settings
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,13 +34,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.ui.component.core.ActionButton
-import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
-import dev.sagi.monotask.ui.component.core.LoadingSpinner
+import dev.sagi.monotask.ui.component.core.MonoConfirmDialog
+import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.nationalPark
 import dev.sagi.monotask.ui.theme.penaltyRed
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import kotlinx.coroutines.flow.collectLatest
@@ -70,7 +66,7 @@ fun SettingsScreen(
     }
 
     when (val state = uiState) {
-        is SettingsUiState.Loading -> LoadingSpinner()
+        is SettingsUiState.Loading -> MonoLoadingIndicator()
         is SettingsUiState.Error   -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(state.message, style = MaterialTheme.typography.bodyLarge)
@@ -189,7 +185,7 @@ private fun SignOutButton(onSignOut: () -> Unit) {
     }
 
     if (showConfirm) {
-        GlassConfirmDialog(
+        MonoConfirmDialog(
             onDismissRequest = { showConfirm = false },
             title            = "Sign Out",
             message          = "Are you sure you want to sign out?",

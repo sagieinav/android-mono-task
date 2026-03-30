@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,7 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.BottomSheet
+import dev.sagi.monotask.ui.component.core.MonoBottomSheet
 import dev.sagi.monotask.ui.component.core.GlassSurface
 
 
@@ -69,7 +68,7 @@ private val FAQ_ITEMS = listOf(
 
 @Composable
 fun FaqBottomSheet(onDismiss: () -> Unit) {
-    BottomSheet(title = "FAQ", onDismissRequest = onDismiss) {
+    MonoBottomSheet(title = "FAQ", onDismissRequest = onDismiss) {
         FAQ_ITEMS.forEach { item ->
             FaqItemRow(item = item)
         }
