@@ -60,8 +60,8 @@ private enum class CellState { ACTIVE, INACTIVE_PAST, FUTURE, EMPTY }
 @Composable
 fun ActivityHeatmap(
     activityData: List<DailyActivity>,
-    shape: Shape = MaterialTheme.shapes.large,
     modifier: Modifier = Modifier,
+    shape: Shape = MaterialTheme.shapes.large
 ) {
     val today      = remember { LocalDate.now() }
     val monthStart = today.withDayOfMonth(1)

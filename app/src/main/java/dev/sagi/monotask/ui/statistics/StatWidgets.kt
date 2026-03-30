@@ -363,7 +363,10 @@ fun TotalXpCard(totalXp: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun StreakCard(activityData: List<DailyActivity>, modifier: Modifier = Modifier) {
+fun StreakCard(
+    activityData: List<DailyActivity>,
+    modifier: Modifier = Modifier
+) {
     val recordDays = computeRecordStreak(activityData)
     StatWidgetSmall(
         title       = "Streak Record",

@@ -61,9 +61,9 @@ class FocusViewModel @Inject constructor(
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
-    // Current streak — independent of task state, drives the streak chip
-    private val _currentStreak = MutableStateFlow(0)
-    val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
+//    // Current streak: independent of task state, drives the streak chip
+//    private val _currentStreak = MutableStateFlow(0)
+//    val currentStreak: StateFlow<Int> = _currentStreak.asStateFlow()
 
     // Cached for undo operations
     private var lastCompletedTask       : Task?    = null
@@ -89,7 +89,7 @@ class FocusViewModel @Inject constructor(
         viewModelScope.launch {
             userId = AuthUtils.awaitUid()
             observeTasks()
-            observeStats()
+//            observeStats()
         }
     }
 
@@ -124,14 +124,14 @@ class FocusViewModel @Inject constructor(
 
     // ========== Stats Observation ==========
 
-    private fun observeStats() {
-        // Live streak: re-emits on every Firestore snapshot for the current month
-        userRepository.getActivity(userId, UserRepository.thisMonthRange)
-            .onEach { activity ->
-                _currentStreak.value = ActivityStats.computeCurrentStreak(activity)
-            }
-            .launchIn(viewModelScope)
-    }
+//    private fun observeStats() {
+//        // Live streak: re-emits on every Firestore snapshot for the current month
+//        userRepository.getActivity(userId, UserRepository.thisMonthRange)
+//            .onEach { activity ->
+//                _currentStreak.value = ActivityStats.computeCurrentStreak(activity)
+//            }
+//            .launchIn(viewModelScope)
+//    }
 
     // ========== Task Observation ==========
 

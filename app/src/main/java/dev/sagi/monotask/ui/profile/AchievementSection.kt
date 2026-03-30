@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,9 +36,7 @@ import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.AchievementCategory
 import dev.sagi.monotask.data.model.AchievementMilestone
 import dev.sagi.monotask.data.model.AchievementTier
-import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.GlassTooltip
-import dev.sagi.monotask.ui.theme.GlassSurface
 import dev.sagi.monotask.ui.theme.HexagonShape
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
@@ -201,7 +197,7 @@ private fun AchievementTooltipContent(
                 }
             }
             // Line 2: NEXT tier description
-            achievement.nextTier?.let { nextMilestone ->
+            achievement.nextMilestone?.let { nextMilestone ->
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text       = "NEXT",

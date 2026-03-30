@@ -5,7 +5,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +18,6 @@ import com.google.firebase.Timestamp
 import dev.sagi.monotask.ui.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.ui.component.core.GlassChip
 import dev.sagi.monotask.ui.component.core.GlassDropdownItem
 import dev.sagi.monotask.ui.component.core.GlassDropdownMenu
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
@@ -31,12 +29,8 @@ import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import dev.sagi.monotask.ui.component.core.DropdownTriggerPill
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import java.util.Date
@@ -128,7 +122,7 @@ fun KanbanScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 EmptyState(
-                    imgRes        = R.drawable.img_empty_hyperfocus_yellow,
+                    imgRes        = R.drawable.img_empty_hyperfocus,
                     title         = "Hyperfocusing",
                     subtitle      = "Kanban's locked. Stay in the zone.",
                     isMainContent = true,
@@ -225,7 +219,7 @@ fun KanbanScreenContent(
                         contentAlignment = Alignment.Center
                     ) {
                         EmptyState(
-                            imgRes        = R.drawable.img_empty_kanban_yellow,
+                            imgRes        = R.drawable.img_empty_kanban,
                             title         = "Nothing here yet",
                             subtitle      = "Add a task and get the ball rolling.",
                             isMainContent = true,

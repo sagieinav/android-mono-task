@@ -11,26 +11,16 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 
-// ─────────────────────────────────────────────────────
-// CATEGORY 1 — HERO / DISPLAY (Headlines, Focus Card title)
-// Used for: headlineLarge, headlineMedium, displayLarge
-// ─────────────────────────────────────────────────────
+// =====================================================
+// CATEGORY 1: HERO / DISPLAY
+// =====================================================
 val gloock = FontFamily(
     Font(R.font.gloock, FontWeight.Normal)
 )
 
-val playfairDisplay = FontFamily(
-    Font(R.font.playfair_display_bold,        FontWeight.Bold),
-    Font(R.font.playfair_display,        FontWeight.SemiBold),
-    Font(R.font.playfair_display,        FontWeight.Bold),
-    Font(R.font.playfair_display_italic, FontWeight.Normal,  FontStyle.Italic),
-)
-
-// ─────────────────────────────────────────────────────
-// CATEGORY 2 — BODY / READING SERIF (Descriptions, onboarding, profile)
-// Used for: bodyLarge, bodyMedium, headlineSmall
-// ─────────────────────────────────────────────────────
-
+// =====================================================
+// CATEGORY 2: BODY / READING SERIF
+// =====================================================
 val lora = FontFamily(
     Font(R.font.lora,        FontWeight.Normal),
     Font(R.font.lora,        FontWeight.Medium),
@@ -38,55 +28,18 @@ val lora = FontFamily(
     Font(R.font.lora_italic, FontWeight.Normal, FontStyle.Italic),
 )
 
-val libreCaslon = FontFamily(
-    Font(R.font.libre_caslon_text,        FontWeight.Normal),
-    Font(R.font.libre_caslon_text_bold,   FontWeight.Bold),
-    Font(R.font.libre_caslon_text_italic, FontWeight.Normal, FontStyle.Italic),
-)
-
-val notoSerif = FontFamily(
-    Font(R.font.noto_serif,        FontWeight.Normal, FontStyle.Normal),
-    Font(R.font.noto_serif_italic, FontWeight.Normal, FontStyle.Italic),
-)
-
-val plantagenet = FontFamily(
-    Font(R.font.plantagenet, FontWeight.Normal, FontStyle.Normal),
-    Font(R.font.plantagenet_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.plantagenet, FontWeight.Bold, FontStyle.Normal)
-)
-
-val ptSerif = FontFamily(
-    Font(R.font.pt_serif, FontWeight.Normal, FontStyle.Normal),
-    Font(R.font.pt_serif_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.pt_serif, FontWeight.Bold, FontStyle.Normal)
-)
-
-val merriweather = FontFamily(
-    Font(R.font.merriweather, FontWeight.Normal, FontStyle.Normal),
-    Font(R.font.merriweather_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.merriweather, FontWeight.Bold, FontStyle.Normal)
-)
-
-// ─────────────────────────────────────────────────────
-// CATEGORY 3 — UI CHROME (Buttons, chips, labels, nav, titles)
-// Used for: titleLarge/Medium/Small, labelLarge/Medium, bodySmall
-// ─────────────────────────────────────────────────────
-
-
-val mplusRounded = FontFamily(
-    Font(R.font.mplus_rounded)
-)
-
+// =====================================================
+// CATEGORY 3: MAIN UI
+// =====================================================
 val nationalPark = FontFamily(
     Font(R.font.national_park),
     Font(R.font.national_park_semi_bold, FontWeight.SemiBold),
     Font(R.font.national_park_bold, FontWeight.Bold)
 )
 
-
-// ─────────────────────────────────────────────────────
-// CATEGORY 4 — DATA (small labels)
-// ─────────────────────────────────────────────────────
+// =====================================================
+// CATEGORY 4: DATA (small labels)
+// =====================================================
 val plusJakartaSans = FontFamily(
     Font(R.font.plus_jakarta_sans,        FontWeight.Normal),
     Font(R.font.plus_jakarta_sans_medium,        FontWeight.Medium),
@@ -104,27 +57,19 @@ val googleSans = FontFamily(
 )
 val harabara = FontFamily(
     Font(R.font.harabara, FontWeight.Normal),
-    Font(R.font.harabara_bold,  FontWeight.Bold),
 )
 
-// ─────────────────────────────────────────────────────
+// =====================================================
 // ACTIVE SELECTION
-// To swap a font, change the variable assigned here.
-// e.g. replace `gloock` with `playfairDisplay` for titles.
-// ─────────────────────────────────────────────────────
-private val heroFont        = gloock            // gloock, playfairDisplay
-private val uiFont          = nationalPark       // mplusRounded, nationalPark
-private val dataFont        = googleSans        // googleSans, plusJakartaSans
-private val contentFont     = lora              // libreCaslon, notoSerif, lora, plantagenet, ptSerif, merriweather
+// =====================================================
+private val heroFont = gloock
+private val uiFont = nationalPark
+private val dataFont = googleSans
+private val contentFont = lora
 
-// ─────────────────────────────────────────────────────
+// =====================================================
 // TYPOGRAPHY SCALE
-// M3 has 15 named styles. Rule of thumb:
-//   display/headline → hero content
-//   title            → section headers, screen names
-//   body             → reading text
-//   label            → UI chrome (smallest, most frequent)
-// ─────────────────────────────────────────────────────
+// =====================================================
 
 // Helper to remove line height padding
 private fun TextStyle.withNoPadding() = copy(

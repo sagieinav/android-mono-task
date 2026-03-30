@@ -165,7 +165,10 @@ private fun FriendRow(
         label = "chevronRotation"
     )
 
-    val liveStreak = remember(activities) { ActivityStats.computeCurrentStreak(activities) }
+    val liveStreak = remember(activities) {
+        user.stats.currentStreak
+//        ActivityStats.computeCurrentStreak(activities)
+    }
     var expandedContentHeightPx by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(expanded) {

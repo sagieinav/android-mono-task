@@ -18,7 +18,10 @@ import dev.sagi.monotask.ui.theme.customColors
 // Section composables (used by StatisticsScreen)
 // =========================
 
-fun LazyListScope.weeklyItems(state: ProfileUiState.Ready, animationKey: Int) {
+fun LazyListScope.weeklyItems(
+    state: ProfileUiState.Ready,
+    animationKey: Int
+) {
     val weekActivity = ActivityStats.weekActivity(state.activityData)
     val weeklyXP     = weekActivity.sumOf { it.xpEarned }
     val weeklyTasks  = weekActivity.sumOf { it.tasksCompleted }
@@ -65,7 +68,9 @@ fun LazyListScope.monthlyItems(state: ProfileUiState.Ready, animationKey: Int) {
     }
     item {
         key(animationKey) {
-            ActivityHeatmap(activityData = state.activityData)
+            ActivityHeatmap(
+                activityData = state.activityData
+            )
         }
     }
 }
@@ -97,7 +102,10 @@ fun LazyListScope.allTimeItems(state: ProfileUiState.Ready, animationKey: Int) {
                     totalTasks = totalCompletedTasks,
                     modifier   = Modifier.weight(1f)
                 )
-                StreakCard(activityData = state.activityData, modifier = Modifier.weight(1f))
+                StreakCard(
+                    activityData = state.activityData,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }

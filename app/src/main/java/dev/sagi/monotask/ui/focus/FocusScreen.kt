@@ -37,8 +37,8 @@ fun FocusScreen(
 ) {
     val uiState            by focusVM.uiState.collectAsStateWithLifecycle()
     val frozenForAnimation by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
-    val currentStreak      by focusVM.currentStreak.collectAsStateWithLifecycle()
     val currentUser        by focusVM.currentUser.collectAsStateWithLifecycle()
+    val currentStreak      = currentUser?.stats?.currentStreak ?: 0
     val editingTask        by focusVM.editingTask.collectAsStateWithLifecycle()
     val snoozeSheetVisible by focusVM.snoozeSheetVisible.collectAsStateWithLifecycle()
     val snackbarHostState  = LocalSnackbarHostState.current
@@ -191,7 +191,7 @@ fun FocusScreenContent(
         when (uiState) {
             is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 EmptyState(
-                    imgRes = R.drawable.img_empty_focus_yellow,
+                    imgRes = R.drawable.img_empty_focus,
                     title = "Where are the tasks?",
                     subtitle = "Oh... you cleared 'em all. Well played!",
                     isMainContent = true,

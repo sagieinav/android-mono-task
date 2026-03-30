@@ -43,28 +43,28 @@ object ActivityStats {
 
     // Current streak = consecutive active days going backwards from today
     // Allows today to still count even if not yet active (checks yesterday as fallback start)
-    fun computeCurrentStreak(data: List<DailyActivity>): Int {
-        if (data.isEmpty()) return 0
-        val days = data
-            .filter { it.tasksCompleted > 0 }
-            .map { it.dateEpochDay }
-            .distinct()
-            .sortedDescending()
-
-        var streak   = 0
-        var expected = LocalDate.now().toEpochDay()
-        for (day in days) {
-            if (day == expected) {
-                streak++
-                expected = day - 1
-            } else if (streak == 0 && day == expected - 1) {
-                // Grace: today isnt over yet, start counting from yesterday
-                streak++
-                expected = day - 1
-            } else break
-        }
-        return streak
-    }
+//    fun computeCurrentStreak(data: List<DailyActivity>): Int {
+//        if (data.isEmpty()) return 0
+//        val days = data
+//            .filter { it.tasksCompleted > 0 }
+//            .map { it.dateEpochDay }
+//            .distinct()
+//            .sortedDescending()
+//
+//        var streak   = 0
+//        var expected = LocalDate.now().toEpochDay()
+//        for (day in days) {
+//            if (day == expected) {
+//                streak++
+//                expected = day - 1
+//            } else if (streak == 0 && day == expected - 1) {
+//                // Grace: today isnt over yet, start counting from yesterday
+//                streak++
+//                expected = day - 1
+//            } else break
+//        }
+//        return streak
+//    }
 
     // Record streak = longest consecutive active day run across all time/time range
     fun computeRecordStreak(

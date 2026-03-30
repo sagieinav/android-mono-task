@@ -48,7 +48,7 @@ fun AvatarImage(user: User, modifier: Modifier = Modifier) {
     }
     if (user.isAutoAvatar) {
         AsyncImage(
-            model              = user.resolvedAvatarUrl(),
+            model              = user.resolvedAvatarUrl,
             contentDescription = "Avatar",
             contentScale       = ContentScale.Fit,
             modifier           = scaledModifier
