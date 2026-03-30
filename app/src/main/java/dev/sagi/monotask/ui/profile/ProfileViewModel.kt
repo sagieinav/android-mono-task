@@ -10,8 +10,8 @@ import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
-import dev.sagi.monotask.domain.util.AchievementEngine
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.AchievementEngine
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,10 +91,10 @@ class ProfileViewModel @Inject constructor(
                     return@onEach
                 }
 
-                val level        = XpEvents.levelForXp(user.xp)
-                val progress     = XpEvents.progressToNextLevel(user.xp)
-                val xpForNext    = XpEvents.xpRequiredForLevel(level + 1)
-                val xpForCurrent = XpEvents.xpRequiredForLevel(level)
+                val level        = XpEngine.levelForXp(user.xp)
+                val progress     = XpEngine.progressToNextLevel(user.xp)
+                val xpForNext    = XpEngine.xpRequiredForLevel(level + 1)
+                val xpForCurrent = XpEngine.xpRequiredForLevel(level)
                 val xpIntoLevel  = user.xp - xpForCurrent
 
                 // Preserve existing statistics fields on subsequent user-doc updates

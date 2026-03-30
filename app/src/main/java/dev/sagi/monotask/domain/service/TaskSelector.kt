@@ -1,4 +1,4 @@
-package dev.sagi.monotask.domain.util
+package dev.sagi.monotask.domain.service
 
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task

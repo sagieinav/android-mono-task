@@ -9,16 +9,10 @@ import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -46,8 +40,8 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.domain.util.AchievementEngine
-import dev.sagi.monotask.domain.util.ActivityStats
+import dev.sagi.monotask.domain.service.AchievementEngine
+import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.ui.component.core.AvatarBox
 import dev.sagi.monotask.ui.component.display.EmptyState
 import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
@@ -64,7 +58,6 @@ import dev.sagi.monotask.ui.component.display.LineChart
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.clickableNoRipple
-import dev.sagi.monotask.ui.theme.noMinSize
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import dev.sagi.monotask.util.Constants.Theme.TRAILING_BUTTON_SIZE
 

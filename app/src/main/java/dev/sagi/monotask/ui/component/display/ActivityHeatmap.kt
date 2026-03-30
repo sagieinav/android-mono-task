@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.DailyActivity
-import dev.sagi.monotask.domain.util.ActivityStats
+import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme

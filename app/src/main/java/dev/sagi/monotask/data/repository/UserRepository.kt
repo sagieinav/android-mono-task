@@ -11,7 +11,7 @@ import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.UserStats
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.XpEngine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -73,7 +73,7 @@ class UserRepository(private val db: FirebaseFirestore) {
 
     suspend fun addXp(userId: String, amount: Int, currentXp: Int, currentLevel: Int) {
         val newXp    = (currentXp + amount).coerceAtLeast(0)
-        val newLevel = XpEvents.levelForXp(newXp)
+        val newLevel = XpEngine.levelForXp(newXp)
         userDoc(userId).update(mapOf("xp" to newXp, "level" to newLevel)).await()
     }
 
@@ -81,7 +81,7 @@ class UserRepository(private val db: FirebaseFirestore) {
         db.runTransaction { tx ->
             val currentXp = tx.get(userDoc(userId)).getLong("xp")?.toInt() ?: 0
             val newXp     = (currentXp - amount).coerceAtLeast(0)
-            tx.update(userDoc(userId), mapOf("xp" to newXp, "level" to XpEvents.levelForXp(newXp)))
+            tx.update(userDoc(userId), mapOf("xp" to newXp, "level" to XpEngine.levelForXp(newXp)))
         }.await()
     }
 

@@ -9,10 +9,10 @@ import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
-import dev.sagi.monotask.domain.util.ActivityStats
-import dev.sagi.monotask.domain.util.AchievementEngine
-import dev.sagi.monotask.domain.util.TaskSelector
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.ActivityStats
+import dev.sagi.monotask.domain.service.AchievementEngine
+import dev.sagi.monotask.domain.service.TaskSelector
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -219,7 +219,7 @@ class FocusViewModel @Inject constructor(
 
                 // Evaluate AFTER by appending the just-completed task in memory
                 // avoids a second Firestore fetch.
-                val levelAfter        = XpEvents.levelForXp(user.xp + xpGained)
+                val levelAfter        = XpEngine.levelForXp(user.xp + xpGained)
                 if (levelAfter > user.level) {
                     _uiEffect.emit(FocusUiEffect.ShowLevelUp(previousLevel = user.level, newLevel = levelAfter))
                 }
@@ -250,7 +250,7 @@ class FocusViewModel @Inject constructor(
         }
     }
 
-    private fun snoozeTask(option: XpEvents.SnoozeOption) {
+    private fun snoozeTask(option: XpEngine.SnoozeOption) {
         val state = _uiState.value as? FocusUiState.Active ?: return
         lastSnoozedTask = state.focusTask
         _frozenForAnimation.value = true
@@ -268,7 +268,7 @@ class FocusViewModel @Inject constructor(
                 val allTasks      = taskRepository.getActiveTasksOnce(userId, state.workspace.id)
                 val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
                 val nextTask = when (option) {
-                    XpEvents.SnoozeOption.BY_DUE_DATE -> TaskSelector.getTopTaskByDueDate(
+                    XpEngine.SnoozeOption.BY_DUE_DATE -> TaskSelector.getTopTaskByDueDate(
                         allTasks, dueDateWeight, excludeId = state.focusTask.id
                     )
                     else -> TaskSelector.getTopTask(

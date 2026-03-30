@@ -88,6 +88,13 @@ fun MainScaffold(
 
     val kanbanUiState by kanbanVM.uiState.collectAsStateWithLifecycle()
 
+    // Eagerly initialize KanbanViewModel so uiState is Ready before the user navigates to Kanban.
+    // setWorkspaceSource / setUserSource are no-ops if already set, so NavGraph calls are harmless.
+    LaunchedEffect(Unit) {
+        kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
+        kanbanVM.setUserSource(userSessionVM.currentUser)
+    }
+
     CompositionLocalProvider(
         LocalHazeState         provides hazeState,
         LocalSnackbarHostState provides snackbarHostState,

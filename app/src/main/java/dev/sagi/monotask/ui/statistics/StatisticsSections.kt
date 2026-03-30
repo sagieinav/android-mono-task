@@ -2,22 +2,16 @@ package dev.sagi.monotask.ui.statistics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.data.model.DailyActivity
-import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.domain.util.ActivityStats
+import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.ui.component.display.ActivityHeatmap
 import dev.sagi.monotask.ui.component.display.BarChart
 import dev.sagi.monotask.ui.component.display.LineChart
 import dev.sagi.monotask.ui.profile.ProfileUiState
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 
 // =========================

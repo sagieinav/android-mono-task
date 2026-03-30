@@ -1,7 +1,5 @@
 package dev.sagi.monotask.ui.focus
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -21,9 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,17 +27,15 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.penaltyRed
 import androidx.compose.ui.text.style.TextAlign
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.core.BottomSheet
-import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.display.InfoCallout
-import dev.sagi.monotask.ui.theme.GlassSurface
 
 @Composable
 fun SnoozeBottomSheet(
     onDismissRequest: () -> Unit,
-    onSnooze: (XpEvents.SnoozeOption) -> Unit
+    onSnooze: (XpEngine.SnoozeOption) -> Unit
 ) {
     BottomSheet(
         title = "Snooze Task",
@@ -63,8 +55,8 @@ fun SnoozeBottomSheet(
         // Define the metadata of each snooze option button
         val snoozeOptions = remember {
             listOf(
-                Triple(XpEvents.SnoozeOption.BY_DUE_DATE,       R.drawable.ic_due_soon,         "Due soon"),
-                Triple(XpEvents.SnoozeOption.NEXT_IN_QUEUE,     R.drawable.ic_skip,             "Next in queue"),
+                Triple(XpEngine.SnoozeOption.BY_DUE_DATE,       R.drawable.ic_due_soon,         "Due soon"),
+                Triple(XpEngine.SnoozeOption.NEXT_IN_QUEUE,     R.drawable.ic_skip,             "Next in queue"),
             )
         }
 
@@ -155,12 +147,12 @@ private fun ChooseSnoozeButtonPreview() {
             ChooseSnoozeButton(
                 icon      = painterResource(R.drawable.ic_due_soon),
                 label     = "Due soon",
-                xpPenalty = XpEvents.SnoozeOption.BY_DUE_DATE.penalty
+                xpPenalty = XpEngine.SnoozeOption.BY_DUE_DATE.penalty
             )
             ChooseSnoozeButton(
                 icon      = painterResource(R.drawable.ic_skip),
                 label     = "Next in queue",
-                xpPenalty = XpEvents.SnoozeOption.NEXT_IN_QUEUE.penalty
+                xpPenalty = XpEngine.SnoozeOption.NEXT_IN_QUEUE.penalty
             )
         }
     }

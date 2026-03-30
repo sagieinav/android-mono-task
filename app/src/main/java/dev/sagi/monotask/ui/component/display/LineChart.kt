@@ -55,7 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.domain.util.ActivityStats.ChartPoint
+import dev.sagi.monotask.domain.service.ActivityStats.ChartPoint
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.AceGold
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding

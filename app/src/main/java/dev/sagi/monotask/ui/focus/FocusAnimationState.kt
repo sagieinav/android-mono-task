@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.XpEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -90,7 +90,7 @@ class FocusAnimationState(
 
     // ========== Snooze Actions ==========
 
-    fun onSnoozeConfirmed(option: XpEvents.SnoozeOption, scope: CoroutineScope, screenWidthPx: Float) {
+    fun onSnoozeConfirmed(option: XpEngine.SnoozeOption, scope: CoroutineScope, screenWidthPx: Float) {
         // Set slide-in direction and fire action immediately so the ViewModel freeze
         // is in place before any Firestore snapshot can arrive and interrupt the exit animation.
         setNextEntryDirection(SwipeExitDirection.LEFT, screenWidthPx)

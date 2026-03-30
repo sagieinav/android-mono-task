@@ -4,7 +4,7 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.XpEngine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -134,13 +134,13 @@ class TaskRepository(private val db: FirebaseFirestore) {
 
     // insertNewTask now stores initial XP
     suspend fun insertNewTask(userId: String, task: Task) {
-        val taskWithXp = task.copy(currentXp = XpEvents.calculateTaskXp(task))
+        val taskWithXp = task.copy(currentXp = XpEngine.calculateTaskXp(task))
         tasksCollection(userId).add(taskWithXp).await()
     }
 
     // Snoozes task and recalculates its XP. No user XP touched here!
-    suspend fun updateSnoozeFields(userId: String, task: Task, option: XpEvents.SnoozeOption) {
-        val newXp = XpEvents.calculateXpAfterSnooze(task, option)
+    suspend fun updateSnoozeFields(userId: String, task: Task, option: XpEngine.SnoozeOption) {
+        val newXp = XpEngine.calculateXpAfterSnooze(task, option)
         tasksCollection(userId).document(task.id)
             .update(mapOf(
                 "snoozeCount" to com.google.firebase.firestore.FieldValue.increment(1),
@@ -150,7 +150,7 @@ class TaskRepository(private val db: FirebaseFirestore) {
 
     // overwriteExistingTask recalculates XP from edited properties
     suspend fun overwriteExistingTask(userId: String, task: Task) {
-        val taskWithXp = task.copy(currentXp = XpEvents.calculateTaskXp(task))
+        val taskWithXp = task.copy(currentXp = XpEngine.calculateTaskXp(task))
         tasksCollection(userId).document(task.id).set(taskWithXp).await()
     }
 

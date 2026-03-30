@@ -61,7 +61,7 @@ fun GlassSnackbar(
         shape = CircleShape,
         blurred = true
     ) {
-        val monoVisuals = snackbarData.visuals as? MonoSnackbarVisuals
+        val snackbarVisuals = snackbarData.visuals as? MonoSnackbarVisuals
 
         Row(
             modifier = Modifier
@@ -69,9 +69,9 @@ fun GlassSnackbar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // (Optional) Leading Icon
-            monoVisuals?.leadingIcon?. let {
+            snackbarVisuals?.leadingIcon?. let {
                 Icon(
-                    painter = painterResource(monoVisuals.leadingIcon),
+                    painter = painterResource(snackbarVisuals.leadingIcon),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = null,
                     modifier = Modifier

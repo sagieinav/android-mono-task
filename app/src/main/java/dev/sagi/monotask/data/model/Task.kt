@@ -2,7 +2,6 @@ package dev.sagi.monotask.data.model
 
 import androidx.annotation.Keep
 import com.google.firebase.Timestamp
-import dev.sagi.monotask.domain.util.XpEvents
 
 @Keep
 data class Task(

@@ -31,7 +31,6 @@ import dev.sagi.monotask.ui.component.task.DueDateLabel
 import dev.sagi.monotask.ui.component.core.GlassConfirmDialog
 import dev.sagi.monotask.ui.component.task.TagSize
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.invincibleBorder
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.GlassDropdownActionItem
@@ -42,7 +41,7 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.ripple
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.glassBorder
 
@@ -153,7 +152,7 @@ fun KanbanCard(
             onDismissRequest = { pendingAction = null },
             title            = "Focus on this Task?",
             message          = "Your current focus task will be snoozed, " +
-                                "receiving a ${XpEvents.SnoozeOption.MANUAL.penalty} XP penalty.",
+                                "receiving a ${XpEngine.SnoozeOption.MANUAL.penalty} XP penalty.",
             confirmLabel     = "Focus",
             confirmColor     = MaterialTheme.customColors.aceDim,
             onConfirm        = { onKanbanEvent(KanbanEvent.FocusNow(task)) }

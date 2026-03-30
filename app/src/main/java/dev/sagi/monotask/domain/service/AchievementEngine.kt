@@ -1,4 +1,4 @@
-package dev.sagi.monotask.domain.util
+package dev.sagi.monotask.domain.service
 
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.AchievementCategory
@@ -7,6 +7,8 @@ import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.AchievementMilestone
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.UserStats
+import java.time.Instant
+import java.time.ZoneId
 
 object AchievementEngine {
 
@@ -136,8 +138,8 @@ object AchievementEngine {
         val days = tasks
             .mapNotNull { it.completedAt }
             .map { ts ->
-                java.time.Instant.ofEpochMilli(ts.toDate().time)
-                    .atZone(java.time.ZoneId.systemDefault())
+                Instant.ofEpochMilli(ts.toDate().time)
+                    .atZone(ZoneId.systemDefault())
                     .toLocalDate()
                     .toEpochDay()
             }

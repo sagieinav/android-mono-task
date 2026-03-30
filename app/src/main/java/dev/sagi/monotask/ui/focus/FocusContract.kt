@@ -3,7 +3,7 @@ package dev.sagi.monotask.ui.focus
 import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.XpEngine
 
 // ========== UI States ==========
 sealed class FocusUiState {
@@ -22,7 +22,7 @@ sealed interface FocusEvent {
     object CompleteTask : FocusEvent
     object OpenSnooze : FocusEvent
     object DismissSnooze : FocusEvent
-    data class ExecuteSnooze(val option: XpEvents.SnoozeOption) : FocusEvent
+    data class ExecuteSnooze(val option: XpEngine.SnoozeOption) : FocusEvent
     object UndoCompleteTask : FocusEvent
     object UndoSnoozeTask : FocusEvent
     object OpenEditSheet : FocusEvent

@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
-import dev.sagi.monotask.domain.util.ActivityStats.computeRecordStreak
+import dev.sagi.monotask.domain.service.ActivityStats.computeRecordStreak
 import dev.sagi.monotask.ui.component.display.ValueLabel
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding

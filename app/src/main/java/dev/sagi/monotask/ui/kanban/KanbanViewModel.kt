@@ -10,7 +10,7 @@ import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
-import dev.sagi.monotask.domain.util.XpEvents
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -195,7 +195,7 @@ class KanbanViewModel @Inject constructor(
                         val allTasks = taskRepository.getActiveTasksOnce(userId, workspace.id)
                         val currentTask = allTasks.find { it.id == currentId }
                         currentTask?.let {
-                            taskRepository.updateSnoozeFields(userId, it, XpEvents.SnoozeOption.MANUAL)
+                            taskRepository.updateSnoozeFields(userId, it, XpEngine.SnoozeOption.MANUAL)
                         }
                     }
                 }
