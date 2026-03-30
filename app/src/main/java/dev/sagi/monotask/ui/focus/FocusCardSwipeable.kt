@@ -21,7 +21,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -155,7 +154,7 @@ fun CompletePill(
 ) {
     val progress = (syncedOffset / COMPLETE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
-        iconRes  = R.drawable.ic_check_alt,
+        iconRes  = R.drawable.ic_check,
         iconTint = COMPLETE_COLOR,
         progress = progress,
         offsetX  = screenWidthPx * (1f - progress),

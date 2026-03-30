@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.component.core
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -12,6 +13,14 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.nationalPark
+
+data class MonoSnackbarVisuals(
+    override val message: String,
+    override val actionLabel: String? = null,
+    override val withDismissAction: Boolean = false,
+    override val duration: SnackbarDuration = SnackbarDuration.Short,
+    @param:DrawableRes val leadingIcon: Int? = null
+) : SnackbarVisuals
 
 @Composable
 fun GlassSnackbarDismissable(
@@ -52,11 +61,25 @@ fun GlassSnackbar(
         shape = CircleShape,
         blurred = true
     ) {
+        val monoVisuals = snackbarData.visuals as? MonoSnackbarVisuals
+
         Row(
             modifier = Modifier
                 .padding(vertical = 8.dp), // internal padding
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // (Optional) Leading Icon
+            monoVisuals?.leadingIcon?. let {
+                Icon(
+                    painter = painterResource(monoVisuals.leadingIcon),
+                    tint = MaterialTheme.colorScheme.primary,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .size(26.dp)
+                )
+            }
+
             // The main message (Takes up remaining space)
             Text(
                 text = snackbarData.visuals.message,

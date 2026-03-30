@@ -23,8 +23,6 @@ import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.core.GlassTabRow
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
-import dev.sagi.monotask.ui.kanban.KanbanEvent
-import dev.sagi.monotask.ui.kanban.KanbanUiState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBorder
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
@@ -48,13 +46,13 @@ private fun TopBarScaffold(
             .padding(
                 start = Constants.Theme.SCREEN_PADDING,
                 end = Constants.Theme.SCREEN_PADDING,
-//                top = 8.dp
+                top = 8.dp
             )
-            .heightIn(min = 54.dp, max = 96.dp)
+            .heightIn(min = 48.dp, max = 96.dp)
             .background(Color.Transparent)
         ,
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         leading()
         trailing()
@@ -89,37 +87,6 @@ fun WorkspaceTopBar(
                 iconRes = R.drawable.ic_add,
                 contentDescription = "Create new task",
                 onClick = onAddTaskClick
-            )
-        }
-    )
-}
-
-@Composable
-fun KanbanTopBar(
-    workspaces: List<Workspace>,
-    selectedWorkspace: Workspace?,
-    onWorkspaceSelected: (Workspace) -> Unit,
-    onAddWorkspace: () -> Unit,
-    isArchive: Boolean,
-    onToggleArchive: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TopBarScaffold(
-        modifier = modifier,
-        leading = {
-            WorkspaceDropdownGlass(
-                workspaces = workspaces,
-                selectedWorkspace = selectedWorkspace,
-                onWorkspaceSelected = onWorkspaceSelected,
-                onAddWorkspace = onAddWorkspace
-            )
-        },
-        trailing = {
-            TopBarIconButton(
-                iconRes = R.drawable.ic_archive,
-                contentDescription = "Toggle Archive",
-                isPressed = isArchive,
-                onClick = onToggleArchive
             )
         }
     )

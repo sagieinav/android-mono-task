@@ -3,6 +3,10 @@ package dev.sagi.monotask.ui.kanban
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 
+// ========== Sort Order ==========
+
+enum class SortOrder { DUE_ASC, DUE_DESC, CREATED_ASC, CREATED_DESC }
+
 // ========== UI States ==========
 
 sealed class KanbanUiState {
@@ -12,7 +16,8 @@ sealed class KanbanUiState {
         val highTasks: List<Task>,
         val mediumTasks: List<Task>,
         val lowTasks: List<Task>,
-        val isArchive: Boolean
+        val isArchive: Boolean,
+        val sortOrder: SortOrder = SortOrder.CREATED_DESC
     ) : KanbanUiState()
 }
 

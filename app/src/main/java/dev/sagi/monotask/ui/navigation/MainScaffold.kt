@@ -32,12 +32,16 @@ import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.ui.component.core.GlassSnackbarDismissable
+import dev.sagi.monotask.ui.component.core.MonoSnackbarVisuals
 import dev.sagi.monotask.ui.shared.CreateSheetDraft
-import dev.sagi.monotask.ui.kanban.KanbanEvent
 import dev.sagi.monotask.ui.kanban.KanbanUiState
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
 import dev.sagi.monotask.ui.shared.UserSessionViewModel
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun MainScaffold(
@@ -83,11 +87,6 @@ fun MainScaffold(
     val selectedWorkspace by workspaceVM.selectedWorkspace.collectAsStateWithLifecycle()
 
     val kanbanUiState by kanbanVM.uiState.collectAsStateWithLifecycle()
-    val isKanbanArchive = (kanbanUiState as? KanbanUiState.Ready)?.isArchive ?: false
-    val isKanbanEmpty = (kanbanUiState as? KanbanUiState.Ready)?.let {
-        !it.isArchive && it.highTasks.isEmpty() && it.mediumTasks.isEmpty() && it.lowTasks.isEmpty()
-    } ?: false
-    val onKanbanEvent: (KanbanEvent) -> Unit = remember { { kanbanVM.onEvent(it) } }
 
     CompositionLocalProvider(
         LocalHazeState         provides hazeState,
@@ -122,13 +121,12 @@ fun MainScaffold(
                         )
 
                     Screen.Kanban.route ->
-                        KanbanTopBar(
+                        WorkspaceTopBar(
                             workspaces          = workspaces,
                             selectedWorkspace   = selectedWorkspace,
                             onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
                             onAddWorkspace      = { showCreateWorkspaceDialog = true },
-                            isArchive           = isKanbanArchive,
-                            onToggleArchive     = { onKanbanEvent(KanbanEvent.ToggleArchive) }
+                            onAddTaskClick      = { workspaceVM.openCreateSheet() }
                         )
 
                     Screen.Statistics.route ->
@@ -147,7 +145,14 @@ fun MainScaffold(
                         )
 
                     Screen.Brief.route ->
-                        TitleTopBar(title = NavTab.BRIEF.label)
+                        TitleTopBar(
+                            title = (
+                                    LocalDate
+                                        .now().format(
+                                            DateTimeFormatter.ofPattern("EEEE, MMMM d", LocalLocale.current.platformLocale)
+                                        )
+                                )
+                        )
 
                     Screen.Settings.route ->
                         TitleTopBar(title = "Settings")
@@ -210,8 +215,11 @@ fun MainScaffold(
                             if (hadTasks) {
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message  = "Task created",
-                                        duration = SnackbarDuration.Short
+                                        MonoSnackbarVisuals(
+                                            message = "Task created",
+                                            duration = SnackbarDuration.Short,
+                                            leadingIcon = R.drawable.ic_check
+                                        )
                                     )
                                 }
                             }

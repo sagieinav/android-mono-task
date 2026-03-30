@@ -52,23 +52,12 @@ fun DueDateLabel(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 
-        // Icon only for big label (dropped for big label as well for now)
-//        if (!small) {
-//            Icon(
-//                painter = painterResource(R.drawable.ic_due_soon),
-//                contentDescription = null,
-//                modifier = Modifier
-//                    .size(18.dp)
-//                    .padding(1.dp),
-//                tint = dateColor
-//            )
-//        }
 
         Text(
             text = relativeDate.text,
             style = textStyle,
             fontSize = fontSize,
-            fontWeight = if (small) FontWeight.Normal else FontWeight.SemiBold,
+            fontWeight = FontWeight.Normal,
             color = dateColor,
             textAlign = TextAlign.Center,
         )

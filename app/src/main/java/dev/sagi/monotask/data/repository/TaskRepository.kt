@@ -66,6 +66,18 @@ class TaskRepository(private val db: FirebaseFirestore) {
         }
     }
 
+    // Live stream of ALL active tasks across every workspace (used by BriefScreen)
+    fun getAllActiveTasks(userId: String): Flow<List<Task>> =
+        tasksCollection(userId)
+            .whereEqualTo("completed", false)
+            .snapshots()
+            .map { snapshot ->
+                snapshot.documents.mapNotNull {
+                    it.toObject(Task::class.java)?.copy(id = it.id)
+                        ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
+                }
+            }
+
     // Live stream of ALL completed tasks across every workspace
     fun getAllCompletedTasks(userId: String): Flow<List<Task>> =
         tasksCollection(userId)

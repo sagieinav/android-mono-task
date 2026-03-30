@@ -187,7 +187,7 @@ private fun SwipePill(
             Icon(
                 painter            = painterResource(action.icon),
                 contentDescription = action.label,
-                tint               = action.color,
+                tint               = action.color.copy(alpha = 0.7f),
                 modifier           = Modifier
                     .fillMaxHeight(0.45f)
                     .aspectRatio(1f)

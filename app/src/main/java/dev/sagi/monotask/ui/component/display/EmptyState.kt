@@ -39,20 +39,210 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+// ========== IllustrationSize ==========
+
+enum class IllustrationSize { Large, Small }
+
+// ========== IllustrationMessage ==========
+
+/**
+ * Shared base composable: illustration image + typewriter title + optional typewriter subtitle.
+ *
+ * [IllustrationSize.Large] — dynamic sizing, used for full-screen empty states.
+ * [IllustrationSize.Small] — fixed compact sizing, used for in-content status cards.
+ */
+@Composable
+fun IllustrationMessage(
+    title: String,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    @DrawableRes imgRes: Int? = null,
+    size: IllustrationSize = IllustrationSize.Large,
+    animate: Boolean = true,
+    action: (@Composable () -> Unit)? = null
+) {
+    when (size) {
+        IllustrationSize.Large -> LargeIllustrationContent(title, subtitle, imgRes, modifier, animate, action)
+        IllustrationSize.Small -> SmallIllustrationContent(title, subtitle, imgRes, modifier, animate, action)
+    }
+}
+
+@Composable
+private fun LargeIllustrationContent(
+    title: String,
+    subtitle: String?,
+    @DrawableRes imgRes: Int?,
+    modifier: Modifier,
+    animate: Boolean,
+    action: (@Composable () -> Unit)?
+) {
+    val imageAnimDuration = 400
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val dynamicImageSize = with(LocalDensity.current) { (screenWidth * 1.5f).toDp() }
+    val dynamicFontSizeBig = with(LocalDensity.current) { (screenWidth * 0.18f).toSp() }
+    val dynamicFontSizeSmall = with(LocalDensity.current) { (screenWidth * 0.11f).toSp() }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        imgRes?.let {
+            val alpha = remember { Animatable(if (animate) 0f else 1f) }
+            val scale = remember { Animatable(if (animate) 0.65f else 1f) }
+            var hasAnimated by remember { mutableStateOf(!animate) }
+            LaunchedEffect(it) {
+                if (!hasAnimated) {
+                    hasAnimated = true
+                    launch { alpha.animateTo(1f, tween(imageAnimDuration)) }
+                    launch {
+                        scale.animateTo(
+                            1f,
+                            spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                        )
+                    }
+                }
+            }
+            Image(
+                painter = painterResource(it),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .height(dynamicImageSize)
+                    .padding(bottom = 32.dp)
+                    .graphicsLayer { this.alpha = alpha.value; scaleX = scale.value; scaleY = scale.value }
+            )
+        }
+
+        val charDelay = 25L
+        TypewriterText(
+            text        = title,
+            delayBefore = imageAnimDuration.toLong(),
+            charDelay   = charDelay,
+            style       = MaterialTheme.typography.headlineMedium.copy(fontSize = dynamicFontSizeBig),
+            textAlign   = TextAlign.Center,
+            color       = MaterialTheme.colorScheme.onBackground,
+            animate     = animate,
+            modifier    = Modifier.padding(bottom = 6.dp)
+        )
+
+        subtitle?.let {
+            TypewriterText(
+                text        = it,
+                delayBefore = imageAnimDuration + (title.length * charDelay) + 200L,
+                charDelay   = charDelay,
+                style       = MaterialTheme.typography.labelLarge.copy(fontSize = dynamicFontSizeSmall),
+                fontWeight  = FontWeight.Thin,
+                textAlign   = TextAlign.Center,
+                color       = MaterialTheme.colorScheme.outline,
+                animate     = animate,
+            )
+        }
+
+        action?.let {
+            Spacer(modifier = Modifier.height(24.dp))
+            it()
+        }
+    }
+}
+
+@Composable
+private fun SmallIllustrationContent(
+    title: String,
+    subtitle: String?,
+    @DrawableRes imgRes: Int?,
+    modifier: Modifier,
+    animate: Boolean,
+    action: (@Composable () -> Unit)?
+) {
+    val imageAnimDuration = 300
+    Column(
+        modifier            = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        imgRes?.let {
+            val alpha = remember { Animatable(if (animate) 0f else 1f) }
+            val scale = remember { Animatable(if (animate) 0.8f else 1f) }
+            var hasAnimated by remember { mutableStateOf(!animate) }
+            LaunchedEffect(it) {
+                if (!hasAnimated) {
+                    hasAnimated = true
+                    launch { alpha.animateTo(1f, tween(imageAnimDuration)) }
+                    launch {
+                        scale.animateTo(
+                            1f,
+                            spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
+                        )
+                    }
+                }
+            }
+            Image(
+                painter      = painterResource(it),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier     = Modifier
+                    .height(120.dp)
+                    .padding(bottom = 8.dp)
+                    .graphicsLayer { this.alpha = alpha.value; scaleX = scale.value; scaleY = scale.value }
+            )
+        }
+
+        val charDelay = 20L
+        TypewriterText(
+            text        = title,
+            delayBefore = imageAnimDuration.toLong(),
+            charDelay   = charDelay,
+            style       = MaterialTheme.typography.titleMedium,
+            fontWeight  = FontWeight.SemiBold,
+            textAlign   = TextAlign.Center,
+            color       = MaterialTheme.colorScheme.onBackground,
+            animate     = animate,
+        )
+
+        subtitle?.let {
+            TypewriterText(
+                text        = it,
+                delayBefore = imageAnimDuration + (title.length * charDelay) + 100L,
+                charDelay   = 15L,
+                style       = MaterialTheme.typography.labelMedium,
+                fontWeight  = FontWeight.Normal,
+                textAlign   = TextAlign.Center,
+                color       = MaterialTheme.colorScheme.outline,
+                animate     = animate,
+            )
+        }
+
+        action?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            it()
+        }
+    }
+}
+
+// ========== TypewriterText ==========
+
 @Composable
 fun TypewriterText(
+    modifier: Modifier = Modifier,
     text: String = "Preview Text",
     delayBefore: Long = 0L,
     charDelay: Long = 30L,
-    modifier: Modifier = Modifier,
     style: TextStyle = MaterialTheme.typography.titleMedium,
     color: Color = MaterialTheme.colorScheme.onBackground,
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
+    animate: Boolean = true,
 ) {
-    var displayed by remember { mutableStateOf("") }
+    var hasAnimated by remember { mutableStateOf(!animate) }
+    var displayed by remember { mutableStateOf(if (!animate) text else "") }
 
     LaunchedEffect(text) {
+        if (hasAnimated) {
+            displayed = text
+            return@LaunchedEffect
+        }
+        hasAnimated = true
         displayed = ""
         delay(delayBefore)
         text.forEachIndexed { i, _ ->
@@ -62,14 +252,16 @@ fun TypewriterText(
     }
 
     Text(
-        text = displayed,
-        style = style,
-        color = color,
+        text       = displayed,
+        style      = style,
+        color      = color,
         fontWeight = fontWeight,
-        textAlign = textAlign,
-        modifier = modifier
+        textAlign  = textAlign,
+        modifier   = modifier
     )
 }
+
+// ========== EmptyState ==========
 
 @Composable
 fun EmptyState(
@@ -82,84 +274,16 @@ fun EmptyState(
     action: (@Composable () -> Unit)? = null
 ) {
     if (isMainContent) {
-        MainEmptyStateContent(title, subtitle, imgRes, modifier, action)
+        IllustrationMessage(
+            title    = title,
+            subtitle = subtitle,
+            imgRes   = imgRes,
+            size     = IllustrationSize.Large,
+            modifier = modifier,
+            action   = action
+        )
     } else {
         SubtleEmptyStateContent(title, subtitle, emoji, modifier, action)
-    }
-}
-
-@Composable
-private fun MainEmptyStateContent(
-    title: String,
-    subtitle: String?,
-    @DrawableRes imgRes: Int?,
-    modifier: Modifier,
-    action: (@Composable () -> Unit)?
-) {
-    val imageAnimDuration = 400
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val dynamicImageSize = with(LocalDensity.current) { (screenWidth * 1.5f).toDp() }
-    val dynamicFontSizeBig = with(LocalDensity.current) { (screenWidth * 0.18f).toSp() }
-    val dynamicFontSizeSmall = with(LocalDensity.current) { (screenWidth * 0.11f).toSp() }
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        imgRes?.let {
-            // Pop-in animation:
-            val alpha = remember { Animatable(0f) }
-            val scale = remember { Animatable(0.65f) }
-            LaunchedEffect(it) {
-                launch { alpha.animateTo(1f, tween(imageAnimDuration)) }
-                launch {
-                    scale.animateTo(
-                        1f,
-                        spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
-                    )
-                }
-            }
-            // The image itself:
-            Image(
-                painter = painterResource(it),
-                contentDescription = "EmptyState Image",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .width(dynamicImageSize)
-                    .padding(bottom = 32.dp)
-                    .graphicsLayer { this.alpha = alpha.value; scaleX = scale.value; scaleY = scale.value }
-            )
-        }
-
-        val charDelay = 25L
-        TypewriterText(
-            text = title,
-            delayBefore = imageAnimDuration.toLong(), // starts right when image anim finishes
-            charDelay = charDelay,
-            style = MaterialTheme.typography.headlineMedium
-                .copy(fontSize = dynamicFontSizeBig),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 6.dp)
-        )
-
-        subtitle?.let {
-            TypewriterText(
-                text = it,
-                delayBefore = imageAnimDuration + (title.length * charDelay) + 200L, // starts after title finishes
-                charDelay = charDelay,
-                style = MaterialTheme.typography.labelLarge
-                    .copy(fontSize = dynamicFontSizeSmall),
-                fontWeight = FontWeight.Thin,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline,
-            )
-        }
-
-        action?.let {
-            Spacer(modifier = Modifier.height(24.dp))
-            it()
-        }
     }
 }
 
@@ -180,25 +304,25 @@ private fun SubtleEmptyStateContent(
         verticalArrangement = Arrangement.Center
     ) {
         TypewriterText(
-            text = titleWithEmoji,
+            text        = titleWithEmoji,
             delayBefore = delayBefore,
-            charDelay = 30L,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Start,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            charDelay   = 30L,
+            style       = MaterialTheme.typography.titleSmall,
+            fontWeight  = FontWeight.SemiBold,
+            textAlign   = TextAlign.Start,
+            color       = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         subtitle?.let {
             Spacer(modifier = Modifier.height(4.dp))
             TypewriterText(
-                text = it,
+                text        = it,
                 delayBefore = delayBefore + (titleWithEmoji.length * 30L),
-                charDelay = 20L,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Thin,
-                textAlign = TextAlign.Start,
-                color = MaterialTheme.colorScheme.outline,
+                charDelay   = 20L,
+                style       = MaterialTheme.typography.bodySmall,
+                fontWeight  = FontWeight.Thin,
+                textAlign   = TextAlign.Start,
+                color       = MaterialTheme.colorScheme.outline,
             )
         }
 
@@ -210,13 +334,15 @@ private fun SubtleEmptyStateContent(
 }
 
 
+// ========== Previews ==========
+
 @Preview(showBackground = true)
 @Composable
 fun FocusEmptyStatePreview() {
     MonoTaskTheme {
         EmptyState(
-            emoji = "🦾",
-            title = "You're all caught up!",
+            emoji    = "🦾",
+            title    = "You're all caught up!",
             subtitle = "No tasks here. Enjoy the moment."
         )
     }
@@ -238,11 +364,23 @@ fun FriendsEmptyStatePreview() {
 fun SubtleEmptyStatePreview() {
     MonoTaskTheme {
         EmptyState(
-            emoji = "📭",
-            title = "Nothing here yet",
-            subtitle = "Check back later",
+            emoji         = "📭",
+            title         = "Nothing here yet",
+            subtitle      = "Check back later",
             isMainContent = false
         )
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun SmallIllustrationPreview() {
+    MonoTaskTheme {
+        IllustrationMessage(
+            title    = "You're all clear!",
+            subtitle = "No overdue or open tasks",
+            size     = IllustrationSize.Small,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}

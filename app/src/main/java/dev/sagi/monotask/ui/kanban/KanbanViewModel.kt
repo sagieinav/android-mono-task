@@ -10,7 +10,6 @@ import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.data.repository.TaskRepository
 import dev.sagi.monotask.data.repository.UserRepository
 import dev.sagi.monotask.data.repository.WorkspaceRepository
-import dev.sagi.monotask.domain.util.TaskSelector
 import dev.sagi.monotask.domain.util.XpEvents
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,10 +26,20 @@ class KanbanViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _internalUiState = MutableStateFlow<KanbanUiState>(KanbanUiState.Loading)
-    private val _isLocked = MutableStateFlow(false)
+    private val _isLocked        = MutableStateFlow(false)
+    private val _sortOrder       = MutableStateFlow(SortOrder.CREATED_DESC)
 
-    val uiState: StateFlow<KanbanUiState> = combine(_internalUiState, _isLocked) { state, locked ->
-        if (locked) KanbanUiState.Locked else state
+    val uiState: StateFlow<KanbanUiState> = combine(_internalUiState, _isLocked, _sortOrder) { state, locked, sortOrder ->
+        if (locked) KanbanUiState.Locked
+        else when (state) {
+            is KanbanUiState.Ready -> state.copy(
+                highTasks   = state.highTasks.applySortOrder(sortOrder),
+                mediumTasks = state.mediumTasks.applySortOrder(sortOrder),
+                lowTasks    = state.lowTasks.applySortOrder(sortOrder),
+                sortOrder   = sortOrder
+            )
+            else -> state
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), KanbanUiState.Loading)
 
     private val _editingTask = MutableStateFlow<Task?>(null)
@@ -127,15 +136,32 @@ class KanbanViewModel @Inject constructor(
     }
 
     private fun updateUiState(tasks: List<Task>, workspace: Workspace?) {
-        val dueDateWeight = _currentUser.value?.dueDateWeight ?: 0.5f
-        val sorted  = if (workspace != null) TaskSelector.getSortedTasks(tasks, dueDateWeight) else tasks
-        val grouped = sorted.groupBy { it.importance }
+        val grouped = tasks.groupBy { it.importance }
         _internalUiState.value = KanbanUiState.Ready(
             highTasks   = grouped[Importance.HIGH]   ?: emptyList(),
             mediumTasks = grouped[Importance.MEDIUM] ?: emptyList(),
             lowTasks    = grouped[Importance.LOW]    ?: emptyList(),
             isArchive   = _showCompleted.value
         )
+    }
+
+    // ========== Sort Order ==========
+
+    fun setSortOrder(order: SortOrder) { _sortOrder.value = order }
+
+    private fun List<Task>.applySortOrder(order: SortOrder): List<Task> = when (order) {
+        SortOrder.DUE_ASC  -> {
+            val hasDue = filter { it.dueDate != null }.sortedBy { it.dueDate!!.seconds }
+            val noDue  = filter { it.dueDate == null }.sortedByDescending { it.createdAt.seconds }
+            hasDue + noDue
+        }
+        SortOrder.DUE_DESC -> {
+            val hasDue = filter { it.dueDate != null }.sortedByDescending { it.dueDate!!.seconds }
+            val noDue  = filter { it.dueDate == null }.sortedByDescending { it.createdAt.seconds }
+            hasDue + noDue
+        }
+        SortOrder.CREATED_ASC  -> sortedBy { it.createdAt.seconds }
+        SortOrder.CREATED_DESC -> sortedByDescending { it.createdAt.seconds }
     }
 
     // ========== Task Actions ==========

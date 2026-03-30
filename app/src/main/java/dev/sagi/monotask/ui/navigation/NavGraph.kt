@@ -23,6 +23,7 @@ import dev.sagi.monotask.ui.auth.AuthScreen
 import dev.sagi.monotask.ui.auth.AuthUiState
 import dev.sagi.monotask.ui.auth.OnboardingScreen
 import dev.sagi.monotask.ui.brief.BriefScreen
+import dev.sagi.monotask.ui.brief.BriefViewModel
 import dev.sagi.monotask.ui.component.core.LoadingSpinner
 import dev.sagi.monotask.ui.focus.FocusScreen
 import dev.sagi.monotask.ui.focus.FocusViewModel
@@ -204,7 +205,9 @@ fun NavGraph(
                     )
                 }
                 composable(Screen.Brief.route) {
-                    BriefScreen()
+                    val briefVM: BriefViewModel = hiltViewModel()
+                    briefVM.setUserSource(userSessionVM.currentUser)
+                    BriefScreen(briefVM = briefVM)
                 }
                 composable(Screen.Settings.route) {
                     SettingsScreen(settingsVM = settingsVM)

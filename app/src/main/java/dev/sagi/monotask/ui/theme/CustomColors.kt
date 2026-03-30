@@ -60,7 +60,7 @@ val lightCustomColors = CustomColors(
     ace             = AceGold,
     aceDim          = AceGoldDim,
     achievementGold   = Color(0xFFEFB73D),
-    achievementSilver = Color(0xFFCACACC),
+    achievementSilver = Color(0xFFB6B6BB),
     achievementBronze = Color(0xFFB78457),
     achievementLocked = Color(0xFFE1E1E1),
 
