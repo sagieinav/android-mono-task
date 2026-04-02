@@ -21,6 +21,11 @@ import dev.sagi.monotask.ui.component.task.CustomTag
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.task.DueDateLabel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.customColors
+import dev.sagi.monotask.ui.theme.glassBackground
+import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.glassBorderPremium
+import dev.sagi.monotask.ui.theme.monoShadow
 
 // ========== FocusCard ==========
 @Composable
@@ -38,6 +43,7 @@ fun FocusCard(
             .fillMaxWidth()
             .padding(horizontal = borderWidth / 2)
             .heightIn(min = 200.dp)
+            .glassBorder(shape, MaterialTheme.customColors.aceDim, 8.dp)
             .then(
                 if (task.isAce) Modifier.aceTaskBorder(
                     shape         = shape,
@@ -52,23 +58,26 @@ fun FocusCard(
             )
     ) {
         GlassSurface(
-            shape    = shape,
+            shape = shape,
+            blurred = false,
+            baseColor = MaterialTheme.colorScheme.surfaceContainerLow,
             modifier = Modifier
-                .matchParentSize()
+                .monoShadow(shape, elevation = 12.dp)
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surface)
-        ) {}
-
-        Column(
-            modifier            = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(40.dp)
         ) {
-            FocusCardHeader(task = task, hideXpLabel = hideXpLabel)
-            FocusCardBody(task)
-            FocusCardFooter(task)
+            Column(
+                modifier            = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(40.dp)
+            ) {
+                FocusCardHeader(task = task, hideXpLabel = hideXpLabel)
+                FocusCardBody(task)
+                FocusCardFooter(task)
+            }
         }
+
+
     }
 }
 

@@ -24,25 +24,35 @@ import dev.sagi.monotask.ui.component.core.SegmentedToggle
 import dev.sagi.monotask.ui.component.task.EditTaskSheet
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
-import dev.sagi.monotask.util.Constants
 import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
 import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.display.IllustrationSize
-import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.monoShadow
+import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
 import java.util.Date
 
 private const val COLUMN_STAGGER_MS = 80
 
-private fun sortLabel(order: SortOrder) = when (order) {
-    SortOrder.DUE_ASC      -> "Due date  ↑"
-    SortOrder.DUE_DESC     -> "Due date  ↓"
-    SortOrder.CREATED_ASC  -> "Created  ↑"
-    SortOrder.CREATED_DESC -> "Created  ↓"
+private fun sortLabelText(order: SortOrder) = when (order) {
+    SortOrder.DUE_ASC, SortOrder.DUE_DESC         -> "Due date"
+    SortOrder.CREATED_ASC, SortOrder.CREATED_DESC -> "Created"
+}
+
+private fun sortIconRes(order: SortOrder) = when (order) {
+    SortOrder.DUE_ASC, SortOrder.CREATED_ASC   -> R.drawable.ic_sort_ascending
+    SortOrder.DUE_DESC, SortOrder.CREATED_DESC -> R.drawable.ic_sort_descending
+}
+
+private fun sortArrowIconRes(order: SortOrder) = when (order) {
+    SortOrder.DUE_ASC, SortOrder.CREATED_ASC   -> R.drawable.ic_arrow_narrow_up
+    SortOrder.DUE_DESC, SortOrder.CREATED_DESC -> R.drawable.ic_arrow_narrow_down
 }
 
 @Composable
@@ -146,7 +156,6 @@ fun KanbanScreenContent(
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
                 // ========== Control row ==========
-                val controlRowHeight = 44.dp
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -161,7 +170,7 @@ fun KanbanScreenContent(
                         onOptionSelected = { index ->
                             if ((index == 1) != ready.isArchive) onKanbanEvent(KanbanEvent.ToggleArchive)
                         },
-                        modifier = Modifier.height(controlRowHeight)
+                        modifier = Modifier.height(TOP_BAR_ITEM_HEIGHT)
                     )
 
                     // "Sorted By" DD-Menu
@@ -176,14 +185,15 @@ fun KanbanScreenContent(
                         ) {
                             SortOrder.entries.forEach { order ->
                                 MonoDropdownItem(
-                                    label    = sortLabel(order),
-                                    isSelected = ready.sortOrder == order,
-                                    onClick  = {
+                                    label          = sortLabelText(order),
+                                    trailingIconRes = sortArrowIconRes(order),
+                                    isSelected     = ready.sortOrder == order,
+                                    onClick        = {
                                         onSortOrderChanged(order)
                                         showSortDropdown = false
                                     },
-                                    textStyle = MaterialTheme.typography.titleSmall,
-                                    showSelectedIcon = false
+                                    textStyle        = MaterialTheme.typography.titleSmall,
+                                    showSelectedIcon = true
                                 )
                             }
                         }
@@ -208,7 +218,7 @@ fun KanbanScreenContent(
                         modifier = Modifier
                             .fillMaxSize()
                             .horizontalScroll(rememberScrollState())
-                            .padding(horizontal = Constants.Theme.SCREEN_PADDING),
+                            .padding(horizontal = SCREEN_PADDING),
                         horizontalArrangement = Arrangement.spacedBy(KANBAN_PADDING)
                     ) {
                         KanbanColumn(
@@ -252,23 +262,33 @@ private fun SortPill(
         blurred = false,
         shape = CircleShape,
         modifier = modifier
-            .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
-            .monoShadowWorkaround(CircleShape)
+            .height(TOP_BAR_ITEM_HEIGHT)
+            .monoShadow(CircleShape)
             .clickable(onClick = onClick),
-        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
+        baseColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
     ) {
-        Text(
-            text = sortLabel(sortOrder),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        Row(
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 16.dp)
-                .widthIn(max = 140.dp)
-        )
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = sortLabelText(sortOrder),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Icon(
+                painter = painterResource(sortIconRes(sortOrder)),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 

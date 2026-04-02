@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -191,6 +192,7 @@ private fun SwipePill(
                 contentDescription = action.label,
                 tint               = action.color.copy(alpha = 0.7f),
                 modifier           = Modifier
+                    .heightIn(max = 100.dp)
                     .fillMaxHeight(0.45f)
                     .aspectRatio(1f)
             )

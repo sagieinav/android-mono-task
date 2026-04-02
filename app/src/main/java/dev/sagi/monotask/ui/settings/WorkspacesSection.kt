@@ -90,6 +90,7 @@ internal fun WorkspacesSection(
                     Text(
                         text       = "Manage workspaces",
                         style      = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Normal,
                         color      = MaterialTheme.colorScheme.onSurface
                     )
                     AnimatedVisibility(

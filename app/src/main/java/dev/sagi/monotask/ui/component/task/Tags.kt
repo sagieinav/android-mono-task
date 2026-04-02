@@ -29,7 +29,7 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.harabara
 
-enum class TagSize { DEFAULT, SMALL }
+enum class TagSize { Default, Small }
 
 private val TagIconStartInset = 2.dp
 private val TagIconEndInset   = 3.dp
@@ -41,7 +41,7 @@ fun TaskTag(
     containerColor: Color,
     contentColor: Color,
     modifier: Modifier = Modifier,
-    size: TagSize = TagSize.DEFAULT,
+    size: TagSize = TagSize.Default,
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
@@ -52,10 +52,10 @@ fun TaskTag(
             trim      = LineHeightStyle.Trim.Both
         )
     )
-    val fontSize          = if (size == TagSize.DEFAULT) 14.sp else 10.sp
-    val horizontalPadding = if (size == TagSize.SMALL) 5.dp else 8.dp
-    val verticalPadding   = if (size == TagSize.SMALL) 1.dp else 2.dp
-    val borderWidth       = if (size == TagSize.SMALL) 1.dp else 1.5.dp
+    val fontSize          = if (size == TagSize.Small) 9.sp else 14.sp
+    val horizontalPadding = if (size == TagSize.Small) 5.dp else 8.dp
+    val verticalPadding   = if (size == TagSize.Small) 1.dp else 2.dp
+    val borderWidth       = if (size == TagSize.Small) 1.dp else 1.5.dp
 
     Surface(
         modifier = modifier.border(borderWidth, borderColor, CircleShape),
@@ -92,7 +92,7 @@ fun TaskTag(
 fun CustomTag(
     label: String,
     modifier: Modifier = Modifier,
-    size: TagSize = TagSize.DEFAULT,
+    size: TagSize = TagSize.Default,
     onRemove: (() -> Unit)? = null
 ) {
     val colors = MaterialTheme.customColors
@@ -150,7 +150,7 @@ private fun CustomTagSmallPreview() {
             verticalArrangement   = Arrangement.spacedBy(4.dp),
             modifier              = Modifier.padding(16.dp)
         ) {
-            previewTags.forEach { CustomTag(label = it, size = TagSize.SMALL) }
+            previewTags.forEach { CustomTag(label = it, size = TagSize.Small) }
         }
     }
 }

@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.kanban
 
+import android.graphics.Color.alpha
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -41,6 +42,7 @@ import dev.sagi.monotask.ui.component.display.CountBadge
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.gloock
+import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
 import kotlinx.coroutines.delay
@@ -79,7 +81,7 @@ fun KanbanColumn(
     ) {
         Column(
             modifier = modifier
-                .width(170.dp)
+                .width(180.dp)
 //                .fillMaxHeight()
             ,
             // Header-Content gap
@@ -93,7 +95,8 @@ fun KanbanColumn(
                 blurred = false,
                 shape = colShape,
                 modifier = Modifier
-                    .monoShadowWorkaround(colShape)
+                    .monoShadow(colShape, strength = 0.8f),
+                    baseColor = MaterialTheme.colorScheme.surfaceContainer
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -132,7 +135,9 @@ fun KanbanColumn(
                 shape = colShape,
                 modifier = Modifier
                     .fillMaxSize()
-                    .monoShadowWorkaround(colShape)
+                    .monoShadow(colShape, strength = 0.8f),
+                baseColor = MaterialTheme.colorScheme.surfaceContainerHigh
+
             ) {
                 AnimatedContent(
                     targetState    = tasks,

@@ -103,7 +103,7 @@ private fun FaqItemRow(item: FaqItem) {
                 Text(
                     text      = item.question,
                     style     = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Medium,
                     color     = MaterialTheme.colorScheme.onSurface,
                     modifier  = Modifier.weight(1f)
                 )

@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.DailyActivity
-import dev.sagi.monotask.domain.service.ActivityStats.computeRecordStreak
 import dev.sagi.monotask.ui.component.display.ValueLabel
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
@@ -365,14 +364,13 @@ fun TotalXpCard(totalXp: Int, modifier: Modifier = Modifier) {
 
 @Composable
 fun StreakCard(
-    activityData: List<DailyActivity>,
+    longestStreak: Int,
     modifier: Modifier = Modifier
 ) {
-    val recordDays = computeRecordStreak(activityData)
     StatWidgetSmall(
         title       = "Streak Record",
-        value       = recordDays.toString(),
-        unit        = if (recordDays == 1) "day" else "days",
+        value       = longestStreak.toString(),
+        unit        = if (longestStreak == 1) "day" else "days",
         icon        = painterResource(R.drawable.ic_fire),
         accentColor = MaterialTheme.customColors.streak,
         modifier    = modifier
@@ -434,7 +432,7 @@ private fun StatWidgetsPreview() {
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         TotalXpCard(totalXp = 14250, modifier = Modifier.weight(1f))
-                        StreakCard(activityData = emptyList(), modifier = Modifier.weight(1f))
+                        StreakCard(longestStreak = 14, modifier = Modifier.weight(1f))
                     }
                 }
             }

@@ -35,7 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextStyle
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.util.Constants
 import kotlinx.coroutines.delay
 
@@ -61,9 +61,10 @@ fun MonoDropdownTriggerPill(
         shape = CircleShape,
         modifier = modifier
             .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
-            .monoShadowWorkaround(CircleShape)
+//            .monoShadowWorkaround(CircleShape)
+            .monoShadow(CircleShape)
             .clickable(onClick = onClick),
-        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
+        baseColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
     ) {
         Row(
             modifier = Modifier
@@ -205,6 +206,7 @@ fun MonoDropdownItem(
     isSelected: Boolean = false,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     showSelectedIcon: Boolean = true,
+    trailingIconRes: Int? = null,
 ) {
     val selectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
     val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -231,8 +233,19 @@ fun MonoDropdownItem(
             color = if (isSelected) selectedColor else unselectedColor
         )
 
+        trailingIconRes?.let {
+            Box(Modifier.padding(start = 8.dp)) {
+                Icon(
+                    painter = painterResource(it),
+                    contentDescription = null,
+                    tint = if (isSelected) selectedColor else unselectedColor,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+
         // 'selected' icon inside a box, to ensure padding on long titles:
-        if (showSelectedIcon && isSelected) {
+        if (showSelectedIcon && isSelected && trailingIconRes == null) {
             Box(Modifier.padding(start = 8.dp)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check_circle),

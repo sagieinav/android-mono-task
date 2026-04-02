@@ -130,7 +130,6 @@ fun XpLabelCompletion(
             )
         ),
         color = if (textBrush == null) color else Color.Unspecified,
-        fontWeight = FontWeight.Bold,
         modifier = modifier.graphicsLayer {
             scaleX = scale.value
             scaleY = scale.value

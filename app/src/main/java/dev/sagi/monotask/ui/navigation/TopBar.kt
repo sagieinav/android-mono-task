@@ -24,7 +24,7 @@ import dev.sagi.monotask.ui.component.core.MonoTabRow
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.util.Constants
 import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
 
@@ -184,7 +184,7 @@ fun TopBarIconButton(
             // "remove" shadow when button is pressed:
             .then(
                 if (isPressed) Modifier
-                else Modifier.monoShadowWorkaround(CircleShape)
+                else Modifier.monoShadow(CircleShape)
             )
             // add border color if pressed:
             .then(
@@ -195,7 +195,7 @@ fun TopBarIconButton(
             .clip(CircleShape)
             .clickable { onClick() },
         accentColor = bgAccentColor,
-        baseColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.35f)
+        baseColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
     ) {
         Icon(
             painter = painterResource(iconRes),

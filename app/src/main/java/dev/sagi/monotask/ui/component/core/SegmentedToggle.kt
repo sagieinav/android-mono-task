@@ -36,7 +36,8 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBackground
 import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.glassBorderPremium
+import dev.sagi.monotask.ui.theme.monoShadow
 
 private val TogglePillSpring = spring<Dp>(
     stiffness = Spring.StiffnessMediumLow,
@@ -52,13 +53,13 @@ fun SegmentedToggle(
     modifier: Modifier = Modifier,
     fullWidth: Boolean = false,
     blurred: Boolean = false,
-    baseColor: Color = Color.Transparent,
+    baseColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f),
     textStyle: TextStyle = MaterialTheme.typography.titleSmall
 ) {
     // Capture constraints BEFORE GlassSurface, since Box always passes min=0 to its content,
     // losing the tight height constraint that external .height() modifiers create.
     BoxWithConstraints(
-        modifier = modifier.monoShadowWorkaround(CircleShape)
+        modifier = modifier.monoShadow(CircleShape)
     ) {
         val fillHeight = constraints.hasFixedHeight
 
@@ -122,15 +123,6 @@ private fun BoxScope.FullWidthToggleContent(
                 contentAlignment = Alignment.Center
             ) {
                 ToggleLabel(label, isSelected, textStyle)
-//                Text(
-//                    text       = label,
-//                    style      = textStyle,
-//                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-//                    color      = if (isSelected)
-//                        MaterialTheme.colorScheme.onSurfaceVariant
-//                    else
-//                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-//                )
             }
         }
     }

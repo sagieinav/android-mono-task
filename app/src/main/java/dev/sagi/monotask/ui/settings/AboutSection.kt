@@ -45,7 +45,7 @@ internal fun SettingsAboutSection() {
         SettingsAboutRow(
             label           = "Frequently asked questions",
             leadingIcon     = { SettingsRowIcon(R.drawable.ic_help_circle, color = MaterialTheme.colorScheme.primary) },
-            trailingIconRes = R.drawable.ic_arrow_right_alt,
+            trailingIconRes = R.drawable.ic_arrow_right,
             onClick         = { showFaq = true }
         )
         SettingsDivider()

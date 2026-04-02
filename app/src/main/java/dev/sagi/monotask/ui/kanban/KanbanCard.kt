@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
@@ -41,13 +40,16 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.ripple
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.domain.service.XpEngine
+import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.googleSansRounded
 
 
 // Tracks which confirm dialog is pending
-private enum class PendingAction { FOCUS_NOW, RESTORE, DELETE }
+private enum class PendingAction { FocusNow, Restore, Delete }
 
 @Composable
 fun KanbanCard(
@@ -63,14 +65,16 @@ fun KanbanCard(
     var cardWindowPos    by remember { mutableStateOf(IntOffset.Zero) }
     val interactionSource = remember { MutableInteractionSource() }
 
+    val color = if (task.isAce) MaterialTheme.customColors.ace else MaterialTheme.colorScheme.outlineVariant
+
     Box(modifier = modifier) {
         // ========== Card surface ==========
-        Surface(
+        GlassSurface(
             modifier = Modifier
                 .fillMaxWidth()
-//                .invincibleBorder(shape)
-                .glassBorder(shape)
-                .monoShadow(shape, strength = 0.8f)
+                .glassBorder(shape = shape, color = color, width = 1.5.dp)
+                .monoShadow(shape, strength = 0.7f)
+//                .monoShadowWorkaround(shape)
                 .onGloballyPositioned { coords ->
                     val pos = coords.positionInWindow()
                     cardWindowPos = IntOffset(pos.x.toInt(), pos.y.toInt())
@@ -94,7 +98,8 @@ fun KanbanCard(
                     )
                 },
             shape = shape,
-            color = MaterialTheme.colorScheme.surface,
+            baseColor = MaterialTheme.colorScheme.surfaceContainerLow
+//            color = MaterialTheme.colorScheme.surface,
         ) {
             Column(
                 modifier = Modifier
@@ -104,11 +109,14 @@ fun KanbanCard(
             ) {
                 // ========== Title ==========
                 Text(
-                    text     = task.title,
-                    style    = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color    = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 3,
+                    text = task.title,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontFamily = googleSansRounded,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 4,
                     overflow = TextOverflow.Ellipsis
                 )
 
@@ -121,7 +129,7 @@ fun KanbanCard(
                         maxLines = 2
                     ) {
                         task.tags.forEach { tag ->
-                            CustomTag(size = TagSize.SMALL, label = tag)
+                            CustomTag(size = TagSize.Small, label = tag)
                         }
                     }
                 }
@@ -140,15 +148,15 @@ fun KanbanCard(
             tapOffset       = tapOffset,
             onDismiss       = { dropdownExpanded = false },
             onEditClick     = { onKanbanEvent(KanbanEvent.OpenEditSheet(task)) },
-            onFocusNowClick = { pendingAction = PendingAction.FOCUS_NOW },
-            onRestoreClick  = { pendingAction = PendingAction.RESTORE },
-            onDeleteClick   = { pendingAction = PendingAction.DELETE }
+            onFocusNowClick = { pendingAction = PendingAction.FocusNow },
+            onRestoreClick  = { pendingAction = PendingAction.Restore },
+            onDeleteClick   = { pendingAction = PendingAction.Delete }
         )
     }
 
     // ========== Confirm dialogs ==========
     when (pendingAction) {
-        PendingAction.FOCUS_NOW -> MonoConfirmDialog(
+        PendingAction.FocusNow -> MonoConfirmDialog(
             onDismissRequest = { pendingAction = null },
             title            = "Focus on this Task?",
             message          = "Your current focus task will be snoozed, " +
@@ -157,7 +165,7 @@ fun KanbanCard(
             confirmColor     = MaterialTheme.customColors.aceDim,
             onConfirm        = { onKanbanEvent(KanbanEvent.FocusNow(task)) }
         )
-        PendingAction.RESTORE -> MonoConfirmDialog(
+        PendingAction.Restore -> MonoConfirmDialog(
             onDismissRequest = { pendingAction = null },
             title            = "Restore Task?",
             message          = "This will move the task back to active.\n" +
@@ -165,7 +173,7 @@ fun KanbanCard(
             confirmLabel     = "Restore",
             onConfirm        = { onKanbanEvent(KanbanEvent.RestoreTask(task)) }
         )
-        PendingAction.DELETE -> MonoConfirmDialog(
+        PendingAction.Delete -> MonoConfirmDialog(
             onDismissRequest = { pendingAction = null },
             title            = "Delete Task?",
             message          = "This operation cannot be undone.",

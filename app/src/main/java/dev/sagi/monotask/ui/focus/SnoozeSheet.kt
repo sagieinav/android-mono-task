@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.core.MonoBottomSheet
+import dev.sagi.monotask.ui.component.core.MonoLabel
 import dev.sagi.monotask.ui.component.display.InfoCallout
 
 @Composable
@@ -116,18 +117,23 @@ fun ChooseSnoozeButton(
             }
 
             xpPenalty?. let {
-                Surface(
-                    shape = RoundedCornerShape(100),
-                    color = penaltyRed.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = "$it XP",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Normal,
-                        color = penaltyRed,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
-                }
+                MonoLabel(
+                    label = "$it XP",
+                    color = penaltyRed,
+                    fontWeight = FontWeight.Normal
+                )
+//                Surface(
+//                    shape = RoundedCornerShape(100),
+//                    color = penaltyRed.copy(alpha = 0.12f)
+//                ) {
+//                    Text(
+//                        text = "$it XP",
+//                        style = MaterialTheme.typography.labelMedium,
+//                        fontWeight = FontWeight.Normal,
+//                        color = penaltyRed,
+//                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+//                    )
+//                }
             }
         }
     }

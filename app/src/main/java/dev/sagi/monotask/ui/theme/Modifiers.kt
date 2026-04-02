@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.time.delay
+import kotlin.math.PI
 import kotlin.math.atan2
 
 
@@ -85,10 +86,10 @@ fun Modifier.basicMonoTask(
 // Custom (workaround) drop shadow for use in semi-transparent components
 fun Modifier.monoShadowWorkaround(
     shape: Shape,
-    color: Color = Color.Black.copy(alpha = 0.04f),
-    blur: Dp = 6.dp,
+    color: Color = Color.Black.copy(alpha = 0.02f),
+    blur: Dp = 12.dp,
     offsetY: Dp = 2.dp,
-    offsetX: Dp = 0.dp,
+    offsetX: Dp = 2.dp,
 ): Modifier = this.drawWithCache {
     // Calculate and cache objects ONLY when the layout size changes
     val paint = android.graphics.Paint().apply {
@@ -143,22 +144,21 @@ fun Modifier.glassBorderPremium(
     shape: Shape,
     width: Dp = 2.dp
 ): Modifier = composed {
-    val innerWidth = width * 1.5f
-    val outerWidth = width * 0.5f
-
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant
 
-    drawWithContent {
-        drawContent()
+    drawWithCache {
+        val innerWidth = (width * 1.5f).toPx()
+        val outerWidth = (width * 0.5f).toPx()
 
         val cornerFraction = (atan2(
             size.height / 2.0,
             size.width / 2.0
-        ) / (2 * Math.PI)).toFloat()
+        ) / (2 * PI)).toFloat()
 
         val bright = Color.White.copy(alpha = 0.6f)
         val dark   = Color.White.copy(alpha = 0.05f)
 
+        // Cached — only rebuilt when size changes
         val brush = Brush.sweepGradient(
             colorStops = arrayOf(
                 0f                      to bright,
@@ -171,20 +171,26 @@ fun Modifier.glassBorderPremium(
             center = Offset(size.width / 2f, size.height / 2f)
         )
 
+        val outerBrush = SolidColor(outlineVariant.copy(alpha = 0.4f))
+
+        // Cached — only rebuilt when size changes
         val outline = shape.createOutline(size, layoutDirection, this)
 
-        // Inner glass stroke
-        drawOutline(
-            outline = outline,
-            brush   = brush,
-            style   = Stroke(width = innerWidth.toPx())
-        )
-        // Outer definition stroke
-        drawOutline(
-            outline = outline,
-            brush   = SolidColor(outlineVariant.copy(alpha = 0.4f)),
-            style   = Stroke(width = outerWidth.toPx())
-        )
+        onDrawWithContent {
+            drawContent()
+            // Inner glass stroke
+            drawOutline(
+                outline = outline,
+                brush   = brush,
+                style   = Stroke(width = innerWidth)
+            )
+            // Outer definition stroke
+            drawOutline(
+                outline = outline,
+                brush   = outerBrush,
+                style   = Stroke(width = outerWidth)
+            )
+        }
     }
 }
 
@@ -255,8 +261,8 @@ fun Modifier.glassBackground(
         )
     }
     return this
-        .background(baseColor)      // solid base
-        .background(shineBrush)     // glass shine on top
+        .background(baseColor) // solid base
+        .background(shineBrush) // glass shine on top
 }
 
 

@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.monoShadowWorkaround
+import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.ui.theme.penaltyRed
 
 private val ButtonHeight = 56.dp
@@ -56,7 +56,7 @@ fun ActionButton(
     GlassSurface(
         modifier = modifier
             .then(
-                if (enabled) Modifier.monoShadowWorkaround(shape = shape)
+                if (enabled) Modifier.monoShadow(shape = shape, strength = 0.5f)
                 else Modifier
             )
             .fillMaxWidth()
@@ -69,6 +69,7 @@ fun ActionButton(
                 onClick = onClick
             ),
         shape = shape,
+        baseColor = MaterialTheme.colorScheme.surfaceContainer,
         blurred = false
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {

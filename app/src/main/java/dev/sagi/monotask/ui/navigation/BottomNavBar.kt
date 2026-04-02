@@ -28,13 +28,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.component.core.GlassSurface
+import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.glassBackground
+import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.glassBorderPremium
+import dev.sagi.monotask.ui.theme.monoShadow
+import dev.sagi.monotask.ui.theme.monoShadowWorkaround
 import dev.sagi.monotask.util.Constants
 
 enum class NavTab(val label: String, val iconRes: Int) {
@@ -64,12 +73,31 @@ fun BottomNavBar(
     )
     val dotColor = MaterialTheme.colorScheme.scrim
 
-    GlassSurface(
-        shape = MaterialTheme.shapes.large,
+//    GlassSurface(
+//        blurred = true,
+//        shape = MaterialTheme.shapes.large,
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .padding(Constants.Theme.SCREEN_PADDING)
+////            .monoShadow(shape = MaterialTheme.shapes.large, strength = 0.5f)
+//            .monoShadowWorkaround(shape = MaterialTheme.shapes.large)
+//            .glassBorderPremium(shape = MaterialTheme.shapes.large)
+//        ,
+////            baseColor = MaterialTheme.colorScheme.surfaceContainer
+//    ) {
+    val hazeState = LocalHazeState.current
+    val shape = MaterialTheme.shapes.large
+
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(Constants.Theme.SCREEN_PADDING),
-//            baseColor = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
+            .padding(Constants.Theme.SCREEN_PADDING)
+            .monoShadowWorkaround(shape = MaterialTheme.shapes.large)
+            .clip(shape)
+            .hazeEffect(hazeState, HazeMaterials.ultraThin())
+            .glassBorderPremium(shape)
+//            .glassBorder(shape)
+            .glassBackground()
     ) {
         BoxWithConstraints(
             modifier = Modifier

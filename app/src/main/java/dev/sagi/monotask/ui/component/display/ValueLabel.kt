@@ -45,7 +45,7 @@ fun ValueLabel(
             Text(
                 text = it,
                 style = MaterialTheme.typography.labelLarge,
-//                fontWeight = FontWeight.Thin,
+                fontWeight = FontWeight.Light,
                 color = MaterialTheme.colorScheme.outlineVariant,
                 modifier = Modifier.alignByBaseline()
             )
