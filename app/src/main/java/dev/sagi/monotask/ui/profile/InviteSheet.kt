@@ -25,7 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.data.repository.UserRepository
+import dev.sagi.monotask.domain.repository.UserRepository
 import dev.sagi.monotask.ui.component.core.ActionButton
 import dev.sagi.monotask.ui.component.display.AvatarBox
 import dev.sagi.monotask.ui.component.core.MonoBottomSheet

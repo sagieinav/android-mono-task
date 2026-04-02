@@ -4,20 +4,20 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.domain.repository.TaskRepository
 import dev.sagi.monotask.domain.service.XpEngine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class TaskRepository(private val db: FirebaseFirestore) {
+class TaskRepositoryImpl @Inject constructor(
+    private val db: FirebaseFirestore
+) : TaskRepository {
 
-    // Returns the Firestore collection for a specific user's tasks
-    // All task operations are scoped under the user's document
     private fun tasksCollection(userId: String) =
         db.collection("users").document(userId).collection("tasks")
 
-
-    // Internal function: single source of truth for task queries
     private fun getTasks(
         userId: String,
         workspaceId: String,
@@ -34,11 +34,10 @@ class TaskRepository(private val db: FirebaseFirestore) {
                 }
             }
 
-    // Returns live stream of active tasks for the Focus Hub + Kanban
-    fun getActiveTasks(userId: String, workspaceId: String): Flow<List<Task>> =
+    override fun getActiveTasks(userId: String, workspaceId: String): Flow<List<Task>> =
         getTasks(userId, workspaceId, completed = false)
 
-    suspend fun getActiveTasksOnce(userId: String, workspaceId: String): List<Task> {
+    override suspend fun getActiveTasksOnce(userId: String, workspaceId: String): List<Task> {
         val result = tasksCollection(userId)
             .whereEqualTo("workspaceId", workspaceId)
             .whereEqualTo("completed", false)
@@ -49,25 +48,21 @@ class TaskRepository(private val db: FirebaseFirestore) {
         }
     }
 
-    // Returns completed tasks for the Archive view
-    fun getCompletedTasks(userId: String, workspaceId: String): Flow<List<Task>> =
+    override fun getCompletedTasks(userId: String, workspaceId: String): Flow<List<Task>> =
         getTasks(userId, workspaceId, completed = true)
 
-    // One-shot fetch of completed tasks for a specific workspace (used by BadgeEngine)
-    suspend fun getCompletedTasksOnce(userId: String, workspaceId: String): List<Task> {
+    override suspend fun getCompletedTasksOnce(userId: String, workspaceId: String): List<Task> {
         val result = tasksCollection(userId)
             .whereEqualTo("workspaceId", workspaceId)
             .whereEqualTo("completed", true)
-            .get()
-            .await()
+            .get().await()
         return result.documents.mapNotNull {
             it.toObject(Task::class.java)?.copy(id = it.id)
                 ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
         }
     }
 
-    // Live stream of ALL active tasks across every workspace (used by BriefScreen)
-    fun getAllActiveTasks(userId: String): Flow<List<Task>> =
+    override fun getAllActiveTasks(userId: String): Flow<List<Task>> =
         tasksCollection(userId)
             .whereEqualTo("completed", false)
             .snapshots()
@@ -78,8 +73,7 @@ class TaskRepository(private val db: FirebaseFirestore) {
                 }
             }
 
-    // Live stream of ALL completed tasks across every workspace
-    fun getAllCompletedTasks(userId: String): Flow<List<Task>> =
+    override fun getAllCompletedTasks(userId: String): Flow<List<Task>> =
         tasksCollection(userId)
             .whereEqualTo("completed", true)
             .snapshots()
@@ -90,32 +84,27 @@ class TaskRepository(private val db: FirebaseFirestore) {
                 }
             }
 
-    // One-shot fetch of ALL completed tasks across every workspace
-    suspend fun getAllCompletedTasksOnce(userId: String): List<Task> {
+    override suspend fun getAllCompletedTasksOnce(userId: String): List<Task> {
         val result = tasksCollection(userId)
             .whereEqualTo("completed", true)
-            .get()
-            .await()
+            .get().await()
         return result.documents.mapNotNull {
             it.toObject(Task::class.java)?.copy(id = it.id)
                 ?: run { Log.w("TaskRepository", "Failed to deserialize task doc ${it.id}"); null }
         }
     }
 
-    // Marks a task as complete. Moves it to archive
-    suspend fun markTaskCompleted(userId: String, taskId: String) {
+    override suspend fun markTaskCompleted(userId: String, taskId: String) {
         tasksCollection(userId).document(taskId)
             .update(
                 mapOf(
                     "completed"   to true,
                     "completedAt" to com.google.firebase.Timestamp.now()
                 )
-            )
-            .await()
+            ).await()
     }
 
-    // Restores a completed task back to active. Inverse of markTaskCompleted
-    suspend fun restoreTask(userId: String, taskId: String) {
+    override suspend fun restoreTask(userId: String, taskId: String) {
         tasksCollection(userId).document(taskId)
             .update(
                 mapOf(
@@ -125,21 +114,16 @@ class TaskRepository(private val db: FirebaseFirestore) {
             ).await()
     }
 
-    // Permanently deletes a task
-    suspend fun deleteTask(userId: String, taskId: String) {
-        tasksCollection(userId).document(taskId)
-            .delete()
-            .await()
+    override suspend fun deleteTask(userId: String, taskId: String) {
+        tasksCollection(userId).document(taskId).delete().await()
     }
 
-    // insertNewTask now stores initial XP
-    suspend fun insertNewTask(userId: String, task: Task) {
+    override suspend fun insertNewTask(userId: String, task: Task) {
         val taskWithXp = task.copy(currentXp = XpEngine.calculateTaskXp(task))
         tasksCollection(userId).add(taskWithXp).await()
     }
 
-    // Snoozes task and recalculates its XP. No user XP touched here!
-    suspend fun updateSnoozeFields(userId: String, task: Task, option: XpEngine.SnoozeOption) {
+    override suspend fun updateSnoozeFields(userId: String, task: Task, option: XpEngine.SnoozeOption) {
         val newXp = XpEngine.calculateXpAfterSnooze(task, option)
         tasksCollection(userId).document(task.id)
             .update(mapOf(
@@ -148,14 +132,12 @@ class TaskRepository(private val db: FirebaseFirestore) {
             )).await()
     }
 
-    // overwriteExistingTask recalculates XP from edited properties
-    suspend fun overwriteExistingTask(userId: String, task: Task) {
+    override suspend fun overwriteExistingTask(userId: String, task: Task) {
         val taskWithXp = task.copy(currentXp = XpEngine.calculateTaskXp(task))
         tasksCollection(userId).document(task.id).set(taskWithXp).await()
     }
 
-    // Reverts a snooze action by restoring the previous snooze count and XP from the cached task
-    suspend fun undoSnoozeFields(userId: String, originalTask: Task) {
+    override suspend fun undoSnoozeFields(userId: String, originalTask: Task) {
         tasksCollection(userId).document(originalTask.id)
             .update(
                 mapOf(
@@ -164,5 +146,4 @@ class TaskRepository(private val db: FirebaseFirestore) {
                 )
             ).await()
     }
-
 }

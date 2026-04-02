@@ -11,28 +11,23 @@ import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.UserStats
+import dev.sagi.monotask.domain.repository.UserRepository
 import dev.sagi.monotask.domain.service.XpEngine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
 import java.time.LocalDate
+import javax.inject.Inject
 
-class UserRepository(private val db: FirebaseFirestore) {
-
-    companion object {
-        val thisMonthRange: ClosedRange<Long> get() {
-            val today = LocalDate.now()
-            return today.withDayOfMonth(1).toEpochDay()..today.toEpochDay()
-        }
-    }
+class UserRepositoryImpl @Inject constructor(
+    private val db: FirebaseFirestore
+) : UserRepository {
 
     private fun userDoc(userId: String) =
         db.collection("users").document(userId)
 
-    // ========== Reads ==========
-
-    fun getUserStream(userId: String): Flow<User?> =
+    override fun getUserStream(userId: String): Flow<User?> =
         userDoc(userId)
             .snapshots()
             .map {
@@ -40,44 +35,36 @@ class UserRepository(private val db: FirebaseFirestore) {
                     ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${it.id}"); null }
             }
 
-    suspend fun getUserOnce(userId: String): User? {
+    override suspend fun getUserOnce(userId: String): User? {
         val doc = userDoc(userId).get().await()
         return doc.toObject(User::class.java)?.copy(id = doc.id)
             ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${doc.id}"); null }
     }
 
-    // ========== User Lifecycle ==========
-
-    suspend fun createUserIfNotExists(user: User) {
+    override suspend fun createUserIfNotExists(user: User) {
         val doc = userDoc(user.id).get().await()
         if (!doc.exists()) userDoc(user.id).set(user).await()
     }
 
-    suspend fun updateProfile(userId: String, displayName: String) {
-        userDoc(userId)
-            .update("displayName", displayName)
-            .await()
+    override suspend fun updateProfile(userId: String, displayName: String) {
+        userDoc(userId).update("displayName", displayName).await()
     }
 
-    suspend fun updateAvatarPreset(userId: String, @DrawableRes preset: Int) {
-        userDoc(userId)
-            .update("avatarPreset", preset)
-            .await()
+    override suspend fun updateAvatarPreset(userId: String, @DrawableRes preset: Int) {
+        userDoc(userId).update("avatarPreset", preset).await()
     }
 
-    suspend fun completeOnboarding(userId: String) {
+    override suspend fun completeOnboarding(userId: String) {
         userDoc(userId).update("onboarded", true).await()
     }
 
-    // ========== XP ==========
-
-    suspend fun addXp(userId: String, amount: Int, currentXp: Int, currentLevel: Int) {
+    override suspend fun addXp(userId: String, amount: Int, currentXp: Int, currentLevel: Int) {
         val newXp    = (currentXp + amount).coerceAtLeast(0)
         val newLevel = XpEngine.levelForXp(newXp)
         userDoc(userId).update(mapOf("xp" to newXp, "level" to newLevel)).await()
     }
 
-    suspend fun removeXp(userId: String, amount: Int) {
+    override suspend fun removeXp(userId: String, amount: Int) {
         db.runTransaction { tx ->
             val currentXp = tx.get(userDoc(userId)).getLong("xp")?.toInt() ?: 0
             val newXp     = (currentXp - amount).coerceAtLeast(0)
@@ -85,9 +72,7 @@ class UserRepository(private val db: FirebaseFirestore) {
         }.await()
     }
 
-    // ========== Daily Activity ==========
-
-    suspend fun logDailyActivity(userId: String, xpEarned: Int, tasksCompleted: Int) {
+    override suspend fun logDailyActivity(userId: String, xpEarned: Int, tasksCompleted: Int) {
         val today = LocalDate.now().toEpochDay()
         userDoc(userId).collection("activity").document(today.toString())
             .set(
@@ -100,11 +85,11 @@ class UserRepository(private val db: FirebaseFirestore) {
             ).await()
     }
 
-    suspend fun removeDailyActivity(
+    override suspend fun removeDailyActivity(
         userId: String,
         xpToSubtract: Int,
-        tasksToSubtract: Int = 1,
-        dateEpochDay: Long = LocalDate.now().toEpochDay()
+        tasksToSubtract: Int,
+        dateEpochDay: Long
     ) {
         userDoc(userId).collection("activity").document(dateEpochDay.toString())
             .set(
@@ -116,8 +101,7 @@ class UserRepository(private val db: FirebaseFirestore) {
             ).await()
     }
 
-    // Live stream, optional time range
-    fun getActivity(userId: String, range: ClosedRange<Long>? = null): Flow<List<DailyActivity>> {
+    override fun getActivity(userId: String, range: ClosedRange<Long>?): Flow<List<DailyActivity>> {
         val col   = userDoc(userId).collection("activity")
         val query = if (range != null)
             col.whereGreaterThanOrEqualTo("dateEpochDay", range.start)
@@ -128,8 +112,7 @@ class UserRepository(private val db: FirebaseFirestore) {
         }
     }
 
-    // One-shot fetch, optional time range
-    suspend fun getActivityOnce(userId: String, range: ClosedRange<Long>? = null): List<DailyActivity> {
+    override suspend fun getActivityOnce(userId: String, range: ClosedRange<Long>?): List<DailyActivity> {
         val col   = userDoc(userId).collection("activity")
         val query = if (range != null)
             col.whereGreaterThanOrEqualTo("dateEpochDay", range.start)
@@ -138,8 +121,7 @@ class UserRepository(private val db: FirebaseFirestore) {
         return query.get().await().mapNotNull { it.toObject(DailyActivity::class.java) }
     }
 
-    // One-shot fetch of top performance day
-    suspend fun getTopPerformanceDay(userId: String): DailyActivity? =
+    override suspend fun getTopPerformanceDay(userId: String): DailyActivity? =
         userDoc(userId).collection("activity")
             .orderBy("xpEarned", Query.Direction.DESCENDING)
             .limit(1)
@@ -147,47 +129,38 @@ class UserRepository(private val db: FirebaseFirestore) {
             .mapNotNull { it.toObject(DailyActivity::class.java) }
             .firstOrNull()
 
-    // ========== Settings ==========
-
-    suspend fun updateHyperfocusMode(userId: String, enabled: Boolean) {
+    override suspend fun updateHyperfocusMode(userId: String, enabled: Boolean) {
         userDoc(userId).update("hyperfocusModeEnabled", enabled).await()
     }
 
-    suspend fun updatePriorityWeights(userId: String, dueDateWeight: Float) {
+    override suspend fun updatePriorityWeights(userId: String, dueDateWeight: Float) {
         userDoc(userId).update("dueDateWeight", dueDateWeight).await()
     }
 
-    // ========== Social ==========
+    override suspend fun getUserById(uid: String): User? = getUserOnce(uid)
 
-    // One-time fetch by ID. Clear alias used by friend-loading flows
-    suspend fun getUserById(uid: String): User? = getUserOnce(uid)
-
-    suspend fun addFriend(userId: String, friendId: String) {
+    override suspend fun addFriend(userId: String, friendId: String) {
         userDoc(userId).update("friends", FieldValue.arrayUnion(friendId)).await()
     }
 
-    // Atomic batch: write both sides of friendship simultaneously
-    suspend fun addFriendBatch(userId: String, friendId: String) {
+    override suspend fun addFriendBatch(userId: String, friendId: String) {
         db.batch().apply {
             update(userDoc(userId),   "friends", FieldValue.arrayUnion(friendId))
             update(userDoc(friendId), "friends", FieldValue.arrayUnion(userId))
         }.commit().await()
     }
 
-    // Atomic batch: remove both sides of friendship simultaneously
-    suspend fun removeFriendBatch(userId: String, friendId: String) {
+    override suspend fun removeFriendBatch(userId: String, friendId: String) {
         db.batch().apply {
             update(userDoc(userId),   "friends", FieldValue.arrayRemove(friendId))
             update(userDoc(friendId), "friends", FieldValue.arrayRemove(userId))
-        }
-            .commit()
-            .await()
+        }.commit().await()
     }
 
-    suspend fun updateUserStats(
-        userId         : String,
-        xpGained       : Int,
-        wasAce         : Boolean,
+    override suspend fun updateUserStats(
+        userId: String,
+        xpGained: Int,
+        wasAce: Boolean,
         newAchievements: List<Achievement>
     ) {
         val todayEpoch = LocalDate.now().toEpochDay()
@@ -226,32 +199,25 @@ class UserRepository(private val db: FirebaseFirestore) {
         }.await()
     }
 
-    // Reverses the stat increments from a single task completion (called on undo)
-    suspend fun undoUserStats(userId: String, wasAce: Boolean) {
+    override suspend fun undoUserStats(userId: String, wasAce: Boolean) {
         db.runTransaction { tx ->
             val current = tx.get(userDoc(userId)).toObject(User::class.java)?.stats ?: UserStats()
             val updated = current.copy(
                 totalTasksCompleted = (current.totalTasksCompleted - 1).coerceAtLeast(0),
                 aceCount            = if (wasAce) (current.aceCount - 1).coerceAtLeast(0) else current.aceCount
-                // Streak is NOT decremented: the user was genuinely active on the completion day.
             )
             tx.update(userDoc(userId), "stats", updated)
         }.await()
     }
 
-    // Overwrites only the task-count fields (totalTasksCompleted, aceCount)
-    // Called by ProfileViewModel to heal historically inflated counts
-    suspend fun patchStatsCount(userId: String, correctTotal: Int, correctAceCount: Int) {
+    override suspend fun patchStatsCount(userId: String, correctTotal: Int, correctAceCount: Int) {
         userDoc(userId).update(mapOf(
             "stats.totalTasksCompleted" to correctTotal,
             "stats.aceCount"            to correctAceCount
-        ))
-            .await()
+        )).await()
     }
 
-    suspend fun searchUsers(query: String): List<User> {
-        // "\uF8FF" is the last character in the Unicode private-use area, used as a
-        // high-value sentinel for Firestore prefix range queries (equivalent to "starts with").
+    override suspend fun searchUsers(query: String): List<User> {
         val result = db.collection("users")
             .whereGreaterThanOrEqualTo("displayName", query)
             .whereLessThanOrEqualTo("displayName", query + "\uF8FF")
@@ -262,18 +228,14 @@ class UserRepository(private val db: FirebaseFirestore) {
         }
     }
 
-    // One-time migration: write back stats derived from the full task history
-    // Called after ProfileViewModel computes achievements from tasks, so that
-    // evaluateFromStats() (used in Social tab) sees consistent data going forward
-    suspend fun patchEarnedStats(
-        userId             : String,
-        longestStreak      : Int,
-        earnedAchievements : Map<String, String>
+    override suspend fun patchEarnedStats(
+        userId: String,
+        longestStreak: Int,
+        earnedAchievements: Map<String, String>
     ) {
         userDoc(userId).update(mapOf(
             "stats.longestStreak"      to longestStreak,
             "stats.earnedAchievements" to earnedAchievements
         )).await()
     }
-
 }

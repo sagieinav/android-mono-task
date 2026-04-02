@@ -4,17 +4,20 @@ import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import dev.sagi.monotask.data.model.Workspace
+import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class WorkspaceRepository(private val db: FirebaseFirestore) {
+class WorkspaceRepositoryImpl @Inject constructor(
+    private val db: FirebaseFirestore
+) : WorkspaceRepository {
 
     private fun workspacesCollection(userId: String) =
         db.collection("users").document(userId).collection("workspaces")
 
-    // Real-time stream of all workspaces belonging to the user
-    fun getWorkspaces(userId: String): Flow<List<Workspace>> =
+    override fun getWorkspaces(userId: String): Flow<List<Workspace>> =
         workspacesCollection(userId)
             .snapshots()
             .map { snapshot ->
@@ -24,9 +27,7 @@ class WorkspaceRepository(private val db: FirebaseFirestore) {
                 }.sortedBy { it.createdAt }
             }
 
-    // Creates a default workspace set on first login
-    // Called alongside createUserIfNotExists in AuthViewModel
-    suspend fun createDefaultWorkspaces(userId: String) {
+    override suspend fun createDefaultWorkspaces(userId: String) {
         val now = System.currentTimeMillis()
         val defaults = listOf(
             Workspace(name = "Personal",  ownerId = userId, createdAt = now),
@@ -37,21 +38,20 @@ class WorkspaceRepository(private val db: FirebaseFirestore) {
         }
     }
 
-    // Adds a new custom workspace
-    suspend fun createWorkspace(userId: String, name: String) {
+    override suspend fun createWorkspace(userId: String, name: String) {
         val workspace = Workspace(name = name, ownerId = userId, createdAt = System.currentTimeMillis())
         workspacesCollection(userId).add(workspace).await()
     }
 
-    suspend fun deleteWorkspace(userId: String, workspaceId: String) {
+    override suspend fun deleteWorkspace(userId: String, workspaceId: String) {
         workspacesCollection(userId).document(workspaceId).delete().await()
     }
 
-    suspend fun renameWorkspace(userId: String, workspaceId: String, newName: String) {
+    override suspend fun renameWorkspace(userId: String, workspaceId: String, newName: String) {
         workspacesCollection(userId).document(workspaceId).update("name", newName).await()
     }
 
-    suspend fun setFocusTask(userId: String, workspaceId: String, taskId: String?) {
+    override suspend fun setFocusTask(userId: String, workspaceId: String, taskId: String?) {
         workspacesCollection(userId)
             .document(workspaceId)
             .update("currentFocusTaskId", taskId)
