@@ -6,35 +6,21 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sagi.monotask.ui.common.BaseViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.R
-import dev.sagi.monotask.data.repository.AuthRepository
-import dev.sagi.monotask.data.repository.UserRepository
-import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.repository.AuthRepository
+import dev.sagi.monotask.domain.repository.UserRepository
+import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
-
-// ========== UI States ==========
-
-sealed class AuthUiState {
-    object Loading : AuthUiState()
-    object SignedOut : AuthUiState()
-    data class SignedIn(val requiresOnboarding: Boolean) : AuthUiState()
-    data class Error(val message: String) : AuthUiState()
-}
-
-data class GoogleSignInData(val idToken: String, val profilePicUrl: String?)
 
 // ========== ViewModel ==========
 
@@ -44,16 +30,25 @@ class AuthViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val workspaceRepository: WorkspaceRepository,
     private val auth: FirebaseAuth
-) : ViewModel() {
+) : BaseViewModel<AuthUiState, AuthEvent, AuthUiEffect>() {
 
-    private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Loading)
-    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+    override val initialState: AuthUiState = AuthUiState.Loading
 
     private var authStateListener: FirebaseAuth.AuthStateListener? = null
     private var isSigningIn = false  // safe: only read/written on Main dispatcher
 
     init {
         observeAuthState()
+    }
+
+    // ========== Event Dispatcher ==========
+
+    override fun onEvent(event: AuthEvent) {
+        when (event) {
+            is AuthEvent.OnGoogleSignInResult -> onGoogleSignInResult(event.idToken)
+            is AuthEvent.CompleteOnboarding   -> completeOnboarding()
+            is AuthEvent.SignOut              -> signOut()
+        }
     }
 
     // ========== Auth State Observation ==========
@@ -128,15 +123,14 @@ class AuthViewModel @Inject constructor(
             isSigningIn = true
             _uiState.value = AuthUiState.Loading
             try {
-                val firebaseUser = authRepository.signInWithGoogle(idToken) ?: run {
+                val userModel = authRepository.signInWithGoogle(idToken) ?: run {
                     _uiState.value = AuthUiState.Error("Authentication failed")
                     return@launch
                 }
 
-                val userModel = authRepository.buildUserModel(firebaseUser)
                 userRepository.createUserIfNotExists(userModel)
 
-                val storedUser = userRepository.getUserOnce(firebaseUser.uid) ?: run {
+                val storedUser = userRepository.getUserOnce(userModel.id) ?: run {
                     _uiState.value = AuthUiState.Error("Failed to load user profile")
                     return@launch
                 }

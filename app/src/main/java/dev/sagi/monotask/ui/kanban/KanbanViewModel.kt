@@ -1,35 +1,49 @@
 package dev.sagi.monotask.ui.kanban
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sagi.monotask.ui.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.data.repository.TaskRepository
-import dev.sagi.monotask.data.repository.UserRepository
-import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.repository.TaskRepository
+import dev.sagi.monotask.domain.repository.UserRepository
+import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlinx.coroutines.flow.SharingStarted
 
 @HiltViewModel
 class KanbanViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val userRepository: UserRepository,
     private val workspaceRepository: WorkspaceRepository,
-) : ViewModel() {
+) : BaseViewModel<KanbanUiState, KanbanEvent, KanbanUiEffect>() {
 
+    override val initialState: KanbanUiState = KanbanUiState.Loading
+
+    // KanbanViewModel derives its public uiState from three internal flows combined,
+    // so it overrides BaseViewModel's uiState with a custom StateFlow.
     private val _internalUiState = MutableStateFlow<KanbanUiState>(KanbanUiState.Loading)
     private val _isLocked        = MutableStateFlow(false)
     private val _sortOrder       = MutableStateFlow(SortOrder.CREATED_DESC)
 
-    val uiState: StateFlow<KanbanUiState> = combine(_internalUiState, _isLocked, _sortOrder) { state, locked, sortOrder ->
+    override val uiState: StateFlow<KanbanUiState> = combine(_internalUiState, _isLocked, _sortOrder) { state, locked, sortOrder ->
         if (locked) KanbanUiState.Locked
         else when (state) {
             is KanbanUiState.Ready -> state.copy(
@@ -46,9 +60,6 @@ class KanbanViewModel @Inject constructor(
     val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
 
     private val _showCompleted = MutableStateFlow(false)
-
-    private val _uiEffect = MutableSharedFlow<KanbanUiEffect>()
-    val uiEffect: SharedFlow<KanbanUiEffect> = _uiEffect.asSharedFlow()
 
     // Stored so focusNow() can reference the current workspace without extra params
     private var currentWorkspace: Workspace? = null
@@ -70,7 +81,7 @@ class KanbanViewModel @Inject constructor(
 
     // ========== Event Dispatcher ==========
 
-    fun onEvent(event: KanbanEvent) {
+    override fun onEvent(event: KanbanEvent) {
         when (event) {
             is KanbanEvent.ToggleArchive   -> toggleArchive()
             is KanbanEvent.ResetArchive    -> resetArchive()
@@ -171,7 +182,7 @@ class KanbanViewModel @Inject constructor(
             try {
                 taskRepository.overwriteExistingTask(userId, task)
             } catch (e: Exception) {
-                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to update task: ${e.message}"))
+                sendEffect(KanbanUiEffect.ShowError("Failed to update task: ${e.message}"))
             }
         }
     }
@@ -181,7 +192,7 @@ class KanbanViewModel @Inject constructor(
             try {
                 taskRepository.deleteTask(userId, taskId)
             } catch (e: Exception) {
-                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to delete task: ${e.message}"))
+                sendEffect(KanbanUiEffect.ShowError("Failed to delete task: ${e.message}"))
             }
         }
     }
@@ -200,9 +211,9 @@ class KanbanViewModel @Inject constructor(
                     }
                 }
                 workspaceRepository.setFocusTask(userId, workspace.id, task.id)
-                _uiEffect.emit(KanbanUiEffect.NavigateToFocus)
+                sendEffect(KanbanUiEffect.NavigateToFocus)
             } catch (e: Exception) {
-                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to set focus task: ${e.message}"))
+                sendEffect(KanbanUiEffect.ShowError("Failed to set focus task: ${e.message}"))
             }
         }
     }
@@ -223,7 +234,7 @@ class KanbanViewModel @Inject constructor(
                 userRepository.removeXp(userId, xpToRemove)
                 userRepository.undoUserStats(userId, task.isAce)
             } catch (e: Exception) {
-                _uiEffect.emit(KanbanUiEffect.ShowError("Failed to restore task: ${e.message}"))
+                sendEffect(KanbanUiEffect.ShowError("Failed to restore task: ${e.message}"))
             }
         }
     }

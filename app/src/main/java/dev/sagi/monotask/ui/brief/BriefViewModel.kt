@@ -1,11 +1,11 @@
 package dev.sagi.monotask.ui.brief
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sagi.monotask.ui.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.data.repository.TaskRepository
-import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.repository.TaskRepository
+import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,10 +24,15 @@ import javax.inject.Inject
 class BriefViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val workspaceRepository: WorkspaceRepository
-) : ViewModel() {
+) : BaseViewModel<BriefUiState, BriefEvent, BriefUiEffect>() {
 
-    private val _uiState = MutableStateFlow<BriefUiState>(BriefUiState.Loading)
-    val uiState: StateFlow<BriefUiState> = _uiState
+    override val initialState: BriefUiState = BriefUiState.Loading
+
+    override fun onEvent(event: BriefEvent) {
+        when (event) {
+            is BriefEvent.Refresh -> { /* data reloads automatically via Firestore streams */ }
+        }
+    }
 
     private var _userSource: StateFlow<User?>? = null
     private val _currentUser = MutableStateFlow<User?>(null)

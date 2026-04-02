@@ -54,7 +54,7 @@ fun SettingsScreen(
     val snackbarHostState = LocalSnackbarHostState.current
 
     LaunchedEffect(Unit) {
-        settingsVM.uiEffect.collectLatest { effect ->
+        settingsVM.effect.collectLatest { effect ->
             when (effect) {
                 is SettingsUiEffect.ShowError -> snackbarHostState.showSnackbar(
                     message          = effect.message,

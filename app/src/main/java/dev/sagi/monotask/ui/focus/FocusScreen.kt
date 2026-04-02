@@ -59,7 +59,7 @@ fun FocusScreen(
     // effects (level-up, achievements) can never cancel it mid-display.
     // Long duration gives a comfortable window to press Undo.
     LaunchedEffect(Unit) {
-        focusVM.uiEffect.collect { effect ->
+        focusVM.effect.collect { effect ->
             if (effect !is FocusUiEffect.ShowUndoComplete) return@collect
             val result = snackbarHostState.showSnackbar(
                 message     = effect.message,
@@ -75,7 +75,7 @@ fun FocusScreen(
 
     // Undo-snooze snackbar. Same reasoning as above.
     LaunchedEffect(Unit) {
-        focusVM.uiEffect.collect { effect ->
+        focusVM.effect.collect { effect ->
             if (effect !is FocusUiEffect.ShowUndoSnooze) return@collect
             val result = snackbarHostState.showSnackbar(
                 message     = effect.message,
@@ -92,7 +92,7 @@ fun FocusScreen(
     // All other one-shot effects (errors, level-up, achievements).
     // collectLatest is fine here since none of these are undo snackbars.
     LaunchedEffect(Unit) {
-        focusVM.uiEffect.collectLatest { effect ->
+        focusVM.effect.collectLatest { effect ->
             when (effect) {
                 is FocusUiEffect.ShowError -> {
                     snackbarHostState.showSnackbar(

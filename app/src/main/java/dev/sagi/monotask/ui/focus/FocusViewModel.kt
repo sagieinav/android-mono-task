@@ -1,14 +1,14 @@
 package dev.sagi.monotask.ui.focus
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sagi.monotask.ui.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.data.repository.TaskRepository
-import dev.sagi.monotask.data.repository.UserRepository
-import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.repository.TaskRepository
+import dev.sagi.monotask.domain.repository.UserRepository
+import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.domain.service.AchievementEngine
 import dev.sagi.monotask.domain.service.TaskSelector
@@ -16,7 +16,15 @@ import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,24 +33,17 @@ class FocusViewModel @Inject constructor(
     private val taskRepository      : TaskRepository,
     private val userRepository      : UserRepository,
     private val workspaceRepository : WorkspaceRepository,
-) : ViewModel() {
+) : BaseViewModel<FocusUiState, FocusEvent, FocusUiEffect>() {
 
-    // ========== State ==========
+    override val initialState: FocusUiState = FocusUiState.Loading
 
-    private val _uiState = MutableStateFlow<FocusUiState>(FocusUiState.Loading)
-    val uiState: StateFlow<FocusUiState> = _uiState.asStateFlow()
+    // ========== Extra State ==========
 
     // Gates displayedUiState in FocusScreen while a completion animation plays,
     // preventing Firestore snapshots from interrupting the card animation mid-way.
     // Cleared immediately in undoCompleteTask so restored cards appear without delay.
     private val _frozenForAnimation = MutableStateFlow(false)
     val frozenForAnimation: StateFlow<Boolean> = _frozenForAnimation.asStateFlow()
-
-    // One-shot UI effects collected by FocusScreen (snackbars).
-    // extraBufferCapacity prevents the VM coroutine from suspending on emit while
-    // the undo snackbar collector is blocked in showSnackbar (up to ~10 s).
-    private val _uiEffect = MutableSharedFlow<FocusUiEffect>(extraBufferCapacity = 8)
-    val uiEffect: SharedFlow<FocusUiEffect> = _uiEffect.asSharedFlow()
 
     private val _editingTask = MutableStateFlow<Task?>(null)
     val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
@@ -108,7 +109,7 @@ class FocusViewModel @Inject constructor(
 
     // ========== Event Handler ==========
 
-    fun onEvent(event: FocusEvent) {
+    override fun onEvent(event: FocusEvent) {
         when (event) {
             is FocusEvent.CompleteTask     -> completeTask()
             is FocusEvent.OpenSnooze       -> openSnoozeSheet()
@@ -194,11 +195,11 @@ class FocusViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                _uiEffect.emit(FocusUiEffect.ShowUndoComplete("Task completed"))
+                sendEffect(FocusUiEffect.ShowUndoComplete("Task completed"))
 
                 val user = _userSource?.value ?: run {
                     _frozenForAnimation.value = false
-                    _uiEffect.emit(FocusUiEffect.ShowError("Failed to load user profile for XP update"))
+                    sendEffect(FocusUiEffect.ShowError("Failed to load user profile for XP update"))
                     return@launch
                 }
 
@@ -221,7 +222,7 @@ class FocusViewModel @Inject constructor(
                 // avoids a second Firestore fetch.
                 val levelAfter        = XpEngine.levelForXp(user.xp + xpGained)
                 if (levelAfter > user.level) {
-                    _uiEffect.emit(FocusUiEffect.ShowLevelUp(previousLevel = user.level, newLevel = levelAfter))
+                    sendEffect(FocusUiEffect.ShowLevelUp(previousLevel = user.level, newLevel = levelAfter))
                 }
                 val tasksAfter        = tasksBefore + state.focusTask
                 val achievementsAfter = AchievementEngine.evaluate(tasksAfter, levelAfter)
@@ -232,7 +233,7 @@ class FocusViewModel @Inject constructor(
                     newProgress.earnedTier != null && newProgress.earnedTier != oldProgress?.earnedTier
                 }
                 newlyUnlocked.forEach { newProgress ->
-                    _uiEffect.emit(
+                    sendEffect(
                         FocusUiEffect.ShowAchievementUnlocked(
                             name = newProgress.displayName,
                             tier = newProgress.earnedTier!!
@@ -245,7 +246,7 @@ class FocusViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _frozenForAnimation.value = false
-                _uiEffect.emit(FocusUiEffect.ShowError("Failed to complete task: ${e.message}"))
+                sendEffect(FocusUiEffect.ShowError("Failed to complete task: ${e.message}"))
             }
         }
     }
@@ -257,7 +258,7 @@ class FocusViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                _uiEffect.emit(FocusUiEffect.ShowUndoSnooze("Task snoozed"))
+                sendEffect(FocusUiEffect.ShowUndoSnooze("Task snoozed"))
 
                 // Ensure the exit animation (starts at ~80ms, runs for 280ms = done at ~360ms)
                 // finishes before the new card appears. Firestore may respond faster than that.
@@ -280,7 +281,7 @@ class FocusViewModel @Inject constructor(
                 minVisualTime.join()
 
             } catch (e: Exception) {
-                _uiEffect.emit(FocusUiEffect.ShowError("Failed to snooze task: ${e.message}"))
+                sendEffect(FocusUiEffect.ShowError("Failed to snooze task: ${e.message}"))
             } finally {
                 _frozenForAnimation.value = false
             }
@@ -318,7 +319,7 @@ class FocusViewModel @Inject constructor(
                 lastCompletedTaskWasAce = false
                 savedStateForUndo       = null
             } catch (e: Exception) {
-                _uiEffect.emit(FocusUiEffect.ShowError("Undo failed"))
+                sendEffect(FocusUiEffect.ShowError("Undo failed"))
             } finally {
                 undoInProgress = false
             }
@@ -334,7 +335,7 @@ class FocusViewModel @Inject constructor(
                 workspaceRepository.setFocusTask(userId, taskToRestore.workspaceId, taskToRestore.id)
                 lastSnoozedTask = null
             } catch (e: Exception) {
-                _uiEffect.emit(FocusUiEffect.ShowError("Failed to undo snooze: ${e.message}"))
+                sendEffect(FocusUiEffect.ShowError("Failed to undo snooze: ${e.message}"))
             }
         }
     }
@@ -350,7 +351,7 @@ class FocusViewModel @Inject constructor(
             try {
                 taskRepository.overwriteExistingTask(userId, task)
             } catch (e: Exception) {
-                _uiEffect.emit(FocusUiEffect.ShowError("Failed to update task: ${e.message}"))
+                sendEffect(FocusUiEffect.ShowError("Failed to update task: ${e.message}"))
             }
         }
     }
@@ -361,7 +362,7 @@ class FocusViewModel @Inject constructor(
         val state = _uiState.value as? FocusUiState.Active ?: return
         if (state.queue.isEmpty()) {
             viewModelScope.launch {
-                _uiEffect.emit(FocusUiEffect.ShowError(
+                sendEffect(FocusUiEffect.ShowError(
                     "This is your only active task.\nTherefore, it cannot be snoozed"
                 ))
             }

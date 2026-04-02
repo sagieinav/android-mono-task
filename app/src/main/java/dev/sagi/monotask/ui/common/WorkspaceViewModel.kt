@@ -7,9 +7,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.data.repository.TaskRepository
-import dev.sagi.monotask.data.repository.UserPrefsRepository
-import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.repository.TaskRepository
+import dev.sagi.monotask.domain.repository.UserPrefsRepository
+import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

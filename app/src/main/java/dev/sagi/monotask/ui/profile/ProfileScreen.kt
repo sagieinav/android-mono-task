@@ -243,7 +243,7 @@ private fun ProfileScreenPreview() {
                         xpIntoLevel = 2115,
                         xpForNextLevel = 2326,
                         achievements = emptyList(),
-                        activityData = emptyList()
+//                        activityData = emptyList()
                     )
                 )
             }

@@ -59,7 +59,7 @@ fun KanbanScreen(
     LaunchedEffect(Unit) { onKanbanEvent(KanbanEvent.ResetArchive) }
 
     LaunchedEffect(Unit) {
-        kanbanVM.uiEffect.collectLatest { effect ->
+        kanbanVM.effect.collectLatest { effect ->
             when (effect) {
                 is KanbanUiEffect.NavigateToFocus ->
                     navController.navigate(Screen.Focus.route)

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.data.repository.UserRepository
+import dev.sagi.monotask.domain.repository.UserRepository
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

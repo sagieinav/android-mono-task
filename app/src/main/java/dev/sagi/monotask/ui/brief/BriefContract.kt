@@ -13,3 +13,15 @@ sealed interface BriefUiState {
         val user: User? = null
     ) : BriefUiState
 }
+
+// ========== Event Callbacks ==========
+
+sealed interface BriefEvent {
+    object Refresh : BriefEvent
+}
+
+// ========== One-Shot UI Effects ==========
+
+sealed interface BriefUiEffect {
+    data class ShowError(val message: String) : BriefUiEffect
+}

@@ -1,19 +1,16 @@
 package dev.sagi.monotask.ui.settings
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sagi.monotask.ui.common.BaseViewModel
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.data.repository.UserRepository
-import dev.sagi.monotask.data.repository.WorkspaceRepository
+import dev.sagi.monotask.domain.repository.UserRepository
+import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -24,13 +21,9 @@ class SettingsViewModel @Inject constructor(
     private val userRepository     : UserRepository,
     private val workspaceRepository: WorkspaceRepository,
     private val auth               : FirebaseAuth
-) : ViewModel() {
+) : BaseViewModel<SettingsUiState, SettingsEvent, SettingsUiEffect>() {
 
-    private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
-
-    private val _uiEffect = MutableSharedFlow<SettingsUiEffect>()
-    val uiEffect: SharedFlow<SettingsUiEffect> = _uiEffect.asSharedFlow()
+    override val initialState: SettingsUiState = SettingsUiState.Loading
 
     private val _workspaces = MutableStateFlow<List<Workspace>>(emptyList())
     val workspaces: StateFlow<List<Workspace>> = _workspaces.asStateFlow()
@@ -44,7 +37,7 @@ class SettingsViewModel @Inject constructor(
 
     // ========== Event Dispatcher ==========
 
-    fun onEvent(event: SettingsEvent) {
+    override fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.UpdateHyperfocusMode  -> updateHyperfocusMode(event.enabled)
             is SettingsEvent.UpdatePriorityWeights -> updatePriorityWeights(event.dueDateWeight)
@@ -109,7 +102,7 @@ class SettingsViewModel @Inject constructor(
                 userRepository.updateHyperfocusMode(uid, enabled)
             } catch (e: Exception) {
                 _uiState.value = current
-                _uiEffect.emit(SettingsUiEffect.ShowError("Failed to save settings: ${e.message}"))
+                sendEffect(SettingsUiEffect.ShowError("Failed to save settings: ${e.message}"))
             }
         }
     }
@@ -123,7 +116,7 @@ class SettingsViewModel @Inject constructor(
                 userRepository.updatePriorityWeights(uid, dueDateWeight)
             } catch (e: Exception) {
                 _uiState.value = current
-                _uiEffect.emit(SettingsUiEffect.ShowError("Failed to save priority weights: ${e.message}"))
+                sendEffect(SettingsUiEffect.ShowError("Failed to save priority weights: ${e.message}"))
             }
         }
     }
@@ -137,7 +130,7 @@ class SettingsViewModel @Inject constructor(
                 userRepository.updateProfile(uid, name)
             } catch (e: Exception) {
                 _uiState.value = current
-                _uiEffect.emit(SettingsUiEffect.ShowError("Failed to update name: ${e.message}"))
+                sendEffect(SettingsUiEffect.ShowError("Failed to update name: ${e.message}"))
             }
         }
     }
@@ -150,7 +143,7 @@ class SettingsViewModel @Inject constructor(
             try {
                 workspaceRepository.createWorkspace(uid, name)
             } catch (e: Exception) {
-                _uiEffect.emit(SettingsUiEffect.ShowError("Failed to create workspace: ${e.message}"))
+                sendEffect(SettingsUiEffect.ShowError("Failed to create workspace: ${e.message}"))
             }
         }
     }
@@ -161,14 +154,14 @@ class SettingsViewModel @Inject constructor(
             try {
                 workspaceRepository.renameWorkspace(uid, workspace.id, newName)
             } catch (e: Exception) {
-                _uiEffect.emit(SettingsUiEffect.ShowError("Failed to rename workspace: ${e.message}"))
+                sendEffect(SettingsUiEffect.ShowError("Failed to rename workspace: ${e.message}"))
             }
         }
     }
 
     private fun deleteWorkspace(workspace: Workspace) {
         if (_workspaces.value.size <= 1) {
-            viewModelScope.launch { _uiEffect.emit(SettingsUiEffect.ShowError("You must keep at least one workspace.")) }
+            viewModelScope.launch { sendEffect(SettingsUiEffect.ShowError("You must keep at least one workspace.")) }
             return
         }
         val uid = auth.currentUser?.uid ?: return
@@ -176,7 +169,7 @@ class SettingsViewModel @Inject constructor(
             try {
                 workspaceRepository.deleteWorkspace(uid, workspace.id)
             } catch (e: Exception) {
-                _uiEffect.emit(SettingsUiEffect.ShowError("Failed to delete workspace: ${e.message}"))
+                sendEffect(SettingsUiEffect.ShowError("Failed to delete workspace: ${e.message}"))
             }
         }
     }
