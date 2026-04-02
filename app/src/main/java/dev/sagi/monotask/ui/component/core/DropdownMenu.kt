@@ -226,7 +226,7 @@ fun MonoDropdownItem(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
+            style = textStyle,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
             color = if (isSelected) selectedColor else unselectedColor
         )

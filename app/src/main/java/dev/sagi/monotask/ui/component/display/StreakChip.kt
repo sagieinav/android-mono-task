@@ -22,7 +22,6 @@ import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.StreakOrange
 import dev.sagi.monotask.ui.theme.customColors
-import dev.sagi.monotask.ui.theme.googleSans
 
 enum class StreakChipSize { Normal, Small }
 
@@ -33,7 +32,7 @@ fun StreakChip(
     size: StreakChipSize = StreakChipSize.Normal
 ) {
     val streakLabel = if (currentStreak == 1) "day streak" else "days streak"
-    val iconSize    = if (size == StreakChipSize.Normal) 18.dp else 15.dp
+    val iconSize    = if (size == StreakChipSize.Normal) 17.dp else 15.dp
     val textStyle   = if (size == StreakChipSize.Normal)
         MaterialTheme.typography.labelLarge
     else
@@ -55,8 +54,8 @@ fun StreakChip(
 
         Text(
             text = currentStreak.toString(),
-            fontWeight = FontWeight.Black,
-            fontFamily = googleSans,
+            fontWeight = FontWeight.SemiBold,
+//            fontFamily = googleSans,
             color = MaterialTheme.colorScheme.onSurface,
             style = textStyle
         )
@@ -65,8 +64,7 @@ fun StreakChip(
 
         Text(
             text = streakLabel,
-            fontWeight = FontWeight.Thin,
-            fontFamily = googleSans,
+            fontWeight = FontWeight.Normal,
             style = textStyle,
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
         )

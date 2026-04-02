@@ -121,7 +121,7 @@ private fun FaqItemRow(item: FaqItem) {
             AnimatedVisibility(visible = expanded) {
                 Text(
                     text  = item.answer,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.outline
                 )
             }

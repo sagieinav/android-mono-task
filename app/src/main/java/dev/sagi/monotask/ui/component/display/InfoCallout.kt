@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.nationalPark
+import dev.sagi.monotask.ui.theme.googleSansRounded
 
 @Composable
 fun InfoCallout(
@@ -53,7 +53,6 @@ fun InfoCallout(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodySmall,
-                fontFamily = nationalPark,
                 fontWeight = FontWeight.SemiBold,
                 color = titleColor
             )

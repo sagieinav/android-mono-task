@@ -46,7 +46,7 @@ fun DueDateLabel(
         text = relativeDate.text,
         style = textStyle,
         fontSize = if (small) DueDateFontSizeSmall else DueDateFontSizeNormal,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Light,
         color = dateColor,
         textAlign = TextAlign.Center,
         modifier = modifier

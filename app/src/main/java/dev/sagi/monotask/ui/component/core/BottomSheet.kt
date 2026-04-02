@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.ui.theme.nationalPark
+import dev.sagi.monotask.ui.theme.googleSansRounded
 
 
 // ========== GENERIC BOTTOM SHEET WRAPPER ==========
@@ -54,8 +54,8 @@ fun MonoBottomSheet(
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineMedium,
-                fontFamily = nationalPark,
-                fontWeight = FontWeight.Bold,
+                fontFamily = googleSansRounded,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center

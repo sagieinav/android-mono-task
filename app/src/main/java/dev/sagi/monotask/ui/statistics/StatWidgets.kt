@@ -261,7 +261,7 @@ fun StatWidgetMedium(
                             Text(
                                 text = it,
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
+                                fontWeight = FontWeight.Medium,
                                 color = accentColor
                             )
                         }
@@ -270,6 +270,7 @@ fun StatWidgetMedium(
                         Text(
                             text  = subtitle,
                             style = MaterialTheme.typography.labelSmall,
+//                            fontWeight = FontWeight.Light,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
                     }
@@ -295,14 +296,14 @@ fun StatWidgetMedium(
                                 text = value,
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                                 modifier = Modifier.alignByBaseline()
                             )
                             trailingUnit?. let { unit ->
                                 Text(
                                     text = unit,
                                     style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Thin,
+                                    fontWeight = FontWeight.Normal,
                                     color = MaterialTheme.colorScheme.outlineVariant,
                                     modifier = Modifier.alignByBaseline()
                                 )

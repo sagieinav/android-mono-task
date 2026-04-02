@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.ui.component.core.GlassSurface
@@ -40,10 +41,11 @@ fun CountBadge(
             targetState = count,
             transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
             label = "count-badge"
-        ) { c ->
+        ) { count ->
             Text(
-                text = c.toString(),
+                text = count.toString(),
                 style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
                 color = labelColor,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )

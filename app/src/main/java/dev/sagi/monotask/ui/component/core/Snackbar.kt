@@ -8,13 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.ui.theme.googleSansRounded
 import dev.sagi.monotask.ui.theme.monoShadow
-import dev.sagi.monotask.ui.theme.nationalPark
 
 private val SnackbarIconSize = 26.dp
 
@@ -89,7 +90,8 @@ fun MonoSnackbar(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.labelLarge,
-                fontFamily = nationalPark,
+                fontWeight = FontWeight.Medium,
+                fontFamily = googleSansRounded,
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .padding(horizontal = 22.dp)

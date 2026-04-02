@@ -86,9 +86,9 @@ fun SnoozeBottomSheet(
 fun ChooseSnoozeButton(
     icon: Painter,
     label: String,
+    modifier: Modifier = Modifier,
     xpPenalty: Int? = null,
-    onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onClick: () -> Unit = {}
 ) {
     ActionButton(
         onClick = onClick,
@@ -123,7 +123,7 @@ fun ChooseSnoozeButton(
                     Text(
                         text = "$it XP",
                         style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Normal,
                         color = penaltyRed,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )

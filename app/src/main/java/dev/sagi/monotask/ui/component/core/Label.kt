@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.R
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.plusJakartaSans
+import dev.sagi.monotask.ui.theme.googleSans
 
 
 @Composable
@@ -38,8 +38,8 @@ fun MonoLabel(
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.extraSmall,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
-    fontFamily: FontFamily = plusJakartaSans,
-    fontWeight: FontWeight = FontWeight.Normal,
+    fontFamily: FontFamily = googleSans,
+    fontWeight: FontWeight = FontWeight.Light,
     horizontalPadding: Dp = 6.dp,
     verticalPadding: Dp = 5.dp,
     accentColor: Color? = color,

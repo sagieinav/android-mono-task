@@ -1,25 +1,37 @@
+@file:OptIn(ExperimentalTextApi::class)
+
 package dev.sagi.monotask.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
 
+private const val UI_FONT_WIDTH = 95f
+private const val UI_FONT_OPTICAL_SIZE = 18f
+private const val DATA_FONT_OPTICAL_SIZE = 14f
+
+private val flexWeights = listOf(
+    FontWeight.Thin, FontWeight.ExtraLight, FontWeight.Light,
+    FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold
+)
+
 // =====================================================
-// CATEGORY 1: HERO / DISPLAY
+// Gloock: hero/display font
 // =====================================================
 val gloock = FontFamily(
     Font(R.font.gloock, FontWeight.Normal)
 )
 
 // =====================================================
-// CATEGORY 2: BODY / READING SERIF
+// Lora: content font
 // =====================================================
 val lora = FontFamily(
     Font(R.font.lora,        FontWeight.Normal),
@@ -29,46 +41,40 @@ val lora = FontFamily(
 )
 
 // =====================================================
-// CATEGORY 3: MAIN UI
+// Google Sans Rounded: main UI font
 // =====================================================
-val nationalPark = FontFamily(
-    Font(R.font.national_park),
-    Font(R.font.national_park_semi_bold, FontWeight.SemiBold),
-    Font(R.font.national_park_bold, FontWeight.Bold)
+val googleSansRounded = googleSansFamily(
+    FontVariation.width(UI_FONT_WIDTH),
+    FontVariation.Setting("ROND", 100f),
+    FontVariation.Setting("opsz", UI_FONT_OPTICAL_SIZE)
 )
 
 // =====================================================
-// CATEGORY 4: DATA (small labels)
+// Google Sans (Standard): labels font (mainly)
 // =====================================================
-val plusJakartaSans = FontFamily(
-    Font(R.font.plus_jakarta_sans,        FontWeight.Normal),
-    Font(R.font.plus_jakarta_sans_medium,        FontWeight.Medium),
-    Font(R.font.plus_jakarta_sans_semi_bold,        FontWeight.SemiBold),
-    Font(R.font.plus_jakarta_sans_bold,        FontWeight.Bold),
-    Font(R.font.plus_jakarta_sans_italic, FontWeight.Normal, FontStyle.Italic),
+val googleSans = googleSansFamily(
+    FontVariation.Setting("opsz", DATA_FONT_OPTICAL_SIZE)
 )
 
-val googleSans = FontFamily(
-    Font(R.font.google_sans,        FontWeight.Normal),
-    Font(R.font.google_sans_medium,        FontWeight.Medium),
-    Font(R.font.google_sans_semi_bold,        FontWeight.SemiBold),
-    Font(R.font.google_sans_bold,        FontWeight.Bold),
-    Font(R.font.google_sans_italic, FontWeight.Normal, FontStyle.Italic),
-)
+// =====================================================
+// Harabara: for task tags
+// =====================================================
 val harabara = FontFamily(
     Font(R.font.harabara, FontWeight.Normal),
 )
+
 
 // =====================================================
 // ACTIVE SELECTION
 // =====================================================
 private val heroFont = gloock
-private val uiFont = nationalPark
+private val uiFont = googleSansRounded
 private val dataFont = googleSans
 private val contentFont = lora
 
+
 // =====================================================
-// TYPOGRAPHY SCALE
+// HELPERS
 // =====================================================
 
 // Helper to remove line height padding
@@ -78,8 +84,25 @@ private fun TextStyle.withNoPadding() = copy(
         trim = LineHeightStyle.Trim.Both
     )
 )
-val baseline = Typography()
 
+// Helper for setting weights to Google Sans Flex family
+private fun googleSansFamily(vararg extra: FontVariation.Setting) =
+    FontFamily(flexWeights.map { fontWeight ->
+        Font(
+            resId = R.font.google_sans_flex,
+            weight = fontWeight,
+            variationSettings = FontVariation.Settings(
+                FontVariation.weight(fontWeight.weight),
+                *extra
+            )
+        )
+    })
+
+
+// =====================================================
+// TYPOGRAPHY SCALE
+// =====================================================
+val baseline = Typography()
 val AppTypography = Typography(
 
     // ========== DISPLAY (largest headings) ==========
@@ -93,22 +116,16 @@ val AppTypography = Typography(
     headlineSmall  = baseline.headlineSmall.copy(fontFamily = uiFont).withNoPadding(),
 
     // ========== TITLE, UI ==========
-    titleLarge  = baseline.titleLarge.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.Bold).withNoPadding(),
-    titleMedium = baseline.titleMedium.copy(
-        fontFamily = uiFont, fontWeight = FontWeight.SemiBold).withNoPadding(),
-    titleSmall  = baseline.titleSmall.copy(
-        fontFamily = uiFont).withNoPadding(),
+    titleLarge  = baseline.titleLarge.copy(fontFamily = uiFont).withNoPadding(),
+    titleMedium = baseline.titleMedium.copy(fontFamily = uiFont).withNoPadding(),
+    titleSmall  = baseline.titleSmall.copy(fontFamily = uiFont).withNoPadding(),
 
     // ========== SMALL LABELS ==========
-    labelLarge  = baseline.labelLarge.copy(
-        fontFamily = plusJakartaSans,
-        fontWeight = FontWeight.Bold
-    ).withNoPadding(),
+    labelLarge  = baseline.labelLarge.copy(fontFamily = dataFont).withNoPadding(),
     labelMedium = baseline.labelMedium.copy(
-        fontFamily = dataFont, fontWeight = FontWeight.Bold).withNoPadding(),
+        fontFamily = dataFont, fontWeight = FontWeight.Light).withNoPadding(),
     labelSmall  = baseline.labelSmall.copy(
-        fontFamily = dataFont, fontSize = 10.sp, fontWeight = FontWeight.Thin).withNoPadding(),
+        fontFamily = dataFont, fontWeight = FontWeight.Light, fontSize = 10.sp).withNoPadding(),
 
     // ========== BODY / CONTENT ==========
     bodyLarge  = baseline.bodyLarge.copy(fontFamily = contentFont).withNoPadding(),

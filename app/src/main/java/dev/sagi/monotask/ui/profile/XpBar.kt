@@ -50,7 +50,7 @@ fun XpBar(
                 Text(
                     text       = "Lv.",
                     style      = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Thin,
+                    fontWeight = FontWeight.Light,
                     color      = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
                     modifier   = Modifier.alignByBaseline()
                 )
@@ -64,7 +64,6 @@ fun XpBar(
             Text(
                 text     = "$currentXp / $xpForNextLevel XP",
                 style      = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Thin,
                 color    = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
                 modifier = Modifier.alignByBaseline()
             )

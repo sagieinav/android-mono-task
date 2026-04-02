@@ -127,7 +127,7 @@ private fun ReadyContent(state: BriefUiState.Ready) {
             Text(
                 text      = "all workspaces · ${state.pendingCount} active tasks",
                 style     = MaterialTheme.typography.titleSmall,
-                color     = MaterialTheme.colorScheme.outline,
+                color     = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,
                 modifier  = Modifier.fillMaxWidth()
             )
@@ -252,8 +252,8 @@ private fun ExpandableTaskSection(
                     if (tasks.isEmpty()) {
                         Text(
                             text  = "No tasks here",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.outline
                         )
                     } else {
                         tasks.forEach { task ->

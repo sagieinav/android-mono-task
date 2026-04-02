@@ -32,7 +32,6 @@ import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import kotlinx.coroutines.delay
 
 private const val AUTO_FOCUS_DELAY_MS = 200L
-private val SupportingTextSize = 10.sp
 
 @Composable
 fun MonoTextField(
@@ -89,8 +88,7 @@ fun MonoTextField(
         supportingText = supportingText?.let { {
             Text(
                 text = it,
-                style = MaterialTheme.typography.titleSmall,
-                fontSize = SupportingTextSize,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
             )
         }},

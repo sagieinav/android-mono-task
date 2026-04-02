@@ -31,7 +31,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
-import dev.sagi.monotask.ui.theme.nationalPark
+import dev.sagi.monotask.ui.theme.googleSansRounded
 import kotlinx.coroutines.delay
 
 @Composable
@@ -108,7 +108,9 @@ private fun MonoTooltipShell(
         modifier = modifier.widthIn(max = 280.dp)
     ) {
         ProvideTextStyle(
-            MaterialTheme.typography.labelSmall.copy(fontFamily = nationalPark)
+            MaterialTheme.typography.labelSmall.copy(
+                fontFamily = googleSansRounded
+            )
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
