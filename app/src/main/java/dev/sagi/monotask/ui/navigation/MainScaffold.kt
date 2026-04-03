@@ -126,12 +126,14 @@ fun MainScaffold(
                         )
 
                     Screen.Kanban.route ->
-                        WorkspaceTopBar(
+                        KanbanTopBar(
                             workspaces          = workspaces,
                             selectedWorkspace   = selectedWorkspace,
                             onWorkspaceSelected = { workspaceVM.selectWorkspace(it) },
                             onAddWorkspace      = { showCreateWorkspaceDialog = true },
-                            onAddTaskClick      = { workspaceVM.openCreateSheet() }
+                            onAddTaskClick      = { workspaceVM.openCreateSheet() },
+                            sortOrder           = (kanbanUiState as? KanbanUiState.Ready)?.sortOrder,
+                            onSortOrderChanged  = kanbanVM::setSortOrder
                         )
 
                     Screen.Statistics.route ->

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -41,30 +42,25 @@ import java.util.Date
 import java.util.Locale
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import dev.sagi.monotask.data.model.DailyActivity
-import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
 import dev.sagi.monotask.ui.component.core.SegmentedToggle
-import dev.sagi.monotask.ui.profile.ProfileEvent
-import dev.sagi.monotask.ui.profile.ProfileUiState
-import dev.sagi.monotask.ui.profile.ProfileViewModel
 import dev.sagi.monotask.ui.theme.LocalHazeState
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
+import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
 
 private val statisticsTabs = listOf("Weekly", "Monthly", "All-Time")
 
 @Composable
 fun StatisticsScreen(
-    profileVM: ProfileViewModel
+    statisticsVM: StatisticsViewModel
 ) {
     var selectedSection by rememberSaveable { mutableIntStateOf(0) }
-    val uiState      by profileVM.uiState.collectAsStateWithLifecycle()
-    val isRefreshing by profileVM.isRefreshing.collectAsStateWithLifecycle()
+    val uiState by statisticsVM.uiState.collectAsStateWithLifecycle()
     val scaffoldPadding = LocalScaffoldPadding.current
 
     when (uiState) {
-        is ProfileUiState.Loading -> {
+        is StatisticsUiState.Loading -> {
             Box(
                 Modifier
                     .fillMaxSize()
@@ -73,22 +69,14 @@ fun StatisticsScreen(
             ) { MonoLoadingIndicator() }
         }
 
-        is ProfileUiState.Error -> {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .padding(top = scaffoldPadding.calculateTopPadding()),
-                contentAlignment = Alignment.Center
-            ) { Text((uiState as ProfileUiState.Error).message, color = MaterialTheme.colorScheme.error) }
-        }
-
-        is ProfileUiState.Ready -> {
+        is StatisticsUiState.Ready -> {
+            val readyState = uiState as StatisticsUiState.Ready
             StatisticsReadyContent(
-                state             = uiState as ProfileUiState.Ready,
-                isRefreshing      = isRefreshing,
+                state             = readyState,
+                isRefreshing      = readyState.isRefreshing,
                 selectedSection   = selectedSection,
                 onSectionSelected = { selectedSection = it },
-                onRefresh         = { profileVM.onEvent(ProfileEvent.RefreshPage) },
+                onRefresh         = { statisticsVM.onEvent(StatisticsEvent.Refresh) },
             )
         }
     }
@@ -96,23 +84,23 @@ fun StatisticsScreen(
 
 @Composable
 private fun StatisticsReadyContent(
-    state: ProfileUiState.Ready,
+    state: StatisticsUiState.Ready,
     isRefreshing: Boolean,
     selectedSection: Int,
     onSectionSelected: (Int) -> Unit,
     onRefresh: () -> Unit,
 ) {
-    val scaffoldPadding  = LocalScaffoldPadding.current
-    val topBarHeight     = scaffoldPadding.calculateTopPadding()
-    val bottomPadding    = scaffoldPadding.calculateBottomPadding()
-    val density          = LocalDensity.current
-    val refreshState     = rememberPullToRefreshState()
+    val scaffoldPadding = LocalScaffoldPadding.current
+    val topBarHeight = scaffoldPadding.calculateTopPadding()
+    val bottomPadding = scaffoldPadding.calculateBottomPadding()
+    val density = LocalDensity.current
+    val refreshState = rememberPullToRefreshState()
     val refreshThreshold = 30.dp
 
     var toggleHeightPx by remember { mutableIntStateOf(0) }
     val toggleHeight = with(density) { toggleHeightPx.toDp() }
     // gap above toggle (between topBar bottom and toggle top)
-    val toggleTopGap = 0.dp
+    val toggleTopGap = 4.dp
     // gap below toggle (between toggle bottom and first content item)
     val toggleBottomGap = 12.dp
     val refreshBoxTopPadding = topBarHeight + toggleTopGap + toggleHeight
@@ -226,6 +214,7 @@ private fun StatisticsReadyContent(
                         start = 16.dp,
                         end   = 16.dp,
                     )
+                    .height(TOP_BAR_ITEM_HEIGHT)
                     .onSizeChanged { toggleHeightPx = it.height }
             )
         }
@@ -234,22 +223,14 @@ private fun StatisticsReadyContent(
 
 // ========== Preview ==========
 
-private val previewScreenState = ProfileUiState.Ready(
-    user           = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),
-    level          = 25,
-    levelProgress  = 0.73f,
-    xpIntoLevel    = 2115,
-    xpForNextLevel = 2326,
-    achievements   = emptyList(),
-    activityData   = listOf(
-        DailyActivity(dateEpochDay = 20000L, tasksCompleted = 3, xpEarned = 120),
-        DailyActivity(dateEpochDay = 20001L, tasksCompleted = 5, xpEarned = 200),
-        DailyActivity(dateEpochDay = 20002L, tasksCompleted = 2, xpEarned = 80),
-        DailyActivity(dateEpochDay = 20003L, tasksCompleted = 4, xpEarned = 160),
-        DailyActivity(dateEpochDay = 20004L, tasksCompleted = 6, xpEarned = 240),
-        DailyActivity(dateEpochDay = 20005L, tasksCompleted = 1, xpEarned = 40),
-        DailyActivity(dateEpochDay = 20006L, tasksCompleted = 3, xpEarned = 120),
-    )
+private val previewScreenState = StatisticsUiState.Ready(
+    weeklyXp      = 960,
+    weeklyTasks   = 24,
+    monthlyXp     = 3840,
+    totalXp       = 12450,
+    totalTasks    = 142,
+    aceCount      = 89,
+    longestStreak = 14,
 )
 
 @Preview(showSystemUi = true, name = "StatisticsScreen: Weekly")

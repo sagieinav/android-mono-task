@@ -7,33 +7,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.ui.component.statistics.ActivityHeatmap
 import dev.sagi.monotask.ui.component.statistics.BarChart
 import dev.sagi.monotask.ui.component.statistics.LineChart
-import dev.sagi.monotask.ui.profile.ProfileUiState
 import dev.sagi.monotask.ui.theme.customColors
 
 // =========================
 // Section composables (used by StatisticsScreen)
 // =========================
 
-fun LazyListScope.weeklyItems(
-    state: ProfileUiState.Ready,
-    animationKey: Int
-) {
-    val weekActivity = ActivityStats.weekActivity(state.activityData)
-    val weeklyXP     = weekActivity.sumOf { it.xpEarned }
-    val weeklyTasks  = weekActivity.sumOf { it.tasksCompleted }
-
+fun LazyListScope.weeklyItems(state: StatisticsUiState.Ready, animationKey: Int) {
     item {
         key(animationKey) {
             LineChart(
                 title         = "XP Earned",
-                headlineValue = "$weeklyXP",
+                headlineValue = "${state.weeklyXp}",
                 headlineUnit  = "xp",
-                points        = ActivityStats.buildXpPoints(weekActivity),
-                trendPercent  = ActivityStats.computeXpTrend(weekActivity),
+                points        = state.weekXpPoints,
+                trendPercent  = state.weekXpTrend,
                 lineColor     = MaterialTheme.customColors.xp,
             )
         }
@@ -42,45 +33,37 @@ fun LazyListScope.weeklyItems(
         key(animationKey) {
             BarChart(
                 title         = "Tasks Completed",
-                headlineValue = "$weeklyTasks",
+                headlineValue = "${state.weeklyTasks}",
                 headlineUnit  = "tasks",
-                points        = ActivityStats.buildTaskPoints(weekActivity),
-                trendPercent  = ActivityStats.computeTaskTrend(weekActivity),
+                points        = state.weekTaskPoints,
+                trendPercent  = state.weekTaskTrend,
                 animate       = true
             )
         }
     }
 }
 
-fun LazyListScope.monthlyItems(state: ProfileUiState.Ready, animationKey: Int) {
-    val monthlyXP = state.activityData.sumOf { it.xpEarned }
+fun LazyListScope.monthlyItems(state: StatisticsUiState.Ready, animationKey: Int) {
     item {
         key(animationKey) {
             LineChart(
                 title         = "XP Earned",
-                headlineValue = "$monthlyXP",
+                headlineValue = "${state.monthlyXp}",
                 headlineUnit  = "xp",
-                points        = ActivityStats.buildXpPointsMonthly(state.activityData),
-                trendPercent  = ActivityStats.computeXpTrendMonthly(state.activityData),
+                points        = state.monthXpPoints,
+                trendPercent  = state.monthXpTrend,
                 lineColor     = MaterialTheme.customColors.xp,
             )
         }
     }
     item {
         key(animationKey) {
-            ActivityHeatmap(
-                activityData = state.activityData
-            )
+            ActivityHeatmap(activityData = state.monthActivityData)
         }
     }
 }
 
-fun LazyListScope.allTimeItems(state: ProfileUiState.Ready, animationKey: Int) {
-    val tasks               = state.completedTasks
-    val aceCount            = tasks.count { it.isAce }
-    val totalCompletedTasks = tasks.size
-    val totalXP             = state.user.xp
-
+fun LazyListScope.allTimeItems(state: StatisticsUiState.Ready, animationKey: Int) {
     item {
         key(animationKey) {
             TopPerformanceCard(bestDay = state.topPerformanceDay)
@@ -89,8 +72,8 @@ fun LazyListScope.allTimeItems(state: ProfileUiState.Ready, animationKey: Int) {
     item {
         key(animationKey) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                TotalTasksCard(totalTasks = totalCompletedTasks, modifier = Modifier.weight(1f))
-                TotalXpCard(totalXp = totalXP, modifier = Modifier.weight(1f))
+                TotalTasksCard(totalTasks = state.totalTasks, modifier = Modifier.weight(1f))
+                TotalXpCard(totalXp = state.totalXp, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -98,13 +81,13 @@ fun LazyListScope.allTimeItems(state: ProfileUiState.Ready, animationKey: Int) {
         key(animationKey) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AceCompletionCard(
-                    aceCount   = aceCount,
-                    totalTasks = totalCompletedTasks,
+                    aceCount   = state.aceCount,
+                    totalTasks = state.totalTasks,
                     modifier   = Modifier.weight(1f)
                 )
                 StreakCard(
-                    activityData = state.activityData,
-                    modifier = Modifier.weight(1f)
+                    longestStreak = state.longestStreak,
+                    modifier      = Modifier.weight(1f)
                 )
             }
         }

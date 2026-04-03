@@ -8,6 +8,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import dev.sagi.monotask.ui.component.core.MonoDropdownItem
+import dev.sagi.monotask.ui.component.core.MonoDropdownMenu
+import dev.sagi.monotask.ui.kanban.SortOrder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +31,7 @@ import dev.sagi.monotask.ui.component.core.MonoTabRow
 import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.glassBorder
+import dev.sagi.monotask.ui.theme.googleSansRounded
 import dev.sagi.monotask.ui.theme.monoShadow
 import dev.sagi.monotask.util.Constants
 import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
@@ -33,7 +41,7 @@ import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
 // Generic core. Not used directly outside 'navigation/'
 // ==========================================
 @Composable
-private fun TopBarScaffold(
+internal fun TopBarScaffold(
     leading: @Composable RowScope.() -> Unit,
     trailing: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier
@@ -50,7 +58,8 @@ private fun TopBarScaffold(
             .heightIn(min = 48.dp, max = 96.dp)
             .background(Color.Transparent)
         ,
-        horizontalArrangement = Arrangement.SpaceBetween,
+//        horizontalArrangement = Arrangement.SpaceBetween,
+//        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.Top
     ) {
         leading()
@@ -60,7 +69,7 @@ private fun TopBarScaffold(
 
 
 // ==========================================
-// Workspace TopBar (Focus + Kanban)
+// Workspace TopBar (Focus)
 // ==========================================
 @Composable
 fun WorkspaceTopBar(
@@ -80,6 +89,7 @@ fun WorkspaceTopBar(
                 onWorkspaceSelected = onWorkspaceSelected,
                 onAddWorkspace = onAddWorkspace
             )
+            Spacer(Modifier.weight(1f))
         },
         trailing = {
             TopBarIconButton(
@@ -93,33 +103,79 @@ fun WorkspaceTopBar(
 
 
 // ==========================================
-// Tab TopBar
+// Kanban TopBar (Workspace + Sort)
 // ==========================================
 @Composable
-fun TabbedTopBar(
-    tabs: List<String>,
-    selectedTab: Int,
-    onTabSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    trailingIcon: (@Composable () -> Unit)? = null
+fun KanbanTopBar(
+    workspaces: List<Workspace>,
+    selectedWorkspace: Workspace?,
+    onWorkspaceSelected: (Workspace) -> Unit,
+    onAddWorkspace: () -> Unit,
+    onAddTaskClick: () -> Unit,
+    sortOrder: SortOrder?,
+    onSortOrderChanged: (SortOrder) -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    var showSortDropdown by remember { mutableStateOf(false) }
+    // Cache last known order so the button never disappears during state transitions
+    var lastSortOrder by remember { mutableStateOf(SortOrder.CREATED_DESC) }
+    if (sortOrder != null) lastSortOrder = sortOrder
+
     TopBarScaffold(
         modifier = modifier,
         leading = {
-            MonoTabRow(
-                tabs          = tabs,
-                selectedIndex = selectedTab,
-                onTabSelected = onTabSelected,
-                modifier      = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .height(TOP_BAR_ITEM_HEIGHT)
-                    .padding(end = 12.dp)
+            WorkspaceDropdownGlass(
+                workspaces = workspaces,
+                selectedWorkspace = selectedWorkspace,
+                onWorkspaceSelected = onWorkspaceSelected,
+                onAddWorkspace = onAddWorkspace
             )
+            Spacer(Modifier.weight(1f))
         },
-        trailing = { trailingIcon?.invoke() }
+        trailing = {
+            Box {
+                TopBarIconButton(
+                    iconRes = R.drawable.ic_sort,
+                    contentDescription = "Sort tasks",
+                    onClick = { showSortDropdown = true }
+                )
+                MonoDropdownMenu(
+                    expanded = showSortDropdown,
+                    onDismiss = { showSortDropdown = false }
+                ) {
+                    SortOrder.entries.forEach { order ->
+                        val label = when (order) {
+                            SortOrder.DUE_ASC, SortOrder.DUE_DESC -> "Due date"
+                            SortOrder.CREATED_ASC, SortOrder.CREATED_DESC -> "Created"
+                        }
+                        val arrowIcon = when (order) {
+                            SortOrder.DUE_ASC, SortOrder.CREATED_ASC -> R.drawable.ic_arrow_narrow_up
+                            SortOrder.DUE_DESC, SortOrder.CREATED_DESC -> R.drawable.ic_arrow_narrow_down
+                        }
+                        MonoDropdownItem(
+                            label = label,
+                            trailingIconRes = arrowIcon,
+                            isSelected = lastSortOrder == order,
+                            onClick = {
+                                onSortOrderChanged(order)
+                                showSortDropdown = false
+                            },
+                            textStyle = MaterialTheme.typography.titleSmall,
+                            showSelectedIcon = true
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            TopBarIconButton(
+                iconRes = R.drawable.ic_add,
+                contentDescription = "Create new task",
+                onClick = onAddTaskClick
+            )
+        }
     )
 }
+
 
 
 // ==========================================
@@ -152,7 +208,6 @@ fun TitleTopBar(
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
@@ -179,8 +234,7 @@ fun TopBarIconButton(
     GlassSurface(
         shape = CircleShape,
         modifier = modifier
-            .height(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
-//            .monoShadowWorkaround(CircleShape)
+            .height(TOP_BAR_ITEM_HEIGHT)
             // "remove" shadow when button is pressed:
             .then(
                 if (isPressed) Modifier

@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,7 +44,7 @@ fun FocusCard(
             .fillMaxWidth()
             .padding(horizontal = borderWidth / 2)
             .heightIn(min = 200.dp)
-            .glassBorder(shape, MaterialTheme.customColors.aceDim, 8.dp)
+//            .glassBorder(shape, MaterialTheme.customColors.aceDim, 8.dp)
             .then(
                 if (task.isAce) Modifier.aceTaskBorder(
                     shape         = shape,
@@ -120,8 +121,7 @@ private fun FocusCardBody(task: Task) {
             Text(
                 text      = task.description,
                 style     = MaterialTheme.typography.bodyMedium,
-                fontStyle = FontStyle.Italic,
-                color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 maxLines  = 8,
                 overflow  = TextOverflow.Ellipsis
             )

@@ -31,10 +31,12 @@ fun InfoCallout(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
-    bodyColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+    bodyColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
     iconSize: Dp = 16.dp,
 ) {
     val resolvedIcon = icon ?: painterResource(R.drawable.ic_info_circle)
+    val iconGap = 4.dp
+    val bodyIndent = iconSize + iconGap
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -42,7 +44,7 @@ fun InfoCallout(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(iconGap)
         ) {
             Icon(
                 painter = resolvedIcon,
@@ -60,7 +62,8 @@ fun InfoCallout(
         Text(
             text = body,
             style = MaterialTheme.typography.bodySmall,
-            color = bodyColor
+            color = bodyColor,
+            modifier = Modifier.padding(start = bodyIndent)
         )
     }
 }

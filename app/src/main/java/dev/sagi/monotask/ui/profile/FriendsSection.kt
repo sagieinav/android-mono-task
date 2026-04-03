@@ -99,7 +99,6 @@ fun FriendsSection(
                 Text(
                     text  = "Invite",
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Thin,
                     color = color
                 )
             }

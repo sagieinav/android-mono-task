@@ -102,8 +102,8 @@ fun MonoConfirmDialog(
         content = {
             Text(
                 text = message,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Thin,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
         },

@@ -1,5 +1,9 @@
 package dev.sagi.monotask.ui.component.core
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -8,7 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
@@ -25,10 +31,17 @@ fun MonoChipSelector(
     selected: Boolean = false,
     selectedColor: Color = MaterialTheme.colorScheme.onSurface,
     shape: Shape = MaterialTheme.shapes.small,
-    iconRes: Int? = null // for using it as "AssistChip"
+    iconRes: Int? = null
 ) {
     val color = if (selected) selectedColor
-                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+
+    val iconSize by animateDpAsState(
+        targetValue = if (selected) 16.dp else 0.dp,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "chipIconSize"
+    )
+
 
     MonoLabel(
         label = label,
@@ -42,12 +55,13 @@ fun MonoChipSelector(
         accentColor = if (selected) selectedColor else null,
         baseColor = Color.Transparent,
         onClick = onClick,
-        leadingContent = {
-            if (iconRes != null) {
+        leadingContent =
+            iconRes?.let {
+            {
                 Icon(
-                    painter = painterResource(iconRes),
+                    painter = painterResource(it),
                     contentDescription = null,
-                    modifier  = Modifier.height(16.dp),
+                    modifier = Modifier.height(iconSize),
                     tint = color
                 )
             }

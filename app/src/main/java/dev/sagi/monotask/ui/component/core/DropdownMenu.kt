@@ -113,7 +113,7 @@ fun MonoDropdownMenu(
                 popupContentSize: IntSize
             ): IntOffset = IntOffset(
                 x = anchorBounds.left.coerceIn(0, windowSize.width - popupContentSize.width),
-                y = (anchorBounds.bottom + 4).coerceIn(0, windowSize.height - popupContentSize.height)
+                y = (anchorBounds.bottom + 12).coerceIn(0, windowSize.height - popupContentSize.height)
             )
         }
     },
@@ -125,11 +125,10 @@ fun MonoDropdownMenu(
     LaunchedEffect(expanded) {
         if (expanded) {
             mounted = true
-            delay(16)
+            delay(10)
             visible = true
         } else {
             visible = false
-            delay(160)
             mounted = false
         }
     }

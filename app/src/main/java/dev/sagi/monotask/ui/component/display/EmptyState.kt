@@ -77,7 +77,7 @@ private fun SubtleEmptyStateContent(
                 delayBefore = SUBTLE_DELAY_BEFORE_MS + (titleWithEmoji.length * SUBTLE_CHAR_DELAY_MS),
                 charDelay = SUBTLE_SUBTITLE_CHAR_DELAY_MS,
                 style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Thin,
+                fontWeight = FontWeight.Light,
                 textAlign = TextAlign.Start,
                 color = MaterialTheme.colorScheme.outline,
             )

@@ -203,7 +203,6 @@ private fun SideStat(
             style = MaterialTheme.typography.labelMedium,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            fontWeight = FontWeight.Thin,
             color = titleColor
         )
         Row(
@@ -220,7 +219,6 @@ private fun SideStat(
                 Text(
                     text       = it,
                     style      = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Thin,
                     color      = MaterialTheme.colorScheme.outlineVariant,
                     modifier   = Modifier.alignByBaseline()
                 )

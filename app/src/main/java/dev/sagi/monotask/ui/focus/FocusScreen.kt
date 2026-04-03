@@ -24,6 +24,7 @@ import dev.sagi.monotask.ui.component.task.EditTaskSheet
 import java.util.Date
 import dev.sagi.monotask.ui.component.display.EmptyState
 import dev.sagi.monotask.ui.component.display.IllustrationSize
+import dev.sagi.monotask.ui.component.task.SnoozeBottomSheet
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
 import dev.sagi.monotask.util.Constants
@@ -212,7 +213,7 @@ fun FocusScreenContent(
     if (snoozeSheetVisible) {
         SnoozeBottomSheet(
             onDismissRequest = { onFocusEvent(FocusEvent.DismissSnooze) },
-            onSnooze         = { option -> animState.onSnoozeConfirmed(option, scope, screenWidthPx) }
+            onSnooze = { option -> animState.onSnoozeConfirmed(option, scope, screenWidthPx) }
         )
     }
 }

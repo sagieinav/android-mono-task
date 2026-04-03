@@ -37,6 +37,7 @@ import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.common.UserSessionViewModel
 import dev.sagi.monotask.ui.common.WorkspaceViewModel
 import dev.sagi.monotask.ui.statistics.StatisticsScreen
+import dev.sagi.monotask.ui.statistics.StatisticsViewModel
 
 val TAB_ORDER = listOf(
     Screen.Kanban.route,
@@ -196,12 +197,9 @@ fun NavGraph(
                     )
                 }
                 composable(Screen.Statistics.route) {
-                    val profileVM: ProfileViewModel = hiltViewModel()
-                    LaunchedEffect(Unit) {
-                        profileVM.startObserving(userSessionVM.currentUser)
-                    }
+                    val statisticsVM: StatisticsViewModel = hiltViewModel()
                     StatisticsScreen(
-                        profileVM = profileVM
+                        statisticsVM = statisticsVM
                     )
                 }
                 composable(Screen.Brief.route) {

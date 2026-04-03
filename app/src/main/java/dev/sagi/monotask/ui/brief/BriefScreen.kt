@@ -223,7 +223,7 @@ private fun ExpandableTaskSection(
                     Text(
                         text       = label,
                         style      = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Medium,
                         color      = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -307,6 +307,7 @@ private fun TaskBriefRow(task: Task, workspaceNames: Map<String, String>) {
             Text(
                 text     = task.title,
                 style    = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Normal,
                 color    = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

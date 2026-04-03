@@ -31,16 +31,6 @@ val gloock = FontFamily(
 )
 
 // =====================================================
-// Lora: content font
-// =====================================================
-val lora = FontFamily(
-    Font(R.font.lora,        FontWeight.Normal),
-    Font(R.font.lora,        FontWeight.Medium),
-    Font(R.font.lora,        FontWeight.SemiBold),
-    Font(R.font.lora_italic, FontWeight.Normal, FontStyle.Italic),
-)
-
-// =====================================================
 // Google Sans Rounded: main UI font
 // =====================================================
 val googleSansRounded = googleSansFamily(
@@ -70,8 +60,6 @@ val harabara = FontFamily(
 private val heroFont = gloock
 private val uiFont = googleSansRounded
 private val dataFont = googleSans
-private val contentFont = lora
-
 
 // =====================================================
 // HELPERS
@@ -120,15 +108,15 @@ val AppTypography = Typography(
     titleMedium = baseline.titleMedium.copy(fontFamily = uiFont).withNoPadding(),
     titleSmall  = baseline.titleSmall.copy(fontFamily = uiFont).withNoPadding(),
 
+    // ========== BODY / CONTENT ==========
+    bodyLarge  = baseline.bodyLarge.copy(fontFamily = uiFont).withNoPadding(),
+    bodyMedium = baseline.bodyMedium.copy(fontFamily = uiFont).withNoPadding(),
+    bodySmall  = baseline.bodySmall.copy(fontFamily = uiFont).withNoPadding(),
+
     // ========== SMALL LABELS ==========
     labelLarge  = baseline.labelLarge.copy(fontFamily = dataFont).withNoPadding(),
     labelMedium = baseline.labelMedium.copy(
         fontFamily = dataFont, fontWeight = FontWeight.Light).withNoPadding(),
     labelSmall  = baseline.labelSmall.copy(
-        fontFamily = dataFont, fontWeight = FontWeight.Light, fontSize = 10.sp).withNoPadding(),
-
-    // ========== BODY / CONTENT ==========
-    bodyLarge  = baseline.bodyLarge.copy(fontFamily = contentFont).withNoPadding(),
-    bodyMedium = baseline.bodyMedium.copy(fontFamily = contentFont).withNoPadding(),
-    bodySmall  = baseline.bodySmall.copy(fontFamily = uiFont).withNoPadding()
+        fontFamily = dataFont, fontWeight = FontWeight.Light, fontSize = 10.sp).withNoPadding()
 )
