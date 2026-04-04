@@ -79,12 +79,6 @@ private fun ReadyContent(state: BriefUiState.Ready) {
     val scaffoldPadding = LocalScaffoldPadding.current
     val density = LocalDensity.current
 
-    val briefStatus = when {
-        state.overdueTasks.isNotEmpty()     -> BriefStatus.OVERDUE
-        state.dueTodayTasks.isNotEmpty()    -> BriefStatus.ON_TRACK
-        else                                -> BriefStatus.ALL_CLEAR
-    }
-
     var briefStatusAnimated by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { briefStatusAnimated = true }
 
@@ -109,53 +103,49 @@ private fun ReadyContent(state: BriefUiState.Ready) {
     }
 
     LazyColumn(
-        state               = listState,
-        modifier            = Modifier
+        state = listState,
+        modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = SCREEN_PADDING),
-        contentPadding      = PaddingValues(
-            top    = scaffoldPadding.calculateTopPadding(),
+        contentPadding = PaddingValues(
+            top = scaffoldPadding.calculateTopPadding(),
             bottom = scaffoldPadding.calculateBottomPadding()
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {  // index 0
             UserHeader(
-                user          = state.user,
+                user = state.user,
                 currentStreak = state.user?.stats?.currentStreak ?: 0
             )
             Text(
-                text      = "all workspaces · ${state.pendingCount} active tasks",
-                style     = MaterialTheme.typography.titleSmall,
-                color     = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
+                text = "all workspaces · ${state.pendingCount} active tasks",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,
-                modifier  = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(4.dp))
         }
 
         item {  // index 1
             ExpandableTaskSection(
-                label          = "Overdue",
-                iconRes        = R.drawable.ic_due_soon,
-                tasks          = state.overdueTasks,
+                label = "Overdue",
+                tasks = state.overdueTasks,
                 workspaceNames = state.workspaceNames,
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor   = MaterialTheme.colorScheme.error,
-                expanded       = overdueExpanded,
+                color = MaterialTheme.colorScheme.error,
+                expanded = overdueExpanded,
                 onExpandChange = { overdueExpanded = it }
             )
         }
 
         item {  // index 2
             ExpandableTaskSection(
-                label          = "Due Today",
-                iconRes        = R.drawable.ic_due_calendar,
-                tasks          = state.dueTodayTasks,
+                label = "Due Today",
+                tasks = state.dueTodayTasks,
                 workspaceNames = state.workspaceNames,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor   = MaterialTheme.colorScheme.primary,
-                expanded       = dueTodayExpanded,
+                color = MaterialTheme.colorScheme.primary,
+                expanded = dueTodayExpanded,
                 onExpandChange = { dueTodayExpanded = it }
             )
         }
@@ -163,13 +153,13 @@ private fun ReadyContent(state: BriefUiState.Ready) {
         item {  // index 3: illustration, fills remaining height
             if (!anyExpanded && illustrationHeightDp > 0.dp) {
                 Box(
-                    modifier         = Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(illustrationHeightDp),
                     contentAlignment = Alignment.Center
                 ) {
                     BriefStatus(
-                        status  = briefStatus,
+                        status = state.briefStatus,
                         animate = !briefStatusAnimated
                     )
                 }
@@ -181,21 +171,19 @@ private fun ReadyContent(state: BriefUiState.Ready) {
 @Composable
 private fun ExpandableTaskSection(
     label: String,
-    iconRes: Int,
     tasks: List<Task>,
     workspaceNames: Map<String, String>,
-    containerColor: Color,
-    contentColor: Color,
+    color: Color,
     expanded: Boolean,
     onExpandChange: (Boolean) -> Unit
 ) {
     val chevronRotation by animateFloatAsState(
         targetValue = if (expanded) 90f else 0f,
-        label       = "chevron_$label"
+        label = "chevron_$label"
     )
 
     GlassSurface(
-        shape    = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.medium,
         blurred  = false,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -215,30 +203,25 @@ private fun ExpandableTaskSection(
                     verticalAlignment     = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                    Icon(
-//                        painter            = painterResource(iconRes),
-//                        contentDescription = null,
-//                        modifier           = Modifier.size(18.dp),
-//                    )
                     Text(
-                        text       = label,
-                        style      = MaterialTheme.typography.titleMedium,
+                        text = label,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
-                        color      = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 Row(
-                    verticalAlignment     = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     CountBadge(
                         count = tasks.size,
-                        color = contentColor
+                        color = color
                     )
                     Icon(
-                        painter            = painterResource(R.drawable.ic_chevron),
+                        painter = painterResource(R.drawable.ic_chevron),
                         contentDescription = null,
-                        modifier           = Modifier
+                        modifier = Modifier
                             .size(18.dp)
                             .rotate(chevronRotation),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -251,7 +234,7 @@ private fun ExpandableTaskSection(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     if (tasks.isEmpty()) {
                         Text(
-                            text  = "No tasks here",
+                            text = "No tasks here",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -268,21 +251,23 @@ private fun ExpandableTaskSection(
 
 @Composable
 private fun TaskBriefRow(task: Task, workspaceNames: Map<String, String>) {
-    val customColors  = LocalCustomColors.current
-    val subtleColor   = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    val customColors = LocalCustomColors.current
+    val subtleColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
 
     val importanceColor = when (task.importance) {
-        Importance.HIGH   -> customColors.importanceHighContent
+        Importance.HIGH -> customColors.importanceHighContent
         Importance.MEDIUM -> customColors.importanceMediumContent
-        Importance.LOW    -> customColors.importanceLowContent
+        Importance.LOW -> customColors.importanceLowContent
     }
 
     val workspaceName = workspaceNames[task.workspaceId] ?: task.workspaceId
-    val dueDateStr    = task.dueDate?.toRelativeDate()?.text
+    val dueDateStr = task.dueDate?.toRelativeDate()?.text
 
     val subtitleParts = buildList {
         add(workspaceName)
-        if (dueDateStr != null) add(dueDateStr)
+        dueDateStr?.let {
+            add(dueDateStr)
+        }
     }
 
     Row(
@@ -301,21 +286,21 @@ private fun TaskBriefRow(task: Task, workspaceNames: Map<String, String>) {
         )
         Spacer(Modifier.width(10.dp))
         Column(
-            modifier            = Modifier.weight(1f),
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text     = task.title,
-                style    = MaterialTheme.typography.titleSmall,
+                text = task.title,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Normal,
-                color    = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text     = subtitleParts.joinToString(separator = "  ·  "),
-                style    = MaterialTheme.typography.labelSmall,
-                color    = subtleColor,
+                text = subtitleParts.joinToString(separator = "  ·  "),
+                style = MaterialTheme.typography.labelSmall,
+                color = subtleColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -326,16 +311,17 @@ private fun TaskBriefRow(task: Task, workspaceNames: Map<String, String>) {
 // ========== Preview ==========
 
 private val previewReadyState = BriefUiState.Ready(
-    overdueTasks  = listOf(
+    overdueTasks = listOf(
         Task(id = "1", title = "Submit assignment", importance = Importance.HIGH, workspaceId = "study"),
         Task(id = "2", title = "Pay electricity bill", importance = Importance.MEDIUM, workspaceId = "personal"),
     ),
     dueTodayTasks = listOf(
         Task(id = "3", title = "Team standup notes", importance = Importance.LOW, workspaceId = "work"),
     ),
-    pendingCount   = 12,
+    pendingCount = 12,
+    briefStatus = BriefStatus.OVERDUE,
     workspaceNames = mapOf("study" to "Study", "personal" to "Personal", "work" to "Work"),
-    user           = User(id = "u1", displayName = "Sagi")
+    user = User(id = "u1", displayName = "Sagi")
 )
 
 @Preview(showSystemUi = true, name = "BriefScreen: Ready")

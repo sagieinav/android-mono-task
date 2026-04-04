@@ -2,6 +2,7 @@ package dev.sagi.monotask.ui.statistics
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.sagi.monotask.domain.repository.ActivityRepository
 import dev.sagi.monotask.domain.repository.UserRepository
 import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.ui.common.BaseViewModel
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
-    private val userRepository: UserRepository,
+    private val userRepository    : UserRepository,
+    private val activityRepository: ActivityRepository,
 ) : BaseViewModel<StatisticsUiState, StatisticsEvent, StatisticsUiEffect>() {
 
     override val initialState: StatisticsUiState = StatisticsUiState.Loading
@@ -45,15 +47,21 @@ class StatisticsViewModel @Inject constructor(
             try {
                 coroutineScope {
                     val userDeferred = async { userRepository.getUserOnce(userId) }
-                    val activityDeferred = async { userRepository.getActivityOnce(userId, widestRange) }
-                    val topDayDeferred = async { userRepository.getTopPerformanceDay(userId) }
+                    val activityDeferred = async { activityRepository.getActivityOnce(userId, widestRange) }
+                    val topDayDeferred = async { activityRepository.getTopPerformanceDay(userId) }
 
                     val user = userDeferred.await()
                     val allActivity = activityDeferred.await()
                     val topDay = topDayDeferred.await()
 
-                    val monthActivity = allActivity.filter { it.dateEpochDay in UserRepository.thisMonthRange }
+                    val monthActivity = allActivity.filter { it.dateEpochDay in ActivityRepository.thisMonthRange }
                     val weekActivity = ActivityStats.weekActivity(allActivity)
+
+                    val totalTasks = user?.stats?.totalTasksCompleted ?: 0
+                    val aceCount = user?.stats?.aceCount ?: 0
+
+                    val monthStart = LocalDate.now().withDayOfMonth(1)
+                    val monthEnd = LocalDate.now()
 
                     _uiState.value = StatisticsUiState.Ready(
                         weeklyXp = weekActivity.sumOf { it.xpEarned },
@@ -67,10 +75,16 @@ class StatisticsViewModel @Inject constructor(
                         monthXpTrend = ActivityStats.computeXpTrendMonthly(monthActivity),
                         monthActivityData = monthActivity,
                         totalXp = user?.xp ?: 0,
-                        totalTasks = user?.stats?.totalTasksCompleted ?: 0,
-                        aceCount = user?.stats?.aceCount ?: 0,
+                        totalTasks = totalTasks,
+                        aceCount = aceCount,
+                        aceCompletionPct = if (totalTasks > 0) (aceCount * 100) / totalTasks else 0,
                         longestStreak = user?.stats?.longestStreak ?: 0,
                         topPerformanceDay = topDay,
+                        monthActiveDays = monthActivity.filter { it.tasksCompleted > 0 }.map { it.dateEpochDay }.toSet(),
+                        monthTotalTasks = monthActivity.sumOf { it.tasksCompleted },
+                        monthBestStreak = ActivityStats.computeRecordStreak(
+                            monthActivity, monthStart.toEpochDay()..monthEnd.toEpochDay()
+                        ),
                         isRefreshing = false,
                     )
                 }

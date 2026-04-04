@@ -51,18 +51,18 @@ import java.time.format.DateTimeFormatter
 
 // ========== Shared design constants ==========
 
-private val CircleRadius     = 22.dp
-private val CutoutPadding    = 6.dp
-private val CornerRadius     = 28.dp
+private val CircleRadius = 22.dp
+private val CutoutPadding = 6.dp
+private val CornerRadius = 28.dp
 private val ContentTopPadding = 14.dp
 private val ContentBottomPadding = 10.dp
 private val ContentHorizPadding = 16.dp
 
 
-private val SmallCardHeight  = 140.dp
+private val SmallCardHeight = 140.dp
 private val MediumCardHeight = 160.dp
 
-private val DateFormatter    = DateTimeFormatter.ofPattern("EEE, MMM d")
+private val DateFormatter = DateTimeFormatter.ofPattern("EEE, MMM d")
 
 // ========== InclusiveCutoutShape ==========
 // Rounded rect with a circular cutout in the top-right corner
@@ -77,26 +77,26 @@ class InclusiveCutoutShape(
 ) : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline =
         Outline.Generic(path = Path().apply {
-            val w  = size.width
-            val h  = size.height
-            val tl = with(density) { topLeft.toPx() }
-            val bl = with(density) { bottomLeft.toPx() }
-            val br = with(density) { bottomRight.toPx() }
-            val cR = with(density) { circleRadius.toPx() }
-            val p  = with(density) { padding.toPx() }
-            val s  = with(density) { smoothing.toPx() }
-            val cutoutSize = (cR * 2) + p
+            val width = size.width
+            val height = size.height
+            val topLeft = with(density) { this@InclusiveCutoutShape.topLeft.toPx() }
+            val bottomLeft = with(density) { this@InclusiveCutoutShape.bottomLeft.toPx() }
+            val bottomRight = with(density) { this@InclusiveCutoutShape.bottomRight.toPx() }
+            val cornerRad = with(density) { circleRadius.toPx() }
+            val padding = with(density) { this@InclusiveCutoutShape.padding.toPx() }
+            val smoothing = with(density) { this@InclusiveCutoutShape.smoothing.toPx() }
+            val cutoutSize = (cornerRad * 2) + padding
 
-            moveTo(0f, tl)
-            if (tl > 0) quadraticTo(0f, 0f, tl, 0f) else lineTo(0f, 0f)
-            lineTo(w - cutoutSize - s, 0f)
-            quadraticTo(w - cutoutSize, 0f,         w - cutoutSize, s)
-            quadraticTo(w - cutoutSize, cutoutSize, w - s,          cutoutSize)
-            quadraticTo(w,             cutoutSize, w,               cutoutSize + s)
-            lineTo(w, h - br)
-            if (br > 0) quadraticTo(w, h, w - br, h) else lineTo(w, h)
-            lineTo(bl, h)
-            if (bl > 0) quadraticTo(0f, h, 0f, h - bl) else lineTo(0f, h)
+            moveTo(0f, topLeft)
+            if (topLeft > 0) quadraticTo(0f, 0f, topLeft, 0f) else lineTo(0f, 0f)
+            lineTo(width - cutoutSize - smoothing, 0f)
+            quadraticTo(width - cutoutSize, 0f, width - cutoutSize, smoothing)
+            quadraticTo(width - cutoutSize, cutoutSize, width - smoothing, cutoutSize)
+            quadraticTo(width, cutoutSize, width, cutoutSize + smoothing)
+            lineTo(width, height - bottomRight)
+            if (bottomRight > 0) quadraticTo(width, height, width - bottomRight, height) else lineTo(width, height)
+            lineTo(bottomLeft, height)
+            if (bottomLeft > 0) quadraticTo(0f, height, 0f, height - bottomLeft) else lineTo(0f, height)
             close()
         })
 }
@@ -118,10 +118,10 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter            = icon,
+            painter = icon,
             contentDescription = null,
-            tint               = accentColor.copy(alpha = 0.8f),
-            modifier           = Modifier.size(26.dp)
+            tint = accentColor.copy(alpha = 0.8f),
+            modifier = Modifier.size(26.dp)
         )
     }
 }
@@ -133,10 +133,10 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
 fun StatWidgetSmall(
     title: String,
     value: String,
+    modifier: Modifier = Modifier,
     unit: String = "",
     icon: Painter,
     accentColor: Color,
-    modifier: Modifier = Modifier,
     subtitle: String? = null,
 ) {
     val titleEndPadding = CircleRadius * 2 - 6.dp
@@ -169,16 +169,16 @@ fun StatWidgetSmall(
                 modifier = Modifier.padding(end = titleEndPadding)
             ) {
                 Text(
-                    text     = title,
-                    style    = MaterialTheme.typography.titleMedium,
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
                     lineHeight = 20.sp, // reduce vertical "padding" when wrapped
-                    color    = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 subtitle?. let {
                     Text(
-                        text  = it,
+                        text = it,
                         style = MaterialTheme.typography.labelSmall,
                         color = accentColor.copy(alpha = 0.8f)
                     )
@@ -237,9 +237,9 @@ fun StatWidgetMedium(
 
             // ========== Top section ==========
             Row(
-                modifier              = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment     = Alignment.Top
+                verticalAlignment = Alignment.Top
             ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -247,10 +247,10 @@ fun StatWidgetMedium(
                 ) {
                     // Main title
                     Text(
-                        text     = title,
-                        style    = MaterialTheme.typography.titleLarge,
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
                         fontFamily = gloock,
-                        color    = accentColor.copy(alpha = 0.9f),
+                        color = accentColor.copy(alpha = 0.9f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -267,7 +267,7 @@ fun StatWidgetMedium(
 
                         // Subtitle
                         Text(
-                            text  = subtitle,
+                            text = subtitle,
                             style = MaterialTheme.typography.labelSmall,
 //                            fontWeight = FontWeight.Light,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
@@ -279,9 +279,9 @@ fun StatWidgetMedium(
 
             // ========== Bottom section ==========
             Row(
-                modifier              = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment     = Alignment.Bottom
+                verticalAlignment = Alignment.Bottom
             ) {
                 ValueLabel(value = value, unit = unit)
                 // Trailing value and unit (if not null)
@@ -327,38 +327,37 @@ fun StatWidgetMedium(
 @Composable
 fun TotalTasksCard(totalTasks: Int, modifier: Modifier = Modifier) {
     StatWidgetSmall(
-        title       = "Tasks Completed",
-        value       = totalTasks.toString(),
-        unit        = "total",
-        icon        = painterResource(R.drawable.ic_task_alt),
+        title = "Tasks Completed",
+        value = totalTasks.toString(),
+        unit = "total",
+        icon = painterResource(R.drawable.ic_task_alt),
         accentColor = MaterialTheme.colorScheme.primary,
-        modifier    = modifier
+        modifier = modifier
     )
 }
 
 @Composable
-fun AceCompletionCard(aceCount: Int, totalTasks: Int, modifier: Modifier = Modifier) {
-    val pct = if (totalTasks > 0) (aceCount * 100) / totalTasks else 0
+fun AceCompletionCard(aceCount: Int, aceCompletionPct: Int, modifier: Modifier = Modifier) {
     StatWidgetSmall(
-        title       = "Ace Completion",
-        value       = "$pct%",
-        unit        = "ratio",
-        icon        = painterResource(R.drawable.ic_ace),
+        title = "Ace Completion",
+        value = "$aceCompletionPct%",
+        unit = "ratio",
+        icon = painterResource(R.drawable.ic_ace),
         accentColor = MaterialTheme.customColors.aceDim,
-        subtitle    = "$aceCount ace tasks",
-        modifier    = modifier
+        subtitle = "$aceCount ace tasks",
+        modifier = modifier
     )
 }
 
 @Composable
 fun TotalXpCard(totalXp: Int, modifier: Modifier = Modifier) {
     StatWidgetSmall(
-        title       = "Total XP",
-        value       = totalXp.toString(),
-        unit        = "xp",
-        icon        = painterResource(R.drawable.ic_xp),
+        title = "Total XP",
+        value = totalXp.toString(),
+        unit = "xp",
+        icon = painterResource(R.drawable.ic_xp),
         accentColor = MaterialTheme.customColors.xp,
-        modifier    = modifier
+        modifier = modifier
     )
 }
 
@@ -368,12 +367,12 @@ fun StreakCard(
     modifier: Modifier = Modifier
 ) {
     StatWidgetSmall(
-        title       = "Streak Record",
-        value       = longestStreak.toString(),
-        unit        = if (longestStreak == 1) "day" else "days",
-        icon        = painterResource(R.drawable.ic_fire),
+        title = "Streak Record",
+        value = longestStreak.toString(),
+        unit = if (longestStreak == 1) "day" else "days",
+        icon = painterResource(R.drawable.ic_fire),
         accentColor = MaterialTheme.customColors.streak,
-        modifier    = modifier
+        modifier = modifier
     )
 }
 
@@ -383,23 +382,23 @@ fun TopPerformanceCard(
     modifier: Modifier = Modifier,
 ) {
 //    val best  = topPerformanceDay.maxByOrNull { it.xpEarned }
-    val xp    = bestDay?.xpEarned ?: 0
+    val xp = bestDay?.xpEarned ?: 0
     val tasks = bestDay?.tasksCompleted ?: 0
-    val date  = remember(bestDay) {
+    val date = remember(bestDay) {
         bestDay?.let { LocalDate.ofEpochDay(it.dateEpochDay).format(DateFormatter) }
     }
 
     StatWidgetMedium(
-        title         = "Top Performance",
-        subtitle      = "your most productive day ever",
-        value         = xp.toString(),
-        unit          = "xp",
-        icon          = painterResource(R.drawable.ic_top_performance),
-        accentColor   = MaterialTheme.customColors.aceDim,
-        dateLabel     = date,
+        title = "Top Performance",
+        subtitle = "your most productive day ever",
+        value = xp.toString(),
+        unit = "xp",
+        icon = painterResource(R.drawable.ic_top_performance),
+        accentColor = MaterialTheme.customColors.aceDim,
+        dateLabel = date,
         trailingValue = tasks.toString(),
-        trailingUnit  = if (tasks == 1) "task" else "tasks",
-        modifier      = modifier
+        trailingUnit = if (tasks == 1) "task" else "tasks",
+        modifier = modifier
     )
 }
 
@@ -421,14 +420,18 @@ private fun StatWidgetsPreview() {
                         bestDay = DailyActivity(LocalDate.now().toEpochDay(),               2, 150)
                     )
                     Row(
-                        modifier              = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         TotalTasksCard(totalTasks = 142, modifier = Modifier.weight(1f))
-                        AceCompletionCard(aceCount = 89, totalTasks = 142, modifier = Modifier.weight(1f))
+                        AceCompletionCard(
+                            aceCount = 89,
+                            aceCompletionPct = 77,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                     Row(
-                        modifier              = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         TotalXpCard(totalXp = 14250, modifier = Modifier.weight(1f))

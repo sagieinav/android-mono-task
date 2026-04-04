@@ -1,4 +1,4 @@
-package dev.sagi.monotask.ui.focus
+package dev.sagi.monotask.ui.component.task
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

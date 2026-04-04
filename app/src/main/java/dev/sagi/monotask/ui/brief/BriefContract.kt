@@ -9,6 +9,7 @@ sealed interface BriefUiState {
         val overdueTasks: List<Task>,
         val dueTodayTasks: List<Task>,
         val pendingCount: Int,
+        val briefStatus: BriefStatus,
         val workspaceNames: Map<String, String> = emptyMap(),
         val user: User? = null
     ) : BriefUiState

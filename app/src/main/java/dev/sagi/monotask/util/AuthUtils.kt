@@ -16,9 +16,9 @@ object AuthUtils {
             val listener = object : FirebaseAuth.AuthStateListener {
                 override fun onAuthStateChanged(firebaseAuth: FirebaseAuth) {
                     val uid = firebaseAuth.currentUser?.uid
-                    if (uid != null) {
+                    uid?.let {
                         auth.removeAuthStateListener(this)
-                        if (cont.isActive) cont.resume(uid)
+                        if (cont.isActive) cont.resume(it)
                     }
                 }
             }

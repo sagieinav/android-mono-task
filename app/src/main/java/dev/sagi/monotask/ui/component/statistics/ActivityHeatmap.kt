@@ -31,8 +31,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.data.model.DailyActivity
-import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
@@ -61,21 +59,18 @@ private enum class CellState {
 
 @Composable
 fun ActivityHeatmap(
-    activityData: List<DailyActivity>,
+    activeDays : Set<Long>,
+    totalTasksThisMonth : Int,
+    bestStreak : Int,
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.large
 ) {
     val today = remember { LocalDate.now() }
     val monthStart = today.withDayOfMonth(1)
-    val monthEnd = today
     val monthName = remember { today.month.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
 
-    val activeDays = remember(activityData) {
-        activityData.filter { it.tasksCompleted > 0 }.map { it.dateEpochDay }.toSet()
-    }
-
     val firstDayOffset = remember { monthStart.dayOfWeek.value % 7 }
-    val daysInMonth    = remember { today.month.length(today.isLeapYear) }
+    val daysInMonth = remember { today.month.length(today.isLeapYear) }
 
     val cells: List<LocalDate?> = remember(today) {
         val list = MutableList<LocalDate?>(firstDayOffset) { null }
@@ -85,14 +80,6 @@ fun ActivityHeatmap(
     }
 
     val weeks = remember(cells) { cells.chunked(7) }
-
-    // Side panel stats
-    val totalTasksThisMonth = remember(activityData) { activityData.sumOf { it.tasksCompleted } }
-    val bestStreak = remember(activityData) {
-        ActivityStats.computeRecordStreak(
-            activityData, monthStart.toEpochDay()..monthEnd.toEpochDay()
-        )
-    }
 
     val labelColor = MaterialTheme.colorScheme.outlineVariant
     val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
@@ -206,21 +193,21 @@ private fun SideStat(
             color = titleColor
         )
         Row(
-            verticalAlignment     = Alignment.Bottom,
+            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text       = value,
-                style      = MaterialTheme.typography.headlineMedium,
-                color      = MaterialTheme.colorScheme.onSurface,
-                modifier   = Modifier.alignByBaseline()
+                text = value,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.alignByBaseline()
             )
             unit?.let {
                 Text(
-                    text       = it,
-                    style      = MaterialTheme.typography.labelMedium,
-                    color      = MaterialTheme.colorScheme.outlineVariant,
-                    modifier   = Modifier.alignByBaseline()
+                    text = it,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    modifier = Modifier.alignByBaseline()
                 )
             }
         }
@@ -237,13 +224,13 @@ private fun HeatmapCell(
     inactiveColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    val shape       = RoundedCornerShape(CellCornerRadius)
+    val shape = RoundedCornerShape(CellCornerRadius)
     val stripeColor = lerp(inactiveColor, Color.Black, 0.08f)
     val borderWidth = 1.dp
 
     val todayBorderColor = when (state) {
         CellState.ACTIVE -> lerp(activeColor, Color.Black, 0.2f)
-        else             -> lerp(inactiveColor, Color.Black, 0.6f)
+        else -> lerp(inactiveColor, Color.Black, 0.6f)
     }
 
     val baseModifier = modifier.aspectRatio(1f).clip(shape)
@@ -296,20 +283,20 @@ private fun ActivityHeatmapPreview() {
     MonoTaskTheme {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             val today = LocalDate.now()
-            val fakeData = listOf(
-                DailyActivity(today.withDayOfMonth(1).toEpochDay(),  3, 120),
-                DailyActivity(today.withDayOfMonth(2).toEpochDay(),  1, 40),
-                DailyActivity(today.withDayOfMonth(5).toEpochDay(),  5, 210),
-                DailyActivity(today.withDayOfMonth(6).toEpochDay(),  2, 80),
-                DailyActivity(today.withDayOfMonth(7).toEpochDay(),  4, 160),
-                DailyActivity(today.withDayOfMonth(10).toEpochDay(), 1, 30),
-                DailyActivity(today.withDayOfMonth(12).toEpochDay(), 6, 280),
-                DailyActivity(today.toEpochDay(),                    2, 90),
-            ).filter { it.dateEpochDay <= today.toEpochDay() }
-
             ActivityHeatmap(
-                activityData = fakeData,
-                modifier     = Modifier.padding(16.dp)
+                activeDays          = setOf(
+                    today.withDayOfMonth(1).toEpochDay(),
+                    today.withDayOfMonth(2).toEpochDay(),
+                    today.withDayOfMonth(5).toEpochDay(),
+                    today.withDayOfMonth(6).toEpochDay(),
+                    today.withDayOfMonth(7).toEpochDay(),
+                    today.withDayOfMonth(10).toEpochDay(),
+                    today.withDayOfMonth(12).toEpochDay(),
+                    today.toEpochDay(),
+                ),
+                totalTasksThisMonth = 24,
+                bestStreak = 3,
+                modifier = Modifier.padding(16.dp)
             )
         }
     }

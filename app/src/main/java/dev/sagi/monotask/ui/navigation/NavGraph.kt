@@ -21,7 +21,7 @@ import androidx.navigation.compose.*
 import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.auth.AuthScreen
 import dev.sagi.monotask.ui.auth.AuthUiState
-import dev.sagi.monotask.ui.auth.OnboardingScreen
+import dev.sagi.monotask.ui.onboarding.OnboardingScreen
 import dev.sagi.monotask.ui.brief.BriefScreen
 import dev.sagi.monotask.ui.brief.BriefViewModel
 import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
@@ -112,9 +112,9 @@ fun NavGraph(
         }
 
         NavHost(
-            navController    = navController,
+            navController = navController,
             startDestination = startDestination,
-            enterTransition  = {
+            enterTransition = {
                 if (targetState.destination.route == Screen.Settings.route)
                     slideInVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it }
                 else

@@ -16,9 +16,9 @@ object AchievementEngine {
         val templates = evaluate(emptyList(), level)
         return templates.map { template ->
             val computedTier = when (template.category) {
-                AchievementCategory.STREAKS     -> tierFor(stats.longestStreak,        bronze = 3,    silver = 7,   gold = 30)
-                AchievementCategory.TASK_VOLUME -> tierFor(stats.totalTasksCompleted,  bronze = 5,    silver = 100, gold = 500)
-                AchievementCategory.DISCIPLINE  -> if (stats.totalTasksCompleted >= 20) {
+                AchievementCategory.STREAKS -> tierFor(stats.longestStreak, bronze = 3, silver = 7, gold = 30)
+                AchievementCategory.TASK_VOLUME -> tierFor(stats.totalTasksCompleted, bronze = 5, silver = 100, gold = 500)
+                AchievementCategory.DISCIPLINE -> if (stats.totalTasksCompleted >= 20) {
                     val ratio = stats.aceCount.toFloat() / stats.totalTasksCompleted
                     when {
                         ratio >= 0.90f -> AchievementTier.GOLD
@@ -39,10 +39,10 @@ object AchievementEngine {
     }
 
     private fun tierFor(value: Int, bronze: Int, silver: Int, gold: Int): AchievementTier? = when {
-        value >= gold   -> AchievementTier.GOLD
+        value >= gold -> AchievementTier.GOLD
         value >= silver -> AchievementTier.SILVER
         value >= bronze -> AchievementTier.BRONZE
-        else            -> null
+        else -> null
     }
 
     private fun maxTier(a: AchievementTier?, b: AchievementTier?): AchievementTier? {
@@ -63,13 +63,13 @@ object AchievementEngine {
 
     private fun evaluateStreaks(tasks: List<Task>): Achievement {
         return Achievement(
-            category   = AchievementCategory.STREAKS,
-            iconRes    = R.drawable.ic_fire,
+            category = AchievementCategory.STREAKS,
+            iconRes = R.drawable.ic_fire,
             earnedTier = tierFor(maxStreak(tasks), bronze = 3, silver = 7, gold = 30),
             milestones = listOf(
-                AchievementMilestone(AchievementTier.BRONZE, "First Flame",      "Active 3 days in a row"),
+                AchievementMilestone(AchievementTier.BRONZE, "First Flame", "Active 3 days in a row"),
                 AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
-                AchievementMilestone(AchievementTier.GOLD,   "Unstoppable",      "Active 30 days in a row")
+                AchievementMilestone(AchievementTier.GOLD,   "Unstoppable", "Active 30 days in a row")
             )
         )
     }
@@ -78,12 +78,12 @@ object AchievementEngine {
 
     private fun evaluateTaskVolume(tasks: List<Task>): Achievement {
         return Achievement(
-            category   = AchievementCategory.TASK_VOLUME,
-            iconRes    = R.drawable.ic_task_alt,
+            category = AchievementCategory.TASK_VOLUME,
+            iconRes = R.drawable.ic_task_alt,
             earnedTier = tierFor(tasks.size, bronze = 5, silver = 100, gold = 500),
             milestones = listOf(
-                AchievementMilestone(AchievementTier.BRONZE, "Warming Up",   "Complete 5 tasks"),
-                AchievementMilestone(AchievementTier.SILVER, "Century",      "Complete 100 tasks"),
+                AchievementMilestone(AchievementTier.BRONZE, "Warming Up", "Complete 5 tasks"),
+                AchievementMilestone(AchievementTier.SILVER, "Century", "Complete 100 tasks"),
                 AchievementMilestone(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
             )
         )
@@ -98,17 +98,17 @@ object AchievementEngine {
                 aceRatio >= 0.90f -> AchievementTier.GOLD
                 aceRatio >= 0.70f -> AchievementTier.SILVER
                 aceRatio >= 0.50f -> AchievementTier.BRONZE
-                else              -> null
+                else -> null
             }
         } else null
 
         return Achievement(
-            category   = AchievementCategory.DISCIPLINE,
-            iconRes    = R.drawable.ic_bolt,
+            category = AchievementCategory.DISCIPLINE,
+            iconRes = R.drawable.ic_bolt,
             earnedTier = earned,
             milestones = listOf(
-                AchievementMilestone(AchievementTier.BRONZE, "No Excuses",    "50%+ ace ratio"),
-                AchievementMilestone(AchievementTier.SILVER, "Iron Will",     "70%+ ace ratio"),
+                AchievementMilestone(AchievementTier.BRONZE, "No Excuses", "50%+ ace ratio"),
+                AchievementMilestone(AchievementTier.SILVER, "Iron Will", "70%+ ace ratio"),
                 AchievementMilestone(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio")
             )
         )
@@ -118,13 +118,13 @@ object AchievementEngine {
 
     private fun evaluateXpLeveling(level: Int): Achievement {
         return Achievement(
-            category   = AchievementCategory.XP_LEVELING,
-            iconRes    = R.drawable.ic_medal,
+            category = AchievementCategory.XP_LEVELING,
+            iconRes = R.drawable.ic_medal,
             earnedTier = tierFor(level, bronze = 5, silver = 15, gold = 30),
             milestones = listOf(
                 AchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
-                AchievementMilestone(AchievementTier.SILVER, "Veteran",     "Reach level 15"),
-                AchievementMilestone(AchievementTier.GOLD,   "Legend",      "Reach level 30")
+                AchievementMilestone(AchievementTier.SILVER, "Veteran", "Reach level 15"),
+                AchievementMilestone(AchievementTier.GOLD,   "Legend", "Reach level 30")
             )
         )
     }
@@ -148,7 +148,7 @@ object AchievementEngine {
 
         if (days.isEmpty()) return 0
         var maxRun = 1
-        var run    = 1
+        var run = 1
         for (i in 1 until days.size) {
             run = if (days[i] - days[i - 1] == 1L) run + 1 else 1
             if (run > maxRun) maxRun = run

@@ -24,8 +24,13 @@ sealed class StatisticsUiState {
         val totalXp: Int = 0,
         val totalTasks: Int = 0,
         val aceCount: Int = 0,
+        val aceCompletionPct: Int = 0,
         val longestStreak: Int = 0,
         val topPerformanceDay: DailyActivity? = null,
+        // Heatmap (pre-computed for ActivityHeatmap composable)
+        val monthActiveDays: Set<Long> = emptySet(),
+        val monthTotalTasks: Int = 0,
+        val monthBestStreak: Int = 0,
         // Meta
         val isRefreshing: Boolean = false,
     ) : StatisticsUiState()

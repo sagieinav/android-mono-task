@@ -20,24 +20,24 @@ fun LazyListScope.weeklyItems(state: StatisticsUiState.Ready, animationKey: Int)
     item {
         key(animationKey) {
             LineChart(
-                title         = "XP Earned",
+                title = "XP Earned",
                 headlineValue = "${state.weeklyXp}",
-                headlineUnit  = "xp",
-                points        = state.weekXpPoints,
-                trendPercent  = state.weekXpTrend,
-                lineColor     = MaterialTheme.customColors.xp,
+                headlineUnit = "xp",
+                points = state.weekXpPoints,
+                trendPercent = state.weekXpTrend,
+                lineColor = MaterialTheme.customColors.xp,
             )
         }
     }
     item {
         key(animationKey) {
             BarChart(
-                title         = "Tasks Completed",
+                title = "Tasks Completed",
                 headlineValue = "${state.weeklyTasks}",
-                headlineUnit  = "tasks",
-                points        = state.weekTaskPoints,
-                trendPercent  = state.weekTaskTrend,
-                animate       = true
+                headlineUnit = "tasks",
+                points = state.weekTaskPoints,
+                trendPercent = state.weekTaskTrend,
+                animate = true
             )
         }
     }
@@ -47,18 +47,22 @@ fun LazyListScope.monthlyItems(state: StatisticsUiState.Ready, animationKey: Int
     item {
         key(animationKey) {
             LineChart(
-                title         = "XP Earned",
+                title = "XP Earned",
                 headlineValue = "${state.monthlyXp}",
-                headlineUnit  = "xp",
-                points        = state.monthXpPoints,
-                trendPercent  = state.monthXpTrend,
-                lineColor     = MaterialTheme.customColors.xp,
+                headlineUnit = "xp",
+                points = state.monthXpPoints,
+                trendPercent = state.monthXpTrend,
+                lineColor = MaterialTheme.customColors.xp,
             )
         }
     }
     item {
         key(animationKey) {
-            ActivityHeatmap(activityData = state.monthActivityData)
+            ActivityHeatmap(
+                activeDays = state.monthActiveDays,
+                totalTasksThisMonth = state.monthTotalTasks,
+                bestStreak = state.monthBestStreak
+            )
         }
     }
 }
@@ -81,13 +85,13 @@ fun LazyListScope.allTimeItems(state: StatisticsUiState.Ready, animationKey: Int
         key(animationKey) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AceCompletionCard(
-                    aceCount   = state.aceCount,
-                    totalTasks = state.totalTasks,
-                    modifier   = Modifier.weight(1f)
+                    aceCount = state.aceCount,
+                    aceCompletionPct = state.aceCompletionPct,
+                    modifier = Modifier.weight(1f)
                 )
                 StreakCard(
                     longestStreak = state.longestStreak,
-                    modifier      = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f)
                 )
             }
         }

@@ -38,10 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.R
-import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.domain.service.AchievementEngine
-import dev.sagi.monotask.domain.service.ActivityStats
 import dev.sagi.monotask.ui.component.display.AvatarBox
 import dev.sagi.monotask.ui.component.display.EmptyState
 import dev.sagi.monotask.ui.component.core.MonoConfirmDialog
@@ -67,37 +64,37 @@ import dev.sagi.monotask.util.Constants.Theme.TRAILING_BUTTON_SIZE
 
 @Composable
 fun FriendsSection(
-    friendUsers      : List<User>?,
-    friendActivities : Map<String, List<DailyActivity>>,
-    onShareInvite    : () -> Unit,
-    onDeleteFriend   : (String) -> Unit = {},
-    lazyListState    : LazyListState? = null
+    friendUsers : List<User>?,
+    friendStats : Map<String, FriendStats>,
+    onShareInvite : () -> Unit,
+    onDeleteFriend : (String) -> Unit = {},
+    lazyListState : LazyListState? = null
 ) {
-    var expandedFriendId    by remember { mutableStateOf<String?>(null) }
-    var deleteTargetFriend  by remember { mutableStateOf<User?>(null) }
+    var expandedFriendId by remember { mutableStateOf<String?>(null) }
+    var deleteTargetFriend by remember { mutableStateOf<User?>(null) }
     val friendRowShape = MaterialTheme.shapes.large
 
     Column {
         SectionTitle("Friends") {
             // Invite Button
             Row(
-                modifier              = Modifier
+                modifier = Modifier
                     .clip(CircleShape)
                     .clickableNoRipple(onClick = onShareInvite)
                     .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp)
                     .alignByBaseline(),
-                verticalAlignment     = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 val color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                 Icon(
-                    painter            = painterResource(R.drawable.ic_add_user),
+                    painter = painterResource(R.drawable.ic_add_user),
                     contentDescription = null,
-                    modifier           = Modifier.size(13.dp),
-                    tint               = color
+                    modifier = Modifier.size(13.dp),
+                    tint = color
                 )
                 Text(
-                    text  = "Invite",
+                    text = "Invite",
                     style = MaterialTheme.typography.labelMedium,
                     color = color
                 )
@@ -107,7 +104,7 @@ fun FriendsSection(
         when {
             friendUsers == null -> MonoLoadingIndicator()
             friendUsers.isEmpty() -> EmptyState(
-                title    = "No friends yet",
+                title = "No friends yet",
                 subtitle = "Share your invite link to connect with friends",
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -116,12 +113,12 @@ fun FriendsSection(
             ) {
                 friendUsers.forEach { user ->
                     FriendRow(
-                        user          = user,
-                        shape         = friendRowShape,
-                        activities    = friendActivities[user.id] ?: emptyList(),
-                        expanded      = expandedFriendId == user.id,
-                        onToggle      = { expandedFriendId = if (expandedFriendId == user.id) null else user.id },
-                        onDelete      = { deleteTargetFriend = user },
+                        user = user,
+                        shape = friendRowShape,
+                        stats = friendStats[user.id],
+                        expanded = (expandedFriendId == user.id),
+                        onToggle = { expandedFriendId = if (expandedFriendId == user.id) null else user.id },
+                        onDelete = { deleteTargetFriend = user },
                         lazyListState = lazyListState
                     )
                 }
@@ -152,7 +149,7 @@ fun FriendsSection(
 @Composable
 private fun FriendRow(
     user: User,
-    activities: List<DailyActivity>,
+    stats: FriendStats?,
     expanded: Boolean,
     shape: Shape = MaterialTheme.shapes.large,
     onToggle: () -> Unit,
@@ -164,10 +161,7 @@ private fun FriendRow(
         label = "chevronRotation"
     )
 
-    val liveStreak = remember(activities) {
-        user.stats.currentStreak
-//        ActivityStats.computeCurrentStreak(activities)
-    }
+    val liveStreak = user.stats.currentStreak
     var expandedContentHeightPx by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(expanded) {
@@ -263,7 +257,7 @@ private fun FriendRow(
                     exit = shrinkVertically()
                 ) {
                     Box(modifier = Modifier.onSizeChanged { expandedContentHeightPx = it.height }) {
-                        FriendExpandedContent(user = user, activities = activities)
+                        if (stats != null) FriendExpandedContent(stats = stats)
                     }
                 }
             }
@@ -276,17 +270,11 @@ private fun FriendRow(
 // ====================
 
 @Composable
-private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
-    val stats        = user.stats
-    val badges       = remember(stats, user.level) { AchievementEngine.evaluateFromStats(stats, user.level) }
-    val weekActivity = remember(activities) { ActivityStats.weekActivity(activities) }
-    val xpPoints     = remember(weekActivity) { ActivityStats.buildXpPoints(weekActivity) }
-    val xpTrend      = remember(weekActivity) { ActivityStats.computeXpTrend(weekActivity) }
-    val totalWeekXp  = remember(weekActivity) { weekActivity.sumOf { it.xpEarned } }
+private fun FriendExpandedContent(stats: FriendStats) {
 
-    val topPadding    = SCREEN_PADDING / 2
+    val topPadding = SCREEN_PADDING / 2
     val bottomPadding = SCREEN_PADDING
-    val horizPadding  = SCREEN_PADDING
+    val horizPadding = SCREEN_PADDING
     val contentPadding = SCREEN_PADDING * 1.25f
 
     Column(
@@ -297,22 +285,22 @@ private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
         verticalArrangement = Arrangement.spacedBy(contentPadding)
     ) {
         AchievementSectionRow(
-            achievements = badges,
-            badgeStyle   = AchievementBadgeStyle.CONCISE,
-            modifier     = Modifier.padding(horizontal = 4.dp) // optical correction
+            achievements = stats.badges,
+            badgeStyle = AchievementBadgeStyle.CONCISE,
+            modifier = Modifier.padding(horizontal = 4.dp) // optical correction
         )
 
         LineChart(
-            title         = "Weekly Activity",
-            headlineValue = "$totalWeekXp",
-            headlineUnit  = "xp",
-            points        = xpPoints,
-            trendPercent  = xpTrend,
-            lineColor     = MaterialTheme.customColors.xp,
-            animate       = false,
-            chartHeight   = 80.dp,
-            shape         = MaterialTheme.shapes.medium,
-            modifier      = Modifier.fillMaxWidth()
+            title = "Weekly Activity",
+            headlineValue = "${stats.totalWeekXp}",
+            headlineUnit = "xp",
+            points = stats.xpPoints,
+            trendPercent = stats.xpTrend,
+            lineColor = MaterialTheme.customColors.xp,
+            animate = false,
+            chartHeight = 80.dp,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -321,14 +309,11 @@ private fun FriendExpandedContent(user: User, activities: List<DailyActivity>) {
 
 private val previewFriend1 = User(id = "1", displayName = "Roei Zalah", level = 12, xp = 4800)
 private val previewFriend2 = User(id = "2", displayName = "Ofek Fanian", level = 7, xp = 1950)
-private val previewActivities = listOf(
-    DailyActivity(dateEpochDay = 20000L, tasksCompleted = 3, xpEarned = 120),
-    DailyActivity(dateEpochDay = 20001L, tasksCompleted = 5, xpEarned = 200),
-    DailyActivity(dateEpochDay = 20002L, tasksCompleted = 2, xpEarned = 80),
-    DailyActivity(dateEpochDay = 20003L, tasksCompleted = 4, xpEarned = 160),
-    DailyActivity(dateEpochDay = 20004L, tasksCompleted = 6, xpEarned = 240),
-    DailyActivity(dateEpochDay = 20005L, tasksCompleted = 1, xpEarned = 40),
-    DailyActivity(dateEpochDay = 20006L, tasksCompleted = 3, xpEarned = 120),
+private val previewFriendStats = FriendStats(
+    badges = emptyList(),
+    xpPoints = emptyList(),
+    xpTrend = 12,
+    totalWeekXp = 720
 )
 
 @Preview(showBackground = true, name = "FriendsSection – with friends")
@@ -336,12 +321,12 @@ private val previewActivities = listOf(
 private fun FriendsSectionPreview() {
     MonoTaskTheme {
         FriendsSection(
-            friendUsers      = listOf(previewFriend1, previewFriend2),
-            friendActivities = mapOf(
-                previewFriend1.id to previewActivities,
-                previewFriend2.id to previewActivities.take(4)
+            friendUsers = listOf(previewFriend1, previewFriend2),
+            friendStats = mapOf(
+                previewFriend1.id to previewFriendStats,
+                previewFriend2.id to previewFriendStats
             ),
-            onShareInvite    = {}
+            onShareInvite = {}
         )
     }
 }
@@ -351,9 +336,9 @@ private fun FriendsSectionPreview() {
 private fun FriendsSectionEmptyPreview() {
     MonoTaskTheme {
         FriendsSection(
-            friendUsers      = emptyList(),
-            friendActivities = emptyMap(),
-            onShareInvite    = {}
+            friendUsers = emptyList(),
+            friendStats = emptyMap(),
+            onShareInvite = {}
         )
     }
 }

@@ -52,15 +52,15 @@ class BriefViewModel @Inject constructor(
                 workspaceRepository.getWorkspaces(uid),
                 _currentUser
             ) { tasks, workspaces, user ->
-                val tz             = TimeZone.currentSystemDefault()
-                val today          = Clock.System.now().toLocalDateTime(tz).date
+                val timeZone = TimeZone.currentSystemDefault()
+                val today = Clock.System.now().toLocalDateTime(timeZone).date
                 val workspaceNames = workspaces.associate { it.id to it.name }
 
                 val overdue = tasks
                     .filter { task ->
                         if (task.dueDate == null) return@filter false
                         val due = Instant.fromEpochMilliseconds(task.dueDate.toDate().time)
-                            .toLocalDateTime(tz).date
+                            .toLocalDateTime(timeZone).date
                         today.daysUntil(due) < 0
                     }
                     .sortedBy { it.dueDate!!.toDate().time }
@@ -68,17 +68,24 @@ class BriefViewModel @Inject constructor(
                     .filter { task ->
                         if (task.dueDate == null) return@filter false
                         val due = Instant.fromEpochMilliseconds(task.dueDate.toDate().time)
-                            .toLocalDateTime(tz).date
+                            .toLocalDateTime(timeZone).date
                         today.daysUntil(due) == 0
                     }
                     .sortedByDescending { it.importance.weight }
 
+                val briefStatus = when {
+                    overdue.isNotEmpty() -> BriefStatus.OVERDUE
+                    dueToday.isNotEmpty() -> BriefStatus.ON_TRACK
+                    else -> BriefStatus.ALL_CLEAR
+                }
+
                 BriefUiState.Ready(
-                    overdueTasks   = overdue,
-                    dueTodayTasks  = dueToday,
-                    pendingCount   = tasks.size,
+                    overdueTasks = overdue,
+                    dueTodayTasks = dueToday,
+                    pendingCount = tasks.size,
+                    briefStatus = briefStatus,
                     workspaceNames = workspaceNames,
-                    user           = user
+                    user = user
                 )
             }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BriefUiState.Loading)

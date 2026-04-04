@@ -29,7 +29,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.component.display.AvatarBox
 import dev.sagi.monotask.ui.component.display.AvatarPicker
@@ -44,22 +43,21 @@ import dev.sagi.monotask.util.Constants
 
 @Composable
 fun ProfileScreen(
-    navController: NavHostController,
     profileVM: ProfileViewModel
 ) {
-    val uiState          by profileVM.uiState.collectAsStateWithLifecycle()
-    val friendUsers      by profileVM.friendUsers.collectAsStateWithLifecycle()
-    val friendActivities by profileVM.friendActivities.collectAsStateWithLifecycle()
+    val uiState by profileVM.uiState.collectAsStateWithLifecycle()
+    val friendUsers by profileVM.friendUsers.collectAsStateWithLifecycle()
+    val friendStats by profileVM.friendStats.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val onProfileEvent: (ProfileEvent) -> Unit = remember { { profileVM.onEvent(it) } }
 
     ProfileScreenContent(
-        uiState          = uiState,
-        friendUsers      = friendUsers,
-        friendActivities = friendActivities,
-        onProfileEvent   = onProfileEvent,
-        onShareInvite    = { profileVM.shareInviteLink(context) }
+        uiState = uiState,
+        friendUsers = friendUsers,
+        friendStats = friendStats,
+        onProfileEvent = onProfileEvent,
+        onShareInvite = { profileVM.shareInviteLink(context) }
     )
 }
 
@@ -69,11 +67,11 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileScreenContent(
-    uiState          : ProfileUiState,
-    friendUsers      : List<User>? = null,
-    friendActivities : Map<String, List<DailyActivity>> = emptyMap(),
-    onProfileEvent   : (ProfileEvent) -> Unit = {},
-    onShareInvite    : () -> Unit = {}
+    uiState : ProfileUiState,
+    friendUsers : List<User>? = null,
+    friendStats : Map<String, FriendStats> = emptyMap(),
+    onProfileEvent : (ProfileEvent) -> Unit = {},
+    onShareInvite : () -> Unit = {}
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
 
@@ -98,11 +96,11 @@ fun ProfileScreenContent(
 
         is ProfileUiState.Ready -> {
             ProfileReadyContent(
-                state            = uiState,
-                friendUsers      = friendUsers,
-                friendActivities = friendActivities,
-                onProfileEvent   = onProfileEvent,
-                onShareInvite    = onShareInvite
+                state = uiState,
+                friendUsers = friendUsers,
+                friendStats = friendStats,
+                onProfileEvent = onProfileEvent,
+                onShareInvite = onShareInvite
             )
         }
     }
@@ -114,25 +112,25 @@ fun ProfileScreenContent(
 
 @Composable
 private fun ProfileReadyContent(
-    state            : ProfileUiState.Ready,
-    friendUsers      : List<User>?,
-    friendActivities : Map<String, List<DailyActivity>>,
-    onProfileEvent   : (ProfileEvent) -> Unit,
-    onShareInvite    : () -> Unit
+    state : ProfileUiState.Ready,
+    friendUsers : List<User>?,
+    friendStats : Map<String, FriendStats>,
+    onProfileEvent : (ProfileEvent) -> Unit,
+    onShareInvite : () -> Unit
 ) {
     val scaffoldPadding = LocalScaffoldPadding.current
-    val topBarHeight    = scaffoldPadding.calculateTopPadding()
-    val bottomPadding   = scaffoldPadding.calculateBottomPadding()
-    val listState       = rememberLazyListState()
-    val xpProgress      = state.xpIntoLevel.toFloat() / state.xpForNextLevel.toFloat()
-    val xpAnimatable    = remember { Animatable(0f) }
+    val topBarHeight = scaffoldPadding.calculateTopPadding()
+    val bottomPadding = scaffoldPadding.calculateBottomPadding()
+    val listState = rememberLazyListState()
+    val xpProgress = state.levelProgress
+    val xpAnimatable = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         xpAnimatable.animateTo(xpProgress, tween(durationMillis = 800))
     }
 
     if (state.showAvatarPicker) {
         AvatarPicker(
-            user      = state.user,
+            user = state.user,
             onSelect  = { preset -> onProfileEvent(ProfileEvent.SelectAvatar(preset)) },
             onDismiss = { onProfileEvent(ProfileEvent.DismissAvatarPicker) }
         )
@@ -145,10 +143,10 @@ private fun ProfileReadyContent(
                 .padding(horizontal = Constants.Theme.SCREEN_PADDING)
         ) {
             LazyColumn(
-                state               = listState,
-                modifier            = Modifier.fillMaxSize(),
-                contentPadding      = PaddingValues(
-                    top    = topBarHeight,
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = topBarHeight,
                     bottom = bottomPadding
                 ),
                 verticalArrangement = Arrangement.spacedBy(36.dp)
@@ -156,16 +154,16 @@ private fun ProfileReadyContent(
                 // Avatar + Name + XP bar
                 item {
                     ProfileHeader(
-                        user          = state.user,
-                        modifier      = Modifier.padding(vertical = 6.dp),
+                        user = state.user,
+                        modifier = Modifier.padding(vertical = 6.dp),
                         onAvatarClick = { onProfileEvent(ProfileEvent.OpenAvatarPicker) }
                     )
                     XpBar(
-                        level            = state.level,
-                        currentXp        = state.xpIntoLevel,
-                        xpForNextLevel   = state.xpForNextLevel,
+                        level = state.level,
+                        currentXp = state.xpIntoLevel,
+                        xpForNextLevel = state.xpForNextLevel,
                         animatedProgress = xpAnimatable.value,
-                        modifier         = Modifier
+                        modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                     )
@@ -176,7 +174,7 @@ private fun ProfileReadyContent(
 //                    SectionTitle("Achievements", Modifier.padding(bottom = 6.dp))
                     AchievementSectionRow(
                         achievements = state.achievements,
-                        modifier     = Modifier
+                        modifier = Modifier
                             .padding(horizontal = 16.dp)
 
                     )
@@ -185,11 +183,11 @@ private fun ProfileReadyContent(
                 // Friends
                 item {
                     FriendsSection(
-                        friendUsers      = friendUsers,
-                        friendActivities = friendActivities,
-                        onShareInvite    = onShareInvite,
-                        onDeleteFriend   = { id -> onProfileEvent(ProfileEvent.RemoveFriend(id)) },
-                        lazyListState    = listState
+                        friendUsers = friendUsers,
+                        friendStats = friendStats,
+                        onShareInvite = onShareInvite,
+                        onDeleteFriend = { id -> onProfileEvent(ProfileEvent.RemoveFriend(id)) },
+                        lazyListState = listState
                     )
                 }
             }
@@ -208,12 +206,12 @@ fun ProfileHeader(
     onAvatarClick: () -> Unit = { }
 ) {
     Column(
-        modifier            = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         AvatarBox(
-            user     = user,
+            user = user,
             modifier = Modifier
                 .size(128.dp)
                 .clip(CircleShape)
@@ -221,9 +219,8 @@ fun ProfileHeader(
         )
 
         Text(
-            text       = user.displayName.ifEmpty { "MonoTask User" },
-            style      = MaterialTheme.typography.headlineMedium,
-//            fontWeight = FontWeight.SemiBold
+            text = user.displayName.ifEmpty { "MonoTask User" },
+            style = MaterialTheme.typography.headlineMedium,
         )
     }
 }
@@ -243,7 +240,6 @@ private fun ProfileScreenPreview() {
                         xpIntoLevel = 2115,
                         xpForNextLevel = 2326,
                         achievements = emptyList(),
-//                        activityData = emptyList()
                     )
                 )
             }

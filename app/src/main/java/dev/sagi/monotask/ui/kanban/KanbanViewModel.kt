@@ -8,9 +8,8 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.domain.repository.TaskRepository
-import dev.sagi.monotask.domain.repository.UserRepository
-import dev.sagi.monotask.domain.repository.WorkspaceRepository
-import dev.sagi.monotask.domain.service.XpEngine
+import dev.sagi.monotask.domain.usecase.RestoreCompletedTaskUseCase
+import dev.sagi.monotask.domain.usecase.SetTaskFocusUseCase
 import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,9 +29,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class KanbanViewModel @Inject constructor(
-    private val taskRepository: TaskRepository,
-    private val userRepository: UserRepository,
-    private val workspaceRepository: WorkspaceRepository,
+    private val taskRepository : TaskRepository,
+    private val setTaskFocusUseCase : SetTaskFocusUseCase,
+    private val restoreCompletedTaskUseCase : RestoreCompletedTaskUseCase,
 ) : BaseViewModel<KanbanUiState, KanbanEvent, KanbanUiEffect>() {
 
     override val initialState: KanbanUiState = KanbanUiState.Loading
@@ -40,21 +39,22 @@ class KanbanViewModel @Inject constructor(
     // KanbanViewModel derives its public uiState from three internal flows combined,
     // so it overrides BaseViewModel's uiState with a custom StateFlow.
     private val _internalUiState = MutableStateFlow<KanbanUiState>(KanbanUiState.Loading)
-    private val _isLocked        = MutableStateFlow(false)
-    private val _sortOrder       = MutableStateFlow(SortOrder.CREATED_DESC)
+    private val _isLocked = MutableStateFlow(false)
+    private val _sortOrder = MutableStateFlow(SortOrder.CREATED_DESC)
 
     override val uiState: StateFlow<KanbanUiState> = combine(_internalUiState, _isLocked, _sortOrder) { state, locked, sortOrder ->
         if (locked) KanbanUiState.Locked
         else when (state) {
             is KanbanUiState.Ready -> state.copy(
-                highTasks   = state.highTasks.applySortOrder(sortOrder),
+                highTasks = state.highTasks.applySortOrder(sortOrder),
                 mediumTasks = state.mediumTasks.applySortOrder(sortOrder),
-                lowTasks    = state.lowTasks.applySortOrder(sortOrder),
-                sortOrder   = sortOrder
+                lowTasks = state.lowTasks.applySortOrder(sortOrder),
+                sortOrder = sortOrder
             )
             else -> state
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), KanbanUiState.Loading)
+    }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), KanbanUiState.Loading)
 
     private val _editingTask = MutableStateFlow<Task?>(null)
     val editingTask: StateFlow<Task?> = _editingTask.asStateFlow()
@@ -70,7 +70,6 @@ class KanbanViewModel @Inject constructor(
     private val _workspaceSource = MutableStateFlow<StateFlow<Workspace?>?>(null)
 
     private var _userSource: StateFlow<User?>? = null
-    private val _currentUser = MutableStateFlow<User?>(null)
 
     init {
         viewModelScope.launch {
@@ -83,14 +82,14 @@ class KanbanViewModel @Inject constructor(
 
     override fun onEvent(event: KanbanEvent) {
         when (event) {
-            is KanbanEvent.ToggleArchive   -> toggleArchive()
-            is KanbanEvent.ResetArchive    -> resetArchive()
-            is KanbanEvent.OpenEditSheet   -> openEditSheet(event.task)
+            is KanbanEvent.ToggleArchive -> toggleArchive()
+            is KanbanEvent.ResetArchive -> resetArchive()
+            is KanbanEvent.OpenEditSheet -> openEditSheet(event.task)
             is KanbanEvent.DismissEditSheet -> dismissEditSheet()
-            is KanbanEvent.UpdateTask      -> updateTask(event.task)
-            is KanbanEvent.DeleteTask      -> deleteTask(event.taskId)
-            is KanbanEvent.FocusNow        -> focusNow(event.task)
-            is KanbanEvent.RestoreTask     -> restoreTask(event.task)
+            is KanbanEvent.UpdateTask -> updateTask(event.task)
+            is KanbanEvent.DeleteTask -> deleteTask(event.taskId)
+            is KanbanEvent.FocusNow -> focusNow(event.task)
+            is KanbanEvent.RestoreTask -> restoreTask(event.task)
         }
     }
 
@@ -107,7 +106,6 @@ class KanbanViewModel @Inject constructor(
     fun setUserSource(userFlow: StateFlow<User?>) {
         if (_userSource == null) {
             _userSource = userFlow
-            viewModelScope.launch { userFlow.collect { _currentUser.value = it } }
         }
     }
 
@@ -126,8 +124,8 @@ class KanbanViewModel @Inject constructor(
                 currentWorkspace = workspace
                 when {
                     workspace == null -> flowOf(Pair(null, emptyList()))
-                    showCompleted     -> taskRepository.getCompletedTasks(userId, workspace.id).map { Pair(workspace, it) }
-                    else              -> taskRepository.getActiveTasks(userId, workspace.id).map { Pair(workspace, it) }
+                    showCompleted -> taskRepository.getCompletedTasks(userId, workspace.id).map { Pair(workspace, it) }
+                    else -> taskRepository.getActiveTasks(userId, workspace.id).map { Pair(workspace, it) }
                 }
             }
             .onEach { (workspace, tasks) -> updateUiState(tasks, workspace) }
@@ -149,10 +147,10 @@ class KanbanViewModel @Inject constructor(
     private fun updateUiState(tasks: List<Task>, workspace: Workspace?) {
         val grouped = tasks.groupBy { it.importance }
         _internalUiState.value = KanbanUiState.Ready(
-            highTasks   = grouped[Importance.HIGH]   ?: emptyList(),
+            highTasks = grouped[Importance.HIGH] ?: emptyList(),
             mediumTasks = grouped[Importance.MEDIUM] ?: emptyList(),
-            lowTasks    = grouped[Importance.LOW]    ?: emptyList(),
-            isArchive   = _showCompleted.value
+            lowTasks = grouped[Importance.LOW] ?: emptyList(),
+            isArchive = _showCompleted.value
         )
     }
 
@@ -163,12 +161,12 @@ class KanbanViewModel @Inject constructor(
     private fun List<Task>.applySortOrder(order: SortOrder): List<Task> = when (order) {
         SortOrder.DUE_ASC  -> {
             val hasDue = filter { it.dueDate != null }.sortedBy { it.dueDate!!.seconds }
-            val noDue  = filter { it.dueDate == null }.sortedByDescending { it.createdAt.seconds }
+            val noDue = filter { it.dueDate == null }.sortedByDescending { it.createdAt.seconds }
             hasDue + noDue
         }
         SortOrder.DUE_DESC -> {
             val hasDue = filter { it.dueDate != null }.sortedByDescending { it.dueDate!!.seconds }
-            val noDue  = filter { it.dueDate == null }.sortedByDescending { it.createdAt.seconds }
+            val noDue = filter { it.dueDate == null }.sortedByDescending { it.createdAt.seconds }
             hasDue + noDue
         }
         SortOrder.CREATED_ASC  -> sortedBy { it.createdAt.seconds }
@@ -201,16 +199,7 @@ class KanbanViewModel @Inject constructor(
         val workspace = currentWorkspace ?: return
         viewModelScope.launch {
             try {
-                workspace.currentFocusTaskId?.let { currentId ->
-                    if (currentId != task.id) {
-                        val allTasks = taskRepository.getActiveTasksOnce(userId, workspace.id)
-                        val currentTask = allTasks.find { it.id == currentId }
-                        currentTask?.let {
-                            taskRepository.updateSnoozeFields(userId, it, XpEngine.SnoozeOption.MANUAL)
-                        }
-                    }
-                }
-                workspaceRepository.setFocusTask(userId, workspace.id, task.id)
+                setTaskFocusUseCase(userId, task, workspace)
                 sendEffect(KanbanUiEffect.NavigateToFocus)
             } catch (e: Exception) {
                 sendEffect(KanbanUiEffect.ShowError("Failed to set focus task: ${e.message}"))
@@ -221,18 +210,7 @@ class KanbanViewModel @Inject constructor(
     private fun restoreTask(task: Task) {
         viewModelScope.launch {
             try {
-                val xpToRemove       = task.currentXp
-                val completionEpoch  = task.completedAt
-                    ?.toDate()
-                    ?.toInstant()
-                    ?.atZone(java.time.ZoneId.systemDefault())
-                    ?.toLocalDate()
-                    ?.toEpochDay()
-                    ?: java.time.LocalDate.now().toEpochDay()
-                taskRepository.restoreTask(userId, task.id)
-                userRepository.removeDailyActivity(userId, xpToRemove, dateEpochDay = completionEpoch)
-                userRepository.removeXp(userId, xpToRemove)
-                userRepository.undoUserStats(userId, task.isAce)
+                restoreCompletedTaskUseCase(userId, task)
             } catch (e: Exception) {
                 sendEffect(KanbanUiEffect.ShowError("Failed to restore task: ${e.message}"))
             }

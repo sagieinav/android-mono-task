@@ -21,6 +21,7 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.ui.component.task.CustomTag
 import dev.sagi.monotask.ui.component.core.GlassSurface
 import dev.sagi.monotask.ui.component.task.DueDateLabel
+import dev.sagi.monotask.ui.component.task.ImportanceLabel
 import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.theme.customColors
 import dev.sagi.monotask.ui.theme.glassBackground
@@ -36,25 +37,24 @@ fun FocusCard(
     modifier: Modifier = Modifier,
     hideXpLabel: Boolean = false
 ) {
-    val shape       = MaterialTheme.shapes.large
+    val shape = MaterialTheme.shapes.large
     val borderWidth = 5.dp
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = borderWidth / 2)
-            .heightIn(min = 200.dp)
 //            .glassBorder(shape, MaterialTheme.customColors.aceDim, 8.dp)
             .then(
                 if (task.isAce) Modifier.aceTaskBorder(
-                    shape         = shape,
-                    drawFraction  = borderFraction,
-                    borderWidth   = borderWidth
+                    shape = shape,
+                    drawFraction = borderFraction,
+                    borderWidth = borderWidth
                 )
                 else Modifier.defaultTaskBorder(
-                    shape         = shape,
-                    drawFraction  = 2f,
-                    borderWidth   = borderWidth
+                    shape = shape,
+                    drawFraction = 2f,
+                    borderWidth = borderWidth
                 )
             )
     ) {
@@ -63,11 +63,12 @@ fun FocusCard(
             blurred = false,
             baseColor = MaterialTheme.colorScheme.surfaceContainerLow,
             modifier = Modifier
-                .monoShadow(shape, elevation = 12.dp)
+//                .monoShadow(shape, elevation = 12.dp)
                 .clip(shape)
+                .heightIn(min = 220.dp)
         ) {
             Column(
-                modifier            = Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(40.dp)
@@ -89,7 +90,7 @@ fun FocusCard(
 private fun FocusCardHeader(task: Task, hideXpLabel: Boolean = false) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment     = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically
     ) {
         if (!hideXpLabel) XpLabel(xp = task.currentXp)
         ImportanceLabel(importance = task.importance)
@@ -109,9 +110,9 @@ private fun FocusCardBody(task: Task) {
             .replace("—", "—\u200B")
 
         Text(
-            text     = titleWrapped,
-            style    = MaterialTheme.typography.displaySmall,
-            color    = MaterialTheme.colorScheme.onSurface,
+            text = titleWrapped,
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth(),
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
@@ -119,11 +120,11 @@ private fun FocusCardBody(task: Task) {
 
         if (task.description.isNotBlank()) {
             Text(
-                text      = task.description,
-                style     = MaterialTheme.typography.bodyMedium,
-                color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                maxLines  = 8,
-                overflow  = TextOverflow.Ellipsis
+                text = task.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                maxLines = 8,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -136,10 +137,9 @@ private fun FocusCardBody(task: Task) {
 private fun FocusCardFooter(task: Task) {
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement   = Arrangement.spacedBy(6.dp),
-        maxLines              = 2,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        maxLines = 2,
     ) {
-//        task.dueDate?.let { DueDateTag(it) }
         task.tags.forEach { CustomTag(label = it) }
     }
 }
@@ -154,13 +154,13 @@ fun FocusCardPreview() {
         Box(modifier = Modifier.size(360.dp).padding(18.dp)) {
             FocusCard(
                 task = Task(
-                    id          = "1",
-                    title       = "Build Swipe-to-Complete",
+                    id = "1",
+                    title = "Build Swipe-to-Complete",
                     description = "Complete sections 3 and 4, submit before midnight.",
-                    importance  = Importance.HIGH,
-                    tags        = listOf("CS101", "ds"),
+                    importance = Importance.HIGH,
+                    tags = listOf("CS101", "ds"),
                     snoozeCount = 0,
-                    dueDate     = Timestamp.now()
+                    dueDate = Timestamp.now()
                 ),
                 borderFraction = 0.5f
             )
