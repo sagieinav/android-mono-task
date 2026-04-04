@@ -56,6 +56,9 @@ configurations.all {
 }
 
 dependencies {
+    // ========== APP DESIGN SYSTEM MODULE ==========
+    implementation(project(":designsystem"))
+
     // ========== UI ==========
     // Compose
     implementation(libs.androidx.activity.compose)
@@ -80,14 +83,6 @@ dependencies {
     implementation(libs.datetime.wheel.picker)
     implementation(libs.kotlinx.datetime)
 
-//    // Compose Unstyled (Composables Library)
-//    implementation(libs.composeunstyled)
-//    // adds theming APIs
-//    implementation(libs.composeunstyled.theming)
-//    // adds component primitives for building components
-//    implementation(libs.composeunstyled.primitives)
-//    // adds themes for native look and feel
-//    implementation(libs.composeunstyled.platformtheme)
 
 
     // ========== Core / Non-UI ==========

@@ -1,25 +1,16 @@
 package dev.sagi.monotask.ui.brief
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,33 +21,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.display.CountBadge
-import dev.sagi.monotask.ui.focus.UserHeader
-import dev.sagi.monotask.ui.theme.LocalCustomColors
-import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.util.toRelativeDate
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.CircleShape
+import dev.sagi.monotask.ui.common.UserHeader
+import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.glassBackground
-import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
+import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
 
 @Composable
 fun BriefScreen(briefVM: BriefViewModel) {
@@ -69,7 +46,7 @@ private fun BriefContent(uiState: BriefUiState) {
     Box(modifier = Modifier.fillMaxSize()) {
         when (uiState) {
             is BriefUiState.Loading -> Unit
-            is BriefUiState.Ready   -> ReadyContent(state = uiState)
+            is BriefUiState.Ready -> ReadyContent(state = uiState)
         }
     }
 }
@@ -129,7 +106,7 @@ private fun ReadyContent(state: BriefUiState.Ready) {
         }
 
         item {  // index 1
-            ExpandableTaskSection(
+            ExpandableBriefSection(
                 label = "Overdue",
                 tasks = state.overdueTasks,
                 workspaceNames = state.workspaceNames,
@@ -140,7 +117,7 @@ private fun ReadyContent(state: BriefUiState.Ready) {
         }
 
         item {  // index 2
-            ExpandableTaskSection(
+            ExpandableBriefSection(
                 label = "Due Today",
                 tasks = state.dueTodayTasks,
                 workspaceNames = state.workspaceNames,
@@ -168,145 +145,7 @@ private fun ReadyContent(state: BriefUiState.Ready) {
     }
 }
 
-@Composable
-private fun ExpandableTaskSection(
-    label: String,
-    tasks: List<Task>,
-    workspaceNames: Map<String, String>,
-    color: Color,
-    expanded: Boolean,
-    onExpandChange: (Boolean) -> Unit
-) {
-    val chevronRotation by animateFloatAsState(
-        targetValue = if (expanded) 90f else 0f,
-        label = "chevron_$label"
-    )
 
-    GlassSurface(
-        shape = MaterialTheme.shapes.medium,
-        blurred  = false,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .clickable { onExpandChange(!expanded) }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            // Header row
-            Row(
-                modifier              = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment     = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment     = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CountBadge(
-                        count = tasks.size,
-                        color = color
-                    )
-                    Icon(
-                        painter = painterResource(R.drawable.ic_chevron),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .rotate(chevronRotation),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Expanded task list
-            AnimatedVisibility(visible = expanded) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    if (tasks.isEmpty()) {
-                        Text(
-                            text = "No tasks here",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                    } else {
-                        tasks.forEach { task ->
-                            TaskBriefRow(task = task, workspaceNames = workspaceNames)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TaskBriefRow(task: Task, workspaceNames: Map<String, String>) {
-    val customColors = LocalCustomColors.current
-    val subtleColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-
-    val importanceColor = when (task.importance) {
-        Importance.HIGH -> customColors.importanceHighContent
-        Importance.MEDIUM -> customColors.importanceMediumContent
-        Importance.LOW -> customColors.importanceLowContent
-    }
-
-    val workspaceName = workspaceNames[task.workspaceId] ?: task.workspaceId
-    val dueDateStr = task.dueDate?.toRelativeDate()?.text
-
-    val subtitleParts = buildList {
-        add(workspaceName)
-        dueDateStr?.let {
-            add(dueDateStr)
-        }
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-    ) {
-        // Left border accent
-        Box(
-            modifier = Modifier
-                .width(3.dp)
-                .fillMaxHeight()
-                .padding(top = 4.dp, bottom = 2.dp)
-                .clip(CircleShape)
-                .glassBackground(baseColor = importanceColor)
-        )
-        Spacer(Modifier.width(10.dp))
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = task.title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = subtitleParts.joinToString(separator = "  ·  "),
-                style = MaterialTheme.typography.labelSmall,
-                color = subtleColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
 
 // ========== Preview ==========
 

@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.settings
 
+import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,17 +32,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.ui.component.core.ActionButton
-import dev.sagi.monotask.ui.component.core.MonoConfirmDialog
-import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
-import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.gloock
-import dev.sagi.monotask.ui.theme.penaltyRed
-import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
+import dev.sagi.monotask.designsystem.component.ActionButton
+import dev.sagi.monotask.designsystem.component.MonoConfirmDialog
+import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
+import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
+import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.theme.gloock
+import dev.sagi.monotask.designsystem.theme.penaltyRed
+import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
+import dev.sagi.monotask.ui.settings.component.SettingsAboutSection
+import dev.sagi.monotask.ui.settings.component.SettingsAccountSection
+import dev.sagi.monotask.ui.settings.component.SettingsFocusPrefsSection
+import dev.sagi.monotask.ui.settings.component.WorkspacesSection
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -116,9 +120,16 @@ private fun SettingsContent(
         // Workspace Management Section:
         item {
             WorkspacesSection(
-                workspaces        = workspaces,
+                workspaces = workspaces,
                 onCreateWorkspace = { onEvent(SettingsEvent.CreateWorkspace(it)) },
-                onRenameWorkspace = { ws, name -> onEvent(SettingsEvent.RenameWorkspace(ws, name)) },
+                onRenameWorkspace = { ws, name ->
+                    onEvent(
+                        SettingsEvent.RenameWorkspace(
+                            ws,
+                            name
+                        )
+                    )
+                },
                 onDeleteWorkspace = { onEvent(SettingsEvent.DeleteWorkspace(it)) }
             )
         }
@@ -170,7 +181,7 @@ private fun SignOutButton(onSignOut: () -> Unit) {
             .height(60.dp)
     ) {
         Icon(
-            painter            = painterResource(R.drawable.ic_sign_out_alt),
+            painter            = painterResource(IconPack.SignOutAlt),
             contentDescription = "Sign Out Button",
             tint               = color,
             modifier           = Modifier
@@ -212,7 +223,7 @@ private fun AppBranding() {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
 //        Image(
-//            painter            = painterResource(id = R.drawable.logo_monotask_raw),
+//            painter            = painterResource(id = MonotaskIcons.LogoRaw),
 //            contentDescription = "App Logo",
 //            modifier           = Modifier.width(70.dp)
 //        )

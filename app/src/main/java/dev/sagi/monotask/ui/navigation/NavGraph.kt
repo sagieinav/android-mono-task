@@ -24,7 +24,7 @@ import dev.sagi.monotask.ui.auth.AuthUiState
 import dev.sagi.monotask.ui.onboarding.OnboardingScreen
 import dev.sagi.monotask.ui.brief.BriefScreen
 import dev.sagi.monotask.ui.brief.BriefViewModel
-import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
 import dev.sagi.monotask.ui.focus.FocusScreen
 import dev.sagi.monotask.ui.focus.FocusViewModel
 import dev.sagi.monotask.ui.kanban.KanbanScreen
@@ -192,8 +192,7 @@ fun NavGraph(
                         profileVM.startObserving(userSessionVM.currentUser)
                     }
                     ProfileScreen(
-                        navController = navController,
-                        profileVM     = profileVM
+                        profileVM = profileVM
                     )
                 }
                 composable(Screen.Statistics.route) {

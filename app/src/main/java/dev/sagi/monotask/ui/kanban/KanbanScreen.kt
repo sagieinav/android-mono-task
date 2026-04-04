@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.kanban
 
+import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,23 +8,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.display.EmptyState
+import dev.sagi.monotask.designsystem.component.EmptyState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.google.firebase.Timestamp
 import dev.sagi.monotask.ui.navigation.Screen
 import kotlinx.coroutines.flow.collectLatest
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.ui.component.core.SegmentedToggle
-import dev.sagi.monotask.ui.component.task.EditTaskSheet
-import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
-import dev.sagi.monotask.util.Constants.Theme.KANBAN_PADDING
-import dev.sagi.monotask.util.Constants.Theme.SCREEN_PADDING
+import dev.sagi.monotask.designsystem.component.SegmentedToggle
+import dev.sagi.monotask.ui.common.EditTaskSheet
+import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
+import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
+import dev.sagi.monotask.designsystem.util.Constants.Theme.KANBAN_PADDING
+import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
 import androidx.compose.material3.SnackbarDuration
-import dev.sagi.monotask.ui.component.display.IllustrationSize
-import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
+import dev.sagi.monotask.designsystem.component.IllustrationSize
+import dev.sagi.monotask.designsystem.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
+import dev.sagi.monotask.ui.kanban.component.KanbanColumn
 import java.util.Date
 
 private const val COLUMN_STAGGER_MS = 80
@@ -104,7 +105,7 @@ fun KanbanScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 EmptyState(
-                    imgRes = R.drawable.img_empty_hyperfocus,
+                    imgRes = IconPack.ImgEmptyHyperfocus,
                     title = "Hyperfocusing",
                     subtitle = "Kanban's locked. Stay in the zone.",
                     size = IllustrationSize.Large,
@@ -145,7 +146,7 @@ fun KanbanScreenContent(
                         contentAlignment = Alignment.Center
                     ) {
                         EmptyState(
-                            imgRes = R.drawable.img_empty_kanban,
+                            imgRes = IconPack.ImgEmptyKanban,
                             title = "Nothing here yet",
                             subtitle = "Add a task and get the ball rolling.",
                             size = IllustrationSize.Large,

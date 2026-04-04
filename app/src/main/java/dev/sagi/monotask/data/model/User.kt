@@ -1,6 +1,7 @@
 package dev.sagi.monotask.data.model
 
 import androidx.annotation.Keep
+import dev.sagi.monotask.designsystem.theme.IconPack
 import dev.sagi.monotask.util.DiceBearHelper
 
 @Keep
@@ -51,4 +52,9 @@ data class User(
 
     // Computed only in-memory, never stored in Firestore
     val resolvedAvatarUrl: String = DiceBearHelper.getAvatarUrl(id)
+
+    /** Resolves the stored preset index (1–23) to a drawable res ID. Null if index is out of range
+     *  (e.g. stale data from a previous build that stored a raw resource ID). */
+//    val avatarDrawableRes: Int? get() = DiceBearHelper.PRESETS.getOrNull(avatarPreset - 1)
+    val avatarDrawableRes: Int? get() = IconPack.AvatarPresets.getOrNull(avatarPreset - 1)
 }

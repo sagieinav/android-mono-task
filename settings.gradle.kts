@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MonoTask"
 include(":app")
- 
+include(":designsystem")

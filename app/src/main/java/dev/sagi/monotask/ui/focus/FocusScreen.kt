@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.focus
 
+import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.animation.core.EaseInQuart
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -17,17 +18,21 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.Timestamp
-import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.ui.component.task.EditTaskSheet
+import dev.sagi.monotask.ui.common.EditTaskSheet
 import java.util.Date
-import dev.sagi.monotask.ui.component.display.EmptyState
-import dev.sagi.monotask.ui.component.display.IllustrationSize
-import dev.sagi.monotask.ui.component.task.SnoozeBottomSheet
-import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
-import dev.sagi.monotask.util.Constants
+import dev.sagi.monotask.designsystem.component.EmptyState
+import dev.sagi.monotask.designsystem.component.IllustrationSize
+import dev.sagi.monotask.ui.common.SnoozeBottomSheet
+import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
+import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
+import dev.sagi.monotask.designsystem.util.Constants
+import dev.sagi.monotask.ui.focus.component.FocusAnimationState
+import dev.sagi.monotask.ui.focus.component.FocusCardSwipeable
+import dev.sagi.monotask.ui.focus.component.SwipeExitDirection
+import dev.sagi.monotask.ui.common.UserHeader
+import dev.sagi.monotask.ui.focus.component.rememberFocusAnimationState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -184,16 +189,16 @@ fun FocusScreenContent(
             )
     ) {
         UserHeader(
-            user          = currentUser,
+            user = currentUser,
             currentStreak = currentStreak,
-            levelUpEvent  = levelUpEvent,
+            levelUpEvent = levelUpEvent,
             onLevelUpDone = onLevelUpDone
         )
 
         when (uiState) {
             is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 EmptyState(
-                    imgRes = R.drawable.img_empty_focus,
+                    imgRes = IconPack.ImgEmptyFocus,
                     title = "Where are the tasks?",
                     subtitle = "Oh... you cleared 'em all. Well played!",
                     size = IllustrationSize.Large,
@@ -269,16 +274,16 @@ private fun ActiveFocusCard(
     ) {
         key(uiState.focusTask.id, uiState.restoreVersion) {
             FocusCardSwipeable(
-                task           = uiState.focusTask,
-                exitTrigger    = animState.snoozeExitTrigger,
+                task = uiState.focusTask,
+                exitTrigger = animState.snoozeExitTrigger,
                 borderFraction = animState.displayBorder,
-                onSwipeRight   = {
+                onSwipeRight = {
                     animState.setNextEntryDirection(SwipeExitDirection.RIGHT, screenWidthPx)
                     onFocusEvent(FocusEvent.CompleteTask)
                 },
-                onSwipeLeft    = { onFocusEvent(FocusEvent.OpenSnooze) },
-                onLongPress    = { onFocusEvent(FocusEvent.OpenEditSheet) },
-                modifier       = Modifier.fillMaxWidth()
+                onSwipeLeft = { onFocusEvent(FocusEvent.OpenSnooze) },
+                onLongPress = { onFocusEvent(FocusEvent.OpenEditSheet) },
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

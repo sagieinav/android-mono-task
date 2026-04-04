@@ -21,8 +21,8 @@ import dev.sagi.monotask.ui.auth.AuthViewModel
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.common.UserSessionViewModel
 import dev.sagi.monotask.ui.common.WorkspaceViewModel
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
 
 @AndroidEntryPoint
@@ -60,14 +60,14 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScaffold(
-                        navController      = navController,
-                        authVM             = authVM,
-                        settingsVM         = settingsVM,
-                        workspaceVM        = workspaceVM,
-                        userSessionVM      = userSessionVM,
-                        kanbanVM           = kanbanVM,
-                        pendingInviteUid   = pendingInviteUid,
-                        onInviteDismissed  = { pendingInviteUid = null }
+                        navController = navController,
+                        authVM = authVM,
+                        settingsVM = settingsVM,
+                        workspaceVM = workspaceVM,
+                        userSessionVM = userSessionVM,
+                        kanbanVM = kanbanVM,
+                        pendingInviteUid = pendingInviteUid,
+                        onInviteDismissed = { pendingInviteUid = null }
                     )
                 }
             }

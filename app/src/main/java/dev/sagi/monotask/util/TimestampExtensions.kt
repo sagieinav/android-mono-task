@@ -19,15 +19,15 @@ fun Timestamp.toRelativeDate(): FormattedDate {
     val diffDays = today.daysUntil(due)
 
     return when {
-        diffDays < 0  -> {
+        diffDays < 0 -> {
             val daysOverdue = -diffDays
             val text = if (daysOverdue > 7) toFormattedDate() else "${daysOverdue}d ago"
             FormattedDate(text, isOverdue = true)
         }
         diffDays == 0 -> FormattedDate("Today", isOverdue = false)
         diffDays == 1 -> FormattedDate("Tomorrow", isOverdue = false)
-        diffDays < 7  -> FormattedDate("in $diffDays days", isOverdue = false)
-        else          -> FormattedDate(this.toFormattedDate(), isOverdue = false)
+        diffDays < 7 -> FormattedDate("in $diffDays days", isOverdue = false)
+        else -> FormattedDate(this.toFormattedDate(), isOverdue = false)
     }
 }
 

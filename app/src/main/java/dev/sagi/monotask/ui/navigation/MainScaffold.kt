@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.navigation
 
+import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
@@ -22,21 +23,20 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dev.sagi.monotask.ui.auth.AuthUiState
 import dev.sagi.monotask.ui.auth.AuthViewModel
-import dev.sagi.monotask.ui.component.task.CreateTaskSheet
-import dev.sagi.monotask.ui.component.workspace.CreateWorkspaceDialog
-import dev.sagi.monotask.ui.profile.InviteSheet
+import dev.sagi.monotask.ui.common.CreateTaskSheet
+import dev.sagi.monotask.ui.common.CreateWorkspaceDialog
+import dev.sagi.monotask.ui.profile.component.InviteSheet
 import dev.sagi.monotask.ui.settings.SettingsViewModel
 import dev.sagi.monotask.ui.common.WorkspaceViewModel
-import dev.sagi.monotask.ui.theme.LocalHazeState
-import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.MonoSnackbarDismissible
-import dev.sagi.monotask.ui.component.core.MonoSnackbarVisuals
+import dev.sagi.monotask.designsystem.theme.LocalHazeState
+import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
+import dev.sagi.monotask.designsystem.component.MonoSnackbarDismissible
+import dev.sagi.monotask.designsystem.component.MonoSnackbarVisuals
 import dev.sagi.monotask.ui.common.CreateSheetDraft
 import dev.sagi.monotask.ui.kanban.KanbanUiState
 import dev.sagi.monotask.ui.kanban.KanbanViewModel
 import dev.sagi.monotask.ui.common.UserSessionViewModel
-import dev.sagi.monotask.ui.theme.LocalSnackbarHostState
+import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.ui.platform.LocalLocale
@@ -144,7 +144,7 @@ fun MainScaffold(
                             title = NavTab.PROFILE.label,
                             trailingIcon = {
                                 TopBarIconButton(
-                                    iconRes            = R.drawable.ic_settings,
+                                    iconRes            = IconPack.Settings,
                                     contentDescription = "Settings",
                                     onClick            = { navController.navigate(Screen.Settings.route) }
                                 )
@@ -225,7 +225,7 @@ fun MainScaffold(
                                         MonoSnackbarVisuals(
                                             message = "Task created",
                                             duration = SnackbarDuration.Short,
-                                            leadingIcon = R.drawable.ic_check
+                                            leadingIcon = IconPack.Check
                                         )
                                     )
                                 }

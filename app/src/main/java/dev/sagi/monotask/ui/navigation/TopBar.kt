@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.navigation
 
+import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,8 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.sagi.monotask.ui.component.core.MonoDropdownItem
-import dev.sagi.monotask.ui.component.core.MonoDropdownMenu
+import dev.sagi.monotask.designsystem.component.MonoDropdownItem
+import dev.sagi.monotask.designsystem.component.MonoDropdownMenu
 import dev.sagi.monotask.ui.kanban.SortOrder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,20 +22,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.R
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.component.core.MonoTabRow
-import dev.sagi.monotask.ui.component.workspace.WorkspaceDropdownGlass
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.googleSansRounded
-import dev.sagi.monotask.ui.theme.monoShadow
-import dev.sagi.monotask.util.Constants
-import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
+import dev.sagi.monotask.designsystem.component.GlassSurface
+import dev.sagi.monotask.ui.common.WorkspaceDropdownGlass
+import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.theme.glassBorder
+import dev.sagi.monotask.designsystem.theme.monoShadow
+import dev.sagi.monotask.designsystem.util.Constants
+import dev.sagi.monotask.designsystem.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
 
 
 // ==========================================
@@ -93,7 +90,7 @@ fun WorkspaceTopBar(
         },
         trailing = {
             TopBarIconButton(
-                iconRes = R.drawable.ic_add,
+                iconRes = IconPack.Add,
                 contentDescription = "Create new task",
                 onClick = onAddTaskClick
             )
@@ -135,7 +132,7 @@ fun KanbanTopBar(
         trailing = {
             Box {
                 TopBarIconButton(
-                    iconRes = R.drawable.ic_sort,
+                    iconRes = IconPack.Sort,
                     contentDescription = "Sort tasks",
                     onClick = { showSortDropdown = true }
                 )
@@ -149,8 +146,8 @@ fun KanbanTopBar(
                             SortOrder.CREATED_ASC, SortOrder.CREATED_DESC -> "Created"
                         }
                         val arrowIcon = when (order) {
-                            SortOrder.DUE_ASC, SortOrder.CREATED_ASC -> R.drawable.ic_arrow_narrow_up
-                            SortOrder.DUE_DESC, SortOrder.CREATED_DESC -> R.drawable.ic_arrow_narrow_down
+                            SortOrder.DUE_ASC, SortOrder.CREATED_ASC -> IconPack.ArrowNarrowUp
+                            SortOrder.DUE_DESC, SortOrder.CREATED_DESC -> IconPack.ArrowNarrowDown
                         }
                         MonoDropdownItem(
                             label = label,
@@ -168,7 +165,7 @@ fun KanbanTopBar(
             }
             Spacer(Modifier.width(12.dp))
             TopBarIconButton(
-                iconRes = R.drawable.ic_add,
+                iconRes = IconPack.Add,
                 contentDescription = "Create new task",
                 onClick = onAddTaskClick
             )
@@ -257,7 +254,7 @@ fun TopBarIconButton(
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(Constants.Theme.TOP_BAR_ITEM_HEIGHT)
+                .size(TOP_BAR_ITEM_HEIGHT)
                 .padding(8.dp)
         )
     }

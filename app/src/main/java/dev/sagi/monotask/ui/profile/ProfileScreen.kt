@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,14 +29,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.ui.component.display.AvatarBox
-import dev.sagi.monotask.ui.component.display.AvatarPicker
-import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
-import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.util.Constants
+import dev.sagi.monotask.ui.common.AvatarBox
+import dev.sagi.monotask.ui.common.AvatarPicker
+import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
+import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.util.Constants
+import dev.sagi.monotask.ui.profile.component.AchievementSectionRow
+import dev.sagi.monotask.ui.profile.component.FriendsSection
+import dev.sagi.monotask.ui.profile.component.XpBar
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point
@@ -231,7 +234,7 @@ fun ProfileHeader(
 private fun ProfileScreenPreview() {
     MonoTaskTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            androidx.compose.runtime.CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
+            CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
                 ProfileScreenContent(
                     uiState = ProfileUiState.Ready(
                         user = User(id = "1", displayName = "Sagi Einav", level = 25, xp = 12450),

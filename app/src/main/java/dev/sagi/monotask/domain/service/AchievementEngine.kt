@@ -1,6 +1,6 @@
 package dev.sagi.monotask.domain.service
 
-import dev.sagi.monotask.R
+import dev.sagi.monotask.designsystem.theme.IconPack
 import dev.sagi.monotask.data.model.AchievementCategory
 import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.AchievementTier
@@ -64,7 +64,7 @@ object AchievementEngine {
     private fun evaluateStreaks(tasks: List<Task>): Achievement {
         return Achievement(
             category = AchievementCategory.STREAKS,
-            iconRes = R.drawable.ic_fire,
+            iconRes = IconPack.Fire,
             earnedTier = tierFor(maxStreak(tasks), bronze = 3, silver = 7, gold = 30),
             milestones = listOf(
                 AchievementMilestone(AchievementTier.BRONZE, "First Flame", "Active 3 days in a row"),
@@ -79,7 +79,7 @@ object AchievementEngine {
     private fun evaluateTaskVolume(tasks: List<Task>): Achievement {
         return Achievement(
             category = AchievementCategory.TASK_VOLUME,
-            iconRes = R.drawable.ic_task_alt,
+            iconRes = IconPack.TaskAlt,
             earnedTier = tierFor(tasks.size, bronze = 5, silver = 100, gold = 500),
             milestones = listOf(
                 AchievementMilestone(AchievementTier.BRONZE, "Warming Up", "Complete 5 tasks"),
@@ -104,7 +104,7 @@ object AchievementEngine {
 
         return Achievement(
             category = AchievementCategory.DISCIPLINE,
-            iconRes = R.drawable.ic_bolt,
+            iconRes = IconPack.Bolt,
             earnedTier = earned,
             milestones = listOf(
                 AchievementMilestone(AchievementTier.BRONZE, "No Excuses", "50%+ ace ratio"),
@@ -119,7 +119,7 @@ object AchievementEngine {
     private fun evaluateXpLeveling(level: Int): Achievement {
         return Achievement(
             category = AchievementCategory.XP_LEVELING,
-            iconRes = R.drawable.ic_medal,
+            iconRes = IconPack.Medal,
             earnedTier = tierFor(level, bronze = 5, silver = 15, gold = 30),
             milestones = listOf(
                 AchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),

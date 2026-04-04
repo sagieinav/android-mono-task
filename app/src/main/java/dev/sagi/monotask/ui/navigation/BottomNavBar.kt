@@ -2,6 +2,7 @@
 
 package dev.sagi.monotask.ui.navigation
 
+import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -35,23 +36,19 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
-import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.GlassSurface
-import dev.sagi.monotask.ui.theme.LocalHazeState
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.theme.glassBackground
-import dev.sagi.monotask.ui.theme.glassBorder
-import dev.sagi.monotask.ui.theme.glassBorderPremium
-import dev.sagi.monotask.ui.theme.monoShadow
-import dev.sagi.monotask.ui.theme.monoShadowWorkaround
-import dev.sagi.monotask.util.Constants
+import dev.sagi.monotask.designsystem.theme.LocalHazeState
+import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.theme.glassBackground
+import dev.sagi.monotask.designsystem.theme.glassBorderPremium
+import dev.sagi.monotask.designsystem.theme.monoShadowWorkaround
+import dev.sagi.monotask.designsystem.util.Constants
 
 enum class NavTab(val label: String, val iconRes: Int) {
-    BOARD("Board", R.drawable.ic_stack_tick),
-    BRIEF("Brief", R.drawable.ic_flag_bolt),
-    FOCUS("Focus", R.drawable.ic_focus),
-    STATISTICS("Statistics", R.drawable.ic_statistics),
-    PROFILE("MonoTask", R.drawable.ic_user_circle)
+    BOARD("Board", IconPack.StackTick),
+    BRIEF("Brief", IconPack.FlagBolt),
+    FOCUS("Focus", IconPack.Focus),
+    STATISTICS("Statistics", IconPack.Statistics),
+    PROFILE("MonoTask", IconPack.UserCircle)
 }
 
 @Composable

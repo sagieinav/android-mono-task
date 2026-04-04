@@ -42,12 +42,15 @@ import java.util.Date
 import java.util.Locale
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
-import dev.sagi.monotask.ui.component.core.SegmentedToggle
-import dev.sagi.monotask.ui.theme.LocalHazeState
-import dev.sagi.monotask.ui.theme.LocalScaffoldPadding
-import dev.sagi.monotask.ui.theme.MonoTaskTheme
-import dev.sagi.monotask.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
+import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.component.SegmentedToggle
+import dev.sagi.monotask.designsystem.theme.LocalHazeState
+import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
+import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
+import dev.sagi.monotask.ui.statistics.component.allTimeItems
+import dev.sagi.monotask.ui.statistics.component.monthlyItems
+import dev.sagi.monotask.ui.statistics.component.weeklyItems
 
 private val statisticsTabs = listOf("Weekly", "Monthly", "All-Time")
 
@@ -237,7 +240,7 @@ private val previewScreenState = StatisticsUiState.Ready(
 @Composable
 private fun StatisticsScreenWeeklyPreview() {
     MonoTaskTheme {
-        androidx.compose.runtime.CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
+        CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             StatisticsReadyContent(
                 state             = previewScreenState,
                 isRefreshing      = false,
@@ -253,7 +256,7 @@ private fun StatisticsScreenWeeklyPreview() {
 @Composable
 private fun StatisticsScreenMonthlyPreview() {
     MonoTaskTheme {
-        androidx.compose.runtime.CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
+        CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             StatisticsReadyContent(
                 state             = previewScreenState,
                 isRefreshing      = false,
@@ -269,7 +272,7 @@ private fun StatisticsScreenMonthlyPreview() {
 @Composable
 private fun StatisticsScreenAllTimePreview() {
     MonoTaskTheme {
-        androidx.compose.runtime.CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
+        CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             StatisticsReadyContent(
                 state             = previewScreenState,
                 isRefreshing      = false,

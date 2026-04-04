@@ -1,5 +1,6 @@
 package dev.sagi.monotask.ui.auth
 
+import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,9 +16,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.sagi.monotask.R
-import dev.sagi.monotask.ui.component.core.MonoLoadingIndicator
-import dev.sagi.monotask.ui.theme.basicMonoTask
+import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.theme.basicMonoTask
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
@@ -62,7 +62,7 @@ fun AuthScreen(
             verticalArrangement = Arrangement.Top
         ) {
             Image(
-                painter            = painterResource(id = R.drawable.logo_monotask_raw),
+                painter            = painterResource(id = IconPack.LogoRaw),
                 contentDescription = "App Logo",
                 modifier           = Modifier.width(180.dp)
             )
@@ -88,7 +88,7 @@ fun AuthScreen(
             verticalArrangement = Arrangement.Bottom
         ) {
             Image(
-                painter            = painterResource(id = R.drawable.btn_sign_in_google),
+                painter            = painterResource(id = IconPack.BtnSignInGoogle),
                 contentDescription = "Sign in with Google",
                 modifier           = Modifier
                     .basicMonoTask(MaterialTheme.shapes.extraLarge)
