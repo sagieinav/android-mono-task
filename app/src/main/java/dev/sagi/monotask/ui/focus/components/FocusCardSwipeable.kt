@@ -53,16 +53,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ========== Swipe Constants ==========
-private val PILL_SIZE          = 44.dp
-private val GLOW_INSET         = 24.dp   // extra padding around pill so shadow fits within the RenderNode texture (shadow radius = 20dp + 4dp buffer)
-private val COMPLETE_COLOR     = Color(0xFF4BB24F)
-private val SNOOZE_COLOR       = Color(0xFFFF511C)
-const val SNOOZE_THRESHOLD     = 380f       // drag distance (px) to trigger snooze
-const val COMPLETE_THRESHOLD   = 380f       // drag distance (px) to trigger complete
-private const val MAX_DRAG_DISTANCE   = 400f  // hard limit for drag range (px)
-private const val MAX_ROTATION_DEG    = 18f   // card tilt at full drag
-private const val EXIT_MULTIPLIER     = 1.5f  // off-screen exit distance multiplier
-private const val EXIT_ANIM_DURATION  = 280   // exit animation duration (ms)
+private val PILL_SIZE = 44.dp
+private val GLOW_INSET = 24.dp // extra padding around pill so shadow fits within the RenderNode texture (shadow radius = 20dp + 4dp buffer)
+private val COMPLETE_COLOR = Color(0xFF4BB24F)
+private val SNOOZE_COLOR = Color(0xFFFF511C)
+const val SNOOZE_THRESHOLD = 380f // drag distance (px) to trigger snooze
+const val COMPLETE_THRESHOLD = 380f // drag distance (px) to trigger complete
+private const val MAX_DRAG_DISTANCE = 400f // hard limit for drag range (px)
+private const val MAX_ROTATION_DEG = 18f // card tilt at full drag
+private const val EXIT_MULTIPLIER = 1.5f // off-screen exit distance multiplier
+private const val EXIT_ANIM_DURATION = 280 // exit animation duration (ms)
 
 // ========== Generic pill ==========
 @Composable
@@ -76,16 +76,16 @@ fun SwipePill(
     maxScale: Float = 1.8f
 ) {
     val isTriggered = progress >= 1f
-    val burstScale  = remember { Animatable(1f) }
+    val burstScale = remember { Animatable(1f) }
 
     LaunchedEffect(isTriggered) {
         if (isTriggered) {
             burstScale.snapTo(1.2f)
             burstScale.animateTo(
-                targetValue   = 1f,
+                targetValue = 1f,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness    = Spring.StiffnessLow
+                    stiffness = Spring.StiffnessLow
                 )
             )
         } else {
@@ -94,8 +94,8 @@ fun SwipePill(
     }
 
     val dynamicColor = lerp(
-        start    = MaterialTheme.colorScheme.outlineVariant,
-        stop     = iconTint,
+        start = MaterialTheme.colorScheme.outlineVariant,
+        stop = iconTint,
         fraction = (progress * progress * 1.2f).coerceIn(0f, 1f)
     )
 
@@ -106,15 +106,15 @@ fun SwipePill(
             .size(PILL_SIZE * maxScale + GLOW_INSET * 2)
             .graphicsLayer {
                 val currentScale = lerp(baseScale / maxScale, 1f, progress) * burstScale.value
-                scaleX       = currentScale
-                scaleY       = currentScale
+                scaleX = currentScale
+                scaleY = currentScale
                 translationX = offsetX
             }
             .circleGlow(
-                color        = dynamicColor.copy(alpha = 0.25f),
-                radius       = 20.dp,                      // glow blur radius
-                circleRadius = PILL_SIZE * maxScale / 2,   // shadow drawn at actual pill radius, not the enlarged box
-                offsetY      = 0.dp
+                color = dynamicColor.copy(alpha = 0.3f),
+                radius = 32.dp,
+                circleRadius = PILL_SIZE * maxScale / 2,
+                offsetY = 0.dp
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -123,7 +123,6 @@ fun SwipePill(
             modifier = Modifier
                 .size(PILL_SIZE * maxScale)
                 .clip(CircleShape)
-//                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f + progress / 2f))
                 .glassBackground(
                     accentColor = dynamicColor,
                     baseColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.8f)
@@ -134,11 +133,10 @@ fun SwipePill(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter            = painterResource(iconRes),
+                painter = painterResource(iconRes),
                 contentDescription = null,
-                tint               = dynamicColor,
-                modifier           = Modifier
-                    .fillMaxSize()
+                tint = dynamicColor,
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -153,10 +151,10 @@ fun CompletePill(
 ) {
     val progress = (syncedOffset / COMPLETE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
-        iconRes  = IconPack.Check,
+        iconRes = IconPack.Check,
         iconTint = COMPLETE_COLOR,
         progress = progress,
-        offsetX  = screenWidthPx * (1f - progress),
+        offsetX = screenWidthPx * (1f - progress),
         modifier = modifier
     )
 }
@@ -170,10 +168,10 @@ fun SnoozePill(
 ) {
     val progress = (-syncedOffset / SNOOZE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
-        iconRes  = IconPack.NextTaskAlt,
+        iconRes = IconPack.NextTaskAlt,
         iconTint = SNOOZE_COLOR,
         progress = progress,
-        offsetX  = -screenWidthPx * (1f - progress),
+        offsetX = -screenWidthPx * (1f - progress),
         modifier = modifier
     )
 }
@@ -190,13 +188,13 @@ fun FocusCardSwipeable(
     onLongPress: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
-    val density       = LocalDensity.current
+    val density = LocalDensity.current
     val screenWidthPx = remember(configuration, density) {
         with(density) { configuration.screenWidthDp.dp.toPx() }
     }
 
-    var badgeOffsetX  by remember { mutableFloatStateOf(0f) }
-    var offsetX       by remember { mutableFloatStateOf(0f) }
+    var badgeOffsetX by remember { mutableFloatStateOf(0f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
     var exitDirection by remember { mutableStateOf<SwipeExitDirection?>(null) }
     val isExiting = exitDirection != null
     val isSwiping = offsetX != 0f || isExiting
@@ -208,19 +206,19 @@ fun FocusCardSwipeable(
     }
 
     val pillAlpha by animateFloatAsState(
-        targetValue   = if (isExiting) 0f else 1f,
+        targetValue = if (isExiting) 0f else 1f,
         animationSpec = tween(120),
-        label         = "pill_alpha"
+        label = "pill_alpha"
     )
 
     val cardTargetOffset = when (exitDirection) {
         SwipeExitDirection.RIGHT -> screenWidthPx * EXIT_MULTIPLIER
-        SwipeExitDirection.LEFT  -> -screenWidthPx * EXIT_MULTIPLIER
-        null                     -> offsetX
+        SwipeExitDirection.LEFT -> -screenWidthPx * EXIT_MULTIPLIER
+        null -> offsetX
     }
 
     val animatedOffset by animateFloatAsState(
-        targetValue   = cardTargetOffset,
+        targetValue = cardTargetOffset,
         animationSpec = if (isExiting)
             tween(EXIT_ANIM_DURATION, easing = FastOutLinearInEasing)
         else
@@ -245,9 +243,9 @@ fun FocusCardSwipeable(
     )
 
     var wasCompleteReady by remember { mutableStateOf(false) }
-    var wasSnoozeReady   by remember { mutableStateOf(false) }
+    var wasSnoozeReady by remember { mutableStateOf(false) }
     val completeReady = offsetX > COMPLETE_THRESHOLD
-    val snoozeReady   = offsetX < -SNOOZE_THRESHOLD
+    val snoozeReady = offsetX < -SNOOZE_THRESHOLD
 
     LaunchedEffect(completeReady) {
         if (completeReady && !wasCompleteReady)
@@ -276,7 +274,7 @@ fun FocusCardSwipeable(
                     rotationZ = (animatedOffset / screenWidthPx) * MAX_ROTATION_DEG
                     scaleX = lpScale
                     scaleY = lpScale
-                    alpha  = lpAlpha
+                    alpha = lpAlpha
                     compositingStrategy = CompositingStrategy.ModulateAlpha
                 }
                 .pointerInput(isExiting) {
@@ -396,20 +394,20 @@ enum class SwipeExitDirection { RIGHT, LEFT }
 private fun SwipePillPreview() {
     MonoTaskTheme {
         Row(
-            modifier              = Modifier.padding(24.dp),
+            modifier = Modifier.padding(24.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             SwipePill(
-                iconRes  = IconPack.Check,
+                iconRes = IconPack.Check,
                 iconTint = Color(0xFF4BB24F),
                 progress = 0.3f,
                 offsetX  = 0f
             )
             SwipePill(
-                iconRes  = IconPack.NextTaskAlt,
+                iconRes = IconPack.NextTaskAlt,
                 iconTint = Color(0xFFFF511C),
                 progress = 1.0f,
-                offsetX  = 0f
+                offsetX = 0f
             )
         }
     }

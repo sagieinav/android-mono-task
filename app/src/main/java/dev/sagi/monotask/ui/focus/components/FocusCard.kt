@@ -2,13 +2,14 @@
 
 package dev.sagi.monotask.ui.focus.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,8 @@ fun FocusCard(
     ) {
         GlassSurface(
             shape = shape,
+            shineAlpha = 0.9f,
+            baseColor = MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier.heightIn(min = 220.dp)
         ) {
             Column(
@@ -135,7 +138,7 @@ private fun FocusCardFooter(task: Task) {
 
 @Preview(showBackground = true)
 @Composable
-fun FocusCardPreview() {
+private fun FocusCardPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.size(360.dp).padding(18.dp)) {
             FocusCard(
@@ -153,3 +156,33 @@ fun FocusCardPreview() {
         }
     }
 }
+
+//@Preview @Composable
+//private fun DummyPreview() {
+//    Box(
+//        Modifier
+//            .size(200.dp)
+//            .background(MaterialTheme.colorScheme.background)
+//    ) {
+//        Box(
+//            Modifier
+//                .size(200.dp)
+//                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+//        )
+//    }
+//}
+//
+//@Preview @Composable
+//private fun DummyPreview2() {
+//    Box(
+//        Modifier
+//            .size(200.dp)
+//            .background(MaterialTheme.colorScheme.background)
+//    ) {
+//        Box(
+//            Modifier
+//                .size(200.dp)
+//                .background(Color.Black.copy(alpha = 0.12f))
+//        )
+//    }
+//}

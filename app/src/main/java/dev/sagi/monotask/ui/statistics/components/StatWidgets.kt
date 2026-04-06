@@ -111,11 +111,11 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
     Box(
         modifier = Modifier
             .size(CircleRadius * 2)
-            .circleGlow(color = accentColor.copy(alpha = 0.1f), radius = 10.dp)
+            .circleGlow(color = accentColor.copy(alpha = 0.15f), radius = 10.dp)
             .clip(CircleShape)
             .glassBackground(
                 accentColor = accentColor,
-                baseColor   = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
+                baseColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
             )
             .glassBorder(shape = CircleShape, color = accentColor),
         contentAlignment = Alignment.Center

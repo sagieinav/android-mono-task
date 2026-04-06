@@ -4,13 +4,10 @@ import android.annotation.SuppressLint
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
@@ -20,8 +17,6 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asAndroidPath
-import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -32,6 +27,10 @@ import kotlin.math.PI
 import kotlin.math.atan2
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.Stroke
+
+private const val OUTLINE_ALPHA = 0.14f
 
 
 @SuppressLint("SuspiciousModifierThen")
@@ -55,69 +54,32 @@ fun Modifier.noMinSize() = layout { measurable, constraints ->
 }
 
 
-// Custom (workaround) drop shadow for use in semi-transparent components
-fun Modifier.monoShadowWorkaround(
-    shape: Shape,
-    color: Color = Color.Black.copy(alpha = 0.02f),
-    blur: Dp = 12.dp,
-    offsetY: Dp = 2.dp,
-    offsetX: Dp = 2.dp,
-): Modifier = this.drawWithCache {
-    // Calculate and cache objects ONLY when the layout size changes
-    val paint = Paint().apply {
-        isAntiAlias = true
-        this.color = android.graphics.Color.TRANSPARENT
-        setShadowLayer(
-            blur.toPx(),
-            offsetX.toPx(),
-            offsetY.toPx(),
-            color.toArgb()
-        )
-    }
-
-    val path = shape.createOutline(size, layoutDirection, this).toAndroidPath()
-
-    // The actual draw phase (runs every frame, but does no allocations)
-    onDrawBehind {
-        drawIntoCanvas { canvas ->
-            canvas.nativeCanvas.save()
-            canvas.nativeCanvas.clipOutPath(path) // Block inside the shape
-            canvas.nativeCanvas.drawPath(path, paint)
-            canvas.nativeCanvas.restore()
-        }
-    }
-}.clip(shape)
-
 fun Modifier.monoShadow(
     shape: Shape,
     alpha: Float = 0.6f,
     elevation: Dp = 20.dp
-): Modifier = composed {
-    this
-        .shadow(
-            elevation = elevation,
-            shape = shape,
-            ambientColor = Color.Black.copy(alpha = alpha),
-            spotColor = Color.Black.copy(alpha = 0.05f)
-        )
-}
+): Modifier = this.shadow(
+        elevation = elevation,
+        shape = shape,
+        ambientColor = Color.Black.copy(alpha = alpha),
+        spotColor = Color.Black.copy(alpha = 0.05f)
+    )
 
 
 // This is more expensive to use. Mainly for big, noticeable components
 fun Modifier.glassBorderPremium(
     shape: Shape,
-    width: Dp = 3.dp
-): Modifier = composed {
-    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+    width: Dp = 4.dp
+): Modifier = this.drawWithCache {
+        val innerWidth = width.toPx()
+        val outerWidth = 0.5.dp.toPx()
 
-    drawWithCache {
-        val innerWidth = (width * 1.5f).toPx()
-        val outerWidth = (width * 0.5f).toPx()
+        val outerColor = Color.Black.copy(alpha = OUTLINE_ALPHA)
 
         val cornerFraction = (atan2(
-            size.height / 2.0,
-            size.width / 2.0
-        ) / (2 * PI)).toFloat()
+                size.height / 2.0,
+                size.width / 2.0
+            ) / (2 * PI)).toFloat()
 
         val bright = Color.White.copy(alpha = 0.8f)
         val dark = Color.White.copy(alpha = 0.05f)
@@ -135,7 +97,7 @@ fun Modifier.glassBorderPremium(
             center = Offset(size.width / 2f, size.height / 2f)
         )
 
-        val outerBrush = SolidColor(outlineVariant.copy(alpha = 0.4f))
+        val outerBrush = SolidColor(outerColor)
 
         // Cached, only rebuilt when size changes
         val outline = shape.createOutline(size, layoutDirection, this)
@@ -156,135 +118,119 @@ fun Modifier.glassBorderPremium(
             )
         }
     }
-}
+
 
 fun Modifier.glassBorder(
     shape: Shape,
     color: Color? = null,
-    width: Dp = 2.dp
-): Modifier = composed {
-    val innerWidth = width * 0.75f
-    val outerWidth = width * 0.25f
+    width: Dp = 1.5.dp
+): Modifier {
+    val innerWidth = width
+    val outerWidth = 0.5.dp
 
-    val innerModifier =
-        if (color == null) {
-            // Normal, non-colored:
-            Modifier.border(innerWidth, Color.White.copy(alpha = 0.5f), shape)
-        } else {
-            // Colored:
-            val brush = Brush.linearGradient(
-                colors = listOf(
-                    color.copy(alpha = 0.4f),
-                    color.copy(alpha = 0.1f),
-                    Color.Transparent,
-                    Color.White.copy(alpha = 0.5f),
-                )
-            )
-            Modifier.border(innerWidth, brush, shape)
-        }
+    val outerColor = Color.Black.copy(alpha = OUTLINE_ALPHA)
 
-    val outerModifier =
-        if (color == null) {
-            // Normal, non-colored:
-            Modifier.border(outerWidth, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f), shape)
-        } else {
-            // Colored:
-            val brush = Brush.linearGradient(
-                colors = listOf(
-                    color.copy(alpha = 0.4f),
-                    color.copy(alpha = 0.1f),
-                    Color.Transparent,
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
-                )
-            )
-            Modifier.border(outerWidth, brush, shape)
-        }
-
-    // Apply the 2 borders
-    this
-        .then(innerModifier)
-        .then(outerModifier)
-}
-
-fun Modifier.glassBackground(
-    accentColor: Color? = null,
-    baseColor: Color = Color.Unspecified
-): Modifier = composed {
-
-    // Resolve the actual base color
-    val resolvedBaseColor = if (baseColor == Color.Unspecified) {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    } else {
-        baseColor
-    }
-
-    val shineBrush = if (accentColor == null) {
-        Brush.verticalGradient(
-            colors = listOf(Color.White.copy(alpha = 0.6f), Color.Transparent)
-        )
+    val innerBrush = if (color == null) {
+        SolidColor(Color.White.copy(alpha = 0.5f))
     } else {
         Brush.linearGradient(
             colors = listOf(
-                accentColor.copy(alpha = 0.3f),
-                accentColor.copy(alpha = 0.05f),
+                color.copy(alpha = 0.4f),
+                color.copy(alpha = 0.1f),
                 Color.Transparent,
-                Color.White.copy(alpha = 0.5f)
+                Color.White.copy(alpha = 0.5f),
             )
         )
     }
-    this
-        .background(resolvedBaseColor) // solid base
-        .background(shineBrush) // glass shine on top
+
+    val outerBrush = if (color == null) {
+        SolidColor(outerColor)
+    } else {
+        Brush.linearGradient(
+            colors = listOf(
+                color.copy(alpha = 0.4f),
+                color.copy(alpha = 0.1f),
+                Color.Transparent,
+                outerColor,
+            )
+        )
+    }
+
+    // Chain the borders
+    return this
+        .border(width = innerWidth, brush = innerBrush, shape = shape)
+        .border(width = outerWidth, brush = outerBrush, shape = shape)
 }
 
 
+fun Modifier.glassBackground(
+    baseColor: Color = Color.Unspecified,
+    accentColor: Color? = null,
+    shineAlpha: Float = 0.6f
+): Modifier = this.drawWithCache {
+        val shineBrush = if (accentColor == null) {
+            Brush.verticalGradient(
+                colors = listOf(Color.White.copy(alpha = shineAlpha), Color.Transparent)
+            )
+        } else {
+            Brush.linearGradient(
+                colors = listOf(
+                    accentColor.copy(alpha = 0.3f),
+                    accentColor.copy(alpha = 0.05f),
+                    Color.Transparent,
+                    Color.White.copy(alpha = shineAlpha)
+                )
+            )
+        }
 
-// circleRadius: the radius of the shadow circle drawn. Defaults to size.width/2 (fills the box).
-// Pass a smaller value when the composable is intentionally larger than the content circle
-// (e.g. to give the shadow room to render without being clipped by the RenderNode boundary).
+        onDrawBehind {
+            // Draw the solid base (if it exists)
+            if (baseColor != Color.Unspecified && baseColor != Color.Transparent) {
+                drawRect(color = baseColor)
+            }
+            // Draw the glass shine directly on top
+            drawRect(brush = shineBrush)
+        }
+    }
+
+
+// circleRadius: the radius of the shadow circle drawn. Defaults to size.width/2 (fills the box)
 fun Modifier.circleGlow(
     color: Color,
     radius: Dp = 10.dp,
     circleRadius: Dp? = null,
     offsetY: Dp = 0.dp
-) = this.drawBehind {
-    if (color.alpha < 0.05f) return@drawBehind
-    drawIntoCanvas { canvas ->
-        val shadowRadius = circleRadius?.toPx() ?: (size.width / 2f)
-        val paint = Paint().apply {
-            isAntiAlias = true
-            this.color = android.graphics.Color.TRANSPARENT
-            setShadowLayer(
-                radius.toPx(),
-                0f,
-                offsetY.toPx(),
-                color.toArgb()
+): Modifier = this.drawWithCache {
+
+    val radiusPx = radius.toPx()
+    val offsetYPx = offsetY.toPx()
+    val shadowColorArgb = color.toArgb()
+
+    val nativePaint = Paint().apply {
+        isAntiAlias = true
+        // Use Android's native transparent color integer
+        this.color = android.graphics.Color.TRANSPARENT
+        setShadowLayer(
+            radiusPx,
+            0f, // offsetX
+            offsetYPx,
+            shadowColorArgb
+        )
+    }
+
+    onDrawBehind {
+        if (color.alpha < 0.05f) return@onDrawBehind
+
+        val shadowRadiusPx = circleRadius?.toPx() ?: (size.width / 2f)
+
+        // Draw directly to the native canvas using the cached native paint
+        drawIntoCanvas { canvas ->
+            canvas.nativeCanvas.drawCircle(
+                size.width / 2f,
+                size.height / 2f,
+                shadowRadiusPx,
+                nativePaint
             )
         }
-        canvas.nativeCanvas.drawCircle(
-            size.width / 2f,
-            size.height / 2f,
-            shadowRadius,
-            paint
-        )
     }
-}
-
-private fun Outline.toAndroidPath(): Path = when (this) {
-    is Outline.Rectangle -> Path().apply {
-        addRect(rect.left, rect.top, rect.right, rect.bottom, Path.Direction.CW)
-    }
-    is Outline.Rounded -> Path().apply {
-        addRoundRect(
-            RectF(roundRect.left, roundRect.top, roundRect.right, roundRect.bottom),
-            floatArrayOf(
-                roundRect.topLeftCornerRadius.x,     roundRect.topLeftCornerRadius.y,
-                roundRect.topRightCornerRadius.x,    roundRect.topRightCornerRadius.y,
-                roundRect.bottomRightCornerRadius.x, roundRect.bottomRightCornerRadius.y,
-                roundRect.bottomLeftCornerRadius.x,  roundRect.bottomLeftCornerRadius.y,
-            ),
-            Path.Direction.CW
-        )
-    }
-    is Outline.Generic -> path.asAndroidPath()
 }

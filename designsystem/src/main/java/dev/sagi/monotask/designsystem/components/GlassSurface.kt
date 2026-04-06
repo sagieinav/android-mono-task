@@ -19,11 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.materials.HazeMaterials
 import androidx.compose.material3.Text
-import dev.sagi.monotask.designsystem.theme.LocalHazeState
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorder
@@ -36,8 +33,10 @@ fun GlassSurface(
     elevated: Boolean = true,
     baseColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     accentColor: Color? = null,
+    shineAlpha: Float = 0.6f,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val outlineColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
     Box(
         modifier = modifier
             .then(
@@ -45,8 +44,11 @@ fun GlassSurface(
                 else Modifier
             )
             .clip(shape)
-            .glassBorder(shape, accentColor)
-            .glassBackground(accentColor = accentColor, baseColor = baseColor)
+            .glassBorder(
+                shape = shape,
+                color = accentColor
+            )
+            .glassBackground(accentColor = accentColor, baseColor = baseColor, shineAlpha = shineAlpha)
     ) {
         content()
     }

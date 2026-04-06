@@ -41,7 +41,6 @@ import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorderPremium
 import dev.sagi.monotask.designsystem.theme.monoShadow
-import dev.sagi.monotask.designsystem.theme.monoShadowWorkaround
 import dev.sagi.monotask.designsystem.util.Constants
 
 @Composable
