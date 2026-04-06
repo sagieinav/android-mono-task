@@ -61,12 +61,12 @@ fun MonoSnackbar(
     val monoVisuals = snackbarData.visuals as? MonoSnackbarVisuals
 
     GlassSurface(
+        shape = CircleShape,
+        blurred = true,
         modifier = modifier
             .padding(10.dp) // external padding
             .monoShadow(CircleShape)
-            .wrapContentSize(),
-        shape = CircleShape,
-        blurred = true
+            .wrapContentSize()
     ) {
         Row(
             modifier = Modifier.padding(vertical = 8.dp), // internal padding

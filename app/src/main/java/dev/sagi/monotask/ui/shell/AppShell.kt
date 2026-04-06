@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -21,7 +22,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.chrisbanes.haze.hazeSource
@@ -45,6 +45,10 @@ import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import dev.sagi.monotask.designsystem.theme.BackgroundGradientBottom
+import dev.sagi.monotask.designsystem.theme.BackgroundGradientTop
 
 @Composable
 fun AppShell(
@@ -76,6 +80,11 @@ fun AppShell(
         kanbanVM.setWorkspaceSource(workspaceVM.selectedWorkspace)
         kanbanVM.setUserSource(userSessionVM.currentUser)
     }
+
+    // Background gradient:
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(BackgroundGradientTop, BackgroundGradientBottom)
+    )
 
     CompositionLocalProvider(
         LocalHazeState provides hazeState,
@@ -129,7 +138,12 @@ fun AppShell(
             }
         ) { innerPadding ->
             CompositionLocalProvider(LocalScaffoldPadding provides innerPadding) {
-                Box(modifier = Modifier.fillMaxSize().hazeSource(hazeState)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .hazeSource(hazeState)
+                        .background(brush = gradientBrush)
+                ) {
                     MonoTaskNavHost(
                         navController = appState.navController,
                         authVM = authVM,

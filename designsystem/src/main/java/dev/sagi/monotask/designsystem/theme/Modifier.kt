@@ -45,8 +45,6 @@ fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = this.then(
 )
 
 
-
-
 // Removes min size constraints from any composable
 fun Modifier.noMinSize() = layout { measurable, constraints ->
     val placeable = measurable.measure(
@@ -55,17 +53,6 @@ fun Modifier.noMinSize() = layout { measurable, constraints ->
     layout(placeable.width, placeable.height) {
         placeable.placeRelative(0, 0)
     }
-}
-
-
-// ========== WRAPPER: MonoTask's basic elevated, bordered design ==========
-fun Modifier.basicMonoTask(
-    shape: Shape,
-    elevation: Dp = 4.dp
-): Modifier = composed {
-    this
-        .monoShadow(shape)
-        .monoBorder(shape)
 }
 
 
@@ -104,26 +91,18 @@ fun Modifier.monoShadowWorkaround(
 
 fun Modifier.monoShadow(
     shape: Shape,
-    elevation: Dp = 4.dp,
-    strength: Float = 1f
+    elevation: Dp = 20.dp,
+    alpha: Float = 0.7f
 ): Modifier = composed {
     this
         .shadow(
             elevation = elevation,
             shape = shape,
-            ambientColor = Color.Black.copy(alpha = 0.05f * strength),
-            spotColor = Color.Black.copy(alpha = 0.35f * strength)
+            ambientColor = Color.Black.copy(alpha = alpha),
+            spotColor = Color.Black.copy(alpha = 0.05f)
         )
 }
 
-fun Modifier.monoBorder(shape: Shape): Modifier = composed {
-    this
-        .border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            shape = shape
-        )
-}
 
 // This is more expensive to use. Mainly for big, noticeable components
 fun Modifier.glassBorderPremium(
@@ -234,7 +213,7 @@ fun Modifier.glassBackground(
 ): Modifier {
     val shineBrush = if (accentColor == null) {
         Brush.verticalGradient(
-            colors = listOf(Color.White.copy(alpha = 0.5f), Color.Transparent)
+            colors = listOf(Color.White.copy(alpha = 0.7f), Color.Transparent)
         )
     } else {
         Brush.linearGradient(
@@ -242,7 +221,7 @@ fun Modifier.glassBackground(
                 accentColor.copy(alpha = 0.3f),
                 accentColor.copy(alpha = 0.05f),
                 Color.Transparent,
-                Color.White.copy(alpha = 0.4f)
+                Color.White.copy(alpha = 0.5f)
             )
         )
     }

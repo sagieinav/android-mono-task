@@ -218,9 +218,9 @@ private fun ChartCanvas(
     fun resolveCache(w: Float): CachedChartData? {
         cachedRef.value?.let { if (it.width == w) return it }
         if (points.size < 2) return null
-        val minV    = points.minOf { it.value }
-        val maxV    = points.maxOf { it.value }
-        val range   = maxV - minV
+        val minV = points.minOf { it.value }
+        val maxV = points.maxOf { it.value }
+        val range = maxV - minV
         val offsets = points.mapIndexed { i, p ->
             Offset(
                 x = (i.toFloat() / (points.size - 1)) * w,
@@ -228,18 +228,18 @@ private fun ChartCanvas(
             )
         }
         val path = buildSmoothPath(offsets)
-        val pm   = PathMeasure().also { it.setPath(path, false) }
+        val pm = PathMeasure().also { it.setPath(path, false) }
         return CachedChartData(w, offsets, path, pm).also { cachedRef.value = it }
     }
 
     fun updateSelection(tapX: Float, width: Float) {
-        val cache    = resolveCache(width) ?: return
+        val cache = resolveCache(width) ?: return
         val progress = (tapX / width).coerceIn(0f, 1f)
-        val idx      = (progress * (points.size - 1)).roundToInt().coerceIn(0, points.size - 1)
+        val idx = (progress * (points.size - 1)).roundToInt().coerceIn(0, points.size - 1)
         userProgress  = progress
         selectedPoint = SelectedPoint(
-            label          = points[idx].tooltipLabel,
-            value          = interpolateAt(points, progress),
+            label = points[idx].tooltipLabel,
+            value = interpolateAt(points, progress),
             screenPosition = cache.pm.let { pm ->
                 pm.getPosition(pm.length * progress.coerceIn(0f, 1f))
             }
@@ -260,8 +260,8 @@ private fun ChartCanvas(
                 }
                 .pointerInput(points) {
                     detectDragGestures(
-                        onDragStart  = { offset -> updateSelection(offset.x, size.width.toFloat()) },
-                        onDrag       = { change, _ ->
+                        onDragStart = { offset -> updateSelection(offset.x, size.width.toFloat()) },
+                        onDrag = { change, _ ->
                             change.consume()
                             updateSelection(change.position.x, size.width.toFloat())
                         },
@@ -276,11 +276,11 @@ private fun ChartCanvas(
                     repeat(3) { i ->
                         val y = h * ((i + 1f) / 4f)
                         drawLine(
-                            color       = gridColor,
-                            start       = Offset(0f, y),
-                            end         = Offset(w, y),
+                            color = gridColor,
+                            start = Offset(0f, y),
+                            end = Offset(w, y),
                             strokeWidth = 1.dp.toPx(),
-                            pathEffect  = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f))
                         )
                     }
 
@@ -308,14 +308,13 @@ private fun ChartCanvas(
             val offsetY = with(density) { point.screenPosition.y.toDp() - 60.dp }
 
             GlassSurface(
-                modifier    = Modifier.offset(x = offsetX, y = offsetY),
-                shape       = MaterialTheme.shapes.small,
+                modifier = Modifier.offset(x = offsetX, y = offsetY),
+                shape = MaterialTheme.shapes.small,
                 accentColor = lineColor.copy(alpha = 0.5f),
-                baseColor   = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f),
-                blurred     = false
+                blurred = false
             ) {
                 Column(
-                    modifier            = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = point.label, style = MaterialTheme.typography.labelSmall,
@@ -332,7 +331,7 @@ private fun ChartCanvas(
 private fun interpolateAt(data: List<ChartPoint>, progress: Float): Float {
     if (data.size <= 1) return data.firstOrNull()?.value ?: 0f
     val exact = progress * (data.size - 1)
-    val lo    = exact.toInt().coerceIn(0, data.size - 2)
+    val lo = exact.toInt().coerceIn(0, data.size - 2)
     return data[lo].value + (data[lo + 1].value - data[lo].value) * (exact - lo)
 }
 private fun buildSmoothPath(pts: List<Offset>): Path = Path().apply {
@@ -355,7 +354,7 @@ private fun DrawScope.drawFillGradient(
     full: Path, pm: PathMeasure, progress: Float, height: Float, firstX: Float, color: Color
 ) {
     val target = pm.length * progress
-    val path   = Path().apply {
+    val path = Path().apply {
         var started = false
         for (i in 0..FILL_SAMPLE_COUNT) {
             val pos = pm.getPosition((target * i / FILL_SAMPLE_COUNT).coerceAtMost(target))
@@ -384,11 +383,11 @@ private fun DrawScope.drawLineGlow(path: Path, color: Color) {
         canvas.nativeCanvas.drawPath(
             path.asAndroidPath(),
             Paint().apply {
-                this.color  = color.copy(alpha = GLOW_ALPHA).toArgb()
+                this.color = color.copy(alpha = GLOW_ALPHA).toArgb()
                 strokeWidth = GlowStrokeWidth.toPx()
-                style       = Paint.Style.STROKE
-                strokeCap   = Paint.Cap.ROUND
-                maskFilter  = BlurMaskFilter(GlowBlurRadius.toPx(), BlurMaskFilter.Blur.NORMAL)
+                style = Paint.Style.STROKE
+                strokeCap = Paint.Cap.ROUND
+                maskFilter = BlurMaskFilter(GlowBlurRadius.toPx(), BlurMaskFilter.Blur.NORMAL)
                 isAntiAlias = true
             }
         )
@@ -396,9 +395,9 @@ private fun DrawScope.drawLineGlow(path: Path, color: Color) {
 }
 
 private fun DrawScope.drawEndpointIndicator(center: Offset, color: Color) {
-    drawCircle(color.copy(alpha = DOT_HALO_ALPHA), DotHaloRadius.toPx(),   center)
-    drawCircle(color,                            DotFillRadius.toPx(),   center)
-    drawCircle(Color.White,                      DotCenterRadius.toPx(), center)
+    drawCircle(color.copy(alpha = DOT_HALO_ALPHA), DotHaloRadius.toPx(), center)
+    drawCircle(color, DotFillRadius.toPx(), center)
+    drawCircle(Color.White, DotCenterRadius.toPx(), center)
 }
 
 // ========== Preview ==========
@@ -409,11 +408,11 @@ private fun LineChartPreview() {
     MonoTaskTheme {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             LineChart(
-                title        = "XP Activity this week",
-                headlineValue     = "72340",
+                title = "XP Activity this week",
+                headlineValue = "72340",
                 headlineUnit = "xp",
                 trendPercent = 42,
-                points       = listOf(
+                points = listOf(
                     ChartPoint(120f, "Sat"), ChartPoint(0f,   "Sun"),
                     ChartPoint(310f, "Mon"), ChartPoint(85f,  "Tue"),
                     ChartPoint(460f, "Wed"), ChartPoint(230f, "Thu"),

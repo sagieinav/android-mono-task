@@ -88,10 +88,8 @@ internal fun SettingsSection(
 ) {
     SectionTitle(text = title)
     GlassSurface(
-        blurred = false,
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        baseColor = MaterialTheme.colorScheme.surfaceContainer
     ) {
         Column(
             content = content

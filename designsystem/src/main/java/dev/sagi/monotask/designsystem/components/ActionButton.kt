@@ -55,9 +55,11 @@ fun ActionButton(
     )
 
     GlassSurface(
+        shape = shape,
+        baseColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
             .then(
-                if (enabled) Modifier.monoShadow(shape = shape, strength = 0.5f)
+                if (enabled) Modifier.monoShadow(shape = shape, alpha = 0.5f)
                 else Modifier
             )
             .fillMaxWidth()
@@ -68,10 +70,7 @@ fun ActionButton(
                 indication = ripple(),
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick
-            ),
-        shape = shape,
-        baseColor = MaterialTheme.colorScheme.surfaceContainer,
-        blurred = false
+            )
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {
             Row(

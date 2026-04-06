@@ -71,11 +71,12 @@ fun KanbanCard(
     Box(modifier = modifier) {
         // ========== Card surface ==========
         GlassSurface(
+            shape = shape,
+            baseColor = MaterialTheme.colorScheme.surfaceContainer,
             modifier = Modifier
                 .fillMaxWidth()
                 .glassBorder(shape = shape, color = color, width = 1.5.dp)
-                .monoShadow(shape, strength = 0.7f)
-//                .monoShadowWorkaround(shape)
+                .monoShadow(shape, elevation = 12.dp, alpha = 1f)
                 .onGloballyPositioned { coords ->
                     val pos = coords.positionInWindow()
                     cardWindowPos = IntOffset(pos.x.toInt(), pos.y.toInt())
@@ -97,10 +98,7 @@ fun KanbanCard(
                             dropdownExpanded = true
                         }
                     )
-                },
-            shape = shape,
-            baseColor = MaterialTheme.colorScheme.surfaceContainerLow
-//            color = MaterialTheme.colorScheme.surface,
+                }
         ) {
             Column(
                 modifier = Modifier

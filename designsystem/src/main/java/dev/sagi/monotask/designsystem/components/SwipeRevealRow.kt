@@ -63,19 +63,19 @@ data class SwipeRevealAction(
 
 @Composable
 fun SwipeRevealRow(
-    modifier    : Modifier           = Modifier,
-    shape       : Shape              = CircleShape,
-    endAction   : SwipeRevealAction? = null,
+    modifier : Modifier = Modifier,
+    shape : Shape = CircleShape,
+    endAction : SwipeRevealAction? = null,
     startAction : SwipeRevealAction? = null,
-    content     : @Composable () -> Unit
+    content : @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    val haptic  = LocalHapticFeedback.current
+    val haptic = LocalHapticFeedback.current
 
     var pillWidthDp by remember { mutableStateOf(MaxPillWidth) }
-    val pillPx      = with(density) { pillWidthDp.toPx() }
-    val maxDragPx   = with(density) { (pillWidthDp + PillGap).toPx() }
-    val threshPx    = pillPx * REVEAL_THRESHOLD
+    val pillPx = with(density) { pillWidthDp.toPx() }
+    val maxDragPx = with(density) { (pillWidthDp + PillGap).toPx() }
+    val threshPx = pillPx * REVEAL_THRESHOLD
 
     val offsetX = remember { Animatable(0f) }
     val scope   = rememberCoroutineScope()
@@ -86,8 +86,8 @@ fun SwipeRevealRow(
                 onDragEnd = {
                     val offset = offsetX.value
                     when {
-                        offset < -threshPx && endAction   != null -> endAction.onTriggered()
-                        offset >  threshPx && startAction != null -> startAction.onTriggered()
+                        offset < -threshPx && endAction != null -> endAction.onTriggered()
+                        offset > threshPx && startAction != null -> startAction.onTriggered()
                     }
                     scope.launch {
                         offsetX.animateTo(0f, spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMediumLow))
@@ -130,7 +130,7 @@ fun SwipeRevealRow(
             .then(gestureModifier)
     ) {
 
-        if (endAction != null) {
+        endAction?.let {
             Box(
                 modifier = Modifier.matchParentSize(),
                 contentAlignment = Alignment.CenterEnd
@@ -144,16 +144,16 @@ fun SwipeRevealRow(
             }
         }
 
-        if (startAction != null) {
+        startAction?.let {
             Box(
                 modifier = Modifier.matchParentSize(),
                 contentAlignment = Alignment.CenterStart
             ) {
                 SwipePill(
-                    action   = startAction,
-                    shape    = shape,
+                    action = startAction,
+                    shape = shape,
                     modifier = Modifier.fillMaxHeight().width(pillWidthDp),
-                    alpha    = { (offsetX.value / pillPx).coerceIn(0f, 1f) }
+                    alpha = { (offsetX.value / pillPx).coerceIn(0f, 1f) }
                 )
             }
         }
@@ -170,26 +170,25 @@ fun SwipeRevealRow(
 
 @Composable
 private fun SwipePill(
-    action  : SwipeRevealAction,
-    shape   : Shape,
+    action : SwipeRevealAction,
+    shape : Shape,
     modifier: Modifier = Modifier,
-    alpha   : () -> Float
+    alpha : () -> Float
 ) {
     GlassSurface(
-        modifier    = modifier.graphicsLayer { this.alpha = alpha() },
-        shape       = shape,
+        shape = shape,
         accentColor = action.color,
-        blurred     = false
+        modifier = modifier.graphicsLayer { this.alpha = alpha() }
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter            = painterResource(action.icon),
+                painter = painterResource(action.icon),
                 contentDescription = action.label,
-                tint               = action.color.copy(alpha = 0.7f),
-                modifier           = Modifier
+                tint = action.color.copy(alpha = 0.7f),
+                modifier = Modifier
                     .heightIn(max = 100.dp)
                     .fillMaxHeight(0.45f)
                     .aspectRatio(1f)

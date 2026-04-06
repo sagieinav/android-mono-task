@@ -44,14 +44,13 @@ fun MonoDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false) // for consistent horizontal padding from screen edges
         ) {
         GlassSurface(
+            shape = MaterialTheme.shapes.large,
+            baseColor = MaterialTheme.colorScheme.surfaceDim,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
                 .widthIn(min = 280.dp, max = 560.dp)
-                .wrapContentHeight(),
-            shape = MaterialTheme.shapes.large,
-            blurred = false,
-            baseColor = MaterialTheme.colorScheme.surfaceDim
+                .wrapContentHeight()
         ) {
             Column(
                 modifier = Modifier

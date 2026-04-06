@@ -58,14 +58,11 @@ fun MonoDropdownTriggerPill(
     )
 
     GlassSurface(
-        blurred = false,
         shape = CircleShape,
         modifier = modifier
             .height(TOP_BAR_ITEM_HEIGHT)
-//            .monoShadowWorkaround(CircleShape)
             .monoShadow(CircleShape)
-            .clickable(onClick = onClick),
-        baseColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
+            .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
@@ -152,7 +149,8 @@ fun MonoDropdownMenu(
             ) + fadeOut(tween(350))
         ) {
             GlassSurface(
-                shape    = MaterialTheme.shapes.medium,
+                blurred = true,
+                shape = MaterialTheme.shapes.medium,
                 modifier = modifier.widthIn(min = 100.dp, max = 220.dp),
             ) {
                 Column(

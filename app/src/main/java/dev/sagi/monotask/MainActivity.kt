@@ -38,16 +38,11 @@ class MainActivity : ComponentActivity() {
             MonoTaskTheme {
                 val appState = rememberMonoTaskAppState()
 
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppShell(
-                        appState = appState,
-                        pendingInviteUid  = pendingInviteUid,
-                        onInviteDismissed = { pendingInviteUid = null }
-                    )
-                }
+                AppShell(
+                    appState = appState,
+                    pendingInviteUid = pendingInviteUid,
+                    onInviteDismissed = { pendingInviteUid = null }
+                )
             }
         }
     }

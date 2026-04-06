@@ -32,8 +32,8 @@ import dev.sagi.monotask.designsystem.theme.glassBorder
 fun GlassSurface(
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.medium,
-    blurred: Boolean = true,
-    baseColor: Color = Color.Transparent,
+    blurred: Boolean = false,
+    baseColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     accentColor: Color? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -43,11 +43,15 @@ fun GlassSurface(
         modifier = modifier
             .clip(shape)
             .then(
-                if (!blurred) Modifier
-                else Modifier.hazeEffect(hazeState, HazeMaterials.ultraThin())
+                if (blurred)
+                    Modifier
+                        .hazeEffect(hazeState, HazeMaterials.ultraThin())
+                        .glassBackground(accentColor = accentColor, baseColor = Color.Transparent)
+                else
+                    Modifier
+                        .glassBackground(accentColor = accentColor, baseColor = baseColor)
             )
             .glassBorder(shape, accentColor)
-            .glassBackground(accentColor = accentColor, baseColor = baseColor)
     ) {
         content()
     }
@@ -86,7 +90,7 @@ private fun GlassSurfacePreview() {
                         Text("android")
                     }
                 }
-                GlassSurface(blurred = false) {
+                GlassSurface {
                     FlowRow(
                         modifier = Modifier.padding(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -98,7 +102,6 @@ private fun GlassSurfacePreview() {
                     }
                 }
                 GlassSurface(
-                    blurred = false,
                     accentColor = MaterialTheme.colorScheme.primary
                 ) {
                     FlowRow(

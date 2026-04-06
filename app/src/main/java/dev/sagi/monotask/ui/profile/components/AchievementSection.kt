@@ -116,13 +116,12 @@ fun HexagonAchievementBadge(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(20f / 21.3f)
-                .monoShadow(HexagonShape, 8.dp)
                 .clip(HexagonShape)
                 .clickable { if (!achievement.isLocked) showTooltip = !showTooltip }
                 .glassBackground(baseColor = tierColor)
 
                 .border(shape = HexagonShape, color = tierColor, width = 1.dp)
-                .glassBorderPremium(HexagonShape, width = 4.dp)
+                .glassBorderPremium(HexagonShape, width = 3.dp)
 
                 .alpha(alpha)
 

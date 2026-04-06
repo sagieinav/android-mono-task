@@ -84,9 +84,6 @@ private fun FaqItemRow(item: FaqItem) {
 
     GlassSurface(
         shape = MaterialTheme.shapes.medium,
-        blurred = false,
-//        accentColor = MaterialTheme.colorScheme.outlineVariant,
-//        baseColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(

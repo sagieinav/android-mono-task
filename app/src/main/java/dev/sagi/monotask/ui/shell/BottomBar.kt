@@ -40,6 +40,7 @@ import dev.sagi.monotask.designsystem.theme.LocalHazeState
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorderPremium
+import dev.sagi.monotask.designsystem.theme.monoShadow
 import dev.sagi.monotask.designsystem.theme.monoShadowWorkaround
 import dev.sagi.monotask.designsystem.util.Constants
 
@@ -68,7 +69,8 @@ fun BottomNavBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(Constants.Theme.SCREEN_PADDING)
-            .monoShadowWorkaround(shape = MaterialTheme.shapes.large)
+//            .monoShadowWorkaround(shape)
+            .monoShadow(shape)
             .clip(shape)
             .hazeEffect(hazeState, HazeMaterials.ultraThin())
             .glassBorderPremium(shape)

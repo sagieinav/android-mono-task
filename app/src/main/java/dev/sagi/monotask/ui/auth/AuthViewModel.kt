@@ -33,7 +33,6 @@ class AuthViewModel @Inject constructor(
 ) : BaseViewModel<AuthUiState, AuthEvent, AuthUiEffect>() {
 
     override val initialState: AuthUiState = AuthUiState.Loading
-
     private var authStateListener: FirebaseAuth.AuthStateListener? = null
     private var isSigningIn = false  // safe: only read/written on Main dispatcher
 
@@ -46,8 +45,8 @@ class AuthViewModel @Inject constructor(
     override fun onEvent(event: AuthEvent) {
         when (event) {
             is AuthEvent.OnGoogleSignInResult -> onGoogleSignInResult(event.idToken)
-            is AuthEvent.CompleteOnboarding   -> completeOnboarding()
-            is AuthEvent.SignOut              -> signOut()
+            is AuthEvent.CompleteOnboarding -> completeOnboarding()
+            is AuthEvent.SignOut -> signOut()
         }
     }
 
@@ -96,7 +95,7 @@ class AuthViewModel @Inject constructor(
                 .addCredentialOption(option)
                 .build()
 
-            val result     = credentialManager.getCredential(context, request)
+            val result = credentialManager.getCredential(context, request)
             val credential = result.credential
 
             // Credential Manager wraps GoogleIdTokenCredential inside CustomCredential

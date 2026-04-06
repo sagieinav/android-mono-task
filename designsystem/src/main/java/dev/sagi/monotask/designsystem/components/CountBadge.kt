@@ -56,7 +56,7 @@ fun CountBadge(
 @Composable
 private fun CountBadgePreview() {
     MonoTaskTheme {
-        GlassSurface(baseColor = MaterialTheme.colorScheme.surfaceContainer) {
+        GlassSurface {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

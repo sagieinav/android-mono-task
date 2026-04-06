@@ -29,9 +29,7 @@ fun StatCard(
 ) {
     GlassSurface(
         modifier = modifier.fillMaxWidth(),
-        shape = shape,
-        baseColor = MaterialTheme.colorScheme.surfaceContainer,
-        blurred = false
+        shape = shape
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),

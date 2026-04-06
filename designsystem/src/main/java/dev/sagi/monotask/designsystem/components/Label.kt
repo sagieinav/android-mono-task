@@ -61,7 +61,6 @@ fun MonoLabel(
         shape = shape,
         accentColor = accentColor,
         baseColor = baseColor,
-        blurred = false,
         modifier = resolvedModifier
     ) {
         Row(

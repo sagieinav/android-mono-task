@@ -91,11 +91,9 @@ fun KanbanColumn(
 
             // ========== Header ==========
             GlassSurface(
-                blurred = false,
                 shape = colShape,
                 modifier = Modifier
-                    .monoShadow(colShape, strength = 0.8f),
-                    baseColor = MaterialTheme.colorScheme.surfaceContainer
+                    .monoShadow(colShape),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -130,13 +128,10 @@ fun KanbanColumn(
 
             // ========== Body ==========
             GlassSurface(
-                blurred = false,
                 shape = colShape,
                 modifier = Modifier
                     .fillMaxSize()
-                    .monoShadow(colShape, strength = 0.8f),
-                baseColor = MaterialTheme.colorScheme.surfaceContainerHigh
-
+                    .monoShadow(colShape)
             ) {
                 AnimatedContent(
                     targetState = tasks,

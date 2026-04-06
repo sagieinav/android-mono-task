@@ -267,7 +267,6 @@ private fun AceTaskBorderPreview() {
             modifier = Modifier.padding(12.dp)
         ) {
             GlassSurface(
-                blurred = false,
                 modifier = Modifier
                     .padding(12.dp)
                     .aceTaskBorder()

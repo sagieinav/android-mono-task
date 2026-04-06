@@ -188,8 +188,7 @@ private fun FriendRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape),
-            shape = shape,
-            blurred = false
+            shape = shape
         ) {
             Column {
                 Row(

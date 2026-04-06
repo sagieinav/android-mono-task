@@ -228,6 +228,7 @@ fun TopBarIconButton(
 
     GlassSurface(
         shape = CircleShape,
+        accentColor = bgAccentColor,
         modifier = modifier
             .height(TOP_BAR_ITEM_HEIGHT)
             // "remove" shadow when button is pressed:
@@ -242,9 +243,7 @@ fun TopBarIconButton(
                 else Modifier
             )
             .clip(CircleShape)
-            .clickable { onClick() },
-        accentColor = bgAccentColor,
-        baseColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
+            .clickable { onClick() }
     ) {
         Icon(
             painter = painterResource(iconRes),

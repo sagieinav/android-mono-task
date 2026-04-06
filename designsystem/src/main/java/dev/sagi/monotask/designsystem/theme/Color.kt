@@ -42,7 +42,7 @@ val surfaceBrightLight = Color(0xFFF6F2F2)
 val surfaceContainerLowestLight = Color(0xFFF8F8F8)
 val surfaceContainerLowLight = Color(0xFFF4F3F2)
 val surfaceContainerLight = Color(0xFFEEEEEE)
-val surfaceContainerHighLight = Color(0xFFE7E7E7)
+val surfaceContainerHighLight = Color(0xFFE9E9E9)
 val surfaceContainerHighestLight = Color(0xFFE4E2E1)
 
 val primaryLightMediumContrast = Color(0xFF443400)
@@ -268,6 +268,8 @@ val XpViolet = Color(0xFF7643F1) // XP accent color
 val bonusGreen = Color(0xCC39D540)
 val penaltyRed = Color(0xDDDE0F38)
 
+val BackgroundGradientTop = Color(0xFFE6E6E6)
+val BackgroundGradientBottom = Color(0xFFF2F2F2)
 
 
 

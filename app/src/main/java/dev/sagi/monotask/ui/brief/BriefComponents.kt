@@ -100,7 +100,6 @@ fun ExpandableBriefSection(
 
     GlassSurface(
         shape = MaterialTheme.shapes.medium,
-        blurred  = false,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(

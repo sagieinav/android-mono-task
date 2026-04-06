@@ -104,6 +104,7 @@ private fun MonoTooltipShell(
     content: @Composable ColumnScope.() -> Unit
 ) {
     GlassSurface(
+        blurred = true,
         shape = MaterialTheme.shapes.small,
         modifier = modifier.widthIn(max = 280.dp)
     ) {

@@ -65,7 +65,6 @@ internal fun WorkspacesSection(
     SectionTitle("Workspaces")
 
     GlassSurface(
-        blurred = false,
         modifier = Modifier.fillMaxWidth(),
         shape = shape
     ) {

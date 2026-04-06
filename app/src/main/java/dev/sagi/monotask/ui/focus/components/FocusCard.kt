@@ -20,6 +20,7 @@ import dev.sagi.monotask.designsystem.components.GlassSurface
 import dev.sagi.monotask.ui.common.DueDateLabel
 import dev.sagi.monotask.ui.common.ImportanceLabel
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.theme.monoShadow
 
 // ========== FocusCard ==========
 @Composable
@@ -52,10 +53,8 @@ fun FocusCard(
     ) {
         GlassSurface(
             shape = shape,
-            blurred = false,
-            baseColor = MaterialTheme.colorScheme.surfaceContainerLow,
             modifier = Modifier
-//                .monoShadow(shape, elevation = 12.dp)
+                .monoShadow(shape, alpha = 1f)
                 .clip(shape)
                 .heightIn(min = 220.dp)
         ) {
@@ -70,8 +69,6 @@ fun FocusCard(
                 FocusCardFooter(task)
             }
         }
-
-
     }
 }
 

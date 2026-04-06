@@ -63,10 +63,10 @@ fun SegmentedToggle(
         val fillHeight = constraints.hasFixedHeight
 
         GlassSurface(
-            blurred   = blurred,
-            shape     = CircleShape,
+            blurred = blurred,
+            shape = CircleShape,
             baseColor = baseColor,
-            modifier  = if (fillHeight) Modifier.fillMaxHeight() else Modifier
+            modifier = if (fillHeight) Modifier.fillMaxHeight() else Modifier
         ) {
             Box(
                 modifier = Modifier.padding(4.dp)
