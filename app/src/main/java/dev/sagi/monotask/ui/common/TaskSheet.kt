@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.Timestamp
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.designsystem.component.ActionButton
-import dev.sagi.monotask.designsystem.component.MonoBottomSheet
-import dev.sagi.monotask.designsystem.component.MonoChipSelector
-import dev.sagi.monotask.designsystem.component.MonoDatePicker
-import dev.sagi.monotask.designsystem.component.MonoTextField
+import dev.sagi.monotask.designsystem.components.ActionButton
+import dev.sagi.monotask.designsystem.components.MonoBottomSheet
+import dev.sagi.monotask.designsystem.components.MonoChipSelector
+import dev.sagi.monotask.designsystem.components.MonoDatePicker
+import dev.sagi.monotask.designsystem.components.MonoTextField
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.customColors
 import dev.sagi.monotask.util.toRelativeDate

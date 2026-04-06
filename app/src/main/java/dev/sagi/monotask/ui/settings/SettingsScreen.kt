@@ -33,19 +33,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.designsystem.component.ActionButton
-import dev.sagi.monotask.designsystem.component.MonoConfirmDialog
-import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.components.ActionButton
+import dev.sagi.monotask.designsystem.components.MonoConfirmDialog
+import dev.sagi.monotask.designsystem.components.MonoLoadingIndicator
 import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
 import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.gloock
 import dev.sagi.monotask.designsystem.theme.penaltyRed
 import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
-import dev.sagi.monotask.ui.settings.component.SettingsAboutSection
-import dev.sagi.monotask.ui.settings.component.SettingsAccountSection
-import dev.sagi.monotask.ui.settings.component.SettingsFocusPrefsSection
-import dev.sagi.monotask.ui.settings.component.WorkspacesSection
+import dev.sagi.monotask.ui.settings.components.SettingsAboutSection
+import dev.sagi.monotask.ui.settings.components.SettingsAccountSection
+import dev.sagi.monotask.ui.settings.components.SettingsFocusPrefsSection
+import dev.sagi.monotask.ui.settings.components.WorkspacesSection
 import kotlinx.coroutines.flow.collectLatest
 
 

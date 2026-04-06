@@ -8,23 +8,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.sagi.monotask.designsystem.component.EmptyState
+import dev.sagi.monotask.designsystem.components.EmptyState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.google.firebase.Timestamp
-import dev.sagi.monotask.ui.navigation.Screen
+import dev.sagi.monotask.ui.navigation.FocusRoute
 import kotlinx.coroutines.flow.collectLatest
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.designsystem.component.SegmentedToggle
+import dev.sagi.monotask.designsystem.components.SegmentedToggle
 import dev.sagi.monotask.ui.common.EditTaskSheet
 import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
 import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
 import dev.sagi.monotask.designsystem.util.Constants.Theme.KANBAN_PADDING
 import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
 import androidx.compose.material3.SnackbarDuration
-import dev.sagi.monotask.designsystem.component.IllustrationSize
+import dev.sagi.monotask.designsystem.components.IllustrationSize
 import dev.sagi.monotask.designsystem.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
-import dev.sagi.monotask.ui.kanban.component.KanbanColumn
+import dev.sagi.monotask.ui.kanban.components.KanbanColumn
 import java.util.Date
 
 private const val COLUMN_STAGGER_MS = 80
@@ -47,7 +47,7 @@ fun KanbanScreen(
         kanbanVM.effect.collectLatest { effect ->
             when (effect) {
                 is KanbanUiEffect.NavigateToFocus ->
-                    navController.navigate(Screen.Focus.route)
+                    navController.navigate(FocusRoute)
                 is KanbanUiEffect.ShowError ->
                     snackbarHostState.showSnackbar(
                         message = effect.message,
@@ -65,9 +65,9 @@ fun KanbanScreen(
 
     editingTask?.let { task ->
         EditTaskSheet(
-            task      = task,
+            task = task,
             onDismiss = { onKanbanEvent(KanbanEvent.DismissEditSheet) },
-            onSave    = { title, desc, importance, tags, dueDate ->
+            onSave = { title, desc, importance, tags, dueDate ->
                 onKanbanEvent(KanbanEvent.UpdateTask(task.copy(
                     title = title,
                     description = desc,
@@ -99,7 +99,7 @@ fun KanbanScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        top    = innerPadding.calculateTopPadding(),
+                        top = innerPadding.calculateTopPadding(),
                         bottom = innerPadding.calculateBottomPadding()
                     ),
                 contentAlignment = Alignment.Center

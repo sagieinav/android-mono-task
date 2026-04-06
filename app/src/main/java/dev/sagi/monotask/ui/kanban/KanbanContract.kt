@@ -2,10 +2,16 @@ package dev.sagi.monotask.ui.kanban
 
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.designsystem.theme.IconPack
 
 // ========== Sort Order ==========
 
-enum class SortOrder { DUE_ASC, DUE_DESC, CREATED_ASC, CREATED_DESC }
+enum class SortOrder(val label: String, val directionIcon: Int) {
+    DUE_ASC("Due date",  IconPack.ArrowNarrowUp),
+    DUE_DESC("Due date", IconPack.ArrowNarrowDown),
+    CREATED_ASC("Created",  IconPack.ArrowNarrowUp),
+    CREATED_DESC("Created", IconPack.ArrowNarrowDown)
+}
 
 // ========== UI States ==========
 

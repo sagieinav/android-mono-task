@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.Workspace
-import dev.sagi.monotask.designsystem.component.*
+import dev.sagi.monotask.designsystem.components.*
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 
 

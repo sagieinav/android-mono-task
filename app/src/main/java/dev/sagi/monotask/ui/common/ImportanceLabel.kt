@@ -13,7 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.Importance
-import dev.sagi.monotask.designsystem.component.MonoLabel
+import dev.sagi.monotask.designsystem.components.MonoLabel
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.customColors
 

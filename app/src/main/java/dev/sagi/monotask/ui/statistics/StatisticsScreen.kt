@@ -42,15 +42,15 @@ import java.util.Date
 import java.util.Locale
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
-import dev.sagi.monotask.designsystem.component.SegmentedToggle
+import dev.sagi.monotask.designsystem.components.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.components.SegmentedToggle
 import dev.sagi.monotask.designsystem.theme.LocalHazeState
 import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.util.Constants.Theme.TOP_BAR_ITEM_HEIGHT
-import dev.sagi.monotask.ui.statistics.component.allTimeItems
-import dev.sagi.monotask.ui.statistics.component.monthlyItems
-import dev.sagi.monotask.ui.statistics.component.weeklyItems
+import dev.sagi.monotask.ui.statistics.components.allTimeItems
+import dev.sagi.monotask.ui.statistics.components.monthlyItems
+import dev.sagi.monotask.ui.statistics.components.weeklyItems
 
 private val statisticsTabs = listOf("Weekly", "Monthly", "All-Time")
 
@@ -75,11 +75,11 @@ fun StatisticsScreen(
         is StatisticsUiState.Ready -> {
             val readyState = uiState as StatisticsUiState.Ready
             StatisticsReadyContent(
-                state             = readyState,
-                isRefreshing      = readyState.isRefreshing,
-                selectedSection   = selectedSection,
+                state = readyState,
+                isRefreshing = readyState.isRefreshing,
+                selectedSection = selectedSection,
                 onSectionSelected = { selectedSection = it },
-                onRefresh         = { statisticsVM.onEvent(StatisticsEvent.Refresh) },
+                onRefresh = { statisticsVM.onEvent(StatisticsEvent.Refresh) },
             )
         }
     }
@@ -109,9 +109,9 @@ private fun StatisticsReadyContent(
     val refreshBoxTopPadding = topBarHeight + toggleTopGap + toggleHeight
     val contentTopPadding = refreshBoxTopPadding + toggleBottomGap
 
-    var animationKey       by remember { mutableIntStateOf(0) }
-    var lastRefreshedAt    by rememberSaveable { mutableStateOf<Long?>(System.currentTimeMillis()) }
-    var prevRefreshingRef  by remember { mutableStateOf(false) }
+    var animationKey by remember { mutableIntStateOf(0) }
+    var lastRefreshedAt by rememberSaveable { mutableStateOf<Long?>(System.currentTimeMillis()) }
+    var prevRefreshingRef by remember { mutableStateOf(false) }
 
     LaunchedEffect(isRefreshing) {
         val wasRefreshing = prevRefreshingRef
@@ -129,7 +129,7 @@ private fun StatisticsReadyContent(
     val localHazeState = rememberHazeState()
     val pagerState = rememberPagerState(
         initialPage = selectedSection,
-        pageCount   = { statisticsTabs.size }
+        pageCount = { statisticsTabs.size }
     )
 
     // Swipe → update toggle
@@ -146,17 +146,17 @@ private fun StatisticsReadyContent(
     Box(Modifier.fillMaxSize()) {
         PullToRefreshBox(
             isRefreshing = isRefreshing,
-            onRefresh    = onRefresh,
-            state        = refreshState,
-            threshold    = refreshThreshold,
-            indicator    = {
+            onRefresh = onRefresh,
+            state = refreshState,
+            threshold = refreshThreshold,
+            indicator = {
                 PullToRefreshDefaults.LoadingIndicator(
-                    state          = refreshState,
-                    isRefreshing   = isRefreshing,
-                    color          = MaterialTheme.colorScheme.primary,
+                    state = refreshState,
+                    isRefreshing = isRefreshing,
+                    color = MaterialTheme.colorScheme.primary,
                     containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    maxDistance    = refreshThreshold,
-                    modifier       = Modifier
+                    maxDistance = refreshThreshold,
+                    modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = refreshBoxTopPadding)
                 )
@@ -166,18 +166,18 @@ private fun StatisticsReadyContent(
                 .hazeSource(localHazeState)
         ) {
             HorizontalPager(
-                state    = pagerState,
+                state = pagerState,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 LazyColumn(
-                    modifier            = Modifier
+                    modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                         .graphicsLayer {
                             translationY = refreshState.distanceFraction * refreshThreshold.toPx()
                         },
-                    contentPadding      = PaddingValues(
-                        top    = contentTopPadding,
+                    contentPadding = PaddingValues(
+                        top = contentTopPadding,
                         bottom = bottomPadding
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -185,11 +185,11 @@ private fun StatisticsReadyContent(
                     timestampLabel?.let {
                         item {
                             Text(
-                                text      = timestampLabel,
-                                style     = MaterialTheme.typography.labelSmall,
-                                color     = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                text = timestampLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                 textAlign = TextAlign.Center,
-                                modifier  = Modifier
+                                modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 2.dp) // optical correction
                             )
@@ -206,16 +206,16 @@ private fun StatisticsReadyContent(
 
         CompositionLocalProvider(LocalHazeState provides localHazeState) {
             SegmentedToggle(
-                options          = statisticsTabs,
-                selectedIndex    = selectedSection,
+                options = statisticsTabs,
+                selectedIndex = selectedSection,
                 onOptionSelected = onSectionSelected,
-                blurred          = true,
-                modifier         = Modifier
+                blurred = true,
+                modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(
-                        top   = topBarHeight + toggleTopGap,
+                        top = topBarHeight + toggleTopGap,
                         start = 16.dp,
-                        end   = 16.dp,
+                        end = 16.dp,
                     )
                     .height(TOP_BAR_ITEM_HEIGHT)
                     .onSizeChanged { toggleHeightPx = it.height }
@@ -227,12 +227,12 @@ private fun StatisticsReadyContent(
 // ========== Preview ==========
 
 private val previewScreenState = StatisticsUiState.Ready(
-    weeklyXp      = 960,
-    weeklyTasks   = 24,
-    monthlyXp     = 3840,
-    totalXp       = 12450,
-    totalTasks    = 142,
-    aceCount      = 89,
+    weeklyXp = 960,
+    weeklyTasks = 24,
+    monthlyXp = 3840,
+    totalXp = 12450,
+    totalTasks = 142,
+    aceCount = 89,
     longestStreak = 14,
 )
 
@@ -242,11 +242,11 @@ private fun StatisticsScreenWeeklyPreview() {
     MonoTaskTheme {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             StatisticsReadyContent(
-                state             = previewScreenState,
-                isRefreshing      = false,
-                selectedSection   = 0,
+                state = previewScreenState,
+                isRefreshing = false,
+                selectedSection = 0,
                 onSectionSelected = {},
-                onRefresh         = {},
+                onRefresh = {},
             )
         }
     }
@@ -258,11 +258,11 @@ private fun StatisticsScreenMonthlyPreview() {
     MonoTaskTheme {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             StatisticsReadyContent(
-                state             = previewScreenState,
-                isRefreshing      = false,
-                selectedSection   = 1,
+                state = previewScreenState,
+                isRefreshing = false,
+                selectedSection = 1,
                 onSectionSelected = {},
-                onRefresh         = {},
+                onRefresh = {},
             )
         }
     }
@@ -274,11 +274,11 @@ private fun StatisticsScreenAllTimePreview() {
     MonoTaskTheme {
         CompositionLocalProvider(LocalScaffoldPadding provides PaddingValues()) {
             StatisticsReadyContent(
-                state             = previewScreenState,
-                isRefreshing      = false,
-                selectedSection   = 2,
+                state = previewScreenState,
+                isRefreshing = false,
+                selectedSection = 2,
                 onSectionSelected = {},
-                onRefresh         = {},
+                onRefresh = {},
             )
         }
     }

@@ -39,13 +39,13 @@ class SettingsViewModel @Inject constructor(
 
     override fun onEvent(event: SettingsEvent) {
         when (event) {
-            is SettingsEvent.UpdateHyperfocusMode  -> updateHyperfocusMode(event.enabled)
+            is SettingsEvent.UpdateHyperfocusMode -> updateHyperfocusMode(event.enabled)
             is SettingsEvent.UpdatePriorityWeights -> updatePriorityWeights(event.dueDateWeight)
-            is SettingsEvent.UpdateDisplayName     -> updateDisplayName(event.name)
-            is SettingsEvent.CreateWorkspace       -> createWorkspace(event.name)
-            is SettingsEvent.RenameWorkspace       -> renameWorkspace(event.workspace, event.newName)
-            is SettingsEvent.DeleteWorkspace       -> deleteWorkspace(event.workspace)
-            is SettingsEvent.SignOut               -> auth.signOut()
+            is SettingsEvent.UpdateDisplayName -> updateDisplayName(event.name)
+            is SettingsEvent.CreateWorkspace -> createWorkspace(event.name)
+            is SettingsEvent.RenameWorkspace -> renameWorkspace(event.workspace, event.newName)
+            is SettingsEvent.DeleteWorkspace -> deleteWorkspace(event.workspace)
+            is SettingsEvent.SignOut -> auth.signOut()
         }
     }
 

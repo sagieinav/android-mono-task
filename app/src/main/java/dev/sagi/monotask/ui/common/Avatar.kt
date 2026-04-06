@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.sagi.monotask.data.model.User
-import dev.sagi.monotask.designsystem.component.MonoBottomSheet
+import dev.sagi.monotask.designsystem.components.MonoBottomSheet
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorder
@@ -38,7 +38,7 @@ import dev.sagi.monotask.designsystem.theme.glassBorderPremium
 import dev.sagi.monotask.designsystem.util.Constants
 
 /**
- * Raw avatar image — handles auto (DiceBear URL) vs preset drawable.
+ * Raw avatar image. Handles auto (DiceBear URL) vs preset drawable.
  * Apply sizing and clipping from outside via [modifier].
  */
 @Composable
@@ -89,7 +89,7 @@ fun AvatarBox(
 
 
 /**
- * Bottom sheet avatar picker — auto (DiceBear) listed first, followed by preset drawables.
+ * Bottom sheet avatar picker. Auto (DiceBear) listed first, followed by preset drawables.
  */
 @Composable
 fun AvatarPicker(

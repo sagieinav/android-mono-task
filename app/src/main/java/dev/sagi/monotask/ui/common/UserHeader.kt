@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
 import dev.sagi.monotask.ui.focus.FocusUiEffect
-import dev.sagi.monotask.ui.focus.component.LevelUpBadge
+import dev.sagi.monotask.ui.focus.components.LevelUpBadge
 
 @Composable
 fun UserHeader(

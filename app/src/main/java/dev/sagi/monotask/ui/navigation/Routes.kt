@@ -1,23 +1,20 @@
 package dev.sagi.monotask.ui.navigation
 
-class Routes {
-}
+import kotlinx.serialization.Serializable
 
-sealed class Screen(val route: String) {
-    object Auth : Screen("auth")
-    object Login : Screen("login")
-    object Onboarding : Screen("onboarding")
+// ===== Auth flow =====
+@Serializable data object AuthRoute
+@Serializable data object LoginRoute
+@Serializable data object OnboardingRoute
 
-    object Main : Screen("main")
-    object Focus : Screen("focus_hub")
-    object Kanban : Screen("kanban")
-    object Profile : Screen("profile")
-    object Settings : Screen("settings")
+// ===== Main flow =====
+@Serializable data object MainRoute
+@Serializable data object FocusRoute
+@Serializable data object KanbanRoute
+@Serializable data object BriefRoute
+@Serializable data object StatisticsRoute
+@Serializable data object ProfileRoute
+@Serializable data object SettingsRoute
 
-    object Statistics : Screen("statistics")
-    object Brief : Screen("brief")
-
-    object FriendProfile : Screen("friend_profile/{userId}") {
-        fun createRoute(userId: String) = "friend_profile/$userId"
-    }
-}
+// ===== Parameterised =====
+@Serializable data class FriendProfileRoute(val userId: String)

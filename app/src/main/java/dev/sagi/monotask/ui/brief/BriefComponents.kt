@@ -36,10 +36,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
-import dev.sagi.monotask.designsystem.component.CountBadge
-import dev.sagi.monotask.designsystem.component.GlassSurface
-import dev.sagi.monotask.designsystem.component.StateMessage
-import dev.sagi.monotask.designsystem.component.IllustrationSize
+import dev.sagi.monotask.designsystem.components.CountBadge
+import dev.sagi.monotask.designsystem.components.GlassSurface
+import dev.sagi.monotask.designsystem.components.StateMessage
+import dev.sagi.monotask.designsystem.components.IllustrationSize
 import dev.sagi.monotask.designsystem.theme.LocalCustomColors
 import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme

@@ -22,17 +22,17 @@ import dev.sagi.monotask.data.model.AchievementTier
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.common.EditTaskSheet
 import java.util.Date
-import dev.sagi.monotask.designsystem.component.EmptyState
-import dev.sagi.monotask.designsystem.component.IllustrationSize
+import dev.sagi.monotask.designsystem.components.EmptyState
+import dev.sagi.monotask.designsystem.components.IllustrationSize
 import dev.sagi.monotask.ui.common.SnoozeBottomSheet
 import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
 import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
 import dev.sagi.monotask.designsystem.util.Constants
-import dev.sagi.monotask.ui.focus.component.FocusAnimationState
-import dev.sagi.monotask.ui.focus.component.FocusCardSwipeable
-import dev.sagi.monotask.ui.focus.component.SwipeExitDirection
+import dev.sagi.monotask.ui.focus.components.FocusAnimationState
+import dev.sagi.monotask.ui.focus.components.FocusCardSwipeable
+import dev.sagi.monotask.ui.focus.components.SwipeExitDirection
 import dev.sagi.monotask.ui.common.UserHeader
-import dev.sagi.monotask.ui.focus.component.rememberFocusAnimationState
+import dev.sagi.monotask.ui.focus.components.rememberFocusAnimationState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -42,17 +42,17 @@ import kotlinx.coroutines.launch
 fun FocusScreen(
     focusVM: FocusViewModel,
 ) {
-    val uiState            by focusVM.uiState.collectAsStateWithLifecycle()
+    val uiState by focusVM.uiState.collectAsStateWithLifecycle()
     val frozenForAnimation by focusVM.frozenForAnimation.collectAsStateWithLifecycle()
-    val currentUser        by focusVM.currentUser.collectAsStateWithLifecycle()
-    val currentStreak      = currentUser?.stats?.currentStreak ?: 0
-    val editingTask        by focusVM.editingTask.collectAsStateWithLifecycle()
+    val currentUser by focusVM.currentUser.collectAsStateWithLifecycle()
+    val currentStreak = currentUser?.stats?.currentStreak ?: 0
+    val editingTask by focusVM.editingTask.collectAsStateWithLifecycle()
     val snoozeSheetVisible by focusVM.snoozeSheetVisible.collectAsStateWithLifecycle()
-    val snackbarHostState  = LocalSnackbarHostState.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     val stableOnFocusEvent = remember { { event: FocusEvent -> focusVM.onEvent(event) } }
-    val animState          = rememberFocusAnimationState(onFocusEvent = stableOnFocusEvent)
-    var levelUpEvent       by remember { mutableStateOf<FocusUiEffect.ShowLevelUp?>(null) }
+    val animState = rememberFocusAnimationState(onFocusEvent = stableOnFocusEvent)
+    var levelUpEvent by remember { mutableStateOf<FocusUiEffect.ShowLevelUp?>(null) }
 
     // Hold off UI updates while a completion animation is playing,
     // so Firestore snapshots don't interrupt the card animation mid-way
@@ -68,9 +68,9 @@ fun FocusScreen(
         focusVM.effect.collect { effect ->
             if (effect !is FocusUiEffect.ShowUndoComplete) return@collect
             val result = snackbarHostState.showSnackbar(
-                message     = effect.message,
+                message = effect.message,
                 actionLabel = "Undo",
-                duration    = SnackbarDuration.Long
+                duration = SnackbarDuration.Long
             )
             if (result == SnackbarResult.ActionPerformed) {
                 animState.cancelPendingEntryDirection()
@@ -84,9 +84,9 @@ fun FocusScreen(
         focusVM.effect.collect { effect ->
             if (effect !is FocusUiEffect.ShowUndoSnooze) return@collect
             val result = snackbarHostState.showSnackbar(
-                message     = effect.message,
+                message = effect.message,
                 actionLabel = "Undo",
-                duration    = SnackbarDuration.Long
+                duration = SnackbarDuration.Long
             )
             if (result == SnackbarResult.ActionPerformed) {
                 animState.cancelPendingEntryDirection()
@@ -102,19 +102,19 @@ fun FocusScreen(
             when (effect) {
                 is FocusUiEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
-                        message           = effect.message,
+                        message = effect.message,
                         withDismissAction = true,
-                        duration          = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short
                     )
                 }
                 is FocusUiEffect.ShowAchievementUnlocked -> {
                     val tierLabel = when (effect.tier) {
                         AchievementTier.BRONZE -> "🥉"
                         AchievementTier.SILVER -> "🥈"
-                        AchievementTier.GOLD   -> "🥇"
+                        AchievementTier.GOLD -> "🥇"
                     }
                     snackbarHostState.showSnackbar(
-                        message  = "$tierLabel Achievement unlocked: ${effect.name}",
+                        message = "$tierLabel Achievement unlocked: ${effect.name}",
                         duration = SnackbarDuration.Short
                     )
                 }
@@ -127,27 +127,27 @@ fun FocusScreen(
     }
 
     FocusScreenContent(
-        uiState            = displayedUiState,
-        currentStreak      = currentStreak,
-        currentUser        = currentUser,
-        animState          = animState,
-        onFocusEvent       = stableOnFocusEvent,
+        uiState = displayedUiState,
+        currentStreak = currentStreak,
+        currentUser = currentUser,
+        animState = animState,
+        onFocusEvent = stableOnFocusEvent,
         snoozeSheetVisible = snoozeSheetVisible,
-        levelUpEvent       = levelUpEvent,
-        onLevelUpDone      = { levelUpEvent = null }
+        levelUpEvent = levelUpEvent,
+        onLevelUpDone = { levelUpEvent = null }
     )
 
     editingTask?.let { task ->
         EditTaskSheet(
-            task      = task,
+            task = task,
             onDismiss = { focusVM.onEvent(FocusEvent.DismissEditSheet) },
-            onSave    = { title, desc, importance, tags, dueDate ->
+            onSave = { title, desc, importance, tags, dueDate ->
                 focusVM.onEvent(FocusEvent.UpdateTask(task.copy(
-                    title       = title,
+                    title = title,
                     description = desc,
-                    importance  = importance,
-                    tags        = tags,
-                    dueDate     = dueDate?.let { Timestamp(Date(it)) }
+                    importance = importance,
+                    tags = tags,
+                    dueDate = dueDate?.let { Timestamp(Date(it)) }
                 )))
                 focusVM.onEvent(FocusEvent.DismissEditSheet)
             }
@@ -159,18 +159,18 @@ fun FocusScreen(
 
 @Composable
 fun FocusScreenContent(
-    uiState            : FocusUiState,
-    currentStreak      : Int,
-    currentUser        : User?,
-    animState          : FocusAnimationState,
-    onFocusEvent       : (FocusEvent) -> Unit,
+    uiState : FocusUiState,
+    currentStreak : Int,
+    currentUser : User?,
+    animState : FocusAnimationState,
+    onFocusEvent : (FocusEvent) -> Unit,
     snoozeSheetVisible : Boolean = false,
-    levelUpEvent       : FocusUiEffect.ShowLevelUp? = null,
-    onLevelUpDone      : () -> Unit = {}
+    levelUpEvent : FocusUiEffect.ShowLevelUp? = null,
+    onLevelUpDone : () -> Unit = {}
 ) {
-    val innerPadding  = LocalScaffoldPadding.current
-    val scope         = rememberCoroutineScope()
-    val density       = LocalDensity.current
+    val innerPadding = LocalScaffoldPadding.current
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
     val configuration = LocalConfiguration.current
     val screenWidthPx = remember(configuration, density) {
         with(density) { configuration.screenWidthDp.dp.toPx() }
@@ -182,10 +182,10 @@ fun FocusScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                top    = innerPadding.calculateTopPadding(),
+                top = innerPadding.calculateTopPadding(),
                 bottom = innerPadding.calculateBottomPadding(),
-                start  = Constants.Theme.SCREEN_PADDING,
-                end    = Constants.Theme.SCREEN_PADDING
+                start = Constants.Theme.SCREEN_PADDING,
+                end = Constants.Theme.SCREEN_PADDING
             )
     ) {
         UserHeader(
@@ -207,8 +207,8 @@ fun FocusScreenContent(
             }
             is FocusUiState.Active ->
                 ActiveFocusCard(
-                    uiState      = uiState,
-                    animState    = animState,
+                    uiState = uiState,
+                    animState = animState,
                     onFocusEvent = onFocusEvent
                 )
             else -> {}
@@ -227,12 +227,12 @@ fun FocusScreenContent(
 
 @Composable
 private fun ActiveFocusCard(
-    uiState      : FocusUiState.Active,
-    animState    : FocusAnimationState,
+    uiState : FocusUiState.Active,
+    animState : FocusAnimationState,
     onFocusEvent : (FocusEvent) -> Unit,
-    modifier     : Modifier = Modifier
+    modifier : Modifier = Modifier
 ) {
-    val density       = LocalDensity.current
+    val density = LocalDensity.current
     val configuration = LocalConfiguration.current
     val screenWidthPx = remember(configuration, density) {
         with(density) { configuration.screenWidthDp.dp.toPx() }
@@ -265,9 +265,9 @@ private fun ActiveFocusCard(
         modifier = modifier
             .fillMaxSize()
             .graphicsLayer {
-                alpha        = animState.displayAlpha
-                scaleX       = animState.displayScale
-                scaleY       = animState.displayScale
+                alpha = animState.displayAlpha
+                scaleX = animState.displayScale
+                scaleY = animState.displayScale
                 translationX = animState.displayOffsetX
             },
         contentAlignment = Alignment.Center

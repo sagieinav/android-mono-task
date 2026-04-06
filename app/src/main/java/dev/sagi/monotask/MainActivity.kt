@@ -1,6 +1,7 @@
 package dev.sagi.monotask
 
-import dev.sagi.monotask.ui.navigation.MainScaffold
+import dev.sagi.monotask.ui.shell.AppShell
+import dev.sagi.monotask.ui.navigation.rememberMonoTaskAppState
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,15 +16,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import dev.sagi.monotask.ui.auth.AuthViewModel
-import dev.sagi.monotask.ui.settings.SettingsViewModel
-import dev.sagi.monotask.ui.common.UserSessionViewModel
-import dev.sagi.monotask.ui.common.WorkspaceViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
-import dev.sagi.monotask.ui.kanban.KanbanViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -42,31 +36,15 @@ class MainActivity : ComponentActivity() {
             ?.getQueryParameter("uid")
         setContent {
             MonoTaskTheme {
-                val navController = rememberNavController()
-
-                // Activity-scoped ViewModels: shared across multiple screens
-                // Inside setContent {}, LocalViewModelStoreOwner.current points to the Activity itself
-                val authVM: AuthViewModel = hiltViewModel()
-                val settingsVM: SettingsViewModel = hiltViewModel()
-                val workspaceVM: WorkspaceViewModel = hiltViewModel()
-                val userSessionVM: UserSessionViewModel = hiltViewModel()
-
-                val kanbanVM: KanbanViewModel = hiltViewModel()
-                // Screen-scoped VMs (focusVM, kanbanVM, profileVM) are created
-                // inside their composable() blocks in NavGraph
+                val appState = rememberMonoTaskAppState()
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScaffold(
-                        navController = navController,
-                        authVM = authVM,
-                        settingsVM = settingsVM,
-                        workspaceVM = workspaceVM,
-                        userSessionVM = userSessionVM,
-                        kanbanVM = kanbanVM,
-                        pendingInviteUid = pendingInviteUid,
+                    AppShell(
+                        appState = appState,
+                        pendingInviteUid  = pendingInviteUid,
                         onInviteDismissed = { pendingInviteUid = null }
                     )
                 }

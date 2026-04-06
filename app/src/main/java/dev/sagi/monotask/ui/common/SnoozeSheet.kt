@@ -26,10 +26,10 @@ import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.penaltyRed
 import androidx.compose.ui.text.style.TextAlign
 import dev.sagi.monotask.domain.service.XpEngine
-import dev.sagi.monotask.designsystem.component.ActionButton
-import dev.sagi.monotask.designsystem.component.MonoBottomSheet
-import dev.sagi.monotask.designsystem.component.MonoLabel
-import dev.sagi.monotask.designsystem.component.InfoCallout
+import dev.sagi.monotask.designsystem.components.ActionButton
+import dev.sagi.monotask.designsystem.components.MonoBottomSheet
+import dev.sagi.monotask.designsystem.components.MonoLabel
+import dev.sagi.monotask.designsystem.components.InfoCallout
 
 @Composable
 fun SnoozeBottomSheet(

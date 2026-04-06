@@ -32,13 +32,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.ui.common.AvatarBox
 import dev.sagi.monotask.ui.common.AvatarPicker
-import dev.sagi.monotask.designsystem.component.MonoLoadingIndicator
+import dev.sagi.monotask.designsystem.components.MonoLoadingIndicator
 import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.util.Constants
-import dev.sagi.monotask.ui.profile.component.AchievementSectionRow
-import dev.sagi.monotask.ui.profile.component.FriendsSection
-import dev.sagi.monotask.ui.profile.component.XpBar
+import dev.sagi.monotask.ui.profile.components.AchievementSectionRow
+import dev.sagi.monotask.ui.profile.components.FriendsSection
+import dev.sagi.monotask.ui.profile.components.XpBar
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Entry point

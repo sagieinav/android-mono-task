@@ -53,6 +53,14 @@ class WorkspaceViewModel @Inject constructor(
     fun saveCreateDraft(draft: CreateSheetDraft) { _createDraft.value = draft }
     fun clearCreateDraft() { _createDraft.value = CreateSheetDraft() }
 
+    // ========== Create Workspace Dialog State ==========
+
+    private val _createWorkspaceDialogVisible = MutableStateFlow(false)
+    val createWorkspaceDialogVisible: StateFlow<Boolean> = _createWorkspaceDialogVisible.asStateFlow()
+
+    fun openCreateWorkspaceDialog()  { _createWorkspaceDialogVisible.value = true }
+    fun closeCreateWorkspaceDialog() { _createWorkspaceDialogVisible.value = false }
+
     // Safe default. Only used after awaitUid() completes in init
     private var userId: String = ""
 
