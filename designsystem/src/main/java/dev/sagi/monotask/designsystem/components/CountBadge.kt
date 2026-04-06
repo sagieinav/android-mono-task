@@ -32,6 +32,7 @@ fun CountBadge(
     val labelColor = remember(color) { lerp(Color.Black, color, 0.9f).copy(alpha = 0.7f) }
 
     GlassSurface(
+        elevated = false,
         shape = CircleShape,
         baseColor = color.copy(alpha = 0.08f),
         modifier = modifier

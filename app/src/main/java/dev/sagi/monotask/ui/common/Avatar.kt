@@ -35,6 +35,7 @@ import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorder
 import dev.sagi.monotask.designsystem.theme.glassBorderPremium
+import dev.sagi.monotask.designsystem.theme.monoShadow
 import dev.sagi.monotask.designsystem.util.Constants
 
 /**
@@ -78,9 +79,10 @@ fun AvatarBox(
 ) {
     Box(
         modifier = modifier
+            .monoShadow(CircleShape)
             .clip(CircleShape)
             .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
-            .glassBorderPremium(CircleShape),
+            .glassBorderPremium(CircleShape, width = 2.dp),
         contentAlignment = Alignment.Center
     ) {
         AvatarImage(user = user, modifier = Modifier.fillMaxSize())

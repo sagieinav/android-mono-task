@@ -62,12 +62,7 @@ fun SegmentedToggle(
     ) {
         val fillHeight = constraints.hasFixedHeight
 
-        GlassSurface(
-            blurred = blurred,
-            shape = CircleShape,
-            baseColor = baseColor,
-            modifier = if (fillHeight) Modifier.fillMaxHeight() else Modifier
-        ) {
+        val content: @Composable BoxScope.() -> Unit = {
             Box(
                 modifier = Modifier.padding(4.dp)
             ) {
@@ -77,6 +72,21 @@ fun SegmentedToggle(
                     ContentSizedToggleContent(options, selectedIndex, onOptionSelected, textStyle, fillHeight)
                 }
             }
+        }
+
+        if (blurred) {
+            BlurredSurface(
+                shape = CircleShape,
+                modifier = if (fillHeight) Modifier.fillMaxHeight() else Modifier,
+                content = content
+            )
+        } else {
+            GlassSurface(
+                shape = CircleShape,
+                baseColor = baseColor,
+                modifier = if (fillHeight) Modifier.fillMaxHeight() else Modifier,
+                content = content
+            )
         }
     }
 }

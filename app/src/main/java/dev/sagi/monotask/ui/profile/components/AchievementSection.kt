@@ -121,7 +121,7 @@ fun HexagonAchievementBadge(
                 .glassBackground(baseColor = tierColor)
 
                 .border(shape = HexagonShape, color = tierColor, width = 1.dp)
-                .glassBorderPremium(HexagonShape, width = 3.dp)
+                .glassBorderPremium(HexagonShape)
 
                 .alpha(alpha)
 

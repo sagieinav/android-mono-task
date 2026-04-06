@@ -310,8 +310,7 @@ private fun ChartCanvas(
             GlassSurface(
                 modifier = Modifier.offset(x = offsetX, y = offsetY),
                 shape = MaterialTheme.shapes.small,
-                accentColor = lineColor.copy(alpha = 0.5f),
-                blurred = false
+                accentColor = lineColor.copy(alpha = 0.5f)
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),

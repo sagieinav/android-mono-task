@@ -38,6 +38,7 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.ripple
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -76,11 +77,11 @@ fun KanbanCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .glassBorder(shape = shape, color = color, width = 1.5.dp)
-                .monoShadow(shape, elevation = 12.dp, alpha = 1f)
                 .onGloballyPositioned { coords ->
                     val pos = coords.positionInWindow()
                     cardWindowPos = IntOffset(pos.x.toInt(), pos.y.toInt())
                 }
+                .clip(shape)
                 .indication(interactionSource, ripple())
                 .pointerInput(Unit) {
                     detectTapGestures(

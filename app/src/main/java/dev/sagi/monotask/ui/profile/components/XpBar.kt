@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.lerp
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.customColors
+import dev.sagi.monotask.designsystem.theme.monoShadow
 
 
 @Composable

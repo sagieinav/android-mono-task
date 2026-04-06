@@ -116,7 +116,7 @@ fun ChooseSnoozeButton(
             xpPenalty?. let {
                 MonoLabel(
                     label = "$it XP",
-                    color = penaltyRed,
+                    accentColor = penaltyRed,
                     fontWeight = FontWeight.Normal
                 )
             }

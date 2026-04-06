@@ -53,10 +53,7 @@ fun FocusCard(
     ) {
         GlassSurface(
             shape = shape,
-            modifier = Modifier
-                .monoShadow(shape, alpha = 1f)
-                .clip(shape)
-                .heightIn(min = 220.dp)
+            modifier = Modifier.heightIn(min = 220.dp)
         ) {
             Column(
                 modifier = Modifier

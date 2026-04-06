@@ -62,10 +62,9 @@ fun MonoSnackbar(
 
     GlassSurface(
         shape = CircleShape,
-        blurred = true,
+        baseColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
             .padding(10.dp) // external padding
-            .monoShadow(CircleShape)
             .wrapContentSize()
     ) {
         Row(

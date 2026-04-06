@@ -83,6 +83,7 @@ private fun FaqItemRow(item: FaqItem) {
     val chevronRotation by animateFloatAsState(targetValue = if (expanded) 90f else 0f, label = "chevron")
 
     GlassSurface(
+        elevated = false,
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier.fillMaxWidth()
     ) {

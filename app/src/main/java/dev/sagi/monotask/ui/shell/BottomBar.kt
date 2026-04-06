@@ -74,7 +74,7 @@ fun BottomNavBar(
             .clip(shape)
             .hazeEffect(hazeState, HazeMaterials.ultraThin())
             .glassBorderPremium(shape)
-            .glassBackground()
+            .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
         BoxWithConstraints(
             modifier = Modifier

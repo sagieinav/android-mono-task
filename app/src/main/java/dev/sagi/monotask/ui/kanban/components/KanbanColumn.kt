@@ -90,11 +90,7 @@ fun KanbanColumn(
             val cardShape = MaterialTheme.shapes.small
 
             // ========== Header ==========
-            GlassSurface(
-                shape = colShape,
-                modifier = Modifier
-                    .monoShadow(colShape),
-            ) {
+            GlassSurface(shape = colShape) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -129,9 +125,7 @@ fun KanbanColumn(
             // ========== Body ==========
             GlassSurface(
                 shape = colShape,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .monoShadow(colShape)
+                modifier = Modifier.fillMaxSize()
             ) {
                 AnimatedContent(
                     targetState = tasks,

@@ -27,31 +27,26 @@ import dev.sagi.monotask.designsystem.theme.LocalHazeState
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorder
+import dev.sagi.monotask.designsystem.theme.monoShadow
 
 @Composable
 fun GlassSurface(
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.medium,
-    blurred: Boolean = false,
+    elevated: Boolean = true,
     baseColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     accentColor: Color? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val hazeState = LocalHazeState.current
-
     Box(
         modifier = modifier
-            .clip(shape)
             .then(
-                if (blurred)
-                    Modifier
-                        .hazeEffect(hazeState, HazeMaterials.ultraThin())
-                        .glassBackground(accentColor = accentColor, baseColor = Color.Transparent)
-                else
-                    Modifier
-                        .glassBackground(accentColor = accentColor, baseColor = baseColor)
+                if (elevated) Modifier.monoShadow(shape)
+                else Modifier
             )
+            .clip(shape)
             .glassBorder(shape, accentColor)
+            .glassBackground(accentColor = accentColor, baseColor = baseColor)
     ) {
         content()
     }
@@ -79,17 +74,6 @@ private fun GlassSurfacePreview() {
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                GlassSurface(blurred = true) {
-                    FlowRow(
-                        modifier = Modifier.padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text("leetcode")
-                        Text("work")
-                        Text("android")
-                    }
-                }
                 GlassSurface {
                     FlowRow(
                         modifier = Modifier.padding(12.dp),

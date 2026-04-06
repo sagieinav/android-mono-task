@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import dev.sagi.monotask.designsystem.components.GlassSurface
 import dev.sagi.monotask.designsystem.components.MonoTooltip
 import dev.sagi.monotask.designsystem.components.SectionTitle
+import dev.sagi.monotask.designsystem.theme.monoShadow
 import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
 import dev.sagi.monotask.designsystem.util.Constants.Theme.TRAILING_BUTTON_SIZE
 
@@ -86,10 +87,13 @@ internal fun SettingsSection(
     title : String,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val shape = MaterialTheme.shapes.large
+
     SectionTitle(text = title)
+
     GlassSurface(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
+        shape = shape,
     ) {
         Column(
             content = content

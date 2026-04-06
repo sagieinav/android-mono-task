@@ -59,7 +59,7 @@ fun ActionButton(
         baseColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
             .then(
-                if (enabled) Modifier.monoShadow(shape = shape, alpha = 0.5f)
+                if (enabled) Modifier.monoShadow(shape = shape, alpha = 0.4f)
                 else Modifier
             )
             .fillMaxWidth()

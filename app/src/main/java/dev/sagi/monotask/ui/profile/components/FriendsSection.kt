@@ -55,6 +55,7 @@ import dev.sagi.monotask.ui.statistics.components.LineChart
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.customColors
 import dev.sagi.monotask.designsystem.theme.clickableNoRipple
+import dev.sagi.monotask.designsystem.theme.monoShadow
 import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
 import dev.sagi.monotask.designsystem.util.Constants.Theme.TRAILING_BUTTON_SIZE
 import dev.sagi.monotask.ui.profile.FriendStats
@@ -130,8 +131,8 @@ fun FriendsSection(
     deleteTargetFriend?.let { friend ->
         MonoConfirmDialog(
             onDismissRequest = { deleteTargetFriend = null },
-            title = "Remove '${friend.displayName}'?",
-            message = "They will be removed from your friends list.",
+            title = "Remove friend?",
+            message = "${friend.displayName} will be removed from your friends list.",
             confirmLabel = "Remove",
             dismissLabel = "Cancel",
             confirmColor = penaltyRed,
@@ -176,7 +177,9 @@ private fun FriendRow(
 
     SwipeRevealRow(
         shape = shape,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .monoShadow(shape),
         endAction = SwipeRevealAction(
             color = penaltyRed,
             icon = IconPack.Delete,
@@ -185,9 +188,7 @@ private fun FriendRow(
         )
     ) {
         GlassSurface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape),
+            modifier = Modifier.fillMaxWidth(),
             shape = shape
         ) {
             Column {
@@ -228,7 +229,7 @@ private fun FriendRow(
                             MonoLabel(
                                 label = "Lv. ${user.level}",
                                 textStyle = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.outline,
+                                accentColor = MaterialTheme.colorScheme.outline,
                                 shape = CircleShape,
                                 verticalPadding = 2.dp,
                                 horizontalPadding = 8.dp

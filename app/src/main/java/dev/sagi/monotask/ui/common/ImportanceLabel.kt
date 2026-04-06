@@ -43,7 +43,7 @@ fun ImportanceLabel(
 
     MonoLabel(
         label = label,
-        color = color,
+        accentColor = color,
         modifier = modifier,
         leadingContent = {
             Icon(

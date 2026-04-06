@@ -176,6 +176,7 @@ private fun SwipePill(
     alpha : () -> Float
 ) {
     GlassSurface(
+        elevated = false,
         shape = shape,
         accentColor = action.color,
         modifier = modifier.graphicsLayer { this.alpha = alpha() }

@@ -24,7 +24,7 @@ fun TrendBadge(
 
     MonoLabel(
         label = "$prefix$trendPercent%",
-        color = tint,
+        accentColor = tint,
         modifier = modifier,
         leadingContent = {
             Icon(

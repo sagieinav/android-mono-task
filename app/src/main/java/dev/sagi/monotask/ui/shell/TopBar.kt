@@ -220,40 +220,47 @@ fun TopBarIconButton(
     iconRes: Int,
     contentDescription: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    isPressed: Boolean = false
+    modifier: Modifier = Modifier
 ) {
-    val bgAccentColor = if (isPressed) MaterialTheme.colorScheme.onSurface
-                        else null
+
+//    GlassSurface(
+//        shape = CircleShape,
+//        modifier = modifier
+//            .height(TOP_BAR_ITEM_HEIGHT)
+//            .clickable { onClick() }
+//    ) {
+//        Icon(
+//            painter = painterResource(iconRes),
+//            contentDescription = contentDescription,
+//            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//            modifier = Modifier
+//                .align(Alignment.Center)
+//                .size(TOP_BAR_ITEM_HEIGHT)
+//                .padding(8.dp)
+//        )
+//    }
 
     GlassSurface(
         shape = CircleShape,
-        accentColor = bgAccentColor,
-        modifier = modifier
-            .height(TOP_BAR_ITEM_HEIGHT)
-            // "remove" shadow when button is pressed:
-            .then(
-                if (isPressed) Modifier
-                else Modifier.monoShadow(CircleShape)
-            )
-            // add border color if pressed:
-            .then(
-                if (isPressed)
-                    Modifier.glassBorder(CircleShape, MaterialTheme.colorScheme.onSurface)
-                else Modifier
-            )
-            .clip(CircleShape)
-            .clickable { onClick() }
+        modifier = modifier.size(TOP_BAR_ITEM_HEIGHT) // No click or clip here
     ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        // Create an inner layer for clipping the ripple effect
+        Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .size(TOP_BAR_ITEM_HEIGHT)
-                .padding(8.dp)
-        )
+                .fillMaxSize()
+                .clip(CircleShape)
+                .clickable { onClick() }
+        ) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(TOP_BAR_ITEM_HEIGHT)
+                    .padding(8.dp)
+            )
+        }
     }
 }
 

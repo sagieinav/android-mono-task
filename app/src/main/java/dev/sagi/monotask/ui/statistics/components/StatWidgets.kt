@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.data.model.DailyActivity
+import dev.sagi.monotask.designsystem.components.GlassSurface
 import dev.sagi.monotask.designsystem.components.ValueLabel
 import dev.sagi.monotask.designsystem.theme.customColors
 import dev.sagi.monotask.designsystem.theme.LocalScaffoldPadding
@@ -46,6 +48,7 @@ import dev.sagi.monotask.designsystem.theme.circleGlow
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorder
 import dev.sagi.monotask.designsystem.theme.gloock
+import dev.sagi.monotask.designsystem.theme.monoShadow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -147,48 +150,48 @@ fun StatWidgetSmall(
 
     Box(modifier = modifier.height(SmallCardHeight)) {
 
-        // ========== Card body ==========
+        // Main Content:
         Box(
             modifier = Modifier
-                .matchParentSize()
+                .monoShadow(cutoutShape)
                 .clip(cutoutShape)
-                .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+                .glassBackground()
                 .glassBorder(cutoutShape, accentColor)
-        )
-
-        // ========== Content ==========
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = ContentHorizPadding, vertical = 0.dp)
-                .padding(top = ContentTopPadding, bottom = ContentBottomPadding),
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.padding(end = titleEndPadding)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = ContentHorizPadding, vertical = 0.dp)
+                    .padding(top = ContentTopPadding, bottom = ContentBottomPadding),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    lineHeight = 20.sp, // reduce vertical "padding" when wrapped
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                subtitle?. let {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(end = titleEndPadding)
+                ) {
                     Text(
-                        text = it,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = accentColor.copy(alpha = 0.8f)
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        lineHeight = 20.sp, // reduce vertical "padding" when wrapped
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    subtitle?. let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = accentColor.copy(alpha = 0.8f)
+                        )
+                    }
                 }
-            }
 
-            ValueLabel(value = value, unit = unit)
+                ValueLabel(value = value, unit = unit)
+            }
         }
 
-        // ========== Circle icon ==========
+
+        // Circle Icon:
         Box(modifier = Modifier.align(Alignment.TopEnd)) {
             WidgetIconCircle(icon = icon, accentColor = accentColor)
         }
@@ -217,95 +220,92 @@ fun StatWidgetMedium(
 
     Box(modifier = modifier.fillMaxWidth().height(MediumCardHeight)) {
 
-        // ========== Card body ==========
+        // Main Content:
         Box(
             modifier = Modifier
-                .matchParentSize()
+                .monoShadow(cutoutShape)
                 .clip(cutoutShape)
-                .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+                .glassBackground()
                 .glassBorder(cutoutShape, accentColor)
-        )
-
-        // ========== Content ==========
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = ContentHorizPadding)
-                .padding(top = ContentTopPadding, bottom = ContentBottomPadding),
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
-
-            // ========== Top section ==========
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = ContentHorizPadding)
+                    .padding(top = ContentTopPadding, bottom = ContentBottomPadding),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.weight(1f)
+                // Top Section:
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    // Main title
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontFamily = gloock,
-                        color = accentColor.copy(alpha = 0.9f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        // Date label
-                        dateLabel?. let {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // Main Title:
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = accentColor.copy(alpha = 0.9f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            // Date Label:
+                            dateLabel?. let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = accentColor
+                                )
+                            }
+                            // Subtitle:
                             Text(
-                                text = it,
+                                text = subtitle,
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Medium,
-                                color = accentColor
+//                            fontWeight = FontWeight.Light,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                             )
                         }
 
-                        // Subtitle
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.labelSmall,
-//                            fontWeight = FontWeight.Light,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
                     }
-
                 }
-            }
 
-            // ========== Bottom section ==========
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                ValueLabel(value = value, unit = unit)
-                // Trailing value and unit (if not null)
-                trailingValue?. let { value ->
-                    Column(horizontalAlignment = Alignment.End) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            Text(
-                                text = value,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                                modifier = Modifier.alignByBaseline()
-                            )
-                            trailingUnit?. let { unit ->
+                // Bottom Section:
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    ValueLabel(value = value, unit = unit)
+                    // Trailing value and unit (if not null)
+                    trailingValue?. let { value ->
+                        Column(horizontalAlignment = Alignment.End) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.Bottom
+                            ) {
                                 Text(
-                                    text = unit,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    text = value,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                                     modifier = Modifier.alignByBaseline()
                                 )
+                                trailingUnit?. let { unit ->
+                                    Text(
+                                        text = unit,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Normal,
+                                        color = MaterialTheme.colorScheme.outlineVariant,
+                                        modifier = Modifier.alignByBaseline()
+                                    )
+                                }
                             }
                         }
                     }

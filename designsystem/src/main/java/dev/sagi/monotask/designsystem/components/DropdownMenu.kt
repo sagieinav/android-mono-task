@@ -56,40 +56,46 @@ fun MonoDropdownTriggerPill(
         animationSpec = tween(200),
         label = "chevron"
     )
+    val shape = CircleShape
 
     GlassSurface(
-        shape = CircleShape,
-        modifier = modifier
-            .height(TOP_BAR_ITEM_HEIGHT)
-            .monoShadow(CircleShape)
-            .clickable(onClick = onClick)
+        shape = shape,
+        modifier = modifier.height(TOP_BAR_ITEM_HEIGHT)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 10.dp)
-                .align(Alignment.Center),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .clip(shape)
+                .clickable(onClick = onClick)
         ) {
-            val color = MaterialTheme.colorScheme.onSurfaceVariant
-            Text(
-                text = text,
-                style = textStyle,
-                fontWeight = FontWeight.SemiBold,
-                color = color,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.widthIn(max = 140.dp)
-            )
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron),
-                contentDescription = null,
-                tint = color,
+            Row(
                 modifier = Modifier
-                    .size(20.dp)
-                    .rotate(chevronRotation)
-            )
+                    .padding(start = 16.dp, end = 10.dp)
+                    .align(Alignment.Center),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                val color = MaterialTheme.colorScheme.onSurfaceVariant
+                Text(
+                    text = text,
+                    style = textStyle,
+                    fontWeight = FontWeight.SemiBold,
+                    color = color,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.widthIn(max = 140.dp)
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_chevron),
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .rotate(chevronRotation)
+                )
+            }
         }
+
     }
 }
 
@@ -148,8 +154,7 @@ fun MonoDropdownMenu(
                 shrinkTowards = Alignment.Top
             ) + fadeOut(tween(350))
         ) {
-            GlassSurface(
-                blurred = true,
+            BlurredSurface(
                 shape = MaterialTheme.shapes.medium,
                 modifier = modifier.widthIn(min = 100.dp, max = 220.dp),
             ) {
@@ -208,17 +213,20 @@ fun MonoDropdownItem(
 ) {
     val selectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
     val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    val shape = MaterialTheme.shapes.small
+    val iconSize = 18.dp
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.small)
+            .clip(shape)
             .clickable(onClick = onClick)
             .then(
-                if (!isSelected) Modifier
-                        else Modifier
-                            .glassBorder(MaterialTheme.shapes.small)
-                            .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+                if (isSelected) Modifier
+                    .glassBorder(shape)
+                    .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
+                else Modifier
+
             )
             .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -237,7 +245,7 @@ fun MonoDropdownItem(
                     painter = painterResource(it),
                     contentDescription = null,
                     tint = if (isSelected) selectedColor else unselectedColor,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(iconSize)
                 )
             }
         }
@@ -249,7 +257,7 @@ fun MonoDropdownItem(
                     painter = painterResource(R.drawable.ic_check_circle),
                     contentDescription = "Dropdown item selected",
                     tint = selectedColor,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(iconSize)
                 )
             }
         }

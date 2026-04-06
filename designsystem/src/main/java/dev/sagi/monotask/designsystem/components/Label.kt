@@ -1,8 +1,6 @@
 package dev.sagi.monotask.designsystem.components
 
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -10,14 +8,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -34,34 +30,29 @@ import dev.sagi.monotask.designsystem.theme.googleSans
 @Composable
 fun MonoLabel(
     label: String,
-    color: Color,
     modifier: Modifier = Modifier,
+    accentColor: Color? = null,
     shape: Shape = MaterialTheme.shapes.extraSmall,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
     fontFamily: FontFamily = googleSans,
     fontWeight: FontWeight = FontWeight.Light,
     horizontalPadding: Dp = 6.dp,
     verticalPadding: Dp = 5.dp,
-    accentColor: Color? = color,
-    baseColor: Color = color.copy(alpha = 0.04f),
-    onClick: (() -> Unit)? = null,
     leadingContent: @Composable (() -> Unit)? = null
 ) {
-    val resolvedModifier = if (onClick != null) {
-        modifier
-            .clip(shape)
-            .clickable(
-                indication = ripple(),
-                interactionSource = remember { MutableInteractionSource() },
-                onClick = onClick
-            )
-    } else modifier
+    val resolvedAccentColor = accentColor ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+    
+    val baseColor = if (accentColor != null)
+                        lerp(accentColor, MaterialTheme.colorScheme.surfaceContainerLowest, 0.96f)
+                    else
+                        MaterialTheme.colorScheme.surfaceContainerHigh
 
     GlassSurface(
+        elevated = false,
         shape = shape,
         accentColor = accentColor,
         baseColor = baseColor,
-        modifier = resolvedModifier
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier
@@ -80,7 +71,7 @@ fun MonoLabel(
                     )
                 ),
                 fontWeight = fontWeight,
-                color = color
+                color = resolvedAccentColor
             )
         }
     }
@@ -98,9 +89,9 @@ private fun MonoLabelDefaultPreview() {
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            MonoLabel(label = "High", color = Color(0xFFE57373))
-            MonoLabel(label = "Work", color = Color(0xFF64B5F6))
-            MonoLabel(label = "Done", color = Color(0xFF81C784))
+            MonoLabel(label = "High", accentColor = Color(0xFFE57373))
+            MonoLabel(label = "Work", accentColor = Color(0xFF64B5F6))
+            MonoLabel(label = "Done", accentColor = Color(0xFF81C784))
         }
     }
 }
@@ -116,7 +107,7 @@ private fun MonoLabelWithIconPreview() {
             val color = Color(0xFFE57373)
             MonoLabel(
                 label = "Due soon",
-                color = color,
+                accentColor = color,
                 leadingContent = {
                     Icon(
                         painter = painterResource(R.drawable.ic_due_calendar),
@@ -138,7 +129,7 @@ private fun MonoLabelClickablePreview() {
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            MonoLabel(label = "Tappable", color = Color(0xFF64B5F6), onClick = {})
+            MonoLabel(label = "Tappable", accentColor = Color(0xFF64B5F6))
         }
     }
 }

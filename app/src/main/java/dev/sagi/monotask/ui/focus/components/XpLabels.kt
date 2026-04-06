@@ -59,7 +59,7 @@ fun XpLabel(xp: Int, modifier: Modifier = Modifier) {
     val color = MaterialTheme.customColors.xp
     MonoLabel(
         label = "$xp XP",
-        color = color,
+        accentColor = color,
         modifier = modifier,
         leadingContent = {
             Icon(

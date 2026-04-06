@@ -39,6 +39,7 @@ import dev.sagi.monotask.designsystem.components.MonoTextInputDialog
 import dev.sagi.monotask.designsystem.components.SectionTitle
 import dev.sagi.monotask.ui.common.CreateWorkspaceDialog
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
+import dev.sagi.monotask.designsystem.theme.monoShadow
 import dev.sagi.monotask.designsystem.theme.penaltyRed
 import dev.sagi.monotask.designsystem.util.Constants.Theme.SCREEN_PADDING
 import dev.sagi.monotask.designsystem.util.Constants.Theme.TRAILING_BUTTON_SIZE

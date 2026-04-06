@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 
 
-
 @SuppressLint("SuspiciousModifierThen")
 fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = this.then(
     clickable(
@@ -91,8 +90,8 @@ fun Modifier.monoShadowWorkaround(
 
 fun Modifier.monoShadow(
     shape: Shape,
-    elevation: Dp = 20.dp,
-    alpha: Float = 0.7f
+    alpha: Float = 0.6f,
+    elevation: Dp = 20.dp
 ): Modifier = composed {
     this
         .shadow(
@@ -107,7 +106,7 @@ fun Modifier.monoShadow(
 // This is more expensive to use. Mainly for big, noticeable components
 fun Modifier.glassBorderPremium(
     shape: Shape,
-    width: Dp = 2.dp
+    width: Dp = 3.dp
 ): Modifier = composed {
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant
 
@@ -120,25 +119,25 @@ fun Modifier.glassBorderPremium(
             size.width / 2.0
         ) / (2 * PI)).toFloat()
 
-        val bright = Color.White.copy(alpha = 0.6f)
-        val dark   = Color.White.copy(alpha = 0.05f)
+        val bright = Color.White.copy(alpha = 0.8f)
+        val dark = Color.White.copy(alpha = 0.05f)
 
-        // Cached — only rebuilt when size changes
+        // Cached, only rebuilt when size changes
         val brush = Brush.sweepGradient(
             colorStops = arrayOf(
-                0f                      to bright,
-                cornerFraction          to bright,
+                0f to bright,
+                cornerFraction to bright,
                 (0.5f - cornerFraction) to dark,
                 (0.5f + cornerFraction) to bright,
-                (1f - cornerFraction)   to dark,
-                1f                      to bright,
+                (1f - cornerFraction) to dark,
+                1f to bright,
             ),
             center = Offset(size.width / 2f, size.height / 2f)
         )
 
         val outerBrush = SolidColor(outlineVariant.copy(alpha = 0.4f))
 
-        // Cached — only rebuilt when size changes
+        // Cached, only rebuilt when size changes
         val outline = shape.createOutline(size, layoutDirection, this)
 
         onDrawWithContent {
@@ -146,14 +145,14 @@ fun Modifier.glassBorderPremium(
             // Inner glass stroke
             drawOutline(
                 outline = outline,
-                brush   = brush,
-                style   = Stroke(width = innerWidth)
+                brush = brush,
+                style = Stroke(width = innerWidth)
             )
             // Outer definition stroke
             drawOutline(
                 outline = outline,
-                brush   = outerBrush,
-                style   = Stroke(width = outerWidth)
+                brush = outerBrush,
+                style = Stroke(width = outerWidth)
             )
         }
     }
@@ -209,11 +208,19 @@ fun Modifier.glassBorder(
 
 fun Modifier.glassBackground(
     accentColor: Color? = null,
-    baseColor: Color = Color.Transparent // solid base bg layer
-): Modifier {
+    baseColor: Color = Color.Unspecified
+): Modifier = composed {
+
+    // Resolve the actual base color
+    val resolvedBaseColor = if (baseColor == Color.Unspecified) {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    } else {
+        baseColor
+    }
+
     val shineBrush = if (accentColor == null) {
         Brush.verticalGradient(
-            colors = listOf(Color.White.copy(alpha = 0.7f), Color.Transparent)
+            colors = listOf(Color.White.copy(alpha = 0.6f), Color.Transparent)
         )
     } else {
         Brush.linearGradient(
@@ -225,21 +232,11 @@ fun Modifier.glassBackground(
             )
         )
     }
-    return this
-        .background(baseColor) // solid base
+    this
+        .background(resolvedBaseColor) // solid base
         .background(shineBrush) // glass shine on top
 }
 
-
-// "Invincible" border. used for readability mainly
-fun Modifier.invincibleBorder(shape: Shape): Modifier = composed {
-    this
-        .border(
-            width = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f),
-            shape = shape
-        )
-}
 
 
 // circleRadius: the radius of the shadow circle drawn. Defaults to size.width/2 (fills the box).
@@ -254,7 +251,7 @@ fun Modifier.circleGlow(
     if (color.alpha < 0.05f) return@drawBehind
     drawIntoCanvas { canvas ->
         val shadowRadius = circleRadius?.toPx() ?: (size.width / 2f)
-        val paint = android.graphics.Paint().apply {
+        val paint = Paint().apply {
             isAntiAlias = true
             this.color = android.graphics.Color.TRANSPARENT
             setShadowLayer(
