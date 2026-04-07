@@ -6,6 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import dev.sagi.monotask.designsystem.animation.MonoAnimations
+import dev.sagi.monotask.designsystem.animation.tabSlideIn
+import dev.sagi.monotask.designsystem.animation.tabSlideOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -75,27 +78,27 @@ fun MonoTaskNavHost(
             startDestination = startDestination,
             enterTransition = {
                 if (targetState.destination.hasRoute<SettingsRoute>())
-                    slideInVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it }
+                    slideInVertically(tween(MonoAnimations.TAB_TRANSITION_MS, easing = FastOutSlowInEasing)) { it }
                 else
-                    tabSlideIn(initialState.destination.route, targetState.destination.route)
+                    tabSlideIn(isForward(initialState.destination.route, targetState.destination.route))
             },
             exitTransition = {
                 if (targetState.destination.hasRoute<SettingsRoute>())
-                    fadeOut(tween(navAnimationDuration))
+                    fadeOut(tween(MonoAnimations.TAB_TRANSITION_MS))
                 else
-                    tabSlideOut(initialState.destination.route, targetState.destination.route)
+                    tabSlideOut(isForward(initialState.destination.route, targetState.destination.route))
             },
             popEnterTransition = {
                 if (initialState.destination.hasRoute<SettingsRoute>())
-                    fadeIn(tween(navAnimationDuration))
+                    fadeIn(tween(MonoAnimations.TAB_TRANSITION_MS))
                 else
-                    tabSlideIn(initialState.destination.route, targetState.destination.route)
+                    tabSlideIn(isForward(initialState.destination.route, targetState.destination.route))
             },
             popExitTransition = {
                 if (initialState.destination.hasRoute<SettingsRoute>())
-                    slideOutVertically(tween(navAnimationDuration, easing = FastOutSlowInEasing)) { it }
+                    slideOutVertically(tween(MonoAnimations.TAB_TRANSITION_MS, easing = FastOutSlowInEasing)) { it }
                 else
-                    tabSlideOut(initialState.destination.route, targetState.destination.route)
+                    tabSlideOut(isForward(initialState.destination.route, targetState.destination.route))
             }
         ) {
             authGraph(navController, authVM)

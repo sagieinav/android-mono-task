@@ -1,18 +1,12 @@
 package dev.sagi.monotask.ui.focus
 
 import dev.sagi.monotask.designsystem.theme.IconPack
-import androidx.compose.animation.core.EaseInQuart
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -30,7 +24,6 @@ import dev.sagi.monotask.designsystem.theme.LocalSnackbarHostState
 import dev.sagi.monotask.designsystem.util.Constants
 import dev.sagi.monotask.ui.focus.components.FocusAnimationState
 import dev.sagi.monotask.ui.focus.components.FocusCardSwipeable
-import dev.sagi.monotask.ui.focus.components.SwipeExitDirection
 import dev.sagi.monotask.ui.common.UserHeader
 import dev.sagi.monotask.ui.focus.components.rememberFocusAnimationState
 import kotlinx.coroutines.flow.collectLatest
@@ -61,36 +54,20 @@ fun FocusScreen(
         if (!frozenForAnimation) displayedUiState = uiState
     }
 
-    // Undo-complete snackbar. Uses `collect` (NOT collectLatest) so that subsequent
+    // Undo snackbar. Uses `collect` (NOT collectLatest) so that subsequent
     // effects (level-up, achievements) can never cancel it mid-display.
     // Long duration gives a comfortable window to press Undo.
     LaunchedEffect(Unit) {
         focusVM.effect.collect { effect ->
-            if (effect !is FocusUiEffect.ShowUndoComplete) return@collect
-            val result = snackbarHostState.showSnackbar(
-                message = effect.message,
-                actionLabel = "Undo",
-                duration = SnackbarDuration.Long
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                animState.cancelPendingEntryDirection()
-                focusVM.onEvent(FocusEvent.UndoCompleteTask)
+            val (message, undoEvent) = when (effect) {
+                is FocusUiEffect.ShowUndoComplete -> effect.message to FocusEvent.UndoCompleteTask
+                is FocusUiEffect.ShowUndoSnooze -> effect.message to FocusEvent.UndoSnoozeTask
+                else -> return@collect
             }
-        }
-    }
-
-    // Undo-snooze snackbar. Same reasoning as above.
-    LaunchedEffect(Unit) {
-        focusVM.effect.collect { effect ->
-            if (effect !is FocusUiEffect.ShowUndoSnooze) return@collect
-            val result = snackbarHostState.showSnackbar(
-                message = effect.message,
-                actionLabel = "Undo",
-                duration = SnackbarDuration.Long
-            )
+            val result = snackbarHostState.showSnackbar(message, "Undo", duration = SnackbarDuration.Long)
             if (result == SnackbarResult.ActionPerformed) {
                 animState.cancelPendingEntryDirection()
-                focusVM.onEvent(FocusEvent.UndoSnoozeTask)
+                focusVM.onEvent(undoEvent)
             }
         }
     }
@@ -206,12 +183,17 @@ fun FocusScreenContent(
                 )
             }
             is FocusUiState.Active ->
-                ActiveFocusCard(
-                    uiState = uiState,
-                    animState = animState,
-                    onFocusEvent = onFocusEvent
-                )
-            else -> {}
+                key(uiState.focusTask.id, uiState.restoreVersion) {
+                    FocusCardSwipeable(
+                        task = uiState.focusTask,
+                        restoreVersion = uiState.restoreVersion,
+                        animState = animState,
+                        onSwipeRight = { onFocusEvent(FocusEvent.CompleteTask) },
+                        onSwipeLeft  = { onFocusEvent(FocusEvent.OpenSnooze) },
+                        onLongPress  = { onFocusEvent(FocusEvent.OpenEditSheet) }
+                    )
+                }
+            is FocusUiState.Loading -> {} // unreachable: handled by early return above
         }
     }
 
@@ -223,68 +205,3 @@ fun FocusScreenContent(
     }
 }
 
-// ========== Active Card ==========
-
-@Composable
-private fun ActiveFocusCard(
-    uiState : FocusUiState.Active,
-    animState : FocusAnimationState,
-    onFocusEvent : (FocusEvent) -> Unit,
-    modifier : Modifier = Modifier
-) {
-    val density = LocalDensity.current
-    val configuration = LocalConfiguration.current
-    val screenWidthPx = remember(configuration, density) {
-        with(density) { configuration.screenWidthDp.dp.toPx() }
-    }
-
-    SideEffect {
-        animState.checkIfNeedsReset(uiState.focusTask.id, uiState.restoreVersion)
-    }
-
-    LaunchedEffect(uiState.focusTask.id, uiState.restoreVersion) {
-        val isSlideIn = animState.resetCard()
-        launch {
-            animState.border.animateTo(1f,   tween(1600, easing = EaseInQuart))
-            animState.border.animateTo(1.1f, tween(200))
-        }
-        if (isSlideIn) {
-            launch { animState.alpha.animateTo(1f, tween(200)) }
-            launch { animState.offsetX.animateTo(0f, tween(350, easing = FastOutSlowInEasing)) }
-        } else {
-            val entrySpec = spring<Float>(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness    = Spring.StiffnessLow
-            )
-            launch { animState.alpha.animateTo(1f, tween(300)) }
-            launch { animState.scale.animateTo(1f, entrySpec) }
-        }
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                alpha = animState.displayAlpha
-                scaleX = animState.displayScale
-                scaleY = animState.displayScale
-                translationX = animState.displayOffsetX
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        key(uiState.focusTask.id, uiState.restoreVersion) {
-            FocusCardSwipeable(
-                task = uiState.focusTask,
-                exitTrigger = animState.snoozeExitTrigger,
-                borderFraction = animState.displayBorder,
-                onSwipeRight = {
-                    animState.setNextEntryDirection(SwipeExitDirection.RIGHT, screenWidthPx)
-                    onFocusEvent(FocusEvent.CompleteTask)
-                },
-                onSwipeLeft = { onFocusEvent(FocusEvent.OpenSnooze) },
-                onLongPress = { onFocusEvent(FocusEvent.OpenEditSheet) },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}

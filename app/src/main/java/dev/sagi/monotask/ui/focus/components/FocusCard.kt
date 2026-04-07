@@ -2,14 +2,12 @@
 
 package dev.sagi.monotask.ui.focus.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,15 +19,15 @@ import dev.sagi.monotask.designsystem.components.GlassSurface
 import dev.sagi.monotask.ui.common.DueDateLabel
 import dev.sagi.monotask.ui.common.ImportanceLabel
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
-import dev.sagi.monotask.designsystem.theme.monoShadow
+import dev.sagi.monotask.designsystem.theme.customColors
+import dev.sagi.monotask.designsystem.theme.outlineBorder
+import dev.sagi.monotask.designsystem.theme.premiumBorder
 
-// ========== FocusCard ==========
 @Composable
 fun FocusCard(
     task: Task,
-    borderFraction: Float,
-    modifier: Modifier = Modifier,
-    hideXpLabel: Boolean = false
+    entryProgressProvider: () -> Float,
+    modifier: Modifier = Modifier
 ) {
     val shape = MaterialTheme.shapes.large
     val borderWidth = 5.dp
@@ -37,18 +35,19 @@ fun FocusCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = borderWidth / 2)
-//            .glassBorder(shape, MaterialTheme.customColors.aceDim, 8.dp)
+            .padding(horizontal = borderWidth / 2) // compensate for external border
             .then(
-                if (task.isAce) Modifier.aceTaskBorder(
+                if (task.isAce) Modifier.premiumBorder(
                     shape = shape,
-                    drawFraction = borderFraction,
-                    borderWidth = borderWidth
+                    color = MaterialTheme.customColors.ace,
+                    borderWidth = borderWidth,
+                    entryProgressProvider = entryProgressProvider
                 )
-                else Modifier.defaultTaskBorder(
+                else Modifier.outlineBorder(
                     shape = shape,
-                    drawFraction = 2f,
-                    borderWidth = borderWidth
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    borderWidth = borderWidth,
+                    entryProgressProvider = entryProgressProvider
                 )
             )
     ) {
@@ -64,9 +63,9 @@ fun FocusCard(
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(40.dp)
             ) {
-                FocusCardHeader(task = task, hideXpLabel = hideXpLabel)
+                FocusCardHeader(task = task)
                 FocusCardBody(task)
-                FocusCardFooter(task)
+                if (task.tags.isNotEmpty()) FocusCardFooter(task)
             }
         }
     }
@@ -74,14 +73,13 @@ fun FocusCard(
 
 
 // ========== Header: XpChip + ImportanceChip ==========
-
 @Composable
-private fun FocusCardHeader(task: Task, hideXpLabel: Boolean = false) {
+private fun FocusCardHeader(task: Task) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (!hideXpLabel) XpLabel(xp = task.currentXp)
+        XpLabel(xp = task.currentXp)
         ImportanceLabel(importance = task.importance)
         Spacer(Modifier.weight(1f))
         task.dueDate?.let { DueDateLabel(it) } ?: Spacer(Modifier)
@@ -90,16 +88,11 @@ private fun FocusCardHeader(task: Task, hideXpLabel: Boolean = false) {
 
 
 // ========== Body: Title + Description ==========
-
 @Composable
 private fun FocusCardBody(task: Task) {
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        val titleWrapped = task.title
-            .replace("-", "-\u200B")
-            .replace("—", "—\u200B")
-
         Text(
-            text = titleWrapped,
+            text = task.title,
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth(),
@@ -121,7 +114,6 @@ private fun FocusCardBody(task: Task) {
 
 
 // ========== Footer: DueDateTag + Custom Tags ==========
-
 @Composable
 private fun FocusCardFooter(task: Task) {
     FlowRow(
@@ -135,13 +127,13 @@ private fun FocusCardFooter(task: Task) {
 
 
 // ========== Preview ==========
-
 @Preview(showBackground = true)
 @Composable
 private fun FocusCardPreview() {
     MonoTaskTheme {
         Box(modifier = Modifier.size(360.dp).padding(18.dp)) {
             FocusCard(
+                entryProgressProvider = { 1f },
                 task = Task(
                     id = "1",
                     title = "Build Swipe-to-Complete",
@@ -150,39 +142,8 @@ private fun FocusCardPreview() {
                     tags = listOf("CS101", "ds"),
                     snoozeCount = 0,
                     dueDate = Timestamp.now()
-                ),
-                borderFraction = 0.5f
+                )
             )
         }
     }
 }
-
-//@Preview @Composable
-//private fun DummyPreview() {
-//    Box(
-//        Modifier
-//            .size(200.dp)
-//            .background(MaterialTheme.colorScheme.background)
-//    ) {
-//        Box(
-//            Modifier
-//                .size(200.dp)
-//                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-//        )
-//    }
-//}
-//
-//@Preview @Composable
-//private fun DummyPreview2() {
-//    Box(
-//        Modifier
-//            .size(200.dp)
-//            .background(MaterialTheme.colorScheme.background)
-//    ) {
-//        Box(
-//            Modifier
-//                .size(200.dp)
-//                .background(Color.Black.copy(alpha = 0.12f))
-//        )
-//    }
-//}

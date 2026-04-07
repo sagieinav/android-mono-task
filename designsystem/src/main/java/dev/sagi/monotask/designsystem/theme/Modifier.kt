@@ -7,6 +7,8 @@ import android.graphics.RectF
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -30,7 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Stroke
 
-private const val OUTLINE_ALPHA = 0.14f
+private const val OUTLINE_ALPHA = 0.12f
 
 
 @SuppressLint("SuspiciousModifierThen")
@@ -72,7 +74,7 @@ fun Modifier.glassBorderPremium(
     width: Dp = 4.dp
 ): Modifier = this.drawWithCache {
         val innerWidth = width.toPx()
-        val outerWidth = 0.5.dp.toPx()
+        val outerWidth = 0.6.dp.toPx()
 
         val outerColor = Color.Black.copy(alpha = OUTLINE_ALPHA)
 
@@ -125,7 +127,6 @@ fun Modifier.glassBorder(
     color: Color? = null,
     width: Dp = 1.5.dp
 ): Modifier {
-    val innerWidth = width
     val outerWidth = 0.5.dp
 
     val outerColor = Color.Black.copy(alpha = OUTLINE_ALPHA)
@@ -158,16 +159,17 @@ fun Modifier.glassBorder(
 
     // Chain the borders
     return this
-        .border(width = innerWidth, brush = innerBrush, shape = shape)
+        .border(width = width, brush = innerBrush, shape = shape)
         .border(width = outerWidth, brush = outerBrush, shape = shape)
 }
 
-
+@Composable
 fun Modifier.glassBackground(
-    baseColor: Color = Color.Unspecified,
+    baseColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     accentColor: Color? = null,
     shineAlpha: Float = 0.6f
 ): Modifier = this.drawWithCache {
+
         val shineBrush = if (accentColor == null) {
             Brush.verticalGradient(
                 colors = listOf(Color.White.copy(alpha = shineAlpha), Color.Transparent)

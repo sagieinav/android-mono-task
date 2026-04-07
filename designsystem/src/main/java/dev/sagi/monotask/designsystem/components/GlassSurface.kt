@@ -36,7 +36,6 @@ fun GlassSurface(
     shineAlpha: Float = 0.6f,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val outlineColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
     Box(
         modifier = modifier
             .then(

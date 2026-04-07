@@ -7,8 +7,8 @@ import dev.sagi.monotask.domain.service.XpEngine
 
 // ========== UI States ==========
 sealed class FocusUiState {
-    object Loading : FocusUiState()
-    object Empty : FocusUiState()
+    data object Loading : FocusUiState()
+    data object Empty   : FocusUiState()
     data class Active(
         val focusTask: Task,
         val queue: List<Task>,
@@ -19,14 +19,14 @@ sealed class FocusUiState {
 
 // ========== Event Callbacks ==========
 sealed interface FocusEvent {
-    object CompleteTask : FocusEvent
-    object OpenSnooze : FocusEvent
-    object DismissSnooze : FocusEvent
+    data object CompleteTask : FocusEvent
+    data object OpenSnooze : FocusEvent
+    data object DismissSnooze : FocusEvent
     data class ExecuteSnooze(val option: XpEngine.SnoozeOption) : FocusEvent
-    object UndoCompleteTask : FocusEvent
-    object UndoSnoozeTask : FocusEvent
-    object OpenEditSheet : FocusEvent
-    object DismissEditSheet : FocusEvent
+    data object UndoCompleteTask : FocusEvent
+    data object UndoSnoozeTask : FocusEvent
+    data object OpenEditSheet : FocusEvent
+    data object DismissEditSheet : FocusEvent
     data class UpdateTask(val task: Task) : FocusEvent
 }
 

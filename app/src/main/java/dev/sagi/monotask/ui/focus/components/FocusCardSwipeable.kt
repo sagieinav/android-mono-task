@@ -3,13 +3,15 @@ package dev.sagi.monotask.ui.focus.components
 import dev.sagi.monotask.designsystem.theme.IconPack
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -23,57 +25,193 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import dev.sagi.monotask.data.model.Task
+import dev.sagi.monotask.designsystem.animation.MonoAnimations
+import dev.sagi.monotask.designsystem.gesture.SwipeExitDirection
+import dev.sagi.monotask.designsystem.gesture.SwipeState
+import dev.sagi.monotask.designsystem.gesture.swipeGestures
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.circleGlow
 import dev.sagi.monotask.designsystem.theme.glassBackground
 import dev.sagi.monotask.designsystem.theme.glassBorder
-import kotlin.math.abs
-import kotlin.math.roundToInt
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 // ========== Swipe Constants ==========
 private val PILL_SIZE = 44.dp
-private val GLOW_INSET = 24.dp // extra padding around pill so shadow fits within the RenderNode texture (shadow radius = 20dp + 4dp buffer)
+private val GLOW_INSET = 24.dp // extra padding so shadow fits within the RenderNode texture
 private val COMPLETE_COLOR = Color(0xFF4BB24F)
 private val SNOOZE_COLOR = Color(0xFFFF511C)
-const val SNOOZE_THRESHOLD = 380f // drag distance (px) to trigger snooze
-const val COMPLETE_THRESHOLD = 380f // drag distance (px) to trigger complete
+const val SWIPE_THRESHOLD = 380f // drag distance (px) to trigger complete or snooze
 private const val MAX_DRAG_DISTANCE = 400f // hard limit for drag range (px)
 private const val MAX_ROTATION_DEG = 18f // card tilt at full drag
 private const val EXIT_MULTIPLIER = 1.5f // off-screen exit distance multiplier
-private const val EXIT_ANIM_DURATION = 280 // exit animation duration (ms)
+private const val PILL_MAX_SCALE = 1.8f
+private const val PILL_START_SCALE = 1f / PILL_MAX_SCALE // pill scale at progress = 0
 
-// ========== Generic pill ==========
+
+// ========== Swipeable Card (entry + swipe animations) ==========
 @Composable
-fun SwipePill(
+fun FocusCardSwipeable(
+    task: Task,
+    restoreVersion: Int,
+    animState: FocusAnimationState,
+    onSwipeRight: () -> Unit,
+    onSwipeLeft: () -> Unit,
+    modifier: Modifier = Modifier,
+    onLongPress: () -> Unit = {}
+) {
+    val swipe = remember { SwipeState() }
+    val haptic = LocalHapticFeedback.current
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val screenWidthPx = remember(configuration, density) {
+        with(density) { configuration.screenWidthDp.dp.toPx() }
+    }
+
+    // ========== Entry Animation ==========
+
+    SideEffect {
+        animState.checkIfNeedsReset(task.id, restoreVersion)
+    }
+
+    LaunchedEffect(task.id, restoreVersion) {
+        val isSlideIn = animState.resetCard()
+        launch {
+            delay(200)
+            animState.border.animateTo(1f, tween(MonoAnimations.BORDER_ANIM_MS, easing = LinearEasing))
+        }
+        if (isSlideIn) {
+            launch { animState.alpha.animateTo(1f, tween(MonoAnimations.CARD_ENTRY_FADE_MS)) }
+            launch { animState.offsetX.animateTo(0f, tween(MonoAnimations.CARD_ENTRY_SLIDE_MS, easing = FastOutSlowInEasing)) }
+        } else {
+            val entrySpec = spring<Float>(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+            launch { animState.alpha.animateTo(1f, tween(300)) }
+            launch { animState.scale.animateTo(1f, entrySpec) }
+        }
+    }
+
+    // ========== Swipe Exit ==========
+
+    LaunchedEffect(animState.snoozeExitTrigger, task.id) {
+        if (animState.snoozeExitTrigger == SwipeExitDirection.LEFT) swipe.exitDirection = SwipeExitDirection.LEFT
+    }
+
+    val cardTargetOffset = when (swipe.exitDirection) {
+        SwipeExitDirection.RIGHT ->  screenWidthPx * EXIT_MULTIPLIER
+        SwipeExitDirection.LEFT -> -screenWidthPx * EXIT_MULTIPLIER
+        null ->  swipe.offsetX
+    }
+
+    val animatedOffset by animateFloatAsState(
+        targetValue = cardTargetOffset,
+        animationSpec = if (swipe.isExiting)
+            tween(MonoAnimations.CARD_EXIT_MS, easing = FastOutLinearInEasing)
+        else
+            spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "swipe_offset"
+    )
+    val pillAlpha by animateFloatAsState(
+        targetValue = if (swipe.isExiting) 0f else 1f,
+        animationSpec = tween(120),
+        label = "pill_alpha"
+    )
+    val lpScale by animateFloatAsState(
+        targetValue = if (swipe.isLongPressPending) 0.975f else 1f,
+        animationSpec = tween(150),
+        label = "lp_scale"
+    )
+    val lpAlpha by animateFloatAsState(
+        targetValue = if (swipe.isLongPressPending) 0.88f else 1f,
+        animationSpec = tween(150),
+        label = "lp_alpha"
+    )
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                alpha = animState.displayAlpha
+                scaleX = animState.displayScale
+                scaleY = animState.displayScale
+                translationX = animState.displayOffsetX
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        FocusCard(
+            task = task,
+            entryProgressProvider = { animState.displayBorder },
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset { IntOffset(animatedOffset.roundToInt(), 0) }
+                .graphicsLayer {
+                    rotationZ = (animatedOffset / screenWidthPx) * MAX_ROTATION_DEG
+                    scaleX = lpScale
+                    scaleY = lpScale
+                    alpha = lpAlpha
+                    compositingStrategy = CompositingStrategy.ModulateAlpha
+                }
+                .swipeGestures(
+                    state = swipe,
+                    haptic = haptic,
+                    onSwipeRight = {
+                        animState.setNextEntryDirection(SwipeExitDirection.RIGHT, screenWidthPx)
+                        onSwipeRight()
+                    },
+                    onSwipeLeft = onSwipeLeft,
+                    onLongPress = onLongPress,
+                    swipeThreshold = SWIPE_THRESHOLD,
+                    maxDragDistance = MAX_DRAG_DISTANCE
+                )
+        )
+
+        if (swipe.isSwiping) {
+            CompletePill(
+                syncedOffset = animatedOffset,
+                screenWidthPx = screenWidthPx,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 16.dp)
+                    .offset(x = -GLOW_INSET)   // shifts layout left so the outer hardware layer
+                    .graphicsLayer { alpha = pillAlpha }  // has room for the glow on the left
+            )
+            SnoozePill(
+                syncedOffset = animatedOffset,
+                screenWidthPx = screenWidthPx,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
+                    .offset(x = GLOW_INSET)    // shifts layout right so the outer hardware layer
+                    .graphicsLayer { alpha = pillAlpha }  // has room for the glow on the right
+            )
+        }
+    }
+}
+
+
+// ========== Generic Pill ==========
+@Composable
+private fun SwipePill(
     iconRes: Int,
     iconTint: Color,
     progress: Float,
     offsetX: Float,
-    modifier: Modifier = Modifier,
-    baseScale: Float = 1f,
-    maxScale: Float = 1.8f
+    modifier: Modifier = Modifier
 ) {
     val isTriggered = progress >= 1f
     val burstScale = remember { Animatable(1f) }
@@ -99,13 +237,13 @@ fun SwipePill(
         fraction = (progress * progress * 1.2f).coerceIn(0f, 1f)
     )
 
-    // Outer box is enlarged by GLOW_INSET on each side so the shadow from circleGlow
-    // fits within the RenderNode bounds and doesn't get clipped to a rectangle.
+    // Outer box enlarged by GLOW_INSET so the shadow from circleGlow fits within the
+    // RenderNode bounds and doesn't get clipped to a rectangle.
     Box(
         modifier = modifier
-            .size(PILL_SIZE * maxScale + GLOW_INSET * 2)
+            .size(PILL_SIZE * PILL_MAX_SCALE + GLOW_INSET * 2)
             .graphicsLayer {
-                val currentScale = lerp(baseScale / maxScale, 1f, progress) * burstScale.value
+                val currentScale = lerp(PILL_START_SCALE, 1f, progress) * burstScale.value
                 scaleX = currentScale
                 scaleY = currentScale
                 translationX = offsetX
@@ -113,23 +251,20 @@ fun SwipePill(
             .circleGlow(
                 color = dynamicColor.copy(alpha = 0.3f),
                 radius = 32.dp,
-                circleRadius = PILL_SIZE * maxScale / 2,
+                circleRadius = PILL_SIZE * PILL_MAX_SCALE / 2,
                 offsetY = 0.dp
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Inner box: actual pill visual (clip + background)
         Box(
             modifier = Modifier
-                .size(PILL_SIZE * maxScale)
+                .size(PILL_SIZE * PILL_MAX_SCALE)
                 .clip(CircleShape)
                 .glassBackground(
                     accentColor = dynamicColor,
                     baseColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.8f)
                 )
-
-                .glassBorder(CircleShape, dynamicColor, width = 4.dp)
-            ,
+                .glassBorder(CircleShape, dynamicColor, width = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -142,14 +277,15 @@ fun SwipePill(
     }
 }
 
-// ========== Complete pill ==========
+
+// ========== Complete Pill ==========
 @Composable
-fun CompletePill(
+private fun CompletePill(
     syncedOffset: Float,
     screenWidthPx: Float,
     modifier: Modifier = Modifier
 ) {
-    val progress = (syncedOffset / COMPLETE_THRESHOLD).coerceIn(0f, 1f)
+    val progress = (syncedOffset / SWIPE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
         iconRes = IconPack.Check,
         iconTint = COMPLETE_COLOR,
@@ -159,14 +295,15 @@ fun CompletePill(
     )
 }
 
-// ========== Snooze pill ==========
+
+// ========== Snooze Pill ==========
 @Composable
-fun SnoozePill(
+private fun SnoozePill(
     syncedOffset: Float,
     screenWidthPx: Float,
     modifier: Modifier = Modifier
 ) {
-    val progress = (-syncedOffset / SNOOZE_THRESHOLD).coerceIn(0f, 1f)
+    val progress = (-syncedOffset / SWIPE_THRESHOLD).coerceIn(0f, 1f)
     SwipePill(
         iconRes = IconPack.NextTaskAlt,
         iconTint = SNOOZE_COLOR,
@@ -176,219 +313,8 @@ fun SnoozePill(
     )
 }
 
-// ========== Swipeable wrapper ==========
-@Composable
-fun FocusCardSwipeable(
-    task: Task,
-    exitTrigger: SwipeExitDirection?,
-    borderFraction: Float,
-    onSwipeRight: () -> Unit,
-    onSwipeLeft: () -> Unit,
-    modifier: Modifier = Modifier,
-    onLongPress: () -> Unit = {}
-) {
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-    val screenWidthPx = remember(configuration, density) {
-        with(density) { configuration.screenWidthDp.dp.toPx() }
-    }
-
-    var badgeOffsetX by remember { mutableFloatStateOf(0f) }
-    var offsetX by remember { mutableFloatStateOf(0f) }
-    var exitDirection by remember { mutableStateOf<SwipeExitDirection?>(null) }
-    val isExiting = exitDirection != null
-    val isSwiping = offsetX != 0f || isExiting
-
-    LaunchedEffect(exitTrigger, task.id) {
-        if (exitTrigger == SwipeExitDirection.LEFT) {
-            exitDirection = SwipeExitDirection.LEFT
-        }
-    }
-
-    val pillAlpha by animateFloatAsState(
-        targetValue = if (isExiting) 0f else 1f,
-        animationSpec = tween(120),
-        label = "pill_alpha"
-    )
-
-    val cardTargetOffset = when (exitDirection) {
-        SwipeExitDirection.RIGHT -> screenWidthPx * EXIT_MULTIPLIER
-        SwipeExitDirection.LEFT -> -screenWidthPx * EXIT_MULTIPLIER
-        null -> offsetX
-    }
-
-    val animatedOffset by animateFloatAsState(
-        targetValue = cardTargetOffset,
-        animationSpec = if (isExiting)
-            tween(EXIT_ANIM_DURATION, easing = FastOutLinearInEasing)
-        else
-            spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "swipe_offset"
-    )
-
-    val haptic = LocalHapticFeedback.current
-
-    var isLongPressPending by remember { mutableStateOf(false) }
-    val lpScale by animateFloatAsState(
-        if (isLongPressPending) 0.975f
-                    else 1f,
-        tween(150),
-        label = "lp_scale"
-    )
-    val lpAlpha by animateFloatAsState(
-        if (isLongPressPending) 0.88f
-                    else 1f,
-        tween(150),
-        label = "lp_alpha"
-    )
-
-    var wasCompleteReady by remember { mutableStateOf(false) }
-    var wasSnoozeReady by remember { mutableStateOf(false) }
-    val completeReady = offsetX > COMPLETE_THRESHOLD
-    val snoozeReady = offsetX < -SNOOZE_THRESHOLD
-
-    LaunchedEffect(completeReady) {
-        if (completeReady && !wasCompleteReady)
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        wasCompleteReady = completeReady
-    }
-    LaunchedEffect(snoozeReady) {
-        if (snoozeReady && !wasSnoozeReady)
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        wasSnoozeReady = snoozeReady
-    }
-
-    val showXpBadge = exitDirection == SwipeExitDirection.RIGHT
-
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center) {
-        FocusCard(
-            task = task,
-            borderFraction = borderFraction,
-            hideXpLabel = showXpBadge,
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                .graphicsLayer {
-                    rotationZ = (animatedOffset / screenWidthPx) * MAX_ROTATION_DEG
-                    scaleX = lpScale
-                    scaleY = lpScale
-                    alpha = lpAlpha
-                    compositingStrategy = CompositingStrategy.ModulateAlpha
-                }
-                .pointerInput(isExiting) {
-                    if (isExiting) return@pointerInput
-                    val longPressTimeout = viewConfiguration.longPressTimeoutMillis
-                    val touchSlop = viewConfiguration.touchSlop
-
-                    coroutineScope {
-                        awaitEachGesture {
-                            val down = awaitFirstDown(requireUnconsumed = false)
-                            var isDragging = false
-                            var accumulatedDrag = 0f
-                            isLongPressPending = true
-
-                            val longPressJob = launch {
-                                delay(longPressTimeout)
-                                isLongPressPending = false
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onLongPress()
-                            }
-
-                            try {
-                                while (true) {
-                                    val event = awaitPointerEvent()
-                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-
-                                    if (!change.pressed) {
-                                        longPressJob.cancel()
-                                        isLongPressPending = false
-                                        change.consume()
-                                        if (isDragging) {
-                                            when {
-                                                offsetX > COMPLETE_THRESHOLD -> {
-                                                    badgeOffsetX = offsetX
-                                                    exitDirection = SwipeExitDirection.RIGHT
-                                                    onSwipeRight() // fire immediately so freeze is set before any Firestore snapshot
-                                                }
-                                                offsetX < -SNOOZE_THRESHOLD -> {
-                                                    offsetX = 0f; onSwipeLeft()
-                                                }
-                                                else -> offsetX = 0f
-                                            }
-                                        }
-                                        break
-                                    }
-
-                                    if (change.positionChanged()) {
-                                        val dx = change.positionChange().x
-                                        accumulatedDrag += dx
-
-                                        if (!isDragging && !longPressJob.isCompleted) {
-                                            if (abs(accumulatedDrag) > touchSlop) {
-                                                isDragging = true
-                                                longPressJob.cancel()
-                                                isLongPressPending = false
-                                            }
-                                        }
-
-                                        if (isDragging) {
-                                            change.consume()
-                                            offsetX = (offsetX + dx).coerceIn(-MAX_DRAG_DISTANCE, MAX_DRAG_DISTANCE)
-                                        }
-                                    }
-                                }
-                            } catch (_: CancellationException) {
-                                longPressJob.cancel()
-                                isLongPressPending = false
-                                if (isDragging) offsetX = 0f
-                            }
-                        }
-                    }
-                }
-        )
-
-        if (showXpBadge) {
-            XpLabelCompletion(
-                xpDelta = task.currentXp,
-                visible = true,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 20.dp, top = 20.dp)
-                    .offset { IntOffset(badgeOffsetX.roundToInt(), 0) }
-            )
-        }
-
-        if (isSwiping) {
-            CompletePill(
-                syncedOffset = animatedOffset,
-                screenWidthPx = screenWidthPx,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 16.dp)
-                    .offset(x = -GLOW_INSET)   // shifts layout left so the outer hardware layer
-                    .graphicsLayer { alpha = pillAlpha }  // has room for the glow on the left
-            )
-            SnoozePill(
-                syncedOffset = animatedOffset,
-                screenWidthPx = screenWidthPx,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 16.dp)
-                    .offset(x = GLOW_INSET)    // shifts layout right so the outer hardware layer
-                    .graphicsLayer { alpha = pillAlpha }  // has room for the glow on the right
-            )
-        }
-    }
-}
-
-
-enum class SwipeExitDirection { RIGHT, LEFT }
-
 
 // ========== Preview ==========
-
 @Preview(showBackground = true, name = "SwipePill, Idle")
 @Composable
 private fun SwipePillPreview() {

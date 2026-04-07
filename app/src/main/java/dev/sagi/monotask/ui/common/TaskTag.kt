@@ -27,12 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.customColors
+import dev.sagi.monotask.designsystem.theme.glassBorder
 import dev.sagi.monotask.designsystem.theme.harabara
 
 enum class TagSize { Default, Small }
 
 private val TagIconStartInset = 2.dp
-private val TagIconEndInset   = 3.dp
+private val TagIconEndInset = 3.dp
 private val TagPaddingMinimum = 2.dp
 
 @Composable
@@ -45,43 +46,43 @@ fun TaskTag(
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null
 ) {
-    val borderColor       = lerp(Color.Black, contentColor, 0.85f).copy(alpha = 0.2f)
-    val textStyle         = MaterialTheme.typography.labelLarge.copy(
+    val borderColor = lerp(Color.Black, contentColor, 0.85f).copy(alpha = 0.2f)
+    val textStyle = MaterialTheme.typography.labelLarge.copy(
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Center,
-            trim      = LineHeightStyle.Trim.Both
+            trim = LineHeightStyle.Trim.Both
         )
     )
-    val fontSize          = if (size == TagSize.Small) 9.sp else 14.sp
+    val fontSize = if (size == TagSize.Small) 9.sp else 14.sp
     val horizontalPadding = if (size == TagSize.Small) 5.dp else 8.dp
-    val verticalPadding   = if (size == TagSize.Small) 1.dp else 2.dp
-    val borderWidth       = if (size == TagSize.Small) 1.dp else 1.5.dp
+    val verticalPadding = if (size == TagSize.Small) 1.dp else 2.dp
+    val borderWidth = if (size == TagSize.Small) 1.dp else 1.5.dp
 
     Surface(
         modifier = modifier.border(borderWidth, borderColor, CircleShape),
-        shape    = CircleShape,
-        color    = containerColor,
+        shape = CircleShape,
+        color = containerColor,
     ) {
         Row(
-            verticalAlignment     = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(
                 start = if (leadingContent  != null) (horizontalPadding - TagIconStartInset).coerceAtLeast(TagPaddingMinimum)
                 else horizontalPadding,
-                end   = if (trailingContent != null) (horizontalPadding - TagIconEndInset).coerceAtLeast(TagPaddingMinimum)
+                end = if (trailingContent != null) (horizontalPadding - TagIconEndInset).coerceAtLeast(TagPaddingMinimum)
                 else horizontalPadding,
             )
         ) {
             leadingContent?.invoke()
             Text(
-                text       = label.lowercase(),
-                style      = textStyle,
-                fontWeight = FontWeight.Bold,
-                fontSize   = fontSize,
+                text = label.lowercase(),
+                style = textStyle,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = fontSize,
                 fontFamily = harabara,
-                color      = contentColor.copy(alpha = 0.85f),
-                modifier   = Modifier.padding(vertical = verticalPadding),
-                maxLines   = 1
+                color = contentColor.copy(alpha = 0.85f),
+                modifier = Modifier.padding(vertical = verticalPadding),
+                maxLines = 1
             )
             trailingContent?.invoke()
         }
@@ -99,22 +100,22 @@ fun CustomTag(
     val (containerColor, contentColor) = colors.tagColorFor(label)
 
     TaskTag(
-        label           = label,
-        containerColor  = containerColor,
-        contentColor    = contentColor,
-        size            = size,
-        modifier        = modifier,
+        label = label,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        size = size,
+        modifier = modifier,
         trailingContent = onRemove?.let { removeAction ->
             {
                 IconButton(
-                    onClick  = removeAction,
+                    onClick = removeAction,
                     modifier = Modifier.size(12.dp),
                 ) {
                     Icon(
-                        painter            = painterResource(IconPack.Close),
+                        painter = painterResource(IconPack.Close),
                         contentDescription = "Remove $label tag",
-                        tint               = MaterialTheme.colorScheme.outline,
-                        modifier           = Modifier.size(10.dp)
+                        tint = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(10.dp)
                     )
                 }
             }
@@ -133,8 +134,8 @@ private fun CustomTagDefaultPreview() {
     MonoTaskTheme {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement   = Arrangement.spacedBy(4.dp),
-            modifier              = Modifier.padding(16.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(16.dp)
         ) {
             previewTags.forEach { CustomTag(label = it) }
         }
@@ -147,8 +148,8 @@ private fun CustomTagSmallPreview() {
     MonoTaskTheme {
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement   = Arrangement.spacedBy(4.dp),
-            modifier              = Modifier.padding(16.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(16.dp)
         ) {
             previewTags.forEach { CustomTag(label = it, size = TagSize.Small) }
         }
@@ -162,7 +163,7 @@ private fun CustomTagRemovablePreview() {
         Column(modifier = Modifier.padding(16.dp)) {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement   = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 previewTags.forEach { CustomTag(label = it, onRemove = {}) }
             }

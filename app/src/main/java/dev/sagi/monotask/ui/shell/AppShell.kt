@@ -6,9 +6,10 @@ import dev.sagi.monotask.ui.navigation.MonoTaskNavHost
 import dev.sagi.monotask.ui.navigation.SettingsRoute
 import androidx.navigation.NavDestination.Companion.hasRoute
 import dev.sagi.monotask.ui.navigation.TopLevelDestination
-import dev.sagi.monotask.ui.navigation.navAnimationDuration
-import dev.sagi.monotask.ui.navigation.tabSlideIn
-import dev.sagi.monotask.ui.navigation.tabSlideOut
+import dev.sagi.monotask.designsystem.animation.MonoAnimations
+import dev.sagi.monotask.designsystem.animation.tabSlideIn
+import dev.sagi.monotask.designsystem.animation.tabSlideOut
+import dev.sagi.monotask.ui.navigation.isForward
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -101,10 +102,11 @@ fun AppShell(
                     transitionSpec = {
                         val isSettingsTransition = initialState == null || targetState == null
                         if (isSettingsTransition)
-                            fadeIn(tween(navAnimationDuration)) togetherWith fadeOut(tween(navAnimationDuration))
-                        else
-                            tabSlideIn(initialState?.routeQualifiedName, targetState?.routeQualifiedName) togetherWith
-                            tabSlideOut(initialState?.routeQualifiedName, targetState?.routeQualifiedName)
+                            fadeIn(tween(MonoAnimations.TAB_TRANSITION_MS)) togetherWith fadeOut(tween(MonoAnimations.TAB_TRANSITION_MS))
+                        else {
+                            val forward = isForward(initialState?.routeQualifiedName, targetState?.routeQualifiedName)
+                            tabSlideIn(forward) togetherWith tabSlideOut(forward)
+                        }
                     },
                     label = "TopBarTransition"
                 ) { dest ->
@@ -128,7 +130,7 @@ fun AppShell(
                         selectedDestination = it,
                         onDestinationSelected = { dest ->
                             val now = System.currentTimeMillis()
-                            if (dest == currentTopLevel || now - lastNavTime < navAnimationDuration) return@BottomNavBar
+                            if (dest == currentTopLevel || now - lastNavTime < MonoAnimations.TAB_TRANSITION_MS) return@BottomNavBar
                             lastNavTime = now
                             appState.navigateTo(dest)
                         },
