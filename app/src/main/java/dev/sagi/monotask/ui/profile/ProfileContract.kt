@@ -36,7 +36,6 @@ sealed interface ProfileEvent {
     data object RefreshPage : ProfileEvent
     data class UpdateProfile(val displayName: String) : ProfileEvent
     data class SelectAvatar(@DrawableRes val preset: Int) : ProfileEvent
-    object ResetAvatar : ProfileEvent
     object OpenAvatarPicker : ProfileEvent
     object DismissAvatarPicker : ProfileEvent
     data class RemoveFriend(val friendId: String) : ProfileEvent

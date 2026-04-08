@@ -63,10 +63,6 @@ dependencies {
     // Android Splash screen (for app launch)
     implementation(libs.androidx.core.splashscreen)
 
-    // Coil (Native Image Loader)
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
-
     // Haze (library for blur effects)
     implementation(libs.haze)
     implementation(libs.haze.materials)

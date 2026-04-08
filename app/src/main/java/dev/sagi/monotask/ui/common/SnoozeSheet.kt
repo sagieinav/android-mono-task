@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -30,11 +31,14 @@ import dev.sagi.monotask.designsystem.components.ActionButton
 import dev.sagi.monotask.designsystem.components.MonoBottomSheet
 import dev.sagi.monotask.designsystem.components.MonoLabel
 import dev.sagi.monotask.designsystem.components.InfoCallout
+import dev.sagi.monotask.designsystem.theme.customColors
+import dev.sagi.monotask.designsystem.theme.glassBorder
 
 @Composable
 fun SnoozeBottomSheet(
     onDismissRequest: () -> Unit,
-    onSnooze: (XpEngine.SnoozeOption) -> Unit
+    onSnooze: (XpEngine.SnoozeOption) -> Unit,
+    isAce: Boolean = false
 ) {
     MonoBottomSheet(
         title = "Snooze Task",
@@ -51,28 +55,40 @@ fun SnoozeBottomSheet(
             modifier = Modifier.fillMaxWidth()
         )
 
+//        if (isAce) {
+//            Text(
+//                text = "\u2736 Ace task: includes -${XpEngine.BONUS_ACE} XP penalty",
+//                textAlign = TextAlign.Center,
+//                style = MaterialTheme.typography.bodyMedium,
+////                fontWeight = FontWeight.SemiBold,
+//                color = MaterialTheme.customColors.ace,
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//        }
+
         // Define the metadata of each snooze option button
         val snoozeOptions = remember {
             listOf(
-                Triple(XpEngine.SnoozeOption.BY_DUE_DATE,       IconPack.DueSoon,         "Due soon"),
-                Triple(XpEngine.SnoozeOption.NEXT_IN_QUEUE,     IconPack.Skip,             "Next in queue"),
+                Triple(XpEngine.SnoozeOption.BY_DUE_DATE, IconPack.DueSoon, "Due soon"),
+                Triple(XpEngine.SnoozeOption.NEXT_IN_QUEUE, IconPack.Skip, "Next in queue"),
             )
         }
 
         // Show the snooze button for each snooze option
+        val acePenalty = if (isAce) XpEngine.BONUS_ACE else 0
         snoozeOptions.forEach { (option, iconRes, label) ->
             ChooseSnoozeButton(
-                icon       = painterResource(iconRes),
-                label      = label,
-                xpPenalty  = option.penalty,
-                onClick    = { onSnooze(option) }
+                icon = painterResource(iconRes),
+                label = label,
+                xpPenalty = option.penalty - acePenalty,
+                onClick = { onSnooze(option) }
             )
         }
 
         // Info for manual snooze
         InfoCallout(
-            title    = "Manual Snooze",
-            body     = "Want to pick a specific next task? Tap it on the Kanban board and hit 'Focus now'!",
+            title = "Manual Snooze",
+            body = "Want to pick a specific next task? Tap it on the Kanban board and hit 'Focus now'!",
             modifier = Modifier
                 .padding(top = 8.dp)
         )
@@ -90,8 +106,8 @@ fun ChooseSnoozeButton(
 ) {
     ActionButton(
         onClick = onClick,
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurface  // neutral, not a primary action
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier
     ) {
         // Override arrangement to SpaceBetween for this specific layout
         Row(
@@ -104,7 +120,7 @@ fun ChooseSnoozeButton(
                     painter = icon,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = LocalContentColor.current.copy(alpha = 0.7f)  // inherits color
+                    tint = LocalContentColor.current  // inherits color
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
@@ -116,8 +132,10 @@ fun ChooseSnoozeButton(
             xpPenalty?. let {
                 MonoLabel(
                     label = "$it XP",
+                    shape = CircleShape,
                     accentColor = penaltyRed,
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight.Light,
+                    horizontalPadding = 8.dp
                 )
             }
         }

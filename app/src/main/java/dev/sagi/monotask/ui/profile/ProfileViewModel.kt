@@ -78,7 +78,6 @@ class ProfileViewModel @Inject constructor(
             is ProfileEvent.SelectAvatar -> selectAvatar(event.preset)
             is ProfileEvent.OpenAvatarPicker -> setAvatarPicker(true)
             is ProfileEvent.DismissAvatarPicker -> setAvatarPicker(false)
-            is ProfileEvent.ResetAvatar -> selectAvatar(0)
             is ProfileEvent.RemoveFriend -> removeFriend(event.friendId)
             is ProfileEvent.RefreshPage -> { /* handled by StatisticsViewModel */ }
         }

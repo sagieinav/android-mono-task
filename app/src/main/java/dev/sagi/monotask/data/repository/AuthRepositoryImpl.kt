@@ -3,6 +3,7 @@ package dev.sagi.monotask.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.designsystem.theme.IconPack
 import dev.sagi.monotask.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -13,12 +14,13 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun signInWithGoogle(idToken: String): User? {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        val result     = auth.signInWithCredential(credential).await()
+        val result = auth.signInWithCredential(credential).await()
         val firebaseUser = result.user ?: return null
         return User(
-            id          = firebaseUser.uid,
+            id = firebaseUser.uid,
             displayName = firebaseUser.displayName ?: "MonoTask User",
-            email       = firebaseUser.email ?: "",
+            email = firebaseUser.email ?: "",
+            avatarPreset = (1..IconPack.AvatarPresets.size).random(),
         )
     }
 

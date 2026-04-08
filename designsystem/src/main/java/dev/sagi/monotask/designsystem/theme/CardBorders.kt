@@ -1,5 +1,6 @@
 package dev.sagi.monotask.designsystem.theme
 
+import android.graphics.Color.HSVToColor
 import android.graphics.Matrix
 import android.graphics.SweepGradient
 import androidx.compose.animation.core.EaseInBack
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -63,15 +65,15 @@ fun Modifier.premiumBorder(
         hsv[1] = (hsv[1] * 1.5f).coerceAtMost(1f)
         hsv[2] = hsv[2] * 0.9f
 
-        val darkMetallic = Color(android.graphics.Color.HSVToColor(hsv))
-        val brightHighlight = Color.White.copy(alpha = 0.8f)
+        val darkShadow = Color(HSVToColor(hsv))
+        val brightHighlight = lerp(Color.White, color, 0.15f)
 
         val sweepGradient = SweepGradient(
             size.width / 2f, size.height / 2f,
             intArrayOf(
-                brightHighlight.toArgb(), color.toArgb(), darkMetallic.toArgb(),
+                brightHighlight.toArgb(), color.toArgb(), darkShadow.toArgb(),
                 color.toArgb(), brightHighlight.toArgb(), color.toArgb(),
-                darkMetallic.toArgb(), color.toArgb(), brightHighlight.toArgb()
+                darkShadow.toArgb(), color.toArgb(), brightHighlight.toArgb()
             ),
             null
         )

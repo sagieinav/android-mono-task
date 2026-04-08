@@ -24,15 +24,22 @@ class UserRepositoryImpl @Inject constructor(
         userDoc(userId)
             .snapshots()
             .map {
-                it.toObject(User::class.java)?.copy(id = it.id)
+                it.toObject(User::class.java)?.copy(id = it.id)?.migrateAvatar()
                     ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${it.id}"); null }
             }
 
     override suspend fun getUserOnce(userId: String): User? {
         val doc = userDoc(userId)
             .get().await()
-        return doc.toObject(User::class.java)?.copy(id = doc.id)
+        return doc.toObject(User::class.java)?.copy(id = doc.id)?.migrateAvatar()
             ?: run { Log.w("UserRepository", "Failed to deserialize user doc ${doc.id}"); null }
+    }
+
+    /** One-time migration: old preset=0 (DiceBear auto) → preset=1. */
+    private suspend fun User.migrateAvatar(): User {
+        if (avatarPreset != 0) return this
+        updateAvatarPreset(id, 1)
+        return copy(avatarPreset = 1)
     }
 
     override suspend fun getUserById(uid: String): User? = getUserOnce(uid)

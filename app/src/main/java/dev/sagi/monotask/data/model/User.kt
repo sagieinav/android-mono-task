@@ -2,7 +2,6 @@ package dev.sagi.monotask.data.model
 
 import androidx.annotation.Keep
 import dev.sagi.monotask.designsystem.theme.IconPack
-import dev.sagi.monotask.util.DiceBearHelper
 
 @Keep
 data class UserStats(
@@ -30,8 +29,7 @@ data class User(
     val displayName: String = "",
     val email: String = "",
 
-    /** 0 = auto-generate avatar from uid via DiceBear; otherwise an R.drawable.avatar_micahXX preset. */
-    val avatarPreset: Int = 0,
+    val avatarPreset: Int = 1,
 
     val level: Int = 1,
     val xp: Int = 0,
@@ -41,20 +39,13 @@ data class User(
 
     // ========== Persistent user settings ==========
     /** True once the user has completed onboarding. Controls first-launch flow. */
-    val onboarded: Boolean = false,               // For first-launch onboarding
+    val onboarded: Boolean = false, // For first-launch onboarding
 
     /** When enabled, Kanban navigation is blocked. Checked by NavGuard. */
-    val hyperfocusModeEnabled: Boolean = false,   // Critical for NavGuard
+    val hyperfocusModeEnabled: Boolean = false, // Critical for NavGuard
 
     val dueDateWeight: Float = 0.5f
 ) {
-    val isAutoAvatar: Boolean get() = avatarPreset == 0
-
-    // Computed only in-memory, never stored in Firestore
-    val resolvedAvatarUrl: String = DiceBearHelper.getAvatarUrl(id)
-
-    /** Resolves the stored preset index (1–23) to a drawable res ID. Null if index is out of range
-     *  (e.g. stale data from a previous build that stored a raw resource ID). */
-//    val avatarDrawableRes: Int? get() = DiceBearHelper.PRESETS.getOrNull(avatarPreset - 1)
-    val avatarDrawableRes: Int? get() = IconPack.AvatarPresets.getOrNull(avatarPreset - 1)
+    val avatarDrawableRes: Int
+        get() = IconPack.AvatarPresets.getOrNull(avatarPreset - 1) ?: IconPack.AvatarPresets.first()
 }

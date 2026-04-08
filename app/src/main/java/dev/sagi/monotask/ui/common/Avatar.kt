@@ -28,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.designsystem.components.MonoBottomSheet
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
@@ -39,8 +38,7 @@ import dev.sagi.monotask.designsystem.theme.monoShadow
 import dev.sagi.monotask.designsystem.util.Constants
 
 /**
- * Raw avatar image. Handles auto (DiceBear URL) vs preset drawable.
- * Apply sizing and clipping from outside via [modifier].
+ * Raw avatar image. Apply sizing and clipping from outside via [modifier].
  */
 @Composable
 fun AvatarImage(
@@ -48,27 +46,16 @@ fun AvatarImage(
     modifier: Modifier = Modifier,
     contentDescription: String? = null
 ) {
-    val scaledModifier = modifier.graphicsLayer {
-        scaleX = 0.95f
-        scaleY = 0.95f
-        translationY = size.height * 0.05f
-    }
-    val drawableRes = user.avatarDrawableRes
-    if (user.isAutoAvatar || drawableRes == null) {
-        AsyncImage(
-            model = user.resolvedAvatarUrl,
-            contentDescription = contentDescription,
-            contentScale = ContentScale.Fit,
-            modifier = scaledModifier
-        )
-    } else {
-        Image(
-            painter = painterResource(drawableRes),
-            contentDescription = contentDescription,
-            contentScale = ContentScale.Fit,
-            modifier = scaledModifier
-        )
-    }
+    Image(
+        painter = painterResource(user.avatarDrawableRes),
+        contentDescription = contentDescription,
+        contentScale = ContentScale.Fit,
+        modifier = modifier.graphicsLayer {
+            scaleX = 0.95f
+            scaleY = 0.95f
+            translationY = size.height * 0.05f
+        }
+    )
 }
 
 /** Avatar with standard glass treatment: clipped circle with glass background and premium border */
@@ -90,9 +77,6 @@ fun AvatarBox(
 }
 
 
-/**
- * Bottom sheet avatar picker. Auto (DiceBear) listed first, followed by preset drawables.
- */
 @Composable
 fun AvatarPicker(
     user: User,
@@ -100,7 +84,7 @@ fun AvatarPicker(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val options: List<Int?> = listOf(null) + (1..IconPack.AvatarPresets.size).toList()
+    val options = (1..IconPack.AvatarPresets.size).toList()
 
     MonoBottomSheet(
         title = "Choose Your Avatar",
@@ -115,10 +99,7 @@ fun AvatarPicker(
             modifier = Modifier.wrapContentHeight().heightIn(max = 360.dp)
         ) {
             items(options) { preset ->
-                val displayUser = if (preset == null) user.copy(avatarPreset = 0)
-                else user.copy(avatarPreset = preset)
-                val isSelected = (preset == null && user.isAutoAvatar) ||
-                        preset == user.avatarPreset
+                val isSelected = preset == user.avatarPreset
                 Box(
                     modifier = Modifier
                         .aspectRatio(1f)
@@ -128,9 +109,9 @@ fun AvatarPicker(
                             if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                             else Modifier.glassBorder(shape = CircleShape, width = 3.dp)
                         )
-                        .clickable { onSelect(preset ?: 0) }
+                        .clickable { onSelect(preset) }
                 ) {
-                    AvatarImage(user = displayUser, modifier = Modifier.fillMaxSize())
+                    AvatarImage(user = user.copy(avatarPreset = preset), modifier = Modifier.fillMaxSize())
                 }
             }
         }
@@ -146,9 +127,9 @@ private fun AvatarPreview() {
     val user = User(avatarPreset = IconPack.AvatarMicah01)
     MonoTaskTheme {
         Row(
-            modifier             = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment    = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             AvatarBox(user = user, modifier = Modifier.size(56.dp))
             AvatarBox(user = user, modifier = Modifier.size(80.dp))

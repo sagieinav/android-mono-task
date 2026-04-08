@@ -200,7 +200,8 @@ fun FocusScreenContent(
     if (snoozeSheetVisible) {
         SnoozeBottomSheet(
             onDismissRequest = { onFocusEvent(FocusEvent.DismissSnooze) },
-            onSnooze = { option -> animState.onSnoozeConfirmed(option, scope, screenWidthPx) }
+            onSnooze = { option -> animState.onSnoozeConfirmed(option, scope, screenWidthPx) },
+            isAce = (uiState as? FocusUiState.Active)?.focusTask?.isAce ?: false
         )
     }
 }
