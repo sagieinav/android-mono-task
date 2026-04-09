@@ -1,27 +1,23 @@
-<a id="readme-top"></a>
-
-
-
-
 <h1 align="center">
   <a href="https://github.com/sagieinav/android-mono-task"><img src="https://github.com/user-attachments/assets/1f8097ba-7108-4dbc-8c5c-4a6f92c4736e" alt="MonoTask Logo" width="200"></a>
   <br>
   MonoTask
-  <br>
 </h1>
 
+
 <p align="center">
-  <b>One Task. No Noise.</b>
+  <b>A gamified task management app for Android that focuses on eliminating task paralysis and enhancing task completion.</b>
 </p>
+
 <p align="center">
   <a href="https://github.com/sagieinav/android-mono-task/issues">Report Bug</a>
   •
   <a href="https://github.com/sagieinav/android-mono-task/issues">Request Feature</a>
   •
-  <a href="#5-demonstration">View Demo</a>
+  <a href="#4-demonstration">View Demo</a>
 </p>
 
----
+<h2></h2>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=flat&logo=kotlin&logoColor=white" alt="Kotlin" />
@@ -32,30 +28,24 @@
 </p>
 
 
-
-<!-- ABOUT THE PROJECT -->
 ## 1 About The Project
 
-MonoTask is a gamified task management app for Android, that focuses on eliminating task paralysis and enhancing task completion.
-The idea is simple: stop multitasking, focus on one task, complete it, and earn XP. Users level up as they complete tasks, build streaks, and unlock achievements. It also includes a Kanban board for organizing tasks (with optional hyperfocus mode for locking it), a statistics dashboard for tracking productivity, and a social layer for sharing progress with friends.
+Developed as a final project for the 'UI Development' course at Afeka College of Engineering, as part of my Computer Science BSc.
 
-It was developed as a final project for the 'UI Development' course in Afeka College of Engineering, as part of my Computer Science BSc.
+MonoTask rewards focus. The idea is simple: stop multitasking, lock in on one task, complete it, and earn XP. Users level up as they complete tasks, build streaks, and unlock achievements. 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- KEY FEATURES -->
 ## 2 Key Features
 
-- **Focus**: Work through tasks one at a time. Each completion awards XP based on task priority and effort.
-- **Kanban Board**: Organize tasks by priority level (High, Medium, Low) with sorting and archive support.
+- **Focus**: Work through tasks one at a time. Each completion awards XP based on task priority and snooze count.
+- **Kanban Board**: View and organize all tasks in an accessible kanban view, with sorting and archive support.
 - **Hyperfocus:** An optional toggle that locks access to the kanban board, for those who wanna maximize their focus.
 - **Gamification**: XP, levels, streaks, and achievements to make productivity feel rewarding.
 - **Statistics**: Activity heatmap, bar and line charts, and trend indicators for tracking your output over time.
 - **Social Layer**: Add friends and follow their progress and activity.
 - **Daily Brief**: A summary screen that shows your task load and completion status for the day.
 - **Custom Design System**: A dedicated `:designsystem` module with reusable Compose components, and a consistent visual language across all screens.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ARCHITECTURE -->
 ## 3 Architecture
@@ -97,16 +87,12 @@ android-mono-task/
         └── theme/               # Color, typography, shape, custom tokens
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- DEMONSTRATION -->
 ## 4 Demonstration
 
 <!-- DEMO_VIDEO_URL -->
 
 > Demo video coming soon.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 ## 5 Getting Started
@@ -141,7 +127,6 @@ git clone https://github.com/sagieinav/android-mono-task.git
 	- Download `google-services.json` and place it in the `app/` folder
 
 4. Run on an emulator or physical device (API 26+)
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE -->
 ## 6 Usage
@@ -155,7 +140,6 @@ git clone https://github.com/sagieinav/android-mono-task.git
 5. **Check your stats** on the Statistics screen to review your productivity over time
 6. **Invite friends** and follow each other's progress and activity
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ROADMAP -->
 ## 7 Roadmap
@@ -166,7 +150,6 @@ git clone https://github.com/sagieinav/android-mono-task.git
 - [ ] Task filtering
 - [ ] Offline support with local cache
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- LEARNING SOURCES -->
 ## 8 Learning Sources
@@ -177,7 +160,6 @@ For the fundamentals, I've watched the YouTube videos of Google's official cours
 
 For enriching my knowledge further, I watched some YouTube videos of the excellent [Philipp Lackner](https://www.youtube.com/@PhilippLackner), along with learning from documentation, hands-on practice, and active conversation with LLM.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ASSETS AND CREDITS -->
 ## 9 Assets and Credits
@@ -185,10 +167,9 @@ For enriching my knowledge further, I watched some YouTube videos of the excelle
 - **[Haze](https://github.com/chrisbanes/haze)** by Chris Banes: blur and glassmorphism effects used in the UI
 - **[datetime-wheel-picker](https://github.com/darkokoa/datetime-wheel-picker)** by darkokoa: wheel-style date and time picker for task scheduling
 - **[AwesomeUI](https://github.com/ArcaDone/AwesomeUI)** by Danilo Arcadipane: baseline of the statistics components
-- **[Illustrations](https://www.figma.com/community/file/1146080946962518693)**: Notion Club by Zafar Ismatullaev
+- **[Notion Club](https://www.figma.com/community/file/1146080946962518693)** by Zafar Ismatullaev: illustrations, used for empty states.
 - **[Firebase](https://firebase.google.com)**: authentication (Google sign-in) and Firestore real-time database
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- CONTRIBUTORS -->
 ## 10 Contributors
@@ -201,7 +182,6 @@ For enriching my knowledge further, I watched some YouTube videos of the excelle
   Sagi Einav
 </div>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## 11 License
 
