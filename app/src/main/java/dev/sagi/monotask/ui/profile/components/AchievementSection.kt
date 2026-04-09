@@ -117,7 +117,7 @@ fun HexagonAchievementBadge(
                 .fillMaxWidth()
                 .aspectRatio(20f / 21.3f)
                 .clip(HexagonShape)
-                .clickable { if (!achievement.isLocked) showTooltip = !showTooltip }
+                .clickable { showTooltip = !showTooltip }
                 .glassBackground(baseColor = tierColor)
 
                 .border(shape = HexagonShape, color = tierColor, width = 1.dp)
@@ -200,7 +200,7 @@ private fun AchievementTooltipContent(
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "NEXT",
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         color = nextMilestone.tier.badgeColor()
                     )
                     Text(
@@ -217,19 +217,17 @@ private fun AchievementTooltipContent(
                 // Line 1: badge display name
                 Text(
                     text = achievement.displayName,
-                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 // Line 2: current tier description (muted), if earned
-                achievement.earnedMilestone?.let {
-                    Text(
-                        text = it.description,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
+                val description =
+                    achievement.earnedMilestone?.description ?:
+                    achievement.milestones[0].description
+                Text(
+                    text = description,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                )
             }
         }
     }

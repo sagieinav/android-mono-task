@@ -1,0 +1,63 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+  <!-- X drawn first, archive on top -->
+
+  <!-- X — left diagonal -->
+  <path
+      android:pathData="M17,17l5,5"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="round"/>
+
+  <!-- X — right diagonal -->
+  <path
+      android:pathData="M22,17l-5,5"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="round"/>
+
+  <!-- Archive box lid -->
+  <path
+      android:pathData="M3,6a2,2 0,0 1,2 -2h14a2,2 0,0 1,2 2a2,2 0,0 1,-2 2h-14a2,2 0,0 1,-2 -2"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="round"/>
+
+  <!-- Archive box left + bottom (stops at x=14, before X territory) -->
+  <path
+      android:pathData="M5,8v10a2,2 0,0 0,2 2h7"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="round"/>
+
+  <!-- Archive box right side (stops at y=14, before X territory) -->
+  <path
+      android:pathData="M19,8v6"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="round"/>
+
+  <!-- Archive horizontal line inside box -->
+  <path
+      android:pathData="M10,12l4,0"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="round"/>
+
+</vector>

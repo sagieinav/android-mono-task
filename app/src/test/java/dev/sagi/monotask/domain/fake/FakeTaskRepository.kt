@@ -85,4 +85,8 @@ class FakeTaskRepository : TaskRepository {
             list.map { if (it.id == originalTask.id) originalTask else it }
         }
     }
+
+    override suspend fun clearArchivedTasks(userId: String, workspaceId: String) {
+        _completedTasks.update { list -> list.filter { it.workspaceId != workspaceId } }
+    }
 }

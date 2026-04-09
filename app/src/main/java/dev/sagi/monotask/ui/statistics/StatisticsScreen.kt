@@ -227,8 +227,8 @@ private fun StatisticsReadyContent(
     }
 }
 
-// ========== Preview ==========
 
+// ========== Preview ==========
 private val previewScreenState = StatisticsUiState.Ready(
     weeklyXp = 960,
     weeklyTasks = 24,

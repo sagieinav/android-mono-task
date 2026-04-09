@@ -66,6 +66,10 @@ fun SettingsScreen(
                     withDismissAction = true,
                     duration = SnackbarDuration.Short
                 )
+                is SettingsUiEffect.ShowSuccess -> snackbarHostState.showSnackbar(
+                    message = effect.message,
+                    duration = SnackbarDuration.Short
+                )
             }
         }
     }
@@ -133,7 +137,8 @@ private fun SettingsContent(
             SettingsAccountSection(
                 displayName         = state.displayName,
                 email               = state.email,
-                onUpdateDisplayName = { onEvent(SettingsEvent.UpdateDisplayName(it)) }
+                onUpdateDisplayName = { onEvent(SettingsEvent.UpdateDisplayName(it)) },
+                onClearArchive      = { onEvent(SettingsEvent.ClearArchive) }
             )
         }
 
@@ -164,40 +169,40 @@ private fun SettingsContent(
 @Composable
 private fun SignOutButton(onSignOut: () -> Unit) {
     var showConfirm by remember { mutableStateOf(false) }
-    val color = penaltyRed
+    val color = MaterialTheme.colorScheme.error
 
     ActionButton(
         onClick  = { showConfirm = true },
-        color    = color,
-        shape    = MaterialTheme.shapes.large,
+        color = color,
+        shape = MaterialTheme.shapes.large,
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
     ) {
         Icon(
-            painter            = painterResource(IconPack.SignOutAlt),
+            painter = painterResource(IconPack.SignOutAlt),
             contentDescription = "Sign Out Button",
-            tint               = color,
-            modifier           = Modifier
+            tint = color,
+            modifier = Modifier
                 .padding(end = 4.dp)
                 .size(18.dp)
         )
         Text(
-            text       = "Sign Out",
-            style      = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+            text = "Sign Out",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium
         )
     }
 
     if (showConfirm) {
         MonoConfirmDialog(
             onDismissRequest = { showConfirm = false },
-            title            = "Sign Out",
-            message          = "Are you sure you want to sign out?",
-            confirmLabel     = "Sign Out",
-            dismissLabel     = "Cancel",
-            confirmColor     = penaltyRed,
-            onConfirm        = onSignOut
+            title = "Sign Out",
+            message = "Are you sure you want to sign out?",
+            confirmLabel = "Sign Out",
+            dismissLabel = "Cancel",
+            confirmColor = color,
+            onConfirm = onSignOut
         )
     }
 }

@@ -19,4 +19,5 @@ interface TaskRepository {
     suspend fun updateSnoozeFields(userId: String, task: Task, option: XpEngine.SnoozeOption)
     suspend fun overwriteExistingTask(userId: String, task: Task)
     suspend fun undoSnoozeFields(userId: String, originalTask: Task)
+    suspend fun clearArchivedTasks(userId: String, workspaceId: String)
 }

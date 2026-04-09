@@ -146,4 +146,15 @@ class TaskRepositoryImpl @Inject constructor(
                 )
             ).await()
     }
+
+    override suspend fun clearArchivedTasks(userId: String, workspaceId: String) {
+        val docs = tasksCollection(userId)
+            .whereEqualTo("workspaceId", workspaceId)
+            .whereEqualTo("completed", true)
+            .get().await()
+        if (docs.isEmpty) return
+        val batch = db.batch()
+        docs.forEach { batch.delete(it.reference) }
+        batch.commit().await()
+    }
 }

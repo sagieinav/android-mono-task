@@ -21,6 +21,8 @@ object IconPack {
     @DrawableRes
     val ArrowRight: Int = R.drawable.ic_arrow_right
     @DrawableRes
+    val ArchiveDelete: Int = R.drawable.ic_archive_delete
+    @DrawableRes
     val Bolt: Int = R.drawable.ic_bolt
     @DrawableRes
     val Calendar: Int = R.drawable.ic_calendar
@@ -32,6 +34,8 @@ object IconPack {
     val CheckCircle: Int = R.drawable.ic_check_circle
     @DrawableRes
     val Chevron: Int = R.drawable.ic_chevron
+    @DrawableRes
+    val ChevronRight: Int = R.drawable.ic_chevron_right
     @DrawableRes
     val Close: Int = R.drawable.ic_close
     @DrawableRes

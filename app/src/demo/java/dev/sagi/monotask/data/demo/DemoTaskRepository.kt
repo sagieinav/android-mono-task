@@ -66,4 +66,8 @@ class DemoTaskRepository @Inject constructor() : TaskRepository {
     override suspend fun undoSnoozeFields(userId: String, originalTask: Task) {
         _tasks.update { list -> list.map { if (it.id == originalTask.id) originalTask else it }.toMutableList() }
     }
+
+    override suspend fun clearArchivedTasks(userId: String, workspaceId: String) {
+        _tasks.update { list -> list.filter { !(it.completed) }.toMutableList() }
+    }
 }

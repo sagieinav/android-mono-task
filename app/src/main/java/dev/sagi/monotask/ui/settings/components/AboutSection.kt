@@ -50,7 +50,7 @@ internal fun SettingsAboutSection() {
                     color = MaterialTheme.colorScheme.primary
                 )
             },
-            trailingIconRes = IconPack.ArrowRight,
+            trailingIconRes = IconPack.ChevronRight,
             onClick = { showFaq = true }
         )
         SettingsDivider()

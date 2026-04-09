@@ -14,12 +14,10 @@ import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.designsystem.R
 
 private const val UI_FONT_WIDTH = 95f
-private const val UI_FONT_OPTICAL_SIZE = 18f
-private const val DATA_FONT_OPTICAL_SIZE = 14f
 
 private val flexWeights = listOf(
-    FontWeight.Thin, FontWeight.ExtraLight, FontWeight.Light,
-    FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold
+    FontWeight.Thin, FontWeight.ExtraLight, FontWeight.Light, FontWeight.Normal,
+    FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold, FontWeight.Black
 )
 
 // =====================================================
@@ -34,16 +32,13 @@ val gloock = FontFamily(
 // =====================================================
 val googleSansRounded = googleSansFamily(
     FontVariation.width(UI_FONT_WIDTH),
-    FontVariation.Setting("ROND", 100f),
-    FontVariation.Setting("opsz", UI_FONT_OPTICAL_SIZE)
+    FontVariation.Setting("ROND", 100f)
 )
 
 // =====================================================
 // Google Sans (Standard): labels font (mainly)
 // =====================================================
-val googleSans = googleSansFamily(
-    FontVariation.Setting("opsz", DATA_FONT_OPTICAL_SIZE)
-)
+val googleSans = googleSansFamily()
 
 // =====================================================
 // Harabara: for task tags

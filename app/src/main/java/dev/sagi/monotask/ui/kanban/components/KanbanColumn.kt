@@ -41,7 +41,6 @@ import dev.sagi.monotask.designsystem.components.CountBadge
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.customColors
 import dev.sagi.monotask.designsystem.theme.gloock
-import dev.sagi.monotask.designsystem.theme.monoShadow
 import dev.sagi.monotask.designsystem.util.Constants.Theme.KANBAN_PADDING
 import dev.sagi.monotask.ui.kanban.KanbanEvent
 import kotlinx.coroutines.delay
@@ -75,14 +74,11 @@ fun KanbanColumn(
 
     AnimatedVisibility(
         visible = columnVisible,
-        enter   = slideInVertically(initialOffsetY = { COLUMN_SLIDE_PX }, animationSpec = tween(ANIM_DURATION)) +
+        enter = slideInVertically(initialOffsetY = { COLUMN_SLIDE_PX }, animationSpec = tween(ANIM_DURATION)) +
                 fadeIn(tween(ANIM_DURATION))
     ) {
         Column(
-            modifier = modifier
-                .width(180.dp)
-//                .fillMaxHeight()
-            ,
+            modifier = modifier.width(180.dp),
             // Header-Content gap
             verticalArrangement = Arrangement.spacedBy(KANBAN_PADDING)
         ) {
@@ -98,17 +94,16 @@ fun KanbanColumn(
                         .padding(horizontal = 12.dp, vertical = 10.dp)
                 ) {
                     Text(
-                        text        = title,
-                        style       = MaterialTheme.typography.titleLarge.copy(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge.copy(
                             lineHeightStyle = LineHeightStyle(
                                 alignment = LineHeightStyle.Alignment.Proportional,
-                                trim      = LineHeightStyle.Trim.Both
+                                trim = LineHeightStyle.Trim.Both
                             )
                         ),
                         fontSize = 20.sp,
-                        fontFamily  = gloock,
-                        fontWeight  = FontWeight.Bold,
-//                        color       = contentColor,
+                        fontFamily = gloock,
+                        fontWeight = FontWeight.SemiBold,
                     )
 
                     // Push to the right
@@ -116,8 +111,8 @@ fun KanbanColumn(
 
                     // Task count badge:
                     CountBadge(
-                        count          = tasks.size,
-                        color   = contentColor
+                        count = tasks.size,
+                        color = contentColor
                     )
                 }
             }

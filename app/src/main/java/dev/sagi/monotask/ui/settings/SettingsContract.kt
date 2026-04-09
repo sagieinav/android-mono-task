@@ -24,6 +24,7 @@ sealed interface SettingsEvent {
     data class CreateWorkspace(val name: String) : SettingsEvent
     data class RenameWorkspace(val workspace: Workspace, val newName: String) : SettingsEvent
     data class DeleteWorkspace(val workspace: Workspace) : SettingsEvent
+    object ClearArchive : SettingsEvent
     object SignOut : SettingsEvent
 }
 
@@ -31,4 +32,5 @@ sealed interface SettingsEvent {
 
 sealed interface SettingsUiEffect {
     data class ShowError(val message: String) : SettingsUiEffect
+    data class ShowSuccess(val message: String) : SettingsUiEffect
 }

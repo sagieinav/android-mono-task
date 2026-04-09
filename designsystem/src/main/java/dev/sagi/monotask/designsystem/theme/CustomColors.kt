@@ -59,7 +59,8 @@ val lightCustomColors = CustomColors(
     streak = StreakOrange,
     ace = AceGold,
     aceDim = AceGoldDim,
-    achievementGold = Color(0xFFEFB73D),
+
+    achievementGold = Color(0xFFD9AC38),
     achievementSilver = Color(0xFFB6B6BB),
     achievementBronze = Color(0xFFB78457),
     achievementLocked = Color(0xFFE1E1E1),
