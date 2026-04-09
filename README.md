@@ -1,9 +1,10 @@
 <a id="readme-top"></a>
 
 
+
+
 <h1 align="center">
-  <!-- Replace LOGO_URL with the raw GitHub asset URL after pushing the repo -->
-  <!-- <a href="https://github.com/sagieinav/android-mono-task"><img src="LOGO_URL" alt="MonoTask Logo" width="200"></a> -->
+  <a href="https://github.com/sagieinav/android-mono-task"><img src="https://github.com/user-attachments/assets/1f8097ba-7108-4dbc-8c5c-4a6f92c4736e" alt="MonoTask Logo" width="200"></a>
   <br>
   MonoTask
   <br>
