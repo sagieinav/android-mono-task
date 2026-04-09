@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "dev.sagi.monotask",
+    "sha256_cert_fingerprints": ["BC:99:BF:FF:ED:06:D3:50:74:4D:6A:D6:08:0F:D9:90:78:6F:55:F5:45:8D:2C:1F:3D:60:8F:4C:C5:9E:8E:2B"]
+  }
+}]

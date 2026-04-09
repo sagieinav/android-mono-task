@@ -1,5 +1,6 @@
 package dev.sagi.monotask.data.model
 
+import com.google.firebase.firestore.Exclude
 import dev.sagi.monotask.designsystem.theme.IconPack
 
 data class UserStats(
@@ -36,6 +37,7 @@ data class User(
 
     val dueDateWeight: Float = 0.5f
 ) {
+    @get:Exclude
     val avatarDrawableRes: Int
         get() = IconPack.AvatarPresets.getOrNull(avatarPreset - 1) ?: IconPack.AvatarPresets.first()
 }

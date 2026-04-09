@@ -146,14 +146,10 @@ class ProfileViewModel @Inject constructor(
     }
 
     // ==========================================================================
-    // Achievements (loaded once per user, from stored stats)
+    // Achievements (re-evaluated on every user update, from stored stats)
     // ==========================================================================
 
-    private var achievementsLoaded = false
-
     private fun loadAchievements(user: User, level: Int) {
-        if (achievementsLoaded) return
-        achievementsLoaded = true
         val current = _uiState.value as? ProfileUiState.Ready ?: return
         val achievements = AchievementEngine.evaluateFromStats(user.stats, level)
         _uiState.value = current.copy(achievements = achievements)
@@ -203,7 +199,8 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun generateInviteLink(): String = "monotask://invite?uid=$userId"
+    fun generateInviteLink(): String =
+        "https://sagieinav.github.io/android-mono-task/invite?uid=$userId"
 
     fun shareInviteLink(context: Context) {
         val link = generateInviteLink()

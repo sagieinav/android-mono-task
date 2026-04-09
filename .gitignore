@@ -40,3 +40,11 @@ google-services.json
 serviceAccountKey.json
 seed.js
 app/seed/
+
+# Android build artifacts
+*.dm
+app-release.dm
+
+# Tests
+**/designsystem/src/test/
+**/androidTest/

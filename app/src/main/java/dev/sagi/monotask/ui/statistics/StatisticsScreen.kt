@@ -31,7 +31,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -96,20 +95,11 @@ private fun StatisticsReadyContent(
     val scaffoldPadding = LocalScaffoldPadding.current
     val topBarHeight = scaffoldPadding.calculateTopPadding()
     val bottomPadding = scaffoldPadding.calculateBottomPadding()
-    val density = LocalDensity.current
     val refreshState = rememberPullToRefreshState()
     val refreshThreshold = 30.dp
 
-    var toggleHeightPx by remember { mutableIntStateOf(0) }
-    val toggleHeight = with(density) { toggleHeightPx.toDp() }
-    var timestampHeightPx by remember { mutableIntStateOf(0) }
-    val timestampHeight = with(density) { timestampHeightPx.toDp() }
-    // gap above toggle (between topBar bottom and toggle top)
-    val toggleTopGap = 4.dp
-    // gap below toggle (between toggle bottom and first content item)
-    val toggleBottomGap = 12.dp
-    val refreshBoxTopPadding = topBarHeight + toggleTopGap + toggleHeight
-    val contentTopPadding = refreshBoxTopPadding + toggleBottomGap + timestampHeight + 8.dp
+    val refreshBoxTopPadding = topBarHeight + TOP_BAR_ITEM_HEIGHT
+    val contentTopPadding = refreshBoxTopPadding + 38.dp
 
     var animationKey by remember { mutableIntStateOf(0) }
     var lastRefreshedAt by rememberSaveable { mutableStateOf<Long?>(System.currentTimeMillis()) }
@@ -200,10 +190,11 @@ private fun StatisticsReadyContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = refreshBoxTopPadding + toggleBottomGap)
+                    .padding(top = refreshBoxTopPadding + 12.dp)
                     .fillMaxWidth()
-                    .onSizeChanged { timestampHeightPx = it.height }
+                    .graphicsLayer {
+                        translationY = refreshState.distanceFraction * refreshThreshold.toPx()
+                    }
             )
         }
 
@@ -215,13 +206,8 @@ private fun StatisticsReadyContent(
                 blurred = true,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(
-                        top = topBarHeight + toggleTopGap,
-                        start = 16.dp,
-                        end = 16.dp,
-                    )
+                    .padding(top = topBarHeight, start = 16.dp, end = 16.dp)
                     .height(TOP_BAR_ITEM_HEIGHT)
-                    .onSizeChanged { toggleHeightPx = it.height }
             )
         }
     }

@@ -59,6 +59,10 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.DeleteWorkspace -> deleteWorkspace(event.workspace)
             is SettingsEvent.ClearArchive -> clearArchive()
             is SettingsEvent.SignOut -> auth.signOut()
+            is SettingsEvent.Retry -> {
+                val uid = AuthUtils.currentUidOrNull() ?: return
+                viewModelScope.launch { loadUserSettings(uid) }
+            }
         }
     }
 

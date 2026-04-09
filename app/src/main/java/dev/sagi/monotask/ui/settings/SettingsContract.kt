@@ -27,6 +27,7 @@ sealed interface SettingsEvent {
     data class DeleteWorkspace(val workspace: Workspace) : SettingsEvent
     object ClearArchive : SettingsEvent
     object SignOut : SettingsEvent
+    object Retry : SettingsEvent
 }
 
 // ========== One-Shot UI Effects ==========

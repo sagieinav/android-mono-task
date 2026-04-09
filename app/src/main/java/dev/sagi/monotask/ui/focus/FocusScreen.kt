@@ -26,7 +26,6 @@ import dev.sagi.monotask.ui.focus.components.FocusAnimationState
 import dev.sagi.monotask.ui.focus.components.FocusCardSwipeable
 import dev.sagi.monotask.ui.common.UserHeader
 import dev.sagi.monotask.ui.focus.components.rememberFocusAnimationState
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 // ========== Entry Point ==========
@@ -54,9 +53,7 @@ fun FocusScreen(
         if (!frozenForAnimation) displayedUiState = uiState
     }
 
-    // Undo snackbar. Uses `collect` (NOT collectLatest) so that subsequent
-    // effects (level-up, achievements) can never cancel it mid-display.
-    // Long duration gives a comfortable window to press Undo.
+    // Undo snackbar. Long duration gives a comfortable window to press Undo.
     LaunchedEffect(Unit) {
         focusVM.effect.collect { effect ->
             val (message, undoEvent) = when (effect) {
@@ -73,9 +70,10 @@ fun FocusScreen(
     }
 
     // All other one-shot effects (errors, level-up, achievements).
-    // collectLatest is fine here since none of these are undo snackbars.
+    // Uses collect (not collectLatest) so that a rapid second emission (e.g. two achievements
+    // unlocked at once) cannot cancel a pending showSnackbar call.
     LaunchedEffect(Unit) {
-        focusVM.effect.collectLatest { effect ->
+        focusVM.effect.collect { effect ->
             when (effect) {
                 is FocusUiEffect.ShowError -> {
                     snackbarHostState.showSnackbar(

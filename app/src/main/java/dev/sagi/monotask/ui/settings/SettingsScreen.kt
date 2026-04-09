@@ -76,8 +76,14 @@ fun SettingsScreen(
     when (val state = uiState) {
         is SettingsUiState.Loading -> MonoLoadingIndicator()
         is SettingsUiState.Error   -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(state.message, style = MaterialTheme.typography.bodyLarge)
+            Column(
+                modifier = Modifier.fillMaxSize().padding(horizontal = SCREEN_PADDING),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(state.message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(16.dp))
+                ActionButton("Retry") { settingsVM.onEvent(SettingsEvent.Retry) }
             }
         }
         is SettingsUiState.Ready -> SettingsContent(
