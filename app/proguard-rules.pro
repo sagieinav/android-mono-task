@@ -19,3 +19,12 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep Firestore data model classes for reflection-based deserialization
+-keepclassmembers class dev.sagi.monotask.data.model.** { *; }
+-keep class dev.sagi.monotask.data.model.** { *; }
+
+# Keep navigation route class names. Compose Navigation uses the compile-time serial name
+# for destination.route, which must match route::class.qualifiedName in NavUtils.TAB_ORDER.
+# R8 class merging collapses empty data objects to one class, breaking isForward() in release.
+-keepnames class dev.sagi.monotask.ui.navigation.*Route

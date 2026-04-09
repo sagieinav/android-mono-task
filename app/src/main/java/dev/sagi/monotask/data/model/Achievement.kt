@@ -20,7 +20,6 @@ enum class AchievementCategory {
 }
 
 /** A single tier milestone within an [Achievement]: its tier, name, and description. */
-@Keep // Prevents R8 from stripping fields used reflectively (Firestore deserialization)
 data class AchievementMilestone(
     val tier : AchievementTier,
     val name : String,

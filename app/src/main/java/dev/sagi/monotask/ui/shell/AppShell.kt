@@ -9,7 +9,6 @@ import dev.sagi.monotask.ui.navigation.TopLevelDestination
 import dev.sagi.monotask.designsystem.animation.MonoAnimations
 import dev.sagi.monotask.designsystem.animation.tabSlideIn
 import dev.sagi.monotask.designsystem.animation.tabSlideOut
-import dev.sagi.monotask.ui.navigation.isForward
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -104,7 +103,7 @@ fun AppShell(
                         if (isSettingsTransition)
                             fadeIn(tween(MonoAnimations.TAB_TRANSITION_MS)) togetherWith fadeOut(tween(MonoAnimations.TAB_TRANSITION_MS))
                         else {
-                            val forward = isForward(initialState?.routeQualifiedName, targetState?.routeQualifiedName)
+                            val forward = (initialState?.ordinal ?: 0) < (targetState?.ordinal ?: 0)
                             tabSlideIn(forward) togetherWith tabSlideOut(forward)
                         }
                     },
