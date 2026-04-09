@@ -83,7 +83,9 @@ fun SettingsScreen(
             ) {
                 Text(state.message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
                 Spacer(modifier = Modifier.height(16.dp))
-                ActionButton("Retry") { settingsVM.onEvent(SettingsEvent.Retry) }
+                ActionButton(onClick = { settingsVM.onEvent(SettingsEvent.Retry) }) {
+                    Text("Retry")
+                }
             }
         }
         is SettingsUiState.Ready -> SettingsContent(
