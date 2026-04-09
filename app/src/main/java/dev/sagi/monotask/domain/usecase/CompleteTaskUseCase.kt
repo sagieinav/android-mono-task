@@ -37,18 +37,19 @@ class CompleteTaskUseCase @Inject constructor(
     ): CompleteTaskResult {
         val xpGained = task.currentXp
 
+        val levelBefore = XpEngine.levelForXp(user.xp)
+        val levelAfter = XpEngine.levelForXp(user.xp + xpGained)
+
         // Snapshot BEFORE completion so we can diff which achievements are newly earned
         val tasksBefore = taskRepository.getAllCompletedTasksOnce(userId)
-        val achievementsBefore = AchievementEngine.evaluate(tasksBefore, user.level)
+        val achievementsBefore = AchievementEngine.evaluate(tasksBefore, levelBefore)
 
         taskRepository.markTaskCompleted(userId, task.id)
         workspaceRepository.setFocusTask(userId, workspaceId, null)
-        statsRepository.addXp(userId, xpGained, user.xp, user.level)
+        statsRepository.addXp(userId, xpGained, user.xp)
         activityRepository.logDailyActivity(userId, xpGained, tasksCompleted = 1)
 
-        val levelAfter = XpEngine.levelForXp(user.xp + xpGained)
-        // Append in-memory to avoid a second Firestore fetch
-        val tasksAfter = tasksBefore + task
+        val tasksAfter = tasksBefore + task  // append in-memory to avoid a second Firestore fetch
         val achievementsAfter = AchievementEngine.evaluate(tasksAfter, levelAfter)
 
         val newlyUnlocked = achievementsAfter.filter { newProgress ->
@@ -58,13 +59,13 @@ class CompleteTaskUseCase @Inject constructor(
 
         // Non-critical: failure does not affect task completion
         try {
-            statsRepository.updateUserStats(userId, xpGained, task.isAce, newlyUnlocked)
+            statsRepository.updateUserStats(userId, xpGained, task.isAce)
         }
         catch (_: Exception) {}
 
         return CompleteTaskResult(
             xpAwarded = xpGained,
-            previousLevel = user.level,
+            previousLevel = levelBefore,
             newLevel = levelAfter,
             newlyUnlocked = newlyUnlocked
         )

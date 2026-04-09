@@ -102,12 +102,14 @@ private fun StatisticsReadyContent(
 
     var toggleHeightPx by remember { mutableIntStateOf(0) }
     val toggleHeight = with(density) { toggleHeightPx.toDp() }
+    var timestampHeightPx by remember { mutableIntStateOf(0) }
+    val timestampHeight = with(density) { timestampHeightPx.toDp() }
     // gap above toggle (between topBar bottom and toggle top)
     val toggleTopGap = 4.dp
     // gap below toggle (between toggle bottom and first content item)
     val toggleBottomGap = 12.dp
     val refreshBoxTopPadding = topBarHeight + toggleTopGap + toggleHeight
-    val contentTopPadding = refreshBoxTopPadding + toggleBottomGap
+    val contentTopPadding = refreshBoxTopPadding + toggleBottomGap + timestampHeight + 8.dp
 
     var animationKey by remember { mutableIntStateOf(0) }
     var lastRefreshedAt by rememberSaveable { mutableStateOf<Long?>(System.currentTimeMillis()) }
@@ -182,19 +184,6 @@ private fun StatisticsReadyContent(
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    timestampLabel?.let {
-                        item {
-                            Text(
-                                text = timestampLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 2.dp) // optical correction
-                            )
-                        }
-                    }
                     when (page) {
                         0 -> weeklyItems(state, animationKey)
                         1 -> monthlyItems(state, animationKey)
@@ -202,6 +191,20 @@ private fun StatisticsReadyContent(
                     }
                 }
             }
+        }
+
+        timestampLabel?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = refreshBoxTopPadding + toggleBottomGap)
+                    .fillMaxWidth()
+                    .onSizeChanged { timestampHeightPx = it.height }
+            )
         }
 
         CompositionLocalProvider(LocalHazeState provides localHazeState) {

@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.domain.repository.UserRepository
 import dev.sagi.monotask.domain.repository.WorkspaceRepository
+import dev.sagi.monotask.util.AuthUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,9 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val userRepository     : UserRepository,
+    private val userRepository: UserRepository,
     private val workspaceRepository: WorkspaceRepository,
-    private val auth               : FirebaseAuth
+    private val auth: FirebaseAuth
 ) : BaseViewModel<SettingsUiState, SettingsEvent, SettingsUiEffect>() {
 
     override val initialState: SettingsUiState = SettingsUiState.Loading
@@ -59,10 +60,11 @@ class SettingsViewModel @Inject constructor(
                 workspacesJob?.cancel()
                 _workspaces.value = emptyList()
             } else {
-                viewModelScope.launch { loadUserSettings(user.uid) }
+                val uid = AuthUtils.currentUidOrNull() ?: user.uid
+                viewModelScope.launch { loadUserSettings(uid) }
                 workspacesJob?.cancel()
                 workspacesJob = viewModelScope.launch {
-                    workspaceRepository.getWorkspaces(user.uid).collect { _workspaces.value = it }
+                    workspaceRepository.getWorkspaces(uid).collect { _workspaces.value = it }
                 }
             }
         }
@@ -80,9 +82,9 @@ class SettingsViewModel @Inject constructor(
             }
             _uiState.value = SettingsUiState.Ready(
                 hyperfocusModeEnabled = user.hyperfocusModeEnabled,
-                dueDateWeight       = user.dueDateWeight,
-                displayName         = user.displayName,
-                email               = user.email
+                dueDateWeight         = user.dueDateWeight,
+                displayName           = user.displayName,
+                email                 = user.email
             )
         } catch (e: TimeoutCancellationException) {
             _uiState.value = SettingsUiState.Error("Network timeout. Settings failed to load.")
@@ -95,7 +97,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateHyperfocusMode(enabled: Boolean) {
         val current = _uiState.value as? SettingsUiState.Ready ?: return
-        val uid     = auth.currentUser?.uid ?: return
+        val uid     = AuthUtils.currentUidOrNull() ?: return
         _uiState.value = current.copy(hyperfocusModeEnabled = enabled)
         viewModelScope.launch {
             try {
@@ -109,7 +111,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun updatePriorityWeights(dueDateWeight: Float) {
         val current = _uiState.value as? SettingsUiState.Ready ?: return
-        val uid     = auth.currentUser?.uid ?: return
+        val uid     = AuthUtils.currentUidOrNull() ?: return
         _uiState.value = current.copy(dueDateWeight = dueDateWeight)
         viewModelScope.launch {
             try {
@@ -123,7 +125,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateDisplayName(name: String) {
         val current = _uiState.value as? SettingsUiState.Ready ?: return
-        val uid     = auth.currentUser?.uid ?: return
+        val uid     = AuthUtils.currentUidOrNull() ?: return
         _uiState.value = current.copy(displayName = name)
         viewModelScope.launch {
             try {
@@ -138,7 +140,7 @@ class SettingsViewModel @Inject constructor(
     // ========== Workspace Operations ==========
 
     private fun createWorkspace(name: String) {
-        val uid = auth.currentUser?.uid ?: return
+        val uid = AuthUtils.currentUidOrNull() ?: return
         viewModelScope.launch {
             try {
                 workspaceRepository.createWorkspace(uid, name)
@@ -149,7 +151,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun renameWorkspace(workspace: Workspace, newName: String) {
-        val uid = auth.currentUser?.uid ?: return
+        val uid = AuthUtils.currentUidOrNull() ?: return
         viewModelScope.launch {
             try {
                 workspaceRepository.renameWorkspace(uid, workspace.id, newName)
@@ -164,7 +166,7 @@ class SettingsViewModel @Inject constructor(
             viewModelScope.launch { sendEffect(SettingsUiEffect.ShowError("You must keep at least one workspace.")) }
             return
         }
-        val uid = auth.currentUser?.uid ?: return
+        val uid = AuthUtils.currentUidOrNull() ?: return
         viewModelScope.launch {
             try {
                 workspaceRepository.deleteWorkspace(uid, workspace.id)

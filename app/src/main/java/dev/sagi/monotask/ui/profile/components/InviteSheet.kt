@@ -26,6 +26,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.repository.UserRepository
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.designsystem.components.ActionButton
 import dev.sagi.monotask.ui.common.AvatarBox
 import dev.sagi.monotask.designsystem.components.MonoBottomSheet
@@ -195,7 +196,7 @@ private fun SenderProfile(user: User) {
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = "Lv. ${user.level}",
+            text = "Lv. ${XpEngine.levelForXp(user.xp)}",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary
         )

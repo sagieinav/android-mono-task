@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sagi.monotask.data.model.User
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.ui.common.AvatarBox
 import dev.sagi.monotask.designsystem.components.EmptyState
 import dev.sagi.monotask.designsystem.components.MonoConfirmDialog
@@ -108,7 +109,7 @@ fun FriendsSection(
             friendUsers.isEmpty() -> EmptyState(
                 title = "No friends yet",
                 subtitle = "Share your invite link to connect with friends",
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp, horizontal = SCREEN_PADDING)
             )
             else -> Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -227,7 +228,7 @@ private fun FriendRow(
 
                             // Level Chip:
                             MonoLabel(
-                                label = "Lv. ${user.level}",
+                                label = "Lv. ${XpEngine.levelForXp(user.xp)}",
                                 textStyle = MaterialTheme.typography.labelSmall,
                                 accentColor = MaterialTheme.colorScheme.outline,
                                 shape = CircleShape,

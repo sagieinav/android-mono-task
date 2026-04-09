@@ -13,14 +13,7 @@ data class UserStats(
     /** Resets each week alongside [weekStartEpochDay]. */
     val lastActiveEpochDay: Long = 0L,
     val weekStartEpochDay: Long = 0L,
-    val weeklyXp: Int = 0,
-
-    /**
-     * Firestore-serialized achievement progress.
-     * Key: [AchievementCategory.name], Value: [AchievementTier.name]
-     * e.g. "STREAKS" → "GOLD"
-     */
-    val earnedAchievements: Map<String, String> = emptyMap()
+    val weeklyXp: Int = 0
 )
 
 @Keep

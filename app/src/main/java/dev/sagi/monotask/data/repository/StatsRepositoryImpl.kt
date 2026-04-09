@@ -1,11 +1,9 @@
 package dev.sagi.monotask.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import dev.sagi.monotask.data.model.Achievement
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.UserStats
 import dev.sagi.monotask.domain.repository.StatsRepository
-import dev.sagi.monotask.domain.service.XpEngine
 import kotlinx.coroutines.tasks.await
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -18,26 +16,19 @@ class StatsRepositoryImpl @Inject constructor(
     private fun userDoc(userId: String) =
         db.collection("users").document(userId)
 
-    override suspend fun addXp(userId: String, amount: Int, currentXp: Int, currentLevel: Int) {
+    override suspend fun addXp(userId: String, amount: Int, currentXp: Int) {
         val newXp = (currentXp + amount).coerceAtLeast(0)
-        val newLevel = XpEngine.levelForXp(newXp)
-        userDoc(userId).update(mapOf("xp" to newXp, "level" to newLevel)).await()
+        userDoc(userId).update("xp", newXp).await()
     }
 
     override suspend fun removeXp(userId: String, amount: Int) {
         db.runTransaction { tx ->
             val currentXp = tx.get(userDoc(userId)).getLong("xp")?.toInt() ?: 0
-            val newXp = (currentXp - amount).coerceAtLeast(0)
-            tx.update(userDoc(userId), mapOf("xp" to newXp, "level" to XpEngine.levelForXp(newXp)))
+            tx.update(userDoc(userId), "xp", (currentXp - amount).coerceAtLeast(0))
         }.await()
     }
 
-    override suspend fun updateUserStats(
-        userId: String,
-        xpGained: Int,
-        wasAce: Boolean,
-        newAchievements: List<Achievement>
-    ) {
+    override suspend fun updateUserStats(userId: String, xpGained: Int, wasAce: Boolean) {
         val todayEpoch = LocalDate.now().toEpochDay()
         val weekStart = LocalDate.now().with(DayOfWeek.MONDAY).toEpochDay()
 
@@ -55,11 +46,6 @@ class StatsRepositoryImpl @Inject constructor(
                 else                                     -> 1
             }
 
-            val updatedAchievements = current.earnedAchievements.toMutableMap()
-            newAchievements.forEach { a ->
-                if (a.earnedTier != null) updatedAchievements[a.category.name] = a.earnedTier.name
-            }
-
             val updated = current.copy(
                 totalTasksCompleted = current.totalTasksCompleted + 1,
                 aceCount = current.aceCount + if (wasAce) 1 else 0,
@@ -67,8 +53,7 @@ class StatsRepositoryImpl @Inject constructor(
                 longestStreak = maxOf(current.longestStreak, newStreak),
                 weeklyXp = weeklyXp,
                 weekStartEpochDay = weekStart,
-                lastActiveEpochDay = todayEpoch,
-                earnedAchievements = updatedAchievements
+                lastActiveEpochDay = todayEpoch
             )
             tx.update(userDoc(userId), "stats", updated)
         }.await()
@@ -85,21 +70,4 @@ class StatsRepositoryImpl @Inject constructor(
         }.await()
     }
 
-    override suspend fun patchStatsCount(userId: String, correctTotal: Int, correctAceCount: Int) {
-        userDoc(userId).update(mapOf(
-            "stats.totalTasksCompleted" to correctTotal,
-            "stats.aceCount" to correctAceCount
-        )).await()
-    }
-
-    override suspend fun patchEarnedStats(
-        userId: String,
-        longestStreak: Int,
-        earnedAchievements: Map<String, String>
-    ) {
-        userDoc(userId).update(mapOf(
-            "stats.longestStreak" to longestStreak,
-            "stats.earnedAchievements" to earnedAchievements
-        )).await()
-    }
 }

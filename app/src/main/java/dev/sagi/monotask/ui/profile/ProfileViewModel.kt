@@ -9,8 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sagi.monotask.data.model.DailyActivity
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.domain.repository.ActivityRepository
-import dev.sagi.monotask.domain.repository.StatsRepository
-import dev.sagi.monotask.domain.repository.TaskRepository
 import dev.sagi.monotask.domain.repository.UserRepository
 import dev.sagi.monotask.domain.service.AchievementEngine
 import dev.sagi.monotask.domain.service.ActivityStats
@@ -35,8 +33,6 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val userRepository : UserRepository,
     private val activityRepository: ActivityRepository,
-    private val statsRepository : StatsRepository,
-    private val taskRepository : TaskRepository,
 ) : BaseViewModel<ProfileUiState, ProfileEvent, ProfileUiEffect>() {
 
     override val initialState: ProfileUiState = ProfileUiState.Loading
@@ -53,7 +49,7 @@ class ProfileViewModel @Inject constructor(
         users?.associate { user ->
             val weekActivity = ActivityStats.weekActivity(activitiesMap[user.id] ?: emptyList())
             user.id to FriendStats(
-                badges = AchievementEngine.evaluateFromStats(user.stats, user.level),
+                badges = AchievementEngine.evaluateFromStats(user.stats, XpEngine.levelForXp(user.xp)),
                 xpPoints = ActivityStats.buildXpPoints(weekActivity),
                 xpTrend = ActivityStats.computeXpTrend(weekActivity),
                 totalWeekXp = weekActivity.sumOf { it.xpEarned }
@@ -120,7 +116,7 @@ class ProfileViewModel @Inject constructor(
                     achievements = emptyList(),
                 )
 
-                loadAchievements(user.id, level)
+                loadAchievements(user, level)
             }
             .launchIn(viewModelScope)
 
@@ -150,47 +146,17 @@ class ProfileViewModel @Inject constructor(
     }
 
     // ==========================================================================
-    // Achievements (loaded once per user, from completed tasks)
+    // Achievements (loaded once per user, from stored stats)
     // ==========================================================================
 
     private var achievementsLoaded = false
 
-    private fun loadAchievements(uid: String, level: Int) {
+    private fun loadAchievements(user: User, level: Int) {
         if (achievementsLoaded) return
         achievementsLoaded = true
-
-        viewModelScope.launch {
-            try {
-                val tasks = taskRepository.getAllCompletedTasksOnce(uid)
-                val current = _uiState.value as? ProfileUiState.Ready ?: return@launch
-                val achievements = AchievementEngine.evaluate(tasks, current.level)
-                _uiState.value = current.copy(achievements = achievements)
-
-                // Patch Firestore if stats are stale
-                val computedStreak = AchievementEngine.computeLongestStreak(tasks)
-                val computedTotal = tasks.size
-                val computedAceCount = tasks.count { it.isAce }
-                val storedStats = current.user.stats
-                val earnedMap = achievements
-                    .filter { it.earnedTier != null }
-                    .associate { it.category.name to it.earnedTier!!.name }
-                if (computedStreak > storedStats.longestStreak || earnedMap != storedStats.earnedAchievements) {
-                    statsRepository.patchEarnedStats(
-                        userId = uid,
-                        longestStreak = maxOf(computedStreak, storedStats.longestStreak),
-                        earnedAchievements = storedStats.earnedAchievements + earnedMap
-                    )
-                }
-                if (computedTotal != storedStats.totalTasksCompleted ||
-                    computedAceCount != storedStats.aceCount) {
-                    statsRepository.patchStatsCount(
-                        userId = uid,
-                        correctTotal = computedTotal,
-                        correctAceCount = computedAceCount
-                    )
-                }
-            } catch (_: Exception) {}
-        }
+        val current = _uiState.value as? ProfileUiState.Ready ?: return
+        val achievements = AchievementEngine.evaluateFromStats(user.stats, level)
+        _uiState.value = current.copy(achievements = achievements)
     }
 
     // ==========================================================================

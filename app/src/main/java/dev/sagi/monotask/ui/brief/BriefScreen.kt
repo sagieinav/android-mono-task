@@ -61,7 +61,6 @@ private fun ReadyContent(state: BriefUiState.Ready) {
 
     var overdueExpanded  by remember { mutableStateOf(false) }
     var dueTodayExpanded by remember { mutableStateOf(false) }
-    val anyExpanded = overdueExpanded || dueTodayExpanded
 
     // Fill the remaining viewport below the sections so the illustration is centered there.
     // Illustration item is at index 3. When expanded, remainingPx ≤ 0 → illustration hidden.
@@ -128,7 +127,7 @@ private fun ReadyContent(state: BriefUiState.Ready) {
         }
 
         item {  // index 3: illustration, fills remaining height
-            if (!anyExpanded && illustrationHeightDp > 0.dp) {
+            if (illustrationHeightDp > 0.dp) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

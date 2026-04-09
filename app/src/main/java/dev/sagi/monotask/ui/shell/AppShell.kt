@@ -115,7 +115,9 @@ fun AppShell(
                         TopLevelDestination.BOARD -> KanbanTopBar()
                         TopLevelDestination.STATISTICS -> StatisticsTopBar()
                         TopLevelDestination.PROFILE -> ProfileTopBar(
-                            onSettingsClick = { appState.navController.navigate(SettingsRoute) }
+                            onSettingsClick = {
+                                appState.navController.navigate(SettingsRoute) { launchSingleTop = true }
+                            }
                         )
                         TopLevelDestination.BRIEF -> BriefTopBar()
                         null -> if (appState.currentDestination?.hasRoute<SettingsRoute>() == true) {

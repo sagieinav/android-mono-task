@@ -12,9 +12,9 @@ enum class AchievementCategory {
     STREAKS, TASK_VOLUME, DISCIPLINE, XP_LEVELING;
 
     val displayName: String get() = when (this) {
-        STREAKS     -> "Consistency"
+        STREAKS -> "Consistency"
         TASK_VOLUME -> "Task Volume"
-        DISCIPLINE  -> "Discipline"
+        DISCIPLINE -> "Discipline"
         XP_LEVELING -> "XP & Leveling"
     }
 }
@@ -22,8 +22,8 @@ enum class AchievementCategory {
 /** A single tier milestone within an [Achievement]: its tier, name, and description. */
 @Keep // Prevents R8 from stripping fields used reflectively (Firestore deserialization)
 data class AchievementMilestone(
-    val tier        : AchievementTier,
-    val name        : String,
+    val tier : AchievementTier,
+    val name : String,
     val description : String
 )
 
@@ -33,8 +33,8 @@ data class AchievementMilestone(
  * @param earnedTier The highest tier the user has reached, or null if not yet earned.
  */
 data class Achievement(
-    val category   : AchievementCategory,
-    val iconRes    : Int,
+    val category : AchievementCategory,
+    val iconRes : Int,
     val earnedTier : AchievementTier?,
     val milestones : List<AchievementMilestone>  // ordered: [BRONZE, SILVER, GOLD]. Indexed by AchievementTier.ordinal
 ) {

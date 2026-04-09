@@ -10,47 +10,66 @@ import dev.sagi.monotask.data.model.UserStats
 import java.time.Instant
 import java.time.ZoneId
 
+private object StreakRules {
+    const val BRONZE = 3
+    const val SILVER = 7
+    const val GOLD = 30
+}
+
+private object VolumeRules {
+    const val BRONZE = 5
+    const val SILVER = 100
+    const val GOLD = 300
+}
+
+private object DisciplineRules {
+    const val MIN_TASKS = 20
+    const val BRONZE_RATIO = 0.50f
+    const val SILVER_RATIO = 0.70f
+    const val GOLD_RATIO = 0.90f
+}
+
+private object LevelRules {
+    const val BRONZE = 5
+    const val SILVER = 15
+    const val GOLD = 30
+}
+
 object AchievementEngine {
 
-    fun evaluateFromStats(stats: UserStats, level: Int): List<Achievement> {
-        val templates = evaluate(emptyList(), level)
-        return templates.map { template ->
-            val computedTier = when (template.category) {
-                AchievementCategory.STREAKS -> tierFor(stats.longestStreak, bronze = 3, silver = 7, gold = 30)
-                AchievementCategory.TASK_VOLUME -> tierFor(stats.totalTasksCompleted, bronze = 5, silver = 100, gold = 500)
-                AchievementCategory.DISCIPLINE -> if (stats.totalTasksCompleted >= 20) {
-                    val ratio = stats.aceCount.toFloat() / stats.totalTasksCompleted
-                    when {
-                        ratio >= 0.90f -> AchievementTier.GOLD
-                        ratio >= 0.70f -> AchievementTier.SILVER
-                        ratio >= 0.50f -> AchievementTier.BRONZE
-                        else           -> null
-                    }
-                } else null
-                AchievementCategory.XP_LEVELING -> tierFor(level, bronze = 5, silver = 15, gold = 30)
-            }
-            // earnedAchievements is the source of truth for previously-reached tiers.
-            // Raw counter fields (e.g. longestStreak) can be stale for older users,
-            // so we take the maximum of both to never downgrade a tier.
-            val storedTier = stats.earnedAchievements[template.category.name]
-                ?.let { runCatching { AchievementTier.valueOf(it) }.getOrNull() }
-            template.copy(earnedTier = maxTier(computedTier, storedTier))
-        }
-    }
+    fun evaluateFromStats(stats: UserStats, level: Int): List<Achievement> = listOf(
+        evaluateStreaks(emptyList()).copy(
+            earnedTier = tierFor(
+                value = stats.longestStreak,
+                bronze = StreakRules.BRONZE,
+                silver = StreakRules.SILVER,
+                gold = StreakRules.GOLD
+            )
+        ),
 
-    private fun tierFor(value: Int, bronze: Int, silver: Int, gold: Int): AchievementTier? = when {
-        value >= gold -> AchievementTier.GOLD
-        value >= silver -> AchievementTier.SILVER
-        value >= bronze -> AchievementTier.BRONZE
-        else -> null
-    }
+        evaluateTaskVolume(emptyList()).copy(
+            earnedTier = tierFor(
+                value = stats.totalTasksCompleted,
+                bronze = VolumeRules.BRONZE,
+                silver = VolumeRules.SILVER,
+                gold = VolumeRules.GOLD
+            )
+        ),
 
-    private fun maxTier(a: AchievementTier?, b: AchievementTier?): AchievementTier? {
-        if (a == null) return b
-        if (b == null) return a
-        val order = listOf(AchievementTier.BRONZE, AchievementTier.SILVER, AchievementTier.GOLD)
-        return if (order.indexOf(a) >= order.indexOf(b)) a else b
-    }
+        evaluateDiscipline(emptyList()).copy(
+            earnedTier = if (stats.totalTasksCompleted >= DisciplineRules.MIN_TASKS) {
+                val ratio = stats.aceCount.toFloat() / stats.totalTasksCompleted
+                tierForRatio(
+                    value = ratio,
+                    bronze = DisciplineRules.BRONZE_RATIO,
+                    silver = DisciplineRules.SILVER_RATIO,
+                    gold = DisciplineRules.GOLD_RATIO
+                )
+            } else null
+        ),
+
+        evaluateXpLeveling(level)
+    )
 
     fun evaluate(completedTasks: List<Task>, level: Int): List<Achievement> = listOf(
         evaluateStreaks(completedTasks),
@@ -59,79 +78,114 @@ object AchievementEngine {
         evaluateXpLeveling(level)
     )
 
-    // ========== Streaks ==========
 
+    // ========== Streaks ==========
     private fun evaluateStreaks(tasks: List<Task>): Achievement {
         return Achievement(
             category = AchievementCategory.STREAKS,
             iconRes = IconPack.Fire,
-            earnedTier = tierFor(maxStreak(tasks), bronze = 3, silver = 7, gold = 30),
+            earnedTier = tierFor(
+                value = maxStreak(tasks),
+                bronze = StreakRules.BRONZE,
+                silver = StreakRules.SILVER,
+                gold = StreakRules.GOLD
+            ),
             milestones = listOf(
-                AchievementMilestone(AchievementTier.BRONZE, "First Flame", "Active 3 days in a row"),
-                AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active 7 days in a row"),
-                AchievementMilestone(AchievementTier.GOLD,   "Unstoppable", "Active 30 days in a row")
+                AchievementMilestone(AchievementTier.BRONZE, "First Flame", "Active ${StreakRules.BRONZE} days in a row"),
+                AchievementMilestone(AchievementTier.SILVER, "Consistency King", "Active ${StreakRules.SILVER} days in a row"),
+                AchievementMilestone(AchievementTier.GOLD, "Unstoppable", "Active ${StreakRules.GOLD} days in a row")
             )
         )
     }
 
-    // ========== Task Volume ==========
 
+    // ========== Task Volume ==========
     private fun evaluateTaskVolume(tasks: List<Task>): Achievement {
         return Achievement(
             category = AchievementCategory.TASK_VOLUME,
             iconRes = IconPack.TaskAlt,
-            earnedTier = tierFor(tasks.size, bronze = 5, silver = 100, gold = 500),
+            earnedTier = tierFor(
+                value = tasks.size,
+                bronze = VolumeRules.BRONZE,
+                silver = VolumeRules.SILVER,
+                gold = VolumeRules.GOLD
+            ),
             milestones = listOf(
-                AchievementMilestone(AchievementTier.BRONZE, "Warming Up", "Complete 5 tasks"),
-                AchievementMilestone(AchievementTier.SILVER, "Century", "Complete 100 tasks"),
-                AchievementMilestone(AchievementTier.GOLD,   "Task Machine", "Complete 500 tasks")
+                AchievementMilestone(AchievementTier.BRONZE, "Warming Up", "Complete ${VolumeRules.BRONZE} tasks"),
+                AchievementMilestone(AchievementTier.SILVER, "Century", "Complete ${VolumeRules.SILVER} tasks"),
+                AchievementMilestone(AchievementTier.GOLD, "Task Machine", "Complete ${VolumeRules.GOLD} tasks")
             )
         )
     }
 
-    // ========== Discipline (ace ratio, minimum 20 tasks) ==========
 
+    // ========== Discipline (ace ratio) ==========
     private fun evaluateDiscipline(tasks: List<Task>): Achievement {
-        val earned = if (tasks.size >= 20) {
+        val earned = if (tasks.size >= DisciplineRules.MIN_TASKS) {
             val aceRatio = tasks.count { it.isAce }.toFloat() / tasks.size
-            when {
-                aceRatio >= 0.90f -> AchievementTier.GOLD
-                aceRatio >= 0.70f -> AchievementTier.SILVER
-                aceRatio >= 0.50f -> AchievementTier.BRONZE
-                else -> null
-            }
+            tierForRatio(
+                value = aceRatio,
+                bronze = DisciplineRules.BRONZE_RATIO,
+                silver = DisciplineRules.SILVER_RATIO,
+                gold = DisciplineRules.GOLD_RATIO
+            )
         } else null
+
+        // Convert the float ratios to clean integer percentages for the UI strings
+        val bronzePercent = (DisciplineRules.BRONZE_RATIO * 100).toInt()
+        val silverPercent = (DisciplineRules.SILVER_RATIO * 100).toInt()
+        val goldPercent = (DisciplineRules.GOLD_RATIO * 100).toInt()
 
         return Achievement(
             category = AchievementCategory.DISCIPLINE,
             iconRes = IconPack.Bolt,
             earnedTier = earned,
             milestones = listOf(
-                AchievementMilestone(AchievementTier.BRONZE, "No Excuses", "50%+ ace ratio"),
-                AchievementMilestone(AchievementTier.SILVER, "Iron Will", "70%+ ace ratio"),
-                AchievementMilestone(AchievementTier.GOLD,   "Denial Denier", "90%+ ace ratio")
+                AchievementMilestone(AchievementTier.BRONZE, "No Excuses", "$bronzePercent%+ ace ratio"),
+                AchievementMilestone(AchievementTier.SILVER, "Iron Will", "$silverPercent%+ ace ratio"),
+                AchievementMilestone(AchievementTier.GOLD, "Denial Denier", "$goldPercent%+ ace ratio")
             )
         )
     }
 
-    // ========== XP & Leveling ==========
 
+    // ========== XP & Leveling ==========
     private fun evaluateXpLeveling(level: Int): Achievement {
         return Achievement(
             category = AchievementCategory.XP_LEVELING,
             iconRes = IconPack.Medal,
-            earnedTier = tierFor(level, bronze = 5, silver = 15, gold = 30),
+            earnedTier = tierFor(
+                value = level,
+                bronze = LevelRules.BRONZE,
+                silver = LevelRules.SILVER,
+                gold = LevelRules.GOLD
+            ),
             milestones = listOf(
-                AchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level 5"),
-                AchievementMilestone(AchievementTier.SILVER, "Veteran", "Reach level 15"),
-                AchievementMilestone(AchievementTier.GOLD,   "Legend", "Reach level 30")
+                AchievementMilestone(AchievementTier.BRONZE, "Rising Star", "Reach level ${LevelRules.BRONZE}"),
+                AchievementMilestone(AchievementTier.SILVER, "Veteran", "Reach level ${LevelRules.SILVER}"),
+                AchievementMilestone(AchievementTier.GOLD, "Legend", "Reach level ${LevelRules.GOLD}")
             )
         )
     }
 
+
     // ========== Helpers ==========
+    private fun tierFor(value: Int, bronze: Int, silver: Int, gold: Int): AchievementTier? = when {
+        value >= gold -> AchievementTier.GOLD
+        value >= silver -> AchievementTier.SILVER
+        value >= bronze -> AchievementTier.BRONZE
+        else -> null
+    }
+
+    private fun tierForRatio(value: Float, bronze: Float, silver: Float, gold: Float): AchievementTier? = when {
+        value >= gold -> AchievementTier.GOLD
+        value >= silver -> AchievementTier.SILVER
+        value >= bronze -> AchievementTier.BRONZE
+        else -> null
+    }
 
     fun computeLongestStreak(tasks: List<Task>): Int = maxStreak(tasks)
+
 
     // Longest consecutive active-day streak across all-time completed tasks
     private fun maxStreak(tasks: List<Task>): Int {
