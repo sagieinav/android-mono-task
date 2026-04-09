@@ -1,9 +1,11 @@
 package dev.sagi.monotask.ui.settings
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import dev.sagi.monotask.ui.common.BaseViewModel
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.domain.repository.TaskRepository
 import dev.sagi.monotask.domain.repository.UserPrefsRepository
@@ -21,12 +23,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val userRepository: UserRepository,
     private val workspaceRepository: WorkspaceRepository,
     private val taskRepository: TaskRepository,
     private val userPrefsRepository: UserPrefsRepository,
     private val auth: FirebaseAuth
 ) : BaseViewModel<SettingsUiState, SettingsEvent, SettingsUiEffect>() {
+
+    private val versionName: String = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
+    } catch (_: Exception) { "—" }
 
     override val initialState: SettingsUiState = SettingsUiState.Loading
 
@@ -61,7 +68,7 @@ class SettingsViewModel @Inject constructor(
         val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             if (user == null) {
-                _uiState.value = SettingsUiState.Ready()
+                _uiState.value = SettingsUiState.Ready(versionName = versionName)
                 workspacesJob?.cancel()
                 _workspaces.value = emptyList()
             } else {
@@ -89,7 +96,8 @@ class SettingsViewModel @Inject constructor(
                 hyperfocusModeEnabled = user.hyperfocusModeEnabled,
                 dueDateWeight = user.dueDateWeight,
                 displayName = user.displayName,
-                email = user.email
+                email = user.email,
+                versionName = versionName
             )
         } catch (e: TimeoutCancellationException) {
             _uiState.value = SettingsUiState.Error("Network timeout. Settings failed to load.")

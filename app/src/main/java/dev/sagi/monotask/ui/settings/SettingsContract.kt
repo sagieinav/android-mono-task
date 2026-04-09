@@ -10,7 +10,8 @@ sealed class SettingsUiState {
         val hyperfocusModeEnabled: Boolean = false,
         val dueDateWeight: Float = 0.5f,
         val displayName: String = "",
-        val email: String = ""
+        val email: String = "",
+        val versionName: String = ""
     ) : SettingsUiState()
     data class Error(val message: String) : SettingsUiState()
 }

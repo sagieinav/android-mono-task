@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -156,7 +155,7 @@ private fun SettingsContent(
         // App Branding:
         item {
             Spacer(Modifier.height(16.dp)) // compensate for lack of section title
-            AppBranding()
+            AppBranding(versionName = state.versionName)
         }
     }
 }
@@ -213,13 +212,7 @@ private fun SignOutButton(onSignOut: () -> Unit) {
 // ==================================
 
 @Composable
-private fun AppBranding() {
-    val context = LocalContext.current
-    // TODO move this calc to VM:
-    val versionName = remember {
-        try { context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—" }
-        catch (_: Exception) { "---" }
-    }
+private fun AppBranding(versionName: String) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -260,7 +253,7 @@ private fun AppBranding() {
 private fun AppBrandingPreview() {
     MonoTaskTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            AppBranding()
+            AppBranding(versionName = "1.0.0")
         }
     }
 }
