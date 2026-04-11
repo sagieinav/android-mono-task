@@ -24,8 +24,14 @@ android {
 
     flavorDimensions += "mode"
     productFlavors {
-        create("prod") { dimension = "mode" }
-        create("demo") { dimension = "mode" }
+        create("prod") {
+            dimension = "mode"
+            buildConfigField("Boolean", "IS_DEMO", "false")
+        }
+        create("demo") {
+            dimension = "mode"
+            buildConfigField("Boolean", "IS_DEMO", "true")
+        }
     }
 
     buildTypes {
@@ -45,6 +51,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     testOptions {

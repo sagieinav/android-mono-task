@@ -119,8 +119,7 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertNewTask(userId: String, task: Task) {
-        val taskWithXp = task.copy(currentXp = XpEngine.calculateTaskXp(task))
-        tasksCollection(userId).add(taskWithXp).await()
+        tasksCollection(userId).add(task).await()
     }
 
     override suspend fun updateSnoozeFields(userId: String, task: Task, option: XpEngine.SnoozeOption) {
@@ -133,8 +132,7 @@ class TaskRepositoryImpl @Inject constructor(
     }
 
     override suspend fun overwriteExistingTask(userId: String, task: Task) {
-        val taskWithXp = task.copy(currentXp = XpEngine.calculateTaskXp(task))
-        tasksCollection(userId).document(task.id).set(taskWithXp).await()
+        tasksCollection(userId).document(task.id).set(task).await()
     }
 
     override suspend fun undoSnoozeFields(userId: String, originalTask: Task) {

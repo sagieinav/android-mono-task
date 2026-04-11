@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,12 +69,12 @@ fun BottomNavBar(
         modifier = modifier
             .fillMaxWidth()
             .padding(Constants.Theme.SCREEN_PADDING)
-//            .monoShadowWorkaround(shape)
             .monoShadow(shape)
             .clip(shape)
             .hazeEffect(hazeState, HazeMaterials.ultraThin())
             .glassBorderPremium(shape)
             .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+//            .glassBackground(Color.Transparent)
     ) {
         BoxWithConstraints(
             modifier = Modifier

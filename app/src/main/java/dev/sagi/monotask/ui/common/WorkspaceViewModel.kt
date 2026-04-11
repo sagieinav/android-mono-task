@@ -8,6 +8,7 @@ import dev.sagi.monotask.data.model.Importance
 import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.domain.repository.TaskRepository
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.domain.repository.UserPrefsRepository
 import dev.sagi.monotask.domain.repository.WorkspaceRepository
 import dev.sagi.monotask.util.AuthUtils
@@ -130,7 +131,7 @@ class WorkspaceViewModel @Inject constructor(
         val workspaceId = _selectedWorkspace.value?.id ?: return
         viewModelScope.launch {
             try {
-                taskRepository.insertNewTask(userId, Task(
+                val task = Task(
                     title = title,
                     description = description,
                     importance = importance,
@@ -139,7 +140,8 @@ class WorkspaceViewModel @Inject constructor(
                     workspaceId = workspaceId,
                     ownerId = userId,
                     createdAt = Timestamp.now()
-                ))
+                )
+                taskRepository.insertNewTask(userId, task.copy(currentXp = XpEngine.calculateTaskXp(task)))
             } catch (e: Exception) {
                 _errorEvent.emit("Failed to create task: ${e.message}")
             }

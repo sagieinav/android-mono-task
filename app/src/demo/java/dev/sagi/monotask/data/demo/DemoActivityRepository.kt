@@ -15,6 +15,8 @@ class DemoActivityRepository @Inject constructor() : ActivityRepository {
     private val friendActivity = mapOf(
         DemoSeedData.DEMO_FRIEND_ROEI_ID to DemoSeedData.DEMO_FRIEND_ROEI_ACTIVITY,
         DemoSeedData.DEMO_FRIEND_OFEK_ID to DemoSeedData.DEMO_FRIEND_OFEK_ACTIVITY,
+        DemoSeedData.DEMO_FRIEND_OFIR_ID to DemoSeedData.DEMO_FRIEND_OFIR_ACTIVITY,
+        DemoSeedData.DEMO_FRIEND_KEREN_ID to DemoSeedData.DEMO_FRIEND_KEREN_ACTIVITY,
     )
 
     override suspend fun logDailyActivity(userId: String, xpEarned: Int, tasksCompleted: Int) {

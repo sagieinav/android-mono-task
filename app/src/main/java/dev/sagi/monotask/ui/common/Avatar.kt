@@ -106,8 +106,8 @@ fun AvatarPicker(
                         .clip(CircleShape)
                         .glassBackground(baseColor = MaterialTheme.colorScheme.surfaceContainer)
                         .then(
-                            if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                            else Modifier.glassBorder(shape = CircleShape, width = 3.dp)
+                            if (isSelected) Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                            else Modifier.glassBorder(shape = CircleShape, width = 1.5.dp)
                         )
                         .clickable { onSelect(preset) }
                 ) {

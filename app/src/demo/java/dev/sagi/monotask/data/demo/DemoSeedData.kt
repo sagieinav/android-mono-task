@@ -7,14 +7,19 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.UserStats
 import dev.sagi.monotask.data.model.Workspace
+import dev.sagi.monotask.domain.service.XpEngine
 import java.time.LocalDate
 
 object DemoSeedData {
     const val DEMO_USER_ID = "demo_user"
-    const val DEMO_WS_MAIN_ID = "demo_ws_main"
-    const val DEMO_WS_SIDE_ID = "demo_ws_side"
+    const val DEMO_WS_PERSONAL_ID = "demo_ws_personal"
+    const val DEMO_WS_EDUCATION_ID = "demo_ws_education"
+    const val DEMO_WS_WORK_ID = "demo_ws_work"
+    const val DEMO_WS_ANDROID_DEV_ID = "demo_ws_android_dev"
     const val DEMO_FRIEND_ROEI_ID = "demo_friend_roei"
     const val DEMO_FRIEND_OFEK_ID = "demo_friend_ofek"
+    const val DEMO_FRIEND_OFIR_ID = "demo_friend_ofir"
+    const val DEMO_FRIEND_KEREN_ID = "demo_friend_keren"
 
     private fun daysAgoTimestamp(days: Long): Timestamp {
         val epochSeconds = LocalDate.now().minusDays(days).toEpochDay() * 86400L
@@ -33,8 +38,8 @@ object DemoSeedData {
         avatarPreset = 1,
         level = 15,
         xp = 12700,
-        currentWorkspaceId = DEMO_WS_MAIN_ID,
-        friends = listOf(DEMO_FRIEND_ROEI_ID, DEMO_FRIEND_OFEK_ID),
+        currentWorkspaceId = DEMO_WS_ANDROID_DEV_ID,
+        friends = listOf(DEMO_FRIEND_ROEI_ID, DEMO_FRIEND_OFEK_ID, DEMO_FRIEND_OFIR_ID, DEMO_FRIEND_KEREN_ID),
         onboarded = true,
         hyperfocusModeEnabled = false,
         dueDateWeight = 0.6f,
@@ -51,7 +56,7 @@ object DemoSeedData {
         id = DEMO_FRIEND_ROEI_ID,
         displayName = "Roei Zalah",
         email = "",
-        avatarPreset = 7,
+        avatarPreset = 21,
         level = 10,
         xp = 5500,
         currentWorkspaceId = "",
@@ -70,7 +75,7 @@ object DemoSeedData {
         id = DEMO_FRIEND_OFEK_ID,
         displayName = "Ofek Fanian",
         email = "",
-        avatarPreset = 2,
+        avatarPreset = 17,
         level = 11,
         xp = 6800,
         currentWorkspaceId = "",
@@ -85,34 +90,86 @@ object DemoSeedData {
         )
     )
 
+    val DEMO_FRIEND_OFIR = User(
+        id = DEMO_FRIEND_OFIR_ID,
+        displayName = "Ofir Vizenblit",
+        email = "",
+        avatarPreset = 14,
+        level = 8,
+        xp = 3200,
+        currentWorkspaceId = "",
+        friends = listOf(DEMO_USER_ID),
+        onboarded = true,
+        stats = UserStats(
+            totalTasksCompleted = 54,
+            aceCount = 31,
+            currentStreak = 2,
+            longestStreak = 11,
+            weeklyXp = 380
+        )
+    )
+
+    val DEMO_FRIEND_KEREN = User(
+        id = DEMO_FRIEND_KEREN_ID,
+        displayName = "Keren Kayrich",
+        email = "",
+        avatarPreset = 20,
+        level = 13,
+        xp = 9800,
+        currentWorkspaceId = "",
+        friends = listOf(DEMO_USER_ID),
+        onboarded = true,
+        stats = UserStats(
+            totalTasksCompleted = 142,
+            aceCount = 105,
+            currentStreak = 12,
+            longestStreak = 27,
+            weeklyXp = 1430
+        )
+    )
+
     val DEMO_WORKSPACES = listOf(
         Workspace(
-            id = DEMO_WS_MAIN_ID,
-            name = "MonoTask",
+            id = DEMO_WS_ANDROID_DEV_ID,
+            name = "Android Dev",
             ownerId = DEMO_USER_ID,
             currentFocusTaskId = "demo_task_1",
             createdAt = daysAgoTimestamp(90).seconds
         ),
         Workspace(
-            id = DEMO_WS_SIDE_ID,
-            name = "University",
+            id = DEMO_WS_EDUCATION_ID,
+            name = "Education",
             ownerId = DEMO_USER_ID,
-            currentFocusTaskId = null,
+            currentFocusTaskId = "demo_task_3",
             createdAt = daysAgoTimestamp(60).seconds
+        ),
+        Workspace(
+            id = DEMO_WS_WORK_ID,
+            name = "Work",
+            ownerId = DEMO_USER_ID,
+            currentFocusTaskId = "demo_task_7",
+            createdAt = daysAgoTimestamp(45).seconds
+        ),
+        Workspace(
+            id = DEMO_WS_PERSONAL_ID,
+            name = "Personal",
+            ownerId = DEMO_USER_ID,
+            currentFocusTaskId = "demo_task_8",
+            createdAt = daysAgoTimestamp(30).seconds
         )
     )
 
     val DEMO_TASKS = listOf(
+        // ── Android Dev ──────────────────────────────────────────────────────
         Task(
             id = "demo_task_1",
             title = "Write unit tests for TaskViewModel",
             description = "Cover the main use cases: add, complete, snooze, and delete.",
             importance = Importance.HIGH,
             dueDate = daysFromNowTimestamp(1),
-            workspaceId = DEMO_WS_MAIN_ID,
+            workspaceId = DEMO_WS_ANDROID_DEV_ID,
             tags = listOf("dev", "testing"),
             snoozeCount = 0,
-            currentXp = 190,
             ownerId = DEMO_USER_ID,
             createdAt = daysAgoTimestamp(2)
         ),
@@ -122,25 +179,11 @@ object DemoSeedData {
             description = "Stutter occurs on older devices during swipe gesture. Profile and reduce recompositions.",
             importance = Importance.HIGH,
             dueDate = null,
-            workspaceId = DEMO_WS_MAIN_ID,
+            workspaceId = DEMO_WS_ANDROID_DEV_ID,
             tags = listOf("dev", "bug"),
             snoozeCount = 1,
-            currentXp = 160,
             ownerId = DEMO_USER_ID,
             createdAt = daysAgoTimestamp(3)
-        ),
-        Task(
-            id = "demo_task_3",
-            title = "Submit OS lab report",
-            description = "Lab 4 — memory management and page replacement algorithms.",
-            importance = Importance.HIGH,
-            dueDate = daysAgoTimestamp(1),
-            workspaceId = DEMO_WS_SIDE_ID,
-            tags = listOf("uni", "report"),
-            snoozeCount = 2,
-            currentXp = 120,
-            ownerId = DEMO_USER_ID,
-            createdAt = daysAgoTimestamp(7)
         ),
         Task(
             id = "demo_task_4",
@@ -148,23 +191,63 @@ object DemoSeedData {
             description = "Update screenshots for all three screen sizes with the new UI.",
             importance = Importance.MEDIUM,
             dueDate = daysFromNowTimestamp(3),
-            workspaceId = DEMO_WS_MAIN_ID,
+            workspaceId = DEMO_WS_ANDROID_DEV_ID,
             tags = listOf("design"),
             snoozeCount = 0,
-            currentXp = 140,
             ownerId = DEMO_USER_ID,
             createdAt = daysAgoTimestamp(2)
+        ),
+        // Archived — Android Dev
+        Task(
+            id = "demo_arch_a1",
+            title = "Set up CI/CD pipeline",
+            description = "Configure GitHub Actions for automated build and test on each PR.",
+            importance = Importance.HIGH,
+            dueDate = null,
+            workspaceId = DEMO_WS_ANDROID_DEV_ID,
+            tags = listOf("dev", "infra"),
+            snoozeCount = 0,
+            completed = true,
+            completedAt = daysAgoTimestamp(5),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(10)
+        ),
+        Task(
+            id = "demo_arch_a2",
+            title = "Refactor authentication module",
+            description = "Split AuthViewModel into separate login and register flows.",
+            importance = Importance.HIGH,
+            dueDate = null,
+            workspaceId = DEMO_WS_ANDROID_DEV_ID,
+            tags = listOf("dev", "refactor"),
+            snoozeCount = 1,
+            completed = true,
+            completedAt = daysAgoTimestamp(8),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(14)
+        ),
+        // ── Education ────────────────────────────────────────────────────────
+        Task(
+            id = "demo_task_3",
+            title = "Submit OS lab report",
+            description = "Lab 4 — memory management and page replacement algorithms.",
+            importance = Importance.HIGH,
+            dueDate = daysAgoTimestamp(1),  // overdue
+            workspaceId = DEMO_WS_EDUCATION_ID,
+            tags = listOf("uni", "report"),
+            snoozeCount = 2,
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(7)
         ),
         Task(
             id = "demo_task_5",
             title = "Study for data structures exam",
             description = "Focus on trees, graphs, and dynamic programming.",
             importance = Importance.HIGH,
-            dueDate = daysFromNowTimestamp(5),
-            workspaceId = DEMO_WS_SIDE_ID,
+            dueDate = daysFromNowTimestamp(0),  // due today
+            workspaceId = DEMO_WS_EDUCATION_ID,
             tags = listOf("uni", "study"),
             snoozeCount = 0,
-            currentXp = 170,
             ownerId = DEMO_USER_ID,
             createdAt = daysAgoTimestamp(4)
         ),
@@ -174,40 +257,150 @@ object DemoSeedData {
             description = "",
             importance = Importance.LOW,
             dueDate = null,
-            workspaceId = DEMO_WS_SIDE_ID,
+            workspaceId = DEMO_WS_EDUCATION_ID,
             tags = listOf("reading"),
             snoozeCount = 0,
-            currentXp = 130,
             ownerId = DEMO_USER_ID,
             createdAt = daysAgoTimestamp(5)
         ),
+        // Archived — Education
+        Task(
+            id = "demo_arch_e1",
+            title = "Complete algorithms homework",
+            description = "Problems 3–7 from chapter 6.",
+            importance = Importance.HIGH,
+            dueDate = null,
+            workspaceId = DEMO_WS_EDUCATION_ID,
+            tags = listOf("uni", "homework"),
+            snoozeCount = 0,
+            completed = true,
+            completedAt = daysAgoTimestamp(4),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(9)
+        ),
+        Task(
+            id = "demo_arch_e2",
+            title = "Submit project proposal",
+            description = "Final-year project proposal document, max 2 pages.",
+            importance = Importance.HIGH,
+            dueDate = null,
+            workspaceId = DEMO_WS_EDUCATION_ID,
+            tags = listOf("uni", "project"),
+            snoozeCount = 1,
+            completed = true,
+            completedAt = daysAgoTimestamp(12),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(18)
+        ),
+        // ── Work ─────────────────────────────────────────────────────────────
         Task(
             id = "demo_task_7",
             title = "Reply to beta tester feedback",
             description = "Check the latest feedback thread and respond to open questions.",
             importance = Importance.MEDIUM,
-            dueDate = daysFromNowTimestamp(2),
-            workspaceId = DEMO_WS_MAIN_ID,
+            dueDate = daysFromNowTimestamp(0),  // due today
+            workspaceId = DEMO_WS_WORK_ID,
             tags = listOf("feedback"),
             snoozeCount = 1,
-            currentXp = 110,
             ownerId = DEMO_USER_ID,
             createdAt = daysAgoTimestamp(1)
         ),
+        Task(
+            id = "demo_task_9",
+            title = "Update project documentation",
+            description = "Sync the README and architecture diagrams with recent changes.",
+            importance = Importance.MEDIUM,
+            dueDate = daysFromNowTimestamp(4),
+            workspaceId = DEMO_WS_WORK_ID,
+            tags = listOf("docs"),
+            snoozeCount = 0,
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(2)
+        ),
+        // Archived — Work
+        Task(
+            id = "demo_arch_w1",
+            title = "Update team Confluence page",
+            description = "Add notes from last sprint retrospective.",
+            importance = Importance.MEDIUM,
+            dueDate = null,
+            workspaceId = DEMO_WS_WORK_ID,
+            tags = listOf("docs"),
+            snoozeCount = 0,
+            completed = true,
+            completedAt = daysAgoTimestamp(3),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(7)
+        ),
+        Task(
+            id = "demo_arch_w2",
+            title = "Review PR from colleague",
+            description = "Review the feature branch for the new onboarding flow.",
+            importance = Importance.MEDIUM,
+            dueDate = null,
+            workspaceId = DEMO_WS_WORK_ID,
+            tags = listOf("review"),
+            snoozeCount = 0,
+            completed = true,
+            completedAt = daysAgoTimestamp(6),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(10)
+        ),
+        // ── Personal ─────────────────────────────────────────────────────────
         Task(
             id = "demo_task_8",
             title = "Book gym session for this week",
             description = "",
             importance = Importance.LOW,
             dueDate = daysFromNowTimestamp(7),
-            workspaceId = DEMO_WS_MAIN_ID,
+            workspaceId = DEMO_WS_PERSONAL_ID,
             tags = listOf("personal"),
             snoozeCount = 0,
-            currentXp = 100,
             ownerId = DEMO_USER_ID,
             createdAt = daysAgoTimestamp(1)
+        ),
+        Task(
+            id = "demo_task_10",
+            title = "Call dentist to schedule checkup",
+            description = "",
+            importance = Importance.LOW,
+            dueDate = null,
+            workspaceId = DEMO_WS_PERSONAL_ID,
+            tags = listOf("personal", "health"),
+            snoozeCount = 0,
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(3)
+        ),
+        // Archived — Personal
+        Task(
+            id = "demo_arch_p1",
+            title = "Renew gym membership",
+            description = "",
+            importance = Importance.MEDIUM,
+            dueDate = null,
+            workspaceId = DEMO_WS_PERSONAL_ID,
+            tags = listOf("personal"),
+            snoozeCount = 0,
+            completed = true,
+            completedAt = daysAgoTimestamp(2),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(6)
+        ),
+        Task(
+            id = "demo_arch_p2",
+            title = "Buy groceries for the week",
+            description = "",
+            importance = Importance.LOW,
+            dueDate = null,
+            workspaceId = DEMO_WS_PERSONAL_ID,
+            tags = listOf("personal"),
+            snoozeCount = 0,
+            completed = true,
+            completedAt = daysAgoTimestamp(5),
+            ownerId = DEMO_USER_ID,
+            createdAt = daysAgoTimestamp(8)
         )
-    )
+    ).map { it.copy(currentXp = XpEngine.calculateTaskXp(it)) }
 
     // Deterministic activity — no random() calls so data is stable across launches.
     val DEMO_ACTIVITY: List<DailyActivity> = buildList {
@@ -317,6 +510,56 @@ object DemoSeedData {
             23 to (3 to 440),
             25 to (2 to 310), 26 to (4 to 530),
             28 to (3 to 410), 29 to (2 to 270)
+        )
+        for ((daysBack, data) in pattern) {
+            add(DailyActivity(
+                dateEpochDay = today.minusDays(daysBack.toLong()).toEpochDay(),
+                tasksCompleted = data.first,
+                xpEarned = data.second
+            ))
+        }
+    }
+
+    val DEMO_FRIEND_OFIR_ACTIVITY: List<DailyActivity> = buildList {
+        val today = LocalDate.now()
+        val pattern = listOf(
+            1 to (1 to 160), 2 to (2 to 280),
+            4 to (3 to 390),
+            6 to (1 to 140), 7 to (2 to 260),
+            9 to (3 to 410), 10 to (1 to 130),
+            12 to (2 to 300),
+            14 to (3 to 370), 15 to (1 to 150),
+            17 to (2 to 270),
+            19 to (3 to 400), 20 to (2 to 240),
+            22 to (1 to 120), 23 to (3 to 360),
+            25 to (2 to 290),
+            27 to (1 to 140), 28 to (3 to 380)
+        )
+        for ((daysBack, data) in pattern) {
+            add(DailyActivity(
+                dateEpochDay = today.minusDays(daysBack.toLong()).toEpochDay(),
+                tasksCompleted = data.first,
+                xpEarned = data.second
+            ))
+        }
+    }
+
+    val DEMO_FRIEND_KEREN_ACTIVITY: List<DailyActivity> = buildList {
+        val today = LocalDate.now()
+        val pattern = listOf(
+            1 to (4 to 620), 2 to (5 to 750),
+            3 to (3 to 450),
+            5 to (4 to 590), 6 to (2 to 310),
+            7 to (5 to 730),
+            9 to (3 to 470), 10 to (4 to 600),
+            11 to (5 to 780), 12 to (2 to 290),
+            14 to (4 to 560), 15 to (3 to 420),
+            16 to (5 to 710),
+            18 to (4 to 580), 19 to (2 to 300),
+            21 to (5 to 740), 22 to (3 to 440),
+            23 to (4 to 610),
+            25 to (3 to 460), 26 to (5 to 700),
+            28 to (4 to 570), 29 to (3 to 410)
         )
         for ((daysBack, data) in pattern) {
             add(DailyActivity(

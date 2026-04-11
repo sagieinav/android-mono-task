@@ -18,6 +18,8 @@ class DemoUserRepository @Inject constructor() : UserRepository {
         DemoSeedData.DEMO_USER_ID to MutableStateFlow<User?>(DemoSeedData.DEMO_USER),
         DemoSeedData.DEMO_FRIEND_ROEI_ID to MutableStateFlow<User?>(DemoSeedData.DEMO_FRIEND_ROEI),
         DemoSeedData.DEMO_FRIEND_OFEK_ID to MutableStateFlow<User?>(DemoSeedData.DEMO_FRIEND_OFEK),
+        DemoSeedData.DEMO_FRIEND_OFIR_ID to MutableStateFlow<User?>(DemoSeedData.DEMO_FRIEND_OFIR),
+        DemoSeedData.DEMO_FRIEND_KEREN_ID to MutableStateFlow<User?>(DemoSeedData.DEMO_FRIEND_KEREN),
     )
     private val _user get() = _users[DemoSeedData.DEMO_USER_ID]!!
 

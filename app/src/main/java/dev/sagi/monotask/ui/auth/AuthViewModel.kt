@@ -7,6 +7,7 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.viewModelScope
+import dev.sagi.monotask.BuildConfig
 import dev.sagi.monotask.ui.common.BaseViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -52,6 +53,11 @@ class AuthViewModel @Inject constructor(
 
     // ========== Auth State Observation ==========
     private fun observeAuthState() {
+        if (BuildConfig.IS_DEMO) {
+            _uiState.value = AuthUiState.SignedIn(requiresOnboarding = false)
+            return
+        }
+
         val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             if (isSigningIn) return@AuthStateListener
 

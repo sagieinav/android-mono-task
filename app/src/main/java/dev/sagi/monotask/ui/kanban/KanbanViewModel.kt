@@ -8,6 +8,7 @@ import dev.sagi.monotask.data.model.Task
 import dev.sagi.monotask.data.model.User
 import dev.sagi.monotask.data.model.Workspace
 import dev.sagi.monotask.domain.repository.TaskRepository
+import dev.sagi.monotask.domain.service.XpEngine
 import dev.sagi.monotask.domain.usecase.RestoreCompletedTaskUseCase
 import dev.sagi.monotask.domain.usecase.SetTaskFocusUseCase
 import dev.sagi.monotask.util.AuthUtils
@@ -178,7 +179,7 @@ class KanbanViewModel @Inject constructor(
     private fun updateTask(task: Task) {
         viewModelScope.launch {
             try {
-                taskRepository.overwriteExistingTask(userId, task)
+                taskRepository.overwriteExistingTask(userId, task.copy(currentXp = XpEngine.calculateTaskXp(task)))
             } catch (e: Exception) {
                 sendEffect(KanbanUiEffect.ShowError("Failed to update task: ${e.message}"))
             }

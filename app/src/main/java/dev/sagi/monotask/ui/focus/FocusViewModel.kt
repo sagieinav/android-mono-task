@@ -316,7 +316,7 @@ class FocusViewModel @Inject constructor(
     private fun updateTask(task: Task) {
         viewModelScope.launch {
             try {
-                taskRepository.overwriteExistingTask(userId, task)
+                taskRepository.overwriteExistingTask(userId, task.copy(currentXp = XpEngine.calculateTaskXp(task)))
             } catch (e: Exception) {
                 sendEffect(FocusUiEffect.ShowError("Failed to update task: ${e.message}"))
             }
