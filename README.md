@@ -28,15 +28,13 @@
 </p>
 
 
-<img width="4021" height="2917" alt="batch1" src="https://github.com/user-attachments/assets/ef47eb1d-99cd-4dda-9f2e-9e0e2cc605da" />
+<!-- Screenshots -->
+<img width="3935" height="2895" alt="ss_batch1" src="https://github.com/user-attachments/assets/caa2d7e6-9306-4b5b-bec8-c1ac6a5a9b2a" />
+<img width="3916" height="2881" alt="ss_batch2" src="https://github.com/user-attachments/assets/bf1a2b40-77f8-4d31-a396-ad3d909c37cf" />
+<img width="3944" height="2917" alt="ss_batch3" src="https://github.com/user-attachments/assets/8332316e-def3-4fad-9584-d467a86fb92e" />
 
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/ef47eb1d-99cd-4dda-9f2e-9e0e2cc605da" width="100%" />
-</p>
-
-
-<p align="center">
+<!-- <p align="center">
   <img src="https://github.com/user-attachments/assets/294e2731-869f-459a-9a62-13447138aba2" height="500"
 	  /><img src="https://github.com/user-attachments/assets/d891a239-640d-4c6b-9908-08a1a8acc51a" height="500"
 			/><img src="https://github.com/user-attachments/assets/981ca6ef-1a3c-478f-ab77-488ce260645b" height="500" />
@@ -51,7 +49,7 @@
 <p align="center">
   <img src="https://github.com/user-attachments/assets/193079e1-60dc-4732-bad5-da3fb11ea84a" height="500"
 	  /><img src="https://github.com/user-attachments/assets/b2a9a55a-afab-4f5c-9ee9-5e0b0f79b2a3" height="500"
-			/><img src="https://github.com/user-attachments/assets/d2d52e79-875d-4434-9c8a-dfd85d23d785" height="500" />
+			/><img src="https://github.com/user-attachments/assets/d2d52e79-875d-4434-9c8a-dfd85d23d785" height="500" /> -->
 
 
 ## 1 About The Project
