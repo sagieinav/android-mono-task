@@ -28,6 +28,25 @@
 </p>
 
 
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/294e2731-869f-459a-9a62-13447138aba2" height="700"
+	  /><img src="https://github.com/user-attachments/assets/d891a239-640d-4c6b-9908-08a1a8acc51a" height="700"
+			/><img src="https://github.com/user-attachments/assets/981ca6ef-1a3c-478f-ab77-488ce260645b" height="700" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f3d855ec-478f-4b57-865a-edda39b3ceac" height="700"
+	  /><img src="https://github.com/user-attachments/assets/6b0050c6-c92c-462f-9262-74d8cd03b4ea" height="700"
+			/><img src="https://github.com/user-attachments/assets/87b1497d-2915-4193-9dc5-e92554dcae1f" height="700" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/193079e1-60dc-4732-bad5-da3fb11ea84a" height="700"
+	  /><img src="https://github.com/user-attachments/assets/b2a9a55a-afab-4f5c-9ee9-5e0b0f79b2a3" height="700"
+			/><img src="https://github.com/user-attachments/assets/d2d52e79-875d-4434-9c8a-dfd85d23d785" height="700" />
+
+
 ## 1 About The Project
 
 Developed as a final project for the 'UI Development' course at Afeka College of Engineering, as part of my Computer Science BSc.
