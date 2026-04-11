@@ -29,9 +29,9 @@
 
 
 <!-- Screenshots -->
-<img width="3935" height="2895" alt="ss_batch1" src="https://github.com/user-attachments/assets/caa2d7e6-9306-4b5b-bec8-c1ac6a5a9b2a" />
-<img width="3916" height="2881" alt="ss_batch2" src="https://github.com/user-attachments/assets/bf1a2b40-77f8-4d31-a396-ad3d909c37cf" />
-<img width="3944" height="2917" alt="ss_batch3" src="https://github.com/user-attachments/assets/8332316e-def3-4fad-9584-d467a86fb92e" />
+<img width="3944" height="2917" alt="ss_batch1" src="https://github.com/user-attachments/assets/c8fa30fc-371c-48b1-93b4-0a9261094a2a" />
+<img width="3916" height="2881" alt="ss_batch2" src="https://github.com/user-attachments/assets/01208d25-50e0-4b98-bf37-481e22128d05" />
+<img width="3935" height="2895" alt="ss_batch3" src="https://github.com/user-attachments/assets/58058926-7e7f-4607-96a6-6ccf9f3ce099" />
 
 
 <!-- <p align="center">
