@@ -134,7 +134,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-//    implementation(libs.androidx.compose.ui.text.google.fonts)
 
     // Unit Tests
     testImplementation(libs.junit.jupiter)
@@ -149,4 +148,5 @@ dependencies {
     // Concurrent Futures
     androidTestImplementation(libs.androidx.concurrent.futures)
     androidTestImplementation(libs.androidx.concurrent.futures.ktx)
+    androidTestImplementation(libs.screengrab)
 }

@@ -48,3 +48,8 @@ app-release.dm
 # Tests
 **/designsystem/src/test/
 **/androidTest/
+
+# Documentation
+/.doc
+/.assets
+/screenshots-generator

@@ -28,6 +28,30 @@
 </p>
 
 
+<!-- Screenshots -->
+<img width="3944" height="2917" alt="ss_batch1" src="https://github.com/user-attachments/assets/c8fa30fc-371c-48b1-93b4-0a9261094a2a" />
+<img width="3916" height="2881" alt="ss_batch2" src="https://github.com/user-attachments/assets/01208d25-50e0-4b98-bf37-481e22128d05" />
+<img width="3935" height="2895" alt="ss_batch3" src="https://github.com/user-attachments/assets/58058926-7e7f-4607-96a6-6ccf9f3ce099" />
+
+
+<!-- <p align="center">
+  <img src="https://github.com/user-attachments/assets/294e2731-869f-459a-9a62-13447138aba2" height="500"
+	  /><img src="https://github.com/user-attachments/assets/d891a239-640d-4c6b-9908-08a1a8acc51a" height="500"
+			/><img src="https://github.com/user-attachments/assets/981ca6ef-1a3c-478f-ab77-488ce260645b" height="500" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f3d855ec-478f-4b57-865a-edda39b3ceac" height="500"
+	  /><img src="https://github.com/user-attachments/assets/6b0050c6-c92c-462f-9262-74d8cd03b4ea" height="500"
+			/><img src="https://github.com/user-attachments/assets/87b1497d-2915-4193-9dc5-e92554dcae1f" height="500" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/193079e1-60dc-4732-bad5-da3fb11ea84a" height="500"
+	  /><img src="https://github.com/user-attachments/assets/b2a9a55a-afab-4f5c-9ee9-5e0b0f79b2a3" height="500"
+			/><img src="https://github.com/user-attachments/assets/d2d52e79-875d-4434-9c8a-dfd85d23d785" height="500" /> -->
+
+
 ## 1 About The Project
 
 Developed as a final project for the 'UI Development' course at Afeka College of Engineering, as part of my Computer Science BSc.
@@ -47,8 +71,20 @@ MonoTask rewards focus. The idea is simple: stop multitasking, lock in on one ta
 - **Daily Brief**: A summary screen that shows your task load and completion status for the day.
 - **Custom Design System**: A dedicated `:designsystem` module with reusable Compose components, and a consistent visual language across all screens.
 
+<!-- TECH STACK -->
+## 3 Tech Stack
+
+- **Language:** [Kotlin](https://kotlinlang.org/)
+- **UI Framework:** [Jetpack Compose](https://developer.android.com/jetpack/compose) with Material 3
+- **Dependency Injection:** [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
+- **Backend:** [Firebase](https://firebase.google.com/) (Firestore & Authentication)
+- **Navigation:** [Compose Navigation](https://developer.android.com/jetpack/compose/navigation)
+- **Asynchronous Programming:** [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
+- **Local Storage:** [DataStore Preferences](https://developer.android.com/topic/libraries/architecture/datastore)
+- **Testing:** [JUnit 5](https://junit.org/junit5/), [Turbine](https://github.com/cashapp/turbine), [AssertK](https://github.com/willowtreeapps/assertk)
+
 <!-- ARCHITECTURE -->
-## 3 Architecture
+## 4 Architecture
 
 The project follows Clean Architecture for the overall file structure of the project, and an optimized MVVM with Contract pattern as the app architecture.
 
@@ -88,22 +124,22 @@ android-mono-task/
 ```
 
 <!-- DEMONSTRATION -->
-## 4 Demonstration
+## 5 Demonstration
 
 <!-- DEMO_VIDEO_URL -->
 
 > Demo video coming soon.
 
 <!-- GETTING STARTED -->
-## 5 Getting Started
+## 6 Getting Started
 
-### 5.1 Install the App (Easy)
+### 6.1 Install the App (Easy)
 
 Download the latest APK from the [Releases](https://github.com/sagieinav/android-mono-task/releases) page and install it on any Android device running API 26+.
 
 > **Note:** You may need to allow installation from unknown sources in your device settings.
 
-### 5.2 Build from Source
+### 6.2 Build from Source
 
 For developers who want to import and run the project locally.
 
@@ -129,7 +165,7 @@ git clone https://github.com/sagieinav/android-mono-task.git
 4. Run on an emulator or physical device (API 26+)
 
 <!-- USAGE -->
-## 6 Usage
+## 7 Usage
 
 **How to Use MonoTask:**
 
@@ -142,7 +178,7 @@ git clone https://github.com/sagieinav/android-mono-task.git
 
 
 <!-- ROADMAP -->
-## 7 Roadmap
+## 8 Roadmap
 
 - [ ] Full onboarding flow for new users
 - [ ] Drag & Drop in the kanban screen
@@ -152,7 +188,7 @@ git clone https://github.com/sagieinav/android-mono-task.git
 
 
 <!-- LEARNING SOURCES -->
-## 8 Learning Sources
+## 9 Learning Sources
 I've developed this app with Jetpack Compose, following all structural patterns that go with it.
 As this was the first time I was exposed to Compose, I had to learn its fundamentals by myself, as well as learning lots of things on-the-fly.
 
@@ -162,7 +198,7 @@ For enriching my knowledge further, I watched some YouTube videos of the excelle
 
 
 <!-- ASSETS AND CREDITS -->
-## 9 Assets and Credits
+## 10 Assets and Credits
 
 - **[Haze](https://github.com/chrisbanes/haze)** by Chris Banes: blur and glassmorphism effects used in the UI
 - **[datetime-wheel-picker](https://github.com/darkokoa/datetime-wheel-picker)** by darkokoa: wheel-style date and time picker for task scheduling
@@ -172,7 +208,7 @@ For enriching my knowledge further, I watched some YouTube videos of the excelle
 
 
 <!-- CONTRIBUTORS -->
-## 10 Contributors
+## 11 Contributors
 
 <div align="center">
   <a href="https://github.com/sagieinav/android-mono-task/graphs/contributors">
@@ -183,6 +219,7 @@ For enriching my knowledge further, I watched some YouTube videos of the excelle
 </div>
 
 
-## 11 License
+## 12 License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
