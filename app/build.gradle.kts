@@ -22,17 +22,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    flavorDimensions += "mode"
-    productFlavors {
-        create("prod") {
-            dimension = "mode"
-            buildConfigField("Boolean", "IS_DEMO", "false")
-        }
-        create("demo") {
-            dimension = "mode"
-            buildConfigField("Boolean", "IS_DEMO", "true")
-        }
-    }
 
     buildTypes {
         release {

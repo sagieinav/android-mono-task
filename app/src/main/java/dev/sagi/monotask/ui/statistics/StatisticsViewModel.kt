@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
-    private val userRepository    : UserRepository,
+    private val userRepository : UserRepository,
     private val activityRepository: ActivityRepository,
 ) : BaseViewModel<StatisticsUiState, StatisticsEvent, StatisticsUiEffect>() {
 

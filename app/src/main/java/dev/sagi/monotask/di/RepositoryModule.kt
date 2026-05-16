@@ -4,13 +4,13 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dev.sagi.monotask.data.demo.DemoActivityRepository
-import dev.sagi.monotask.data.demo.DemoStatsRepository
-import dev.sagi.monotask.data.demo.DemoTaskRepository
-import dev.sagi.monotask.data.demo.DemoUserRepository
-import dev.sagi.monotask.data.demo.DemoWorkspaceRepository
+import dev.sagi.monotask.data.repository.ActivityRepositoryImpl
 import dev.sagi.monotask.data.repository.AuthRepositoryImpl
+import dev.sagi.monotask.data.repository.StatsRepositoryImpl
+import dev.sagi.monotask.data.repository.TaskRepositoryImpl
 import dev.sagi.monotask.data.repository.UserPrefsRepositoryImpl
+import dev.sagi.monotask.data.repository.UserRepositoryImpl
+import dev.sagi.monotask.data.repository.WorkspaceRepositoryImpl
 import dev.sagi.monotask.domain.repository.ActivityRepository
 import dev.sagi.monotask.domain.repository.AuthRepository
 import dev.sagi.monotask.domain.repository.StatsRepository
@@ -28,19 +28,19 @@ abstract class RepositoryModule {
     abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 
     @Binds @Singleton
-    abstract fun bindTaskRepository(impl: DemoTaskRepository): TaskRepository
+    abstract fun bindTaskRepository(impl: TaskRepositoryImpl): TaskRepository
 
     @Binds @Singleton
-    abstract fun bindUserRepository(impl: DemoUserRepository): UserRepository
+    abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 
     @Binds @Singleton
-    abstract fun bindActivityRepository(impl: DemoActivityRepository): ActivityRepository
+    abstract fun bindActivityRepository(impl: ActivityRepositoryImpl): ActivityRepository
 
     @Binds @Singleton
-    abstract fun bindStatsRepository(impl: DemoStatsRepository): StatsRepository
+    abstract fun bindStatsRepository(impl: StatsRepositoryImpl): StatsRepository
 
     @Binds @Singleton
-    abstract fun bindWorkspaceRepository(impl: DemoWorkspaceRepository): WorkspaceRepository
+    abstract fun bindWorkspaceRepository(impl: WorkspaceRepositoryImpl): WorkspaceRepository
 
     @Binds @Singleton
     abstract fun bindUserPrefsRepository(impl: UserPrefsRepositoryImpl): UserPrefsRepository
