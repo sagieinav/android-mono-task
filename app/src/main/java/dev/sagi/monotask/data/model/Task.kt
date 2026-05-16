@@ -1,5 +1,6 @@
 package dev.sagi.monotask.data.model
 
+import androidx.compose.runtime.Immutable
 import com.google.firebase.Timestamp
 
 enum class Importance(val weight: Float) {
@@ -8,6 +9,7 @@ enum class Importance(val weight: Float) {
     HIGH(3f)
 }
 
+@Immutable
 data class Task(
     val id: String = "",
     val title: String = "",

@@ -48,7 +48,7 @@ fun XpLabel(xp: Int, modifier: Modifier = Modifier) {
         modifier = modifier,
         leadingContent = {
             Icon(
-                painter = painterResource(IconPack.Xp),
+                imageVector = IconPack.imageVector(IconPack.Xp),
                 contentDescription = null,
                 tint = color,
                 modifier = Modifier.size(14.dp)
@@ -104,7 +104,7 @@ fun LevelUpBadge(
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Icon(
-                    painter = painterResource(IconPack.Upgrade),
+                    imageVector = IconPack.imageVector(IconPack.Upgrade),
                     contentDescription = null,
                     tint = customColors.xp,
                     modifier = Modifier.size(14.dp)

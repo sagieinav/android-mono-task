@@ -8,7 +8,7 @@ import dev.sagi.monotask.domain.service.XpEngine
 // ========== UI States ==========
 sealed class FocusUiState {
     data object Loading : FocusUiState()
-    data object Empty   : FocusUiState()
+    data object Empty : FocusUiState()
     data class Active(
         val focusTask: Task,
         val queue: List<Task>,

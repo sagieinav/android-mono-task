@@ -41,7 +41,7 @@ fun StreakChip(
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Icon(
-            painter = painterResource(IconPack.Fire),
+            imageVector = IconPack.imageVector(IconPack.Fire),
             contentDescription = null,
             tint = MaterialTheme.customColors.streak,
             modifier = Modifier

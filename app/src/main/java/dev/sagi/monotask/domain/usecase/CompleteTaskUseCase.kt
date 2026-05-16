@@ -24,9 +24,9 @@ data class CompleteTaskResult(
  * Returns a [CompleteTaskResult] so the ViewModel can emit UI effects (level-up, achievement unlocked).
  */
 class CompleteTaskUseCase @Inject constructor(
-    private val taskRepository      : TaskRepository,
-    private val statsRepository     : StatsRepository,
-    private val activityRepository  : ActivityRepository,
+    private val taskRepository : TaskRepository,
+    private val statsRepository : StatsRepository,
+    private val activityRepository : ActivityRepository,
     private val workspaceRepository : WorkspaceRepository,
 ) {
     suspend operator fun invoke(

@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -112,7 +111,7 @@ fun CustomTag(
                     modifier = Modifier.size(12.dp),
                 ) {
                     Icon(
-                        painter = painterResource(IconPack.Close),
+                        imageVector = IconPack.imageVector(IconPack.Close),
                         contentDescription = "Remove $label tag",
                         tint = MaterialTheme.colorScheme.outline,
                         modifier = Modifier.size(10.dp)

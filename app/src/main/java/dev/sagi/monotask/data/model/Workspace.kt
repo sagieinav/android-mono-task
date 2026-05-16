@@ -1,5 +1,8 @@
 package dev.sagi.monotask.data.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Workspace(
     val id: String = "",
     val name: String = "",

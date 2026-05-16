@@ -106,7 +106,7 @@ private fun FaqItemRow(item: FaqItem) {
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
-                    painter = painterResource(IconPack.Chevron),
+                    imageVector = IconPack.imageVector(IconPack.Chevron),
                     contentDescription = null,
                     modifier = Modifier
                         .padding(start = 8.dp)

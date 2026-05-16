@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -91,8 +90,8 @@ fun FriendsSection(
             ) {
                 val color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                 Icon(
-                    painter = painterResource(IconPack.AddUser),
-                    contentDescription = null,
+                    imageVector = IconPack.imageVector(IconPack.AddUser),
+                    contentDescription = "Invite friends",
                     modifier = Modifier.size(13.dp),
                     tint = color
                 )
@@ -244,7 +243,7 @@ private fun FriendRow(
                     }
 
                     Icon(
-                        painter = painterResource(IconPack.Chevron),
+                        imageVector = IconPack.imageVector(IconPack.Chevron),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier

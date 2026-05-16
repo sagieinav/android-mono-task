@@ -177,10 +177,10 @@ class FocusViewModel @Inject constructor(
     private fun completeTask() {
         val state = _uiState.value as? FocusUiState.Active ?: return
 
-        lastCompletedTask       = state.focusTask
+        lastCompletedTask = state.focusTask
         lastCompletedTaskWasAce = state.focusTask.isAce
-        savedStateForUndo       = state
-        completeInProgress      = true
+        savedStateForUndo = state
+        completeInProgress = true
         _frozenForAnimation.value = true
 
         viewModelScope.launch {
@@ -199,8 +199,6 @@ class FocusViewModel @Inject constructor(
                 }
 
                 // Guaranteed minimum visual time. Sole factor for unfreeze timing.
-                // Previously we awaited the use case here, causing a delay when Firestore
-                // wrote 4+ documents and took >380ms (unlike snooze's 1-2 writes).
                 delay(380L)
 
                 // Optimistically advance to the next task without waiting for Firestore.
@@ -211,7 +209,7 @@ class FocusViewModel @Inject constructor(
                 else
                     FocusUiState.Empty
 
-                _frozenForAnimation.value = false  // new card slides in at exactly 380ms
+                _frozenForAnimation.value = false  // new card slides in
 
                 // Await the result for gamification effects. UI is already unfrozen.
                 val result = resultDeferred.await()
@@ -227,7 +225,7 @@ class FocusViewModel @Inject constructor(
                 sendEffect(FocusUiEffect.ShowError("Failed to complete task: ${e.message}"))
             } finally {
                 _frozenForAnimation.value = false  // safety net
-                completeInProgress        = false  // ungate observeTasks
+                completeInProgress = false  // ungate observeTasks
             }
         }
     }

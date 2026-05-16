@@ -1,9 +1,16 @@
 package dev.sagi.monotask.designsystem.theme
 
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import dev.sagi.monotask.designsystem.R
 
 object IconPack {
+
+    @Composable
+    fun imageVector(@DrawableRes id: Int): ImageVector = ImageVector.vectorResource(id)
 
     // ========== Icons ==========
     @DrawableRes

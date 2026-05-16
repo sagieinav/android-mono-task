@@ -187,7 +187,7 @@ private fun SignOutButton(onSignOut: () -> Unit) {
             .height(60.dp)
     ) {
         Icon(
-            painter = painterResource(IconPack.SignOutAlt),
+            imageVector = IconPack.imageVector(IconPack.SignOutAlt),
             contentDescription = "Sign Out Button",
             tint = color,
             modifier = Modifier

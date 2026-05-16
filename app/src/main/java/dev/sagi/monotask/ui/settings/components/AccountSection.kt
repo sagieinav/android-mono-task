@@ -104,7 +104,7 @@ private fun ClearArchiveRow(onClick: () -> Unit) {
         onClick = onClick,
         trailingContent = {
             Icon(
-                painter = painterResource(IconPack.ChevronRight),
+                imageVector = IconPack.imageVector(IconPack.ChevronRight),
                 contentDescription = null,
                 tint = errorColor,
                 modifier = Modifier.size(20.dp)

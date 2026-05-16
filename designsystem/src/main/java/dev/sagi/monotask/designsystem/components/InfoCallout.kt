@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,12 +27,12 @@ fun InfoCallout(
     title: String,
     body: String,
     modifier: Modifier = Modifier,
-    icon: Painter? = null,
+    icon: ImageVector? = null,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     bodyColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
     iconSize: Dp = 16.dp,
 ) {
-    val resolvedIcon = icon ?: painterResource(IconPack.InfoCircle)
+    val resolvedIcon = icon ?: IconPack.imageVector(IconPack.InfoCircle)
     val iconGap = 4.dp
     val bodyIndent = iconSize + iconGap
 
@@ -45,8 +45,8 @@ fun InfoCallout(
             horizontalArrangement = Arrangement.spacedBy(iconGap)
         ) {
             Icon(
-                painter = resolvedIcon,
-                contentDescription = null,
+                imageVector = resolvedIcon,
+                contentDescription = null, // Decorative icon
                 tint = titleColor,
                 modifier = Modifier.size(iconSize)
             )

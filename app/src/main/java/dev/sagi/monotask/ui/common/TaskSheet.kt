@@ -182,8 +182,8 @@ private fun TaskTitleAndDescriptionInput(
         autoFocus = true,
         leadingIcon = {
             Icon(
-                painter = painterResource(IconPack.TitlePencil),
-                contentDescription = null
+                imageVector = IconPack.imageVector(IconPack.TitlePencil),
+                contentDescription = "Title icon"
             )
         },
         singleLine = false,
@@ -196,8 +196,8 @@ private fun TaskTitleAndDescriptionInput(
         label = "Description",
         leadingIcon = {
             Icon(
-                painter = painterResource(IconPack.Description),
-                contentDescription = null
+                imageVector = IconPack.imageVector(IconPack.Description),
+                contentDescription = "Description icon"
             )
         },
         singleLine = false,
@@ -235,8 +235,8 @@ private fun TaskSmartTagsInput(
             supportingText = "Space or Enter to add",
             leadingIcon = {
                 Icon(
-                    painter = painterResource(IconPack.Tag),
-                    contentDescription = "Tags"
+                    imageVector = IconPack.imageVector(IconPack.Tag),
+                    contentDescription = "Tags icon"
                 )
             },
             modifier = Modifier.fillMaxWidth(),
@@ -291,7 +291,8 @@ private fun TaskImportanceSelector(
                 selected = isSelected,
                 selectedColor = color,
                 onClick = { onImportanceSelected(imp) },
-                iconRes = if (isSelected) iconRes else null
+                imageVector = if (isSelected) IconPack.imageVector(iconRes) else null,
+                contentDescription = if (isSelected) "${imp.name.lowercase()} importance" else null
             )
         }
     }
@@ -312,7 +313,8 @@ private fun TaskDueDateSelector(
         selected = dueDateMillis != null,
         selectedColor = contentColor,
         onClick = onClick,
-        iconRes = IconPack.CalendarPlus
+        imageVector = IconPack.imageVector(IconPack.CalendarPlus),
+        contentDescription = "Due date"
     )
 }
 

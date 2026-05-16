@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,12 +35,14 @@ fun MonoChipSelector(
     selected: Boolean = false,
     selectedColor: Color = MaterialTheme.colorScheme.onSurface,
     shape: Shape = MaterialTheme.shapes.small,
-    iconRes: Int? = null
+    iconRes: Int? = null,
+    imageVector: ImageVector? = null,
+    contentDescription: String? = null
 ) {
     val color = if (selected) selectedColor else null
 
     val iconSize by animateDpAsState(
-        targetValue = if (selected) 16.dp else 0.dp,
+        targetValue = if (selected && (iconRes != null || imageVector != null)) 16.dp else 0.dp,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "chipIconSize"
     )
@@ -52,16 +55,28 @@ fun MonoChipSelector(
         fontWeight = if (selected) FontWeight.Medium else FontWeight.ExtraLight,
         horizontalPadding = 10.dp,
         verticalPadding = 6.dp,
-        leadingContent =
-            iconRes?.let {
-            {
-                Icon(
-                    painter = painterResource(it),
-                    contentDescription = null,
-                    modifier = Modifier.height(iconSize),
-                    tint = selectedColor
-                )
+        leadingContent = when {
+            imageVector != null -> {
+                {
+                    Icon(
+                        imageVector = imageVector,
+                        contentDescription = contentDescription,
+                        modifier = Modifier.height(iconSize),
+                        tint = selectedColor
+                    )
+                }
             }
+            iconRes != null -> {
+                {
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = contentDescription,
+                        modifier = Modifier.height(iconSize),
+                        tint = selectedColor
+                    )
+                }
+            }
+            else -> null
         },
         modifier = modifier
             .monoShadow(shape, 0.4f)

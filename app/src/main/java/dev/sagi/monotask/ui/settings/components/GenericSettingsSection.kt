@@ -212,7 +212,7 @@ internal fun InfoIconButton(text: String, size: Dp = 20.dp) {
                 .size(size + 2.dp)
         ) {
             Icon(
-                painter = painterResource(IconPack.InfoCircle),
+                imageVector = IconPack.imageVector(IconPack.InfoCircle),
                 contentDescription = "More info",
                 modifier = Modifier.size(size),
                 tint = MaterialTheme.colorScheme.outlineVariant

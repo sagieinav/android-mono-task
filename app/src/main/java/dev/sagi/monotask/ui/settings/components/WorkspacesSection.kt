@@ -81,7 +81,7 @@ internal fun WorkspacesSection(
                 onClick = { expanded = !expanded },
                 trailingContent = {
                     Icon(
-                        painter = painterResource(IconPack.Chevron),
+                        imageVector = IconPack.imageVector(IconPack.Chevron),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
@@ -164,7 +164,7 @@ internal fun WorkspacesSection(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
-                            painter = painterResource(IconPack.AddM3),
+                        imageVector = IconPack.imageVector(IconPack.AddM3),
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onSurface

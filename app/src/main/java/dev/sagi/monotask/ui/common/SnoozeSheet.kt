@@ -18,10 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import dev.sagi.monotask.designsystem.theme.MonoTaskTheme
 import dev.sagi.monotask.designsystem.theme.penaltyRed
@@ -78,7 +77,7 @@ fun SnoozeBottomSheet(
         val acePenalty = if (isAce) XpEngine.BONUS_ACE else 0
         snoozeOptions.forEach { (option, iconRes, label) ->
             ChooseSnoozeButton(
-                icon = painterResource(iconRes),
+                icon = IconPack.imageVector(iconRes),
                 label = label,
                 xpPenalty = option.penalty - acePenalty,
                 onClick = { onSnooze(option) }
@@ -98,7 +97,7 @@ fun SnoozeBottomSheet(
 
 @Composable
 fun ChooseSnoozeButton(
-    icon: Painter,
+    icon: ImageVector,
     label: String,
     modifier: Modifier = Modifier,
     xpPenalty: Int? = null,
@@ -117,7 +116,7 @@ fun ChooseSnoozeButton(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    painter = icon,
+                    imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = LocalContentColor.current  // inherits color
@@ -154,12 +153,12 @@ private fun ChooseSnoozeButtonPreview() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ChooseSnoozeButton(
-                icon      = painterResource(IconPack.DueSoon),
+                icon      = IconPack.imageVector(IconPack.DueSoon),
                 label     = "Due soon",
                 xpPenalty = XpEngine.SnoozeOption.BY_DUE_DATE.penalty
             )
             ChooseSnoozeButton(
-                icon      = painterResource(IconPack.Skip),
+                icon      = IconPack.imageVector(IconPack.Skip),
                 label     = "Next in queue",
                 xpPenalty = XpEngine.SnoozeOption.NEXT_IN_QUEUE.penalty
             )

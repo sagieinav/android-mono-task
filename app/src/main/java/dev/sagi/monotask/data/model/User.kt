@@ -1,8 +1,10 @@
 package dev.sagi.monotask.data.model
 
+import androidx.compose.runtime.Immutable
 import com.google.firebase.firestore.Exclude
 import dev.sagi.monotask.designsystem.theme.IconPack
 
+@Immutable
 data class UserStats(
     val totalTasksCompleted: Int = 0,
     val aceCount: Int  = 0,
@@ -15,6 +17,7 @@ data class UserStats(
     val weeklyXp: Int = 0
 )
 
+@Immutable
 data class User(
     val id: String = "",
     val displayName: String = "",

@@ -28,8 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -107,7 +106,7 @@ class InclusiveCutoutShape(
 // ========== Shared icon circle ==========
 
 @Composable
-private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
+private fun WidgetIconCircle(icon: ImageVector, accentColor: Color) {
     Box(
         modifier = Modifier
             .size(CircleRadius * 2)
@@ -121,7 +120,7 @@ private fun WidgetIconCircle(icon: Painter, accentColor: Color) {
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = icon,
+            imageVector = icon,
             contentDescription = null,
             tint = accentColor.copy(alpha = 0.8f),
             modifier = Modifier.size(26.dp)
@@ -138,7 +137,7 @@ fun StatWidgetSmall(
     value: String,
     modifier: Modifier = Modifier,
     unit: String = "",
-    icon: Painter,
+    icon: ImageVector,
     accentColor: Color,
     subtitle: String? = null,
 ) {
@@ -205,7 +204,7 @@ fun StatWidgetMedium(
     title: String,
     subtitle: String,
     value: String,
-    icon: Painter,
+    icon: ImageVector,
     accentColor: Color,
     modifier: Modifier = Modifier,
     unit: String = "",
@@ -330,7 +329,7 @@ fun TotalTasksCard(totalTasks: Int, modifier: Modifier = Modifier) {
         title = "Tasks Completed",
         value = totalTasks.toString(),
         unit = "total",
-        icon = painterResource(IconPack.TaskAlt),
+        icon = IconPack.imageVector(IconPack.TaskAlt),
         accentColor = MaterialTheme.colorScheme.primary,
         modifier = modifier
     )
@@ -342,7 +341,7 @@ fun AceCompletionCard(aceCount: Int, aceCompletionPct: Int, modifier: Modifier =
         title = "Ace Completion",
         value = "$aceCompletionPct%",
         unit = "ratio",
-        icon = painterResource(IconPack.Ace),
+        icon = IconPack.imageVector(IconPack.Ace),
         accentColor = MaterialTheme.customColors.aceDim,
         subtitle = "$aceCount ace tasks",
         modifier = modifier
@@ -355,7 +354,7 @@ fun TotalXpCard(totalXp: Int, modifier: Modifier = Modifier) {
         title = "Total XP",
         value = totalXp.toString(),
         unit = "xp",
-        icon = painterResource(IconPack.Xp),
+        icon = IconPack.imageVector(IconPack.Xp),
         accentColor = MaterialTheme.customColors.xp,
         modifier = modifier
     )
@@ -370,7 +369,7 @@ fun StreakCard(
         title = "Streak Record",
         value = longestStreak.toString(),
         unit = if (longestStreak == 1) "day" else "days",
-        icon = painterResource(IconPack.Fire),
+        icon = IconPack.imageVector(IconPack.Fire),
         accentColor = MaterialTheme.customColors.streak,
         modifier = modifier
     )
@@ -393,7 +392,7 @@ fun TopPerformanceCard(
         subtitle = "your most productive day ever",
         value = xp.toString(),
         unit = "xp",
-        icon = painterResource(IconPack.TopPerformance),
+        icon = IconPack.imageVector(IconPack.TopPerformance),
         accentColor = MaterialTheme.customColors.aceDim,
         dateLabel = date,
         trailingValue = tasks.toString(),

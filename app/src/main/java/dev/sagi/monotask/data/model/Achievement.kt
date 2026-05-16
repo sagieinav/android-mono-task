@@ -1,6 +1,6 @@
 package dev.sagi.monotask.data.model
 
-import androidx.annotation.Keep
+import androidx.compose.runtime.Immutable
 
 // ========== Achievement Tier ==========
 enum class AchievementTier {
@@ -20,6 +20,7 @@ enum class AchievementCategory {
 }
 
 /** A single tier milestone within an [Achievement]: its tier, name, and description. */
+@Immutable
 data class AchievementMilestone(
     val tier : AchievementTier,
     val name : String,
@@ -31,6 +32,7 @@ data class AchievementMilestone(
  * @param milestones Ordered [BRONZE, SILVER, GOLD]. indexed by [AchievementTier.ordinal].
  * @param earnedTier The highest tier the user has reached, or null if not yet earned.
  */
+@Immutable
 data class Achievement(
     val category : AchievementCategory,
     val iconRes : Int,
