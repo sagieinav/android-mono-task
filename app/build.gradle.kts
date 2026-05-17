@@ -17,7 +17,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 3
-        versionName = "0.9.0-beta.2"
+        versionName = "0.9.0-beta.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -110,6 +110,7 @@ dependencies {
     // Compose Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.gson)
 
     // Hilt (Dependency Injection)
     implementation(libs.hilt.android)

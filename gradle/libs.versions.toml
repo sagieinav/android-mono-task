@@ -30,6 +30,7 @@ credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.2.0"
 googleAuth = "21.5.1"
+gson = "2.11.0"
 
 # ========== Firebase ==========
 googleServices = "4.4.4"
@@ -84,6 +85,7 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 # ========== Firebase ==========
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }

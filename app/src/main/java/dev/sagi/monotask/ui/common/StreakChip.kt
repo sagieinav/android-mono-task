@@ -29,8 +29,8 @@ fun StreakChip(
     size: StreakChipSize = StreakChipSize.Normal
 ) {
     val streakLabel = if (currentStreak == 1) "day streak" else "days streak"
-    val iconSize    = if (size == StreakChipSize.Normal) 17.dp else 15.dp
-    val textStyle   = if (size == StreakChipSize.Normal)
+    val iconSize = if (size == StreakChipSize.Normal) 17.dp else 15.dp
+    val textStyle = if (size == StreakChipSize.Normal)
         MaterialTheme.typography.labelLarge
     else
         MaterialTheme.typography.labelMedium
@@ -68,7 +68,7 @@ fun StreakChip(
     }
 }
 
-@Preview(showBackground = true, name = "StreakChip — Normal")
+@Preview(showBackground = true, name = "StreakChip: Normal")
 @Composable
 private fun StreakChipNormalPreview() {
     MonoTaskTheme {
@@ -76,7 +76,7 @@ private fun StreakChipNormalPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "StreakChip — Small")
+@Preview(showBackground = true, name = "StreakChip: Small")
 @Composable
 private fun StreakChipSmallPreview() {
     MonoTaskTheme {
