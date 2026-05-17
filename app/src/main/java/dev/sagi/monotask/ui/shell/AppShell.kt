@@ -130,6 +130,7 @@ fun AppShell(
                     BottomNavBar(
                         selectedDestination = it,
                         onDestinationSelected = { dest ->
+                            // Track time for safer navigation animations, preventing visual glitches
                             val now = System.currentTimeMillis()
                             if (dest == currentTopLevel || now - lastNavTime < MonoAnimations.TAB_TRANSITION_MS) return@BottomNavBar
                             lastNavTime = now

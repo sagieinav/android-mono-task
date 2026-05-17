@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
+// This singleton object is used instead of relying on Hilt injection, to eliminate the need of injecting AuthRepository into EVERY ViewModel
+
 object AuthUtils {
     private val auth get() = FirebaseAuth.getInstance()
 
@@ -23,7 +25,7 @@ object AuthUtils {
                 }
             }
             auth.addAuthStateListener(listener)
-            cont.invokeOnCancellation { auth.removeAuthStateListener(listener) }
+            cont.invokeOnCancellation { auth.removeAuthStateListener(listener) } // Prevent memory leaks upon mid-operation cancellation
         }
     }
 

@@ -13,7 +13,7 @@ sealed class FocusUiState {
         val focusTask: Task,
         val queue: List<Task>,
         val workspace: Workspace,
-        val restoreVersion: Int = 0
+        val restoreVersion: Int = 0 // For enforcing re-composition when user undo's a task completion
     ) : FocusUiState()
 }
 

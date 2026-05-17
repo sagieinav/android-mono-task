@@ -151,6 +151,8 @@ class TaskRepositoryImpl @Inject constructor(
             .whereEqualTo("completed", true)
             .get().await()
         if (docs.isEmpty) return
+
+        // Delete in batch: atomic and more efficient (just 1 network request)
         val batch = db.batch()
         docs.forEach { batch.delete(it.reference) }
         batch.commit().await()

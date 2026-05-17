@@ -16,5 +16,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object ProfileRoute
 @Serializable data object SettingsRoute
 
-// ===== Parameterised =====
 @Serializable data class FriendProfileRoute(val userId: String)

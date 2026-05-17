@@ -53,7 +53,7 @@ fun FocusScreen(
         if (!frozenForAnimation) displayedUiState = uiState
     }
 
-    // Undo snackbar. Long duration gives a comfortable window to press Undo.
+    // Undo snackbar. Long duration gives a comfortable window to press Undo
     LaunchedEffect(Unit) {
         focusVM.effect.collect { effect ->
             val (message, undoEvent) = when (effect) {
@@ -69,9 +69,8 @@ fun FocusScreen(
         }
     }
 
-    // All other one-shot effects (errors, level-up, achievements).
-    // Uses collect (not collectLatest) so that a rapid second emission (e.g. two achievements
-    // unlocked at once) cannot cancel a pending showSnackbar call.
+    // All other one-shot effects (errors, level-up, achievements)
+    // Uses collect (not collectLatest) so that a rapid second emission cannot cancel a pending showSnackbar call
     LaunchedEffect(Unit) {
         focusVM.effect.collect { effect ->
             when (effect) {
@@ -171,7 +170,7 @@ fun FocusScreenContent(
         )
 
         when (uiState) {
-            is FocusUiState.Empty  -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+            is FocusUiState.Empty -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 EmptyState(
                     imgRes = IconPack.ImgEmptyFocus,
                     title = "Where are the tasks?",
@@ -180,6 +179,9 @@ fun FocusScreenContent(
                     modifier = Modifier.padding(bottom = 40.dp) // optical correction for vertical position
                 )
             }
+
+            // Using key to treat the card as a whole component, enabling the animation to work and replace the whole card,
+            // instead of compose replacing only parts of the card that have changed
             is FocusUiState.Active ->
                 key(uiState.focusTask.id, uiState.restoreVersion) {
                     FocusCardSwipeable(
@@ -187,8 +189,8 @@ fun FocusScreenContent(
                         restoreVersion = uiState.restoreVersion,
                         animState = animState,
                         onSwipeRight = { onFocusEvent(FocusEvent.CompleteTask) },
-                        onSwipeLeft  = { onFocusEvent(FocusEvent.OpenSnooze) },
-                        onLongPress  = { onFocusEvent(FocusEvent.OpenEditSheet) }
+                        onSwipeLeft = { onFocusEvent(FocusEvent.OpenSnooze) },
+                        onLongPress = { onFocusEvent(FocusEvent.OpenEditSheet) }
                     )
                 }
             is FocusUiState.Loading -> {} // unreachable: handled by early return above

@@ -24,7 +24,7 @@ fun ImportanceLabel(
 ) {
     val colors = MaterialTheme.customColors
     val (label, color, iconRes) = when (importance) {
-        Importance.HIGH   -> Triple(
+        Importance.HIGH -> Triple(
             "High",
             colors.importanceHighContent,
             IconPack.ImportanceHighAlt
@@ -34,7 +34,7 @@ fun ImportanceLabel(
             colors.importanceMediumContent,
             IconPack.ImportanceMediumAlt
         )
-        Importance.LOW    -> Triple(
+        Importance.LOW -> Triple(
             "Low",
             colors.importanceLowContent,
             IconPack.ImportanceLowAlt
@@ -65,7 +65,7 @@ fun ImportanceLabel(
 private fun ImportanceLabelPreview() {
     MonoTaskTheme {
         Row(
-            modifier              = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ImportanceLabel(importance = Importance.HIGH)

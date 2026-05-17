@@ -26,6 +26,6 @@ class UserPrefsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getLastWorkspaceId(): String? {
-        return context.dataStore.data.first()[LAST_WORKSPACE_ID]
+        return context.dataStore.data.first()[LAST_WORKSPACE_ID] // Grab first item from the flow and then cancel it
     }
 }

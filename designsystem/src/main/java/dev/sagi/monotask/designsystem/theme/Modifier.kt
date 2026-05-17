@@ -45,17 +45,6 @@ fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = this.then(
 )
 
 
-// Removes min size constraints from any composable
-fun Modifier.noMinSize() = layout { measurable, constraints ->
-    val placeable = measurable.measure(
-        constraints.copy(minWidth = 0, minHeight = 0)
-    )
-    layout(placeable.width, placeable.height) {
-        placeable.placeRelative(0, 0)
-    }
-}
-
-
 fun Modifier.monoShadow(
     shape: Shape,
     alpha: Float = 0.6f,

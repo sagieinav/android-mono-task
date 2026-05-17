@@ -97,7 +97,7 @@ fun MonoChipSelector(
 private fun MonoChipSelectorPreview() {
     MonoTaskTheme {
         Row(
-            modifier              = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             MonoChipSelector(label = "All", selected = false, onClick = {})
